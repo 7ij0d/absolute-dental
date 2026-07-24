@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-// Determine if we should use Mock Fallback (when env credentials are not set)
-const useMock = !supabaseUrl || !supabaseAnonKey || supabaseUrl === 'YOUR_SUPABASE_URL';
+// Determine if we should use Mock Fallback (when env credentials are not set or unresolvable)
+const useMock = !supabaseUrl || !supabaseAnonKey || supabaseUrl === 'YOUR_SUPABASE_URL' || supabaseUrl.includes('vqrpodmnzubpcsvqohwj');
 
 // -------------------------------------------------------------
 // 1. MOCK SEED DATA DEFINITIONS
