@@ -336,13 +336,15 @@ class MockQueryBuilder {
     return this;
   }
 
-  // EXECUTE READS
+  // EXECUTE READS AND WRITES
   async then(resolve) {
-    let result = [...this.data];
+    let result = this.resultData !== undefined ? [...this.resultData] : [...this.data];
 
-    // Filter
-    for (const filterFn of this.filters) {
-      result = result.filter(filterFn);
+    // Filter reads
+    if (this.resultData === undefined) {
+      for (const filterFn of this.filters) {
+        result = result.filter(filterFn);
+      }
     }
 
     // Sort
@@ -371,7 +373,38 @@ class MockQueryBuilder {
   }
 
   // WRITE OPERATIONS
-  async insert(records) {
+  upsert(records, options = {}) {
+    const arr = Array.isArray(records) ? records : [records];
+    let affected = [];
+
+    for (const item of arr) {
+      const pKey = item.key !== undefined ? 'key' : (item.id !== undefined ? 'id' : null);
+      let existingIndex = -1;
+      
+      if (pKey) {
+        existingIndex = this.data.findIndex((row) => String(row[pKey]) === String(item[pKey]));
+      }
+
+      if (existingIndex >= 0) {
+        this.data[existingIndex] = { ...this.data[existingIndex], ...item };
+        affected.push(this.data[existingIndex]);
+      } else {
+        const newItem = {
+          ...(item.key ? {} : { id: item.id || Math.random().toString(36).substring(2, 9) }),
+          created_at: new Date().toISOString(),
+          ...item
+        };
+        this.data.push(newItem);
+        affected.push(newItem);
+      }
+    }
+
+    this.save();
+    this.resultData = affected;
+    return this;
+  }
+
+  insert(records) {
     const arr = Array.isArray(records) ? records : [records];
     const newRecords = arr.map((item) => ({
       id: item.id || Math.random().toString(36).substring(2, 9),
@@ -381,13 +414,13 @@ class MockQueryBuilder {
 
     this.data.push(...newRecords);
     this.save();
-    return { data: newRecords, error: null };
+    this.resultData = newRecords;
+    return this;
   }
 
-  async update(updates) {
+  update(updates) {
     let affected = [];
     this.data = this.data.map((item) => {
-      // Check if item matches filters
       let match = true;
       for (const filterFn of this.filters) {
         if (!filterFn(item)) {
@@ -403,10 +436,11 @@ class MockQueryBuilder {
       return item;
     });
     this.save();
-    return { data: affected, error: null };
+    this.resultData = affected;
+    return this;
   }
 
-  async delete() {
+  delete() {
     let deleted = [];
     this.data = this.data.filter((item) => {
       let match = true;
@@ -423,7 +457,8 @@ class MockQueryBuilder {
       return true;
     });
     this.save();
-    return { data: deleted, error: null };
+    this.resultData = deleted;
+    return this;
   }
 }
 
