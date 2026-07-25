@@ -5,7 +5,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
 import InvoiceView from '../../components/InvoiceView';
 import MapPicker from '../../components/MapPicker';
-import { Search, Eye, RefreshCw, Printer, X, ClipboardList, CheckCircle } from 'lucide-react';
+import { Search, Eye, RefreshCw, Printer, X, ClipboardList, CheckCircle, Trash2 } from 'lucide-react';
 
 export const Orders = () => {
   const { t, lang, isRtl } = useLanguage();
@@ -89,6 +89,24 @@ export const Orders = () => {
       console.error(err);
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  const handleDeleteOrder = async (orderId, orderNumber) => {
+    if (!window.confirm(`هل أنت متأكد من حذف الطلب #${orderNumber}؟\nThis will permanently delete the order and all its items.`)) return;
+    try {
+      // Delete order items first (in case no CASCADE)
+      await supabase.from('order_items').delete().eq('order_id', orderId);
+      const { error } = await supabase.from('orders').delete().eq('id', orderId);
+      if (!error) {
+        setOrders((prev) => prev.filter((o) => o.id !== orderId));
+        if (selectedOrder?.id === orderId) setSelectedOrder(null);
+      } else {
+        alert('حدث خطأ أثناء الحذف: ' + error.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ غير متوقع');
     }
   };
 
@@ -183,8 +201,8 @@ export const Orders = () => {
                 <th style={{ padding: '1rem 0.75rem' }}>{t('admin.customer')}</th>
                 <th style={{ padding: '1rem 0.75rem' }}>تاريخ الطلب</th>
                 <th style={{ padding: '1rem 0.75rem' }}>{t('admin.total')}</th>
-                <th style={{ padding: '1rem 0.75rem' }}>{t('admin.status')}</th>
-                <th style={{ padding: '1rem 0.75rem', textAlign: 'center' }}>{t('admin.action')}</th>
+                <th style={{ padding: '1rem 0.75rem' }}>الحالة</th>
+                <th style={{ padding: '1rem 0.75rem', textAlign: 'center' }}>خيارات</th>
               </tr>
             </thead>
             <tbody>
@@ -213,15 +231,64 @@ export const Orders = () => {
                       {t(`tracking.status_${ord.status}`)}
                     </span>
                   </td>
-                  <td style={{ padding: '1rem 0.75rem', textAlign: 'center' }}>
-                    <button
-                      onClick={() => setSelectedOrder(ord)}
-                      className="btn btn-outline"
-                      style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', borderRadius: 'var(--radius-sm)', gap: '0.2rem' }}
-                    >
-                      <Eye size={12} />
-                      عرض
-                    </button>
+                  <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      {/* Quick status change */}
+                      <select
+                        value={ord.status}
+                        onChange={(e) => {
+                          handleUpdateStatus(ord.id, e.target.value);
+                          // optimistic update
+                          setOrders(prev => prev.map(o => o.id === ord.id ? { ...o, status: e.target.value } : o));
+                        }}
+                        style={{
+                          fontSize: '0.7rem',
+                          padding: '0.25rem 0.4rem',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-color)',
+                          backgroundColor: 'var(--surface-color)',
+                          color: 'var(--text-main)',
+                          cursor: 'pointer',
+                          maxWidth: '110px'
+                        }}
+                      >
+                        <option value="new">جديد</option>
+                        <option value="under_review">قيد المراجعة</option>
+                        <option value="accepted">تم القبول</option>
+                        <option value="preparing">جاري التجهيز</option>
+                        <option value="out_for_delivery">خرج للتوصيل</option>
+                        <option value="delivered">تم التسليم</option>
+                        <option value="cancelled">إلغاء</option>
+                      </select>
+                      {/* View details */}
+                      <button
+                        onClick={() => setSelectedOrder(ord)}
+                        className="btn btn-outline"
+                        title="عرض التفاصيل"
+                        style={{ padding: '0.3rem 0.5rem', fontSize: '0.72rem', borderRadius: 'var(--radius-sm)', gap: '0.2rem' }}
+                      >
+                        <Eye size={12} />
+                      </button>
+                      {/* Delete */}
+                      <button
+                        onClick={() => handleDeleteOrder(ord.id, ord.order_number)}
+                        title="حذف الطلب"
+                        style={{
+                          padding: '0.3rem 0.5rem',
+                          fontSize: '0.72rem',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid rgba(239,68,68,0.4)',
+                          backgroundColor: 'rgba(239,68,68,0.1)',
+                          color: '#ef4444',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.2rem'
+                        }}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
