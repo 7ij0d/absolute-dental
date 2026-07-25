@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import supabase from '../supabaseClient';
 import ProductCard from '../components/ProductCard';
 import SkeletonLoader from '../components/SkeletonLoader';
-import { SlidersHorizontal, ChevronRight, ChevronLeft, ArrowDownUp } from 'lucide-react';
+import { SlidersHorizontal, ChevronLeft, ChevronRight, Package, X } from 'lucide-react';
 
 export const SubjectPage = () => {
   const { slug } = useParams();
@@ -15,50 +15,28 @@ export const SubjectPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filters State
-  const [maxPrice, setMaxPrice] = useState(500);
+  const [maxPrice, setMaxPrice] = useState(1000);
   const [selectedStock, setSelectedStock] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const fetchSubjectData = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch subject details
-        const { data: subject } = await supabase
-          .from('subjects')
-          .select('*')
-          .eq('slug', slug)
-          .single();
-
+        const { data: subject } = await supabase.from('subjects').select('*').eq('slug', slug).single();
         if (subject) {
           setSubjectData(subject);
-          
-          // Fetch parent year details
-          const { data: year } = await supabase
-            .from('years')
-            .select('*')
-            .eq('id', subject.year_id)
-            .single();
+          const { data: year } = await supabase.from('years').select('*').eq('id', subject.year_id).single();
           if (year) setYearData(year);
-
-          // Fetch products under subject
           const { data: prods } = await supabase
-            .from('products')
-            .select('*')
-            .eq('subject_id', subject.id)
-            .eq('is_active', true)
-            .eq('is_archived', false);
-          
+            .from('products').select('*')
+            .eq('subject_id', subject.id).eq('is_active', true).eq('is_archived', false);
           if (prods) {
             setProducts(prods);
-            
-            // Set max price slider dynamically based on products
             if (prods.length > 0) {
-              const prices = prods.map((p) => p.price);
-              const maxP = Math.max(...prices);
-              setMaxPrice(Math.ceil(maxP));
+              const prices = prods.map(p => p.price);
+              setMaxPrice(Math.ceil(Math.max(...prices)));
             }
           }
         }
@@ -68,238 +46,274 @@ export const SubjectPage = () => {
         setLoading(false);
       }
     };
-
-    fetchSubjectData();
+    fetchData();
   }, [slug]);
 
-  // Apply sorting and filtering logic on client side
-  const getFilteredProducts = () => {
-    let list = [...products];
-
-    // 1. Filter by price
-    list = list.filter((p) => p.price <= maxPrice);
-
-    // 2. Filter by stock availability
+  const getFiltered = () => {
+    let list = [...products].filter(p => p.price <= maxPrice);
     if (selectedStock !== 'all') {
-      if (selectedStock === 'discount') {
-        list = list.filter((p) => p.compare_at_price !== null);
-      } else {
-        list = list.filter((p) => p.availability === selectedStock);
-      }
+      if (selectedStock === 'discount') list = list.filter(p => p.compare_at_price !== null);
+      else list = list.filter(p => p.availability === selectedStock);
     }
-
-    // 3. Sort by
-    if (sortBy === 'recent') {
-      list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    } else if (sortBy === 'price_asc') {
-      list.sort((a, b) => a.price - b.price);
-    } else if (sortBy === 'price_desc') {
-      list.sort((a, b) => b.price - a.price);
-    } else if (sortBy === 'popular') {
-      list.sort((a, b) => b.sort_order - a.sort_order);
-    }
-
+    if (sortBy === 'recent')     list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    if (sortBy === 'price_asc')  list.sort((a, b) => a.price - b.price);
+    if (sortBy === 'price_desc') list.sort((a, b) => b.price - a.price);
+    if (sortBy === 'popular')    list.sort((a, b) => (b.sort_order || 0) - (a.sort_order || 0));
     return list;
   };
 
+  const ChevronFwd = isRtl ? ChevronLeft : ChevronRight;
+
   if (loading) {
     return (
-      <div className="container" style={{ padding: '2rem 0' }}>
-        <div className="skeleton" style={{ height: '30px', width: '350px', marginBottom: '2rem' }}></div>
-        <SkeletonLoader type="card-grid" count={4} />
+      <div style={{ minHeight: '80vh' }}>
+        <div className="skeleton" style={{ height: '180px', borderRadius: 0 }} />
+        <div className="container" style={{ padding: '3rem 0' }}>
+          <div className="browse-layout">
+            <div className="skeleton" style={{ height: '400px', borderRadius: 'var(--radius-lg)' }} />
+            <div className="grid-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="skeleton" style={{ height: '280px', borderRadius: 'var(--radius-lg)' }} />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!subjectData) {
     return (
-      <div className="container" style={{ padding: '3rem 0', textAlign: 'center' }}>
-        <h2>عذراً، المادة المطلوبة غير موجودة.</h2>
-        <p style={{ color: 'var(--text-muted)' }}>Sorry, this subject was not found.</p>
-        <Link to="/" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-          {t('nav.home')}
+      <div className="container" style={{ padding: '5rem 0', textAlign: 'center' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>😕</div>
+        <h2 style={{ fontWeight: 800, marginBottom: '0.5rem' }}>المادة المطلوبة غير موجودة</h2>
+        <Link to="/" className="btn btn-primary" style={{ marginTop: '1.5rem' }}>
+          {lang === 'ar' ? 'الرئيسية' : 'Go Home'}
         </Link>
       </div>
     );
   }
 
-  const filteredList = getFilteredProducts();
+  const filteredList = getFiltered();
+
+  const filterOptions = lang === 'ar'
+    ? [
+        { key: 'all',            label: 'الكل' },
+        { key: 'available',      label: 'متوفر' },
+        { key: 'limited_quantity', label: 'كمية محدودة' },
+        { key: 'coming_soon',   label: 'قريباً' },
+        { key: 'discount',       label: 'عليه خصم' },
+      ]
+    : [
+        { key: 'all',            label: 'All' },
+        { key: 'available',      label: 'Available' },
+        { key: 'limited_quantity', label: 'Limited Qty' },
+        { key: 'coming_soon',   label: 'Coming Soon' },
+        { key: 'discount',       label: 'On Sale' },
+      ];
+
+  const sortOptions = lang === 'ar'
+    ? [
+        { key: 'recent',     label: 'الأحدث' },
+        { key: 'popular',    label: 'الأكثر طلباً' },
+        { key: 'price_asc',  label: 'السعر: الأقل' },
+        { key: 'price_desc', label: 'السعر: الأعلى' },
+      ]
+    : [
+        { key: 'recent',     label: 'Newest' },
+        { key: 'popular',    label: 'Most Popular' },
+        { key: 'price_asc',  label: 'Price: Low to High' },
+        { key: 'price_desc', label: 'Price: High to Low' },
+      ];
+
+  const SidebarContent = () => (
+    <>
+      <div className="filter-title">
+        <SlidersHorizontal size={16} style={{ display: 'inline', marginInlineEnd: '0.4rem' }} />
+        {lang === 'ar' ? 'التصفية والترتيب' : 'Filter & Sort'}
+      </div>
+
+      {/* Sort */}
+      <div className="filter-section">
+        <div className="filter-section-label">{lang === 'ar' ? 'الترتيب' : 'Sort By'}</div>
+        {sortOptions.map(opt => (
+          <div
+            key={opt.key}
+            className={`filter-option ${sortBy === opt.key ? 'selected' : ''}`}
+            onClick={() => setSortBy(opt.key)}
+          >
+            <span className="filter-dot" />
+            {opt.label}
+          </div>
+        ))}
+      </div>
+
+      {/* Availability */}
+      <div className="filter-section">
+        <div className="filter-section-label">{lang === 'ar' ? 'التوفر' : 'Availability'}</div>
+        {filterOptions.map(opt => (
+          <div
+            key={opt.key}
+            className={`filter-option ${selectedStock === opt.key ? 'selected' : ''}`}
+            onClick={() => setSelectedStock(opt.key)}
+          >
+            <span className="filter-dot" />
+            {opt.label}
+          </div>
+        ))}
+      </div>
+
+      {/* Price Range */}
+      <div className="filter-section">
+        <div className="filter-section-label">{lang === 'ar' ? 'نطاق السعر' : 'Price Range'}</div>
+        <input
+          type="range" min="0" max="1000" step="10"
+          value={maxPrice}
+          onChange={e => setMaxPrice(Number(e.target.value))}
+          style={{ width: '100%', accentColor: 'var(--secondary)', marginBottom: '0.5rem' }}
+        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+          <span>0</span>
+          <span style={{ fontWeight: 700, color: 'var(--secondary)' }}>
+            {maxPrice} {lang === 'ar' ? 'د.ل' : 'LYD'}
+          </span>
+        </div>
+      </div>
+
+      {/* Reset Button */}
+      <button
+        className="btn btn-outline"
+        style={{ width: '100%', marginTop: '0.5rem', fontSize: '0.82rem' }}
+        onClick={() => { setMaxPrice(1000); setSelectedStock('all'); setSortBy('recent'); }}
+      >
+        {lang === 'ar' ? 'إعادة الضبط' : 'Reset Filters'}
+      </button>
+    </>
+  );
 
   return (
-    <div className="container" style={{ padding: '2rem 0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      
-      {/* Breadcrumb Navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem' }} className="no-print">
-        <Link to="/" style={{ color: 'var(--text-muted)' }}>{t('nav.home')}</Link>
-        {isRtl ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-        {yearData && (
-          <>
-            <Link to={`/year/${yearData.slug}`} style={{ color: 'var(--text-muted)' }}>
-              {lang === 'ar' ? yearData.name_ar : yearData.name_en}
-            </Link>
-            {isRtl ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-          </>
-        )}
-        <span style={{ fontWeight: 600, color: 'var(--secondary)' }}>
-          {subjectData.name_en}
-        </span>
-      </div>
-
-      {/* Header Info */}
-      <div style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '0.8rem' }}>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--primary)' }}>
-          {subjectData.name_en}
-        </h1>
-        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-          {lang === 'ar' ? subjectData.description_ar : subjectData.description_en}
-        </p>
-      </div>
-
-      {/* Filter / Layout Body */}
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: '2rem' }} className="subject-layout">
-        
-        {/* Sidebar Filters (Desktop) */}
-        <aside className={`filters-aside ${showMobileFilters ? 'mobile-filters-show' : ''}`}>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-            <span style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <SlidersHorizontal size={18} />
-              التصفية والفلترة
+    <div>
+      {/* ── SUBJECT HERO ── */}
+      <div style={{
+        background: 'var(--gradient-dark)',
+        padding: '2.5rem 0',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(124,58,237,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.05) 1px, transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
+        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+          {/* Breadcrumb */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', marginBottom: '1rem', color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap' }}>
+            <Link to="/" style={{ color: 'inherit' }}>{lang === 'ar' ? 'الرئيسية' : 'Home'}</Link>
+            <ChevronFwd size={13} />
+            {yearData && (
+              <>
+                <Link to={`/year/${yearData.slug}`} style={{ color: 'inherit' }}>
+                  {lang === 'ar' ? yearData.name_ar : yearData.name_en}
+                </Link>
+                <ChevronFwd size={13} />
+              </>
+            )}
+            <span style={{ color: 'var(--purple-300)', fontWeight: 700 }}>
+              {lang === 'ar' ? subjectData.name_ar : subjectData.name_en}
             </span>
-            {showMobileFilters && (
-              <button onClick={() => setShowMobileFilters(false)} style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>
-                إغلاق
-              </button>
+          </div>
+
+          <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', marginBottom: '0.4rem' }}>
+            {lang === 'ar' ? subjectData.name_ar : subjectData.name_en}
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+            {lang === 'ar' ? subjectData.description_ar : subjectData.description_en}
+          </p>
+
+          {/* Product Count + Mobile Filter Button */}
+          <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
+              {filteredList.length} {lang === 'ar' ? 'منتج' : 'products'}
+            </span>
+            <button
+              className="btn btn-ghost"
+              style={{ fontSize: '0.85rem' }}
+              onClick={() => setShowMobileFilters(true)}
+              id="mobile-filter-btn"
+            >
+              <SlidersHorizontal size={15} />
+              {lang === 'ar' ? 'تصفية وترتيب' : 'Filter & Sort'}
+            </button>
+          </div>
+        </div>
+        <style>{`@media(min-width:900px){#mobile-filter-btn{display:none!important;}}`}</style>
+      </div>
+
+      {/* ── CONTENT ── */}
+      <div className="container" style={{ padding: '2.5rem 0' }}>
+        <div className="browse-layout">
+
+          {/* Desktop Sidebar */}
+          <aside className="filter-sidebar" style={{ display: 'none' }} id="desktop-sidebar">
+            <SidebarContent />
+          </aside>
+          <style>{`@media(min-width:900px){#desktop-sidebar{display:block!important;}}`}</style>
+
+          {/* Products Grid */}
+          <div>
+            {filteredList.length === 0 ? (
+              <div style={{
+                textAlign: 'center', padding: '5rem 2rem',
+                border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-lg)',
+                color: 'var(--text-muted)',
+              }}>
+                <Package size={48} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
+                <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>
+                  {lang === 'ar' ? 'لا توجد منتجات تطابق هذه الفلاتر' : 'No products match these filters'}
+                </p>
+                <button
+                  className="btn btn-outline"
+                  style={{ marginTop: '1rem' }}
+                  onClick={() => { setMaxPrice(1000); setSelectedStock('all'); setSortBy('recent'); }}
+                >
+                  {lang === 'ar' ? 'إعادة الضبط' : 'Reset Filters'}
+                </button>
+              </div>
+            ) : (
+              <div className="grid-4">
+                {filteredList.map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
             )}
           </div>
-
-          {/* Price Range Slider */}
-          <div style={{ marginBottom: '2rem' }}>
-            <h4 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.6rem' }}>{t('subject.filter_price')}</h4>
-            <input
-              type="range"
-              min="0"
-              max="1000"
-              step="10"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(Number(e.target.value))}
-              style={{ width: '100%', accentColor: 'var(--secondary)' }}
-            />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              <span>0 {t('cart.currency')}</span>
-              <span style={{ fontWeight: 700, color: 'var(--secondary)' }}>{maxPrice} {t('cart.currency')}</span>
-            </div>
-          </div>
-
-          {/* Availability Status Filter */}
-          <div style={{ marginBottom: '2rem' }}>
-            <h4 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.6rem' }}>{t('subject.filter_availability')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem' }}>
-              {[
-                { key: 'all', label: t('subject.all_statuses') },
-                { key: 'available', label: t('subject.available') },
-                { key: 'limited_quantity', label: t('subject.limited') },
-                { key: 'discount', label: t('subject.discounted_only') }
-              ].map((opt) => (
-                <label key={opt.key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
-                  <input
-                    type="radio"
-                    name="stock"
-                    checked={selectedStock === opt.key}
-                    onChange={() => setSelectedStock(opt.key)}
-                    style={{ accentColor: 'var(--secondary)' }}
-                  />
-                  <span>{opt.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-        </aside>
-
-        {/* Product Grid Area */}
-        <div>
-          {/* Sorting Actions row */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', backgroundColor: 'var(--surface-color)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem' }} className="sorting-row">
-            
-            <button
-              onClick={() => setShowMobileFilters(true)}
-              className="btn btn-outline mobile-filter-trigger"
-              style={{ display: 'none', padding: '0.4rem 0.8rem', fontSize: '0.8rem', gap: '0.3rem' }}
-            >
-              <SlidersHorizontal size={14} />
-              الفلاتر
-            </button>
-
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              تم العثور على {filteredList.length} منتج
-            </span>
-
-            {/* Sort Dropdown */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}>
-              <ArrowDownUp size={14} style={{ color: 'var(--secondary)' }} />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                style={{
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  fontWeight: 600,
-                  color: 'var(--text-main)',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="recent">{t('subject.sort_recent')}</option>
-                <option value="price_asc">{t('subject.sort_price_asc')}</option>
-                <option value="price_desc">{t('subject.sort_price_desc')}</option>
-                <option value="popular">{t('subject.sort_popular')}</option>
-              </select>
-            </div>
-
-          </div>
-
-          {/* Product grid list */}
-          {filteredList.length === 0 ? (
-            <div style={{ padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'var(--surface-color)', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-              <p style={{ color: 'var(--text-muted)' }}>لا توجد منتجات تطابق خيارات التصفية المدخلة.</p>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '1.5rem' }}>
-              {filteredList.map((prod) => (
-                <ProductCard key={prod.id} product={prod} />
-              ))}
-            </div>
-          )}
-
         </div>
-
       </div>
 
-      <style>{`
-        @media (max-width: 768px) {
-          .subject-layout {
-            grid-template-columns: 1fr !important;
-          }
-          .filters-aside {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--surface-color);
-            z-index: 1000;
-            padding: 2rem;
-            overflow-y: auto;
-          }
-          .mobile-filters-show {
-            display: block !important;
-          }
-          .mobile-filter-trigger {
-            display: inline-flex !important;
-          }
-        }
-      `}</style>
+      {/* Mobile Filters Drawer */}
+      {showMobileFilters && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9000, display: 'flex' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
+            onClick={() => setShowMobileFilters(false)} />
+          <div style={{
+            position: 'relative',
+            width: 300, maxWidth: '90vw', height: '100%',
+            background: 'var(--surface-color)',
+            padding: '1.5rem',
+            overflowY: 'auto',
+            marginLeft: isRtl ? 'auto' : 0,
+            marginRight: isRtl ? 0 : 'auto',
+            boxShadow: 'var(--shadow-lg)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontWeight: 800, fontSize: '1rem' }}>
+                {lang === 'ar' ? 'التصفية والترتيب' : 'Filter & Sort'}
+              </h3>
+              <button className="icon-btn" onClick={() => setShowMobileFilters(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <SidebarContent />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

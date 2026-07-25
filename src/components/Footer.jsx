@@ -1,156 +1,191 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import Logo from './Logo';
-import { Phone, Send, MapPin, Truck, ShieldCheck } from 'lucide-react';
+import {
+  Phone, Mail, MapPin, MessageCircle, Send,
+  Share2, ExternalLink, Heart
+} from 'lucide-react';
 
 export const Footer = () => {
-  const { t, isRtl } = useLanguage();
+  const { lang, t, isRtl } = useLanguage();
+
+  const currentYear = new Date().getFullYear();
+
+  const quickLinks = lang === 'ar'
+    ? [
+        { label: 'الرئيسية',           to: '/' },
+        { label: 'السنة الأولى',       to: '/year/1st-year' },
+        { label: 'السنة الثانية',      to: '/year/2nd-year' },
+        { label: 'السنة الثالثة',     to: '/year/3rd-year' },
+        { label: 'السنة الرابعة',      to: '/year/4th-year' },
+        { label: 'تتبع طلبك',          to: '/track' },
+      ]
+    : [
+        { label: 'Home',           to: '/' },
+        { label: '1st Year',       to: '/year/1st-year' },
+        { label: '2nd Year',       to: '/year/2nd-year' },
+        { label: '3rd Year',       to: '/year/3rd-year' },
+        { label: '4th Year',       to: '/year/4th-year' },
+        { label: 'Track Order',    to: '/track' },
+      ];
+
+  const policyLinks = lang === 'ar'
+    ? [
+        { label: 'من نحن',            to: '/about' },
+        { label: 'الأسئلة الشائعة',  to: '/faq' },
+        { label: 'الشحن والإرجاع',   to: '/shipping-returns' },
+        { label: 'تواصل معنا',        to: '/contact' },
+      ]
+    : [
+        { label: 'About Us',          to: '/about' },
+        { label: 'FAQ',               to: '/faq' },
+        { label: 'Shipping & Returns', to: '/shipping-returns' },
+        { label: 'Contact',           to: '/contact' },
+      ];
 
   return (
-    <footer
-      style={{
-        backgroundColor: 'var(--surface-color)',
-        borderTop: '1px solid var(--border-color)',
-        padding: '3rem 0 1.5rem 0',
-        marginTop: 'auto',
-        fontSize: '0.9rem',
-        color: 'var(--text-muted)'
-      }}
-    >
-      <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
-        
-        {/* Brand Information */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <Logo width={160} />
-          <p style={{ lineHeight: 1.6, fontSize: '0.85rem' }}>
-            {t('home.subtitle')}
+    <footer className="footer">
+      <div className="container">
+        <div className="footer-grid">
+
+          {/* Brand Column */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 10,
+                background: 'linear-gradient(135deg, #7C3AED, #2563EB)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '1.1rem', fontWeight: 900, color: '#fff',
+                boxShadow: '0 4px 12px rgba(124,58,237,0.4)',
+              }}>
+                S
+              </div>
+              <div className="footer-brand-name">سمايلودنت</div>
+            </div>
+            <p className="footer-desc">
+              {lang === 'ar'
+                ? 'متجرك الموثوق لجميع الأدوات والمستلزمات الطبية التي يحتاجها طلاب كلية طب الأسنان. جودة عالية، أسعار طلابية، توصيل سريع.'
+                : 'Your trusted store for all medical tools and supplies needed by dental college students. High quality, student prices, fast delivery.'}
+            </p>
+
+            {/* Contact Info */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '1.25rem' }}>
+              <a
+                href="https://wa.me/218911234567"
+                target="_blank"
+                rel="noreferrer"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem', transition: 'color 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#25D366'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
+              >
+                <Phone size={14} /> 218-91-1234567+
+              </a>
+              <a
+                href="mailto:smylodent@gmail.com"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem', transition: 'color 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.color = 'var(--purple-300)'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
+              >
+                <Mail size={14} /> smylodent@gmail.com
+              </a>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem' }}>
+                <MapPin size={14} /> {lang === 'ar' ? 'طرابلس، ليبيا' : 'Tripoli, Libya'}
+              </span>
+            </div>
+
+            {/* Social Icons */}
+            <div className="footer-social">
+              <a href="https://wa.me/218911234567" target="_blank" rel="noreferrer" className="social-btn" title="WhatsApp"
+                style={{ color: 'var(--text-dim)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#25D366'; e.currentTarget.style.borderColor = '#25D366'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
+              >
+                <MessageCircle size={16} />
+              </a>
+              <a href="https://t.me/smylodent_libya" target="_blank" rel="noreferrer" className="social-btn" title="Telegram"
+                style={{ color: 'var(--text-dim)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#0088cc'; e.currentTarget.style.borderColor = '#0088cc'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
+              >
+                <Send size={16} />
+              </a>
+              <a href="https://instagram.com/smylodent" target="_blank" rel="noreferrer" className="social-btn" title="Instagram"
+                style={{ color: 'var(--text-dim)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#E1306C'; e.currentTarget.style.borderColor = '#E1306C'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
+              >
+              <ExternalLink size={16} />
+              </a>
+              <a href="https://facebook.com/smylodent" target="_blank" rel="noreferrer" className="social-btn" title="Facebook"
+                style={{ color: 'var(--text-dim)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#1877F2'; e.currentTarget.style.borderColor = '#1877F2'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
+              >
+              <Share2 size={16} />
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="footer-heading">
+              {lang === 'ar' ? 'روابط سريعة' : 'Quick Links'}
+            </h4>
+            <div className="footer-links">
+              {quickLinks.map((link, i) => (
+                <Link key={i} to={link.to} className="footer-link">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Policy Links */}
+          <div>
+            <h4 className="footer-heading">
+              {lang === 'ar' ? 'المساعدة والدعم' : 'Help & Support'}
+            </h4>
+            <div className="footer-links">
+              {policyLinks.map((link, i) => (
+                <Link key={i} to={link.to} className="footer-link">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* Delivery Info Box */}
+            <div style={{
+              marginTop: '1.5rem',
+              padding: '1rem',
+              background: 'rgba(124,58,237,0.12)',
+              border: '1px solid rgba(124,58,237,0.25)',
+              borderRadius: 'var(--radius-md)',
+            }}>
+              <p style={{ color: 'var(--purple-300)', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem' }}>
+                🚚 {lang === 'ar' ? 'معلومات التوصيل' : 'Delivery Info'}
+              </p>
+              <p style={{ color: 'var(--text-dim)', fontSize: '0.78rem', lineHeight: 1.6 }}>
+                {lang === 'ar'
+                  ? 'كلية الأسنان: مجاناً\nداخل طرابلس: 15 د.ل\nضواحي طرابلس: 20 د.ل'
+                  : 'Dental College: Free\nWithin Tripoli: 15 LYD\nTripoli suburbs: 20 LYD'}
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Footer Bottom */}
+        <div className="footer-bottom">
+          <p className="footer-copy">
+            © {currentYear} سمايلودنت — {lang === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginTop: '0.5rem' }}>
-            <a href="https://wa.me/218911234567" target="_blank" rel="noopener noreferrer" className="social-icon-footer" title="WhatsApp">
-              <Phone size={18} />
-            </a>
-            <a href="https://t.me/smylodent_libya" target="_blank" rel="noopener noreferrer" className="social-icon-footer" title="Telegram">
-              <Send size={18} />
-            </a>
-            <a href="https://instagram.com/smylodent" target="_blank" rel="noopener noreferrer" className="social-icon-footer" title="Instagram">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-            </a>
-            <a href="https://facebook.com/smylodent" target="_blank" rel="noopener noreferrer" className="social-icon-footer" title="Facebook">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-            </a>
-          </div>
-        </div>
-
-        {/* Academic years quick shortcuts */}
-        <div>
-          <h4 style={{ color: 'var(--text-main)', marginBottom: '1rem', fontWeight: 600, position: 'relative' }} className="footer-title">
-            {t('nav.years')}
-          </h4>
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <li><Link to="/year/1st-year" className="footer-link">{t('years.y1')}</Link></li>
-            <li><Link to="/year/2nd-year" className="footer-link">{t('years.y2')}</Link></li>
-            <li><Link to="/year/3rd-year" className="footer-link">{t('years.y3')}</Link></li>
-            <li><Link to="/year/4th-year" className="footer-link">{t('years.y4')}</Link></li>
-          </ul>
-        </div>
-
-        {/* General Store pages */}
-        <div>
-          <h4 style={{ color: 'var(--text-main)', marginBottom: '1rem', fontWeight: 600 }} className="footer-title">
-            {t('nav.about')}
-          </h4>
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <li><Link to="/about" className="footer-link">{t('nav.about')}</Link></li>
-            <li><Link to="/contact" className="footer-link">{t('nav.contact')}</Link></li>
-            <li><Link to="/faq" className="footer-link">{t('nav.faq')}</Link></li>
-            <li><Link to="/shipping-returns" className="footer-link">{t('checkout.delivery_options')}</Link></li>
-          </ul>
-        </div>
-
-        {/* Delivery / Guarantee Quick Details */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-          <h4 style={{ color: 'var(--text-main)', marginBottom: '0.2rem', fontWeight: 600 }}>
-            {t('home.why_us')}
-          </h4>
-          
-          <div style={{ display: 'flex', gap: '0.6rem' }}>
-            <MapPin size={28} style={{ color: 'var(--secondary)', flexShrink: 0 }} />
-            <div>
-              <p style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--text-main)' }}>{t('home.delivery_tripoli')}</p>
-              <p style={{ fontSize: '0.75rem' }}>{t('home.delivery_tripoli_desc')}</p>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '0.6rem' }}>
-            <Truck size={28} style={{ color: 'var(--secondary)', flexShrink: 0 }} />
-            <div>
-              <p style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--text-main)' }}>{t('home.delivery_libya')}</p>
-              <p style={{ fontSize: '0.75rem' }}>{t('home.delivery_libya_desc')}</p>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '0.6rem' }}>
-            <ShieldCheck size={28} style={{ color: 'var(--secondary)', flexShrink: 0 }} />
-            <div>
-              <p style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--text-main)' }}>{t('home.cod')}</p>
-              <p style={{ fontSize: '0.75rem' }}>{t('home.cod_desc')}</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Copyright border */}
-      <div
-        style={{
-          borderTop: '1px solid var(--border-color)',
-          paddingTop: '1.25rem',
-          textAlign: 'center',
-          fontSize: '0.8rem'
-        }}
-      >
-        <div className="container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '0.8rem' }}>
-          <p>© {new Date().getFullYear()} Smylodent. All rights reserved.</p>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <Link to="/faq" style={{ hover: 'color: var(--secondary)' }}>FAQ</Link>
-            <span>•</span>
-            <Link to="/shipping-returns">Shipping & Returns</Link>
-          </div>
+          <p className="footer-copy" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            {lang === 'ar' ? 'صُنع بـ' : 'Made with'}
+            <Heart size={12} style={{ color: 'var(--secondary)' }} fill="var(--secondary)" />
+            {lang === 'ar' ? 'لطلاب طب الأسنان في ليبيا' : 'for dental students in Libya'}
+          </p>
         </div>
       </div>
-
-      <style>{`
-        .footer-link {
-          transition: var(--transition-fast);
-        }
-        .footer-link:hover {
-          color: var(--secondary);
-          padding-left: 4px;
-        }
-        [dir="rtl"] .footer-link:hover {
-          padding-left: 0;
-          padding-right: 4px;
-        }
-        .social-icon-footer {
-          width: 34px;
-          height: 34px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid var(--border-color);
-          background-color: var(--bg-color);
-          color: var(--text-muted);
-          transition: var(--transition-smooth);
-        }
-        .social-icon-footer:hover {
-          color: white;
-          background-color: var(--secondary);
-          border-color: var(--secondary);
-          transform: translateY(-2px);
-        }
-      `}</style>
     </footer>
   );
 };

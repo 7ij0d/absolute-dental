@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import AnnouncementBar from './components/AnnouncementBar';
 
 // Public Storefront Pages
 import Home from './pages/Home';
@@ -34,8 +35,9 @@ import Users from './pages/admin/Users';
 const PublicLayout = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <AnnouncementBar />
       <Navbar />
-      <main style={{ flexGrow: 1, padding: '1rem 0' }}>
+      <main style={{ flexGrow: 1 }}>
         <Outlet />
       </main>
       <Footer />
@@ -46,7 +48,7 @@ const PublicLayout = () => {
 export const App = () => {
   return (
     <Routes>
-      
+
       {/* 1. PUBLIC STOREFRONT ROUTES */}
       <Route path="/" element={<PublicLayout />}>
         <Route index element={<Home />} />
@@ -62,7 +64,7 @@ export const App = () => {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="search" element={<SearchPage />} />
         <Route path="invoice/:id" element={<InvoicePage />} />
-        
+
         {/* Policy & Static Pages */}
         <Route path="about" element={<StaticPages pageKey="about_us" />} />
         <Route path="faq" element={<StaticPages pageKey="faq" />} />

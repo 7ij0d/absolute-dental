@@ -325,9 +325,35 @@ export const ProductDetails = () => {
     : 0;
 
   return (
-    <div className="container" style={{ padding: '2rem 0', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-      
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+
+      {/* Breadcrumb Hero */}
+      <div style={{
+        background: 'var(--gradient-dark)',
+        padding: '2rem 0',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+      }}>
+        <div className="container">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap' }}>
+            <Link to="/" style={{ color: 'inherit' }}>{lang === 'ar' ? 'الرئيسية' : 'Home'}</Link>
+            <span>/</span>
+            {subject && (
+              <>
+                <Link to={`/subject/${subject.slug}`} style={{ color: 'inherit' }}>
+                  {lang === 'ar' ? subject.name_ar : subject.name_en}
+                </Link>
+                <span>/</span>
+              </>
+            )}
+            <span style={{ color: 'var(--purple-300)', fontWeight: 700 }}>
+              {lang === 'ar' ? product.name_ar : product.name_en}
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* 1. PRODUCT METADATA BLOCK */}
+      <div className="container">
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '3rem' }} className="details-main-grid">
         
         {/* Left Side: Photo Album */}
@@ -626,6 +652,7 @@ export const ProductDetails = () => {
           }
         }
       `}</style>
+      </div>{/* /container */}
     </div>
   );
 };
