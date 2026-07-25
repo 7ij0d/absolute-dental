@@ -268,7 +268,11 @@ export const Products = () => {
         .select(`
           *,
           years (*),
-          subjects (*)
+          subjects!products_subject_id_fkey (*),
+          product_subjects (
+            subject_id,
+            subjects!product_subjects_subject_id_fkey (id, name_ar, name_en, slug)
+          )
         `)
         .order('created_at', { ascending: false });
       if (prods) setProducts(prods);
