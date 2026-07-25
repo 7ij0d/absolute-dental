@@ -1,0 +1,41 @@
+name: 🦷 Keep Supabase Alive
+
+# Run every 3 days at 8:00 AM UTC to prevent Supabase free-tier pause
+on:
+  schedule:
+    - cron: '0 8 */3 * *'   # Every 3 days at 08:00 UTC
+  workflow_dispatch:          # Allow manual trigger from GitHub UI
+
+jobs:
+  keep-alive:
+    name: Ping Supabase Database
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: 🏓 Ping Supabase REST API
+        run: |
+          echo "⏰ $(date) — Pinging Supabase to prevent inactivity pause..."
+
+          # Ping the years table (lightweight, no auth needed with anon key)
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/years?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+
+          echo "📡 HTTP Response Code: $RESPONSE"
+
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✅ Supabase is alive and responding!"
+          else
+            echo "⚠️  Unexpected response: $RESPONSE"
+            echo "   → Project might be paused. Resume it from supabase.com/dashboard"
+            exit 1
+          fi
+
+      - name: 📊 Log ping timestamp
+        if: success()
+        run: |
+          echo "🟢 Keep-alive ping successful at $(date '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "   Next ping scheduled in 3 days."
+          echo "   Project: smylodent | Platform: Supabase Free Tier"
