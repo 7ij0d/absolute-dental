@@ -336,7 +336,7 @@ export const Orders = () => {
                       >
                         <Pencil size={12} />
                       </button>
-                      {/* View details */}}
+                      {/* View details */}
                       <button
                         onClick={() => setSelectedOrder(ord)}
                         className="btn btn-outline"
