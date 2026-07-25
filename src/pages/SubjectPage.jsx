@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import supabase from '../supabaseClient';
 import ProductCard from '../components/ProductCard';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { cacheGet, cacheSet } from '../cache';
 import { SlidersHorizontal, ChevronLeft, ChevronRight, Package, X } from 'lucide-react';
 
 export const SubjectPage = () => {
@@ -21,33 +22,53 @@ export const SubjectPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+    const CACHE_KEY = `subject:${slug}`;
+
+    const applyData = ({ subject, year, prods }) => {
+      setSubjectData(subject);
+      setYearData(year);
+      setProducts(prods || []);
+      if (prods && prods.length > 0) {
+        setMaxPrice(Math.ceil(Math.max(...prods.map(p => p.price))));
+      }
+    };
+
+    const fetchAndCache = async (showLoader) => {
+      if (showLoader) setLoading(true);
       try {
-        const { data: subject } = await supabase.from('subjects').select('*').eq('slug', slug).single();
-        if (subject) {
-          setSubjectData(subject);
-          const { data: year } = await supabase.from('years').select('*').eq('id', subject.year_id).single();
-          if (year) setYearData(year);
-          const { data: prods } = await supabase
-            .from('products').select('*')
-            .eq('subject_id', subject.id).eq('is_active', true).eq('is_archived', false);
-          if (prods) {
-            setProducts(prods);
-            if (prods.length > 0) {
-              const prices = prods.map(p => p.price);
-              setMaxPrice(Math.ceil(Math.max(...prices)));
-            }
-          }
-        }
+        const { data: subject } = await supabase
+          .from('subjects').select('*').eq('slug', slug).single();
+        if (!subject) { setLoading(false); return; }
+
+        // Fetch year + products IN PARALLEL
+        const [{ data: year }, { data: prods }] = await Promise.all([
+          supabase.from('years').select('*').eq('id', subject.year_id).single(),
+          supabase.from('products').select('*')
+            .eq('is_active', true).eq('is_archived', false)
+            .eq('subject_id', subject.id)
+        ]);
+
+        const bundle = { subject, year: year || null, prods: prods || [] };
+        cacheSet(CACHE_KEY, bundle, 5 * 60);
+        applyData(bundle);
       } catch (err) {
-        console.error('Error fetching subject catalog', err);
+        console.error('SubjectPage fetch error', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+
+    // Show cached data instantly, refresh silently in background
+    const cached = cacheGet(CACHE_KEY);
+    if (cached) {
+      applyData(cached);
+      setLoading(false);
+      fetchAndCache(false); // background refresh
+    } else {
+      fetchAndCache(true);
+    }
   }, [slug]);
+
 
   const getFiltered = () => {
     let list = [...products].filter(p => p.price <= maxPrice);

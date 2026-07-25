@@ -5,6 +5,7 @@ import supabase from '../supabaseClient';
 import ProductCard from '../components/ProductCard';
 import HeroCarousel from '../components/HeroCarousel';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { cacheGet, cacheSet } from '../cache';
 import {
   Truck, ShieldCheck, Award, Headphones,
   ArrowRight, ArrowLeft, Star, Users, Package, Clock,
@@ -49,19 +50,22 @@ export const Home = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      const { data: yrs } = await supabase.from('years').select('*').order('slug', { ascending: true });
-      if (yrs) setYears(yrs);
+      // Serve from cache instantly
+      const cachedYears = cacheGet('home:years');
+      const cachedFeatured = cacheGet('home:featured');
+      if (cachedYears) setYears(cachedYears);
+      if (cachedFeatured) { setFeaturedProducts(cachedFeatured); setLoadingProducts(false); }
 
-      setLoadingProducts(true);
-      const { data: featured } = await supabase
-        .from('products')
-        .select('*')
-        .eq('is_featured', true)
-        .eq('is_active', true)
-        .eq('is_archived', false)
-        .limit(8);
-      if (featured) setFeaturedProducts(featured);
-      else setFeaturedProducts([]);
+      // Fetch in parallel (background if cached, foreground if not)
+      const [{ data: yrs }, { data: featured }] = await Promise.all([
+        supabase.from('years').select('*').order('slug', { ascending: true }),
+        supabase.from('products').select('*')
+          .eq('is_featured', true).eq('is_active', true).eq('is_archived', false).limit(8)
+      ]);
+
+      if (yrs)      { setYears(yrs);                   cacheSet('home:years',     yrs,      5 * 60); }
+      if (featured) { setFeaturedProducts(featured);    cacheSet('home:featured',  featured, 5 * 60); }
+      else          { setFeaturedProducts([]); }
       setLoadingProducts(false);
     };
     loadData();
