@@ -5,7 +5,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
 import InvoiceView from '../../components/InvoiceView';
 import MapPicker from '../../components/MapPicker';
-import { Search, Eye, RefreshCw, Printer, X, ClipboardList, CheckCircle, Trash2 } from 'lucide-react';
+import { Search, Eye, RefreshCw, Printer, X, ClipboardList, CheckCircle, Trash2, Pencil, Save } from 'lucide-react';
 
 export const Orders = () => {
   const { t, lang, isRtl } = useLanguage();
@@ -22,6 +22,11 @@ export const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [showInvoicePrint, setShowInvoicePrint] = useState(false);
+
+  // Edit Modal
+  const [editingOrder, setEditingOrder] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
 
   // Load query from URL if redirected from elsewhere (e.g. dashboard link)
   useEffect(() => {
@@ -95,7 +100,6 @@ export const Orders = () => {
   const handleDeleteOrder = async (orderId, orderNumber) => {
     if (!window.confirm(`هل أنت متأكد من حذف الطلب #${orderNumber}؟\nThis will permanently delete the order and all its items.`)) return;
     try {
-      // Delete order items first (in case no CASCADE)
       await supabase.from('order_items').delete().eq('order_id', orderId);
       const { error } = await supabase.from('orders').delete().eq('id', orderId);
       if (!error) {
@@ -107,6 +111,59 @@ export const Orders = () => {
     } catch (err) {
       console.error(err);
       alert('حدث خطأ غير متوقع');
+    }
+  };
+
+  const openEditModal = (ord) => {
+    setEditingOrder(ord);
+    setEditForm({
+      customer_name: ord.customer_name || '',
+      customer_phone: ord.customer_phone || '',
+      customer_phone_secondary: ord.customer_phone_secondary || '',
+      customer_email: ord.customer_email || '',
+      university: ord.university || '',
+      college: ord.college || '',
+      notes: ord.notes || '',
+      status: ord.status || 'new',
+      shipping_fee: ord.shipping_fee ?? 0,
+      discount_amount: ord.discount_amount ?? 0,
+      address_text: ord.address_text || '',
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingOrder) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          customer_name: editForm.customer_name,
+          customer_phone: editForm.customer_phone,
+          customer_phone_secondary: editForm.customer_phone_secondary,
+          customer_email: editForm.customer_email,
+          university: editForm.university,
+          college: editForm.college,
+          notes: editForm.notes,
+          status: editForm.status,
+          shipping_fee: parseFloat(editForm.shipping_fee) || 0,
+          discount_amount: parseFloat(editForm.discount_amount) || 0,
+          address_text: editForm.address_text,
+        })
+        .eq('id', editingOrder.id);
+
+      if (!error) {
+        setOrders((prev) => prev.map((o) =>
+          o.id === editingOrder.id ? { ...o, ...editForm } : o
+        ));
+        setEditingOrder(null);
+      } else {
+        alert('خطأ في الحفظ: ' + error.message);
+      }
+    } catch (err) {
+      alert('خطأ غير متوقع: ' + err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -260,7 +317,26 @@ export const Orders = () => {
                         <option value="delivered">تم التسليم</option>
                         <option value="cancelled">إلغاء</option>
                       </select>
-                      {/* View details */}
+                      {/* Edit */}
+                      <button
+                        onClick={() => openEditModal(ord)}
+                        title="تعديل الطلب"
+                        style={{
+                          padding: '0.3rem 0.5rem',
+                          fontSize: '0.72rem',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid rgba(99,102,241,0.4)',
+                          backgroundColor: 'rgba(99,102,241,0.1)',
+                          color: '#6366f1',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.2rem'
+                        }}
+                      >
+                        <Pencil size={12} />
+                      </button>
+                      {/* View details */}}
                       <button
                         onClick={() => setSelectedOrder(ord)}
                         className="btn btn-outline"
@@ -296,6 +372,111 @@ export const Orders = () => {
           </table>
         </div>
       )}
+
+      {/* EDIT ORDER MODAL */}
+      {editingOrder && createPortal(
+        <div
+          onClick={() => setEditingOrder(null)}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+            display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
+            padding: '2rem 1rem', zIndex: 10000, overflowY: 'auto'
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="animate-fade-in"
+            style={{
+              width: '100%', maxWidth: '580px',
+              backgroundColor: 'var(--surface-color)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '2rem',
+              display: 'flex', flexDirection: 'column', gap: '1.25rem',
+              boxShadow: 'var(--shadow-lg)'
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>
+                ✏️ تعديل الطلب #{editingOrder.order_number?.slice(0, 12)}
+              </h3>
+              <button onClick={() => setEditingOrder(null)} className="action-btn"><X size={18} /></button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label className="form-label">اسم العميل</label>
+                <input className="form-input" value={editForm.customer_name} onChange={e => setEditForm(p => ({...p, customer_name: e.target.value}))} />
+              </div>
+              <div>
+                <label className="form-label">رقم الهاتف</label>
+                <input className="form-input" value={editForm.customer_phone} onChange={e => setEditForm(p => ({...p, customer_phone: e.target.value}))} />
+              </div>
+              <div>
+                <label className="form-label">رقم احتياطي</label>
+                <input className="form-input" value={editForm.customer_phone_secondary} onChange={e => setEditForm(p => ({...p, customer_phone_secondary: e.target.value}))} />
+              </div>
+              <div>
+                <label className="form-label">البريد الإلكتروني</label>
+                <input className="form-input" type="email" value={editForm.customer_email} onChange={e => setEditForm(p => ({...p, customer_email: e.target.value}))} />
+              </div>
+              <div>
+                <label className="form-label">الجامعة</label>
+                <input className="form-input" value={editForm.university} onChange={e => setEditForm(p => ({...p, university: e.target.value}))} />
+              </div>
+              <div>
+                <label className="form-label">الكلية</label>
+                <input className="form-input" value={editForm.college} onChange={e => setEditForm(p => ({...p, college: e.target.value}))} />
+              </div>
+              <div>
+                <label className="form-label">رسوم التوصيل (د.ل)</label>
+                <input className="form-input" type="number" value={editForm.shipping_fee} onChange={e => setEditForm(p => ({...p, shipping_fee: e.target.value}))} />
+              </div>
+              <div>
+                <label className="form-label">قيمة الخصم (د.ل)</label>
+                <input className="form-input" type="number" value={editForm.discount_amount} onChange={e => setEditForm(p => ({...p, discount_amount: e.target.value}))} />
+              </div>
+            </div>
+
+            <div>
+              <label className="form-label">حالة الطلب</label>
+              <select className="form-input" value={editForm.status} onChange={e => setEditForm(p => ({...p, status: e.target.value}))}>
+                <option value="new">طلب جديد</option>
+                <option value="under_review">قيد المراجعة</option>
+                <option value="accepted">تم القبول</option>
+                <option value="preparing">جاري التجهيز</option>
+                <option value="out_for_delivery">خرج للتوصيل</option>
+                <option value="delivered">تم التسليم</option>
+                <option value="cancelled">إلغاء الطلب</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="form-label">عنوان التوصيل</label>
+              <input className="form-input" value={editForm.address_text} onChange={e => setEditForm(p => ({...p, address_text: e.target.value}))} />
+            </div>
+
+            <div>
+              <label className="form-label">ملاحظات</label>
+              <textarea className="form-input" rows={3} value={editForm.notes} onChange={e => setEditForm(p => ({...p, notes: e.target.value}))} style={{ resize: 'vertical' }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button onClick={() => setEditingOrder(null)} className="btn btn-outline" style={{ padding: '0.6rem 1.5rem' }}>إلغاء</button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={saving}
+                className="btn btn-primary"
+                style={{ padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <Save size={15} />
+                {saving ? 'جاري الحفظ...' : 'حفظ التعديلات'}
+              </button>
+            </div>
+          </div>
+        </div>
+      , document.body)}
 
       {/* -------------------------------------------------------------
           ORDER DETAILS DRAWER/MODAL
