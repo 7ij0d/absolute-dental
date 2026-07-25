@@ -353,19 +353,18 @@ export const Products = () => {
     e.preventDefault();
 
     const nameArTrimmed = nameAr.trim();
-    const nameEnTrimmed = nameEn.trim();
 
-    // Check if at least one name is provided
-    if (!nameArTrimmed && !nameEnTrimmed) {
-      alert(lang === 'ar' ? 'يجب إدخال اسم المنتج بلغة واحدة على الأقل!' : 'Product name must be provided in at least one language!');
+    // Check name is provided
+    if (!nameArTrimmed) {
+      alert('يجب إدخال اسم المنتج!');
       return;
     }
 
     setSubmitting(true);
 
     const productPayload = {
-      name_ar: nameArTrimmed || nameEnTrimmed,
-      name_en: nameEnTrimmed || nameArTrimmed,
+      name_ar: nameArTrimmed,
+      name_en: nameArTrimmed,
       description_ar: descriptionAr.trim() || null,
       description_en: descriptionEn.trim() || null,
       details_ar: detailsAr.trim() || null,
@@ -540,7 +539,6 @@ export const Products = () => {
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem' }}>
                     <p style={{ fontWeight: 700 }}>{prod.name_ar}</p>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{prod.name_en}</p>
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem', fontWeight: 800 }}>{prod.price} د.ل</td>
                   <td style={{ padding: '0.6rem 0.75rem', fontWeight: 700 }}>{prod.stock_quantity}</td>
@@ -608,15 +606,9 @@ export const Products = () => {
 
             <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }} className="modal-form-row">
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">{t('admin.product_name_ar')} (أحدهما مطلوب / One required) *</label>
-                  <input type="text" className="form-input" value={nameAr} onChange={(e) => setNameAr(e.target.value)} placeholder="اسم المنتج بالعربية..." />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">{t('admin.product_name_en')} (أحدهما مطلوب / One required) *</label>
-                  <input type="text" className="form-input" value={nameEn} onChange={(e) => setNameEn(e.target.value)} placeholder="Product name in English..." />
-                </div>
+              <div className="form-group">
+                <label className="form-label">اسم المنتج</label>
+                <input type="text" className="form-input" value={nameAr} onChange={(e) => setNameAr(e.target.value)} placeholder="اكتب اسم المنتج..." />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }} className="modal-form-row">
