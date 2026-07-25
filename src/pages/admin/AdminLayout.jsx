@@ -112,7 +112,6 @@ export const AdminLayout = () => {
             <div className="form-group" style={{ marginBottom: 0 }}>
               <input
                 type="password"
-                required
                 className="form-input"
                 placeholder="••••"
                 value={inputCode}

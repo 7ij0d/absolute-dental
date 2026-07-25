@@ -292,12 +292,12 @@ export const Banners = () => {
               
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">العنوان الرئيسي (عربي) *</label>
-                <input type="text" className="form-input" required value={titleAr} onChange={(e) => setTitleAr(e.target.value)} />
+                <input type="text" className="form-input" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} />
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">العنوان الرئيسي (إنجليزي) *</label>
-                <input type="text" className="form-input" required value={titleEn} onChange={(e) => setTitleEn(e.target.value)} />
+                <input type="text" className="form-input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} />
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
@@ -316,7 +316,6 @@ export const Banners = () => {
                   <input
                     type="text"
                     className="form-input"
-                    required
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="رابط الصورة أو اختر ملفاً..."

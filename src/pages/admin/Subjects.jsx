@@ -395,17 +395,17 @@ export const Subjects = () => {
               
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">الاسم بالعربية *</label>
-                <input type="text" className="form-input" required value={nameAr} onChange={(e) => setNameAr(e.target.value)} />
+                <input type="text" className="form-input" value={nameAr} onChange={(e) => setNameAr(e.target.value)} />
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">الاسم بالإنجليزية *</label>
-                <input type="text" className="form-input" required value={nameEn} onChange={(e) => setNameEn(e.target.value)} />
+                <input type="text" className="form-input" value={nameEn} onChange={(e) => setNameEn(e.target.value)} />
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">الرابط الفريد (Slug) *</label>
-                <input type="text" className="form-input" required placeholder="dental-anatomy" value={slug} onChange={(e) => setSlug(e.target.value)} />
+                <input type="text" className="form-input" placeholder="dental-anatomy" value={slug} onChange={(e) => setSlug(e.target.value)} />
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
@@ -479,12 +479,12 @@ export const Subjects = () => {
               
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">الاسم بالعربية *</label>
-                <input type="text" className="form-input" required value={yearNameAr} onChange={(e) => setYearNameAr(e.target.value)} />
+                <input type="text" className="form-input" value={yearNameAr} onChange={(e) => setYearNameAr(e.target.value)} />
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">الاسم بالإنجليزية *</label>
-                <input type="text" className="form-input" required value={yearNameEn} onChange={(e) => setYearNameEn(e.target.value)} />
+                <input type="text" className="form-input" value={yearNameEn} onChange={(e) => setYearNameEn(e.target.value)} />
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>

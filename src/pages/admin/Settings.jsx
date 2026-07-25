@@ -147,17 +147,17 @@ export const Settings = () => {
 
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">توصيل كلية طب الأسنان طرابلس (د.ل) *</label>
-            <input type="number" className="form-input" required value={tripoliFacultyRate} onChange={(e) => setTripoliFacultyRate(e.target.value)} />
+            <input type="number" className="form-input" value={tripoliFacultyRate} onChange={(e) => setTripoliFacultyRate(e.target.value)} />
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">توصيل المنزل داخل طرابلس (د.ل) *</label>
-            <input type="number" className="form-input" required value={tripoliHomeRate} onChange={(e) => setTripoliHomeRate(e.target.value)} />
+            <input type="number" className="form-input" value={tripoliHomeRate} onChange={(e) => setTripoliHomeRate(e.target.value)} />
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">شحن لبقية المدن والمناطق (د.ل) *</label>
-            <input type="number" className="form-input" required value={otherCitiesRate} onChange={(e) => setOtherCitiesRate(e.target.value)} />
+            <input type="number" className="form-input" value={otherCitiesRate} onChange={(e) => setOtherCitiesRate(e.target.value)} />
           </div>
 
           {/* Submit */}

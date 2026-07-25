@@ -535,7 +535,6 @@ export const Users = () => {
                 <label className="form-label">{lang === 'ar' ? 'الاسم الكامل *' : 'Full Name *'}</label>
                 <input
                   type="text"
-                  required
                   className="form-input"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
@@ -548,7 +547,6 @@ export const Users = () => {
                   <label className="form-label">{lang === 'ar' ? 'رقم الهاتف *' : 'Phone Number *'}</label>
                   <input
                     type="tel"
-                    required
                     className="form-input"
                     value={editPhone}
                     onChange={(e) => setEditPhone(e.target.value)}
@@ -571,7 +569,6 @@ export const Users = () => {
                   <label className="form-label">{lang === 'ar' ? 'الجامعة *' : 'University *'}</label>
                   <input
                     type="text"
-                    required
                     className="form-input"
                     value={editUniversity}
                     onChange={(e) => setEditUniversity(e.target.value)}
@@ -581,7 +578,6 @@ export const Users = () => {
                   <label className="form-label">{lang === 'ar' ? 'الكلية *' : 'College *'}</label>
                   <input
                     type="text"
-                    required
                     className="form-input"
                     value={editCollege}
                     onChange={(e) => setEditCollege(e.target.value)}

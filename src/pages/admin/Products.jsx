@@ -622,7 +622,7 @@ export const Products = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }} className="modal-form-row">
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">{t('admin.price')} (د.ل) *</label>
-                  <input type="number" step="0.1" className="form-input" required value={price} onChange={(e) => setPrice(e.target.value)} />
+                  <input type="number" step="0.1" className="form-input" value={price} onChange={(e) => setPrice(e.target.value)} />
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">{t('admin.compare_price')} (د.ل)</label>
@@ -649,7 +649,7 @@ export const Products = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }} className="modal-form-row">
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">{t('admin.year')} *</label>
-                  <select className="form-input" required value={yearId} onChange={(e) => setYearId(e.target.value)}>
+                  <select className="form-input" value={yearId} onChange={(e) => setYearId(e.target.value)}>
                     <option value="">اختر السنة الدراسية</option>
                     {years.map((y) => (
                       <option key={y.id} value={y.id}>{y.name_ar}</option>
@@ -658,7 +658,7 @@ export const Products = () => {
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">{t('admin.subject')} *</label>
-                  <select className="form-input" required value={subjectId} onChange={(e) => setSubjectId(e.target.value)}>
+                  <select className="form-input" value={subjectId} onChange={(e) => setSubjectId(e.target.value)}>
                     <option value="">اختر المادة الدراسية</option>
                     {filteredSubjects.map((s) => (
                       <option key={s.id} value={s.id}>{s.name_ar}</option>
@@ -673,7 +673,6 @@ export const Products = () => {
                   <input
                     type="text"
                     className="form-input"
-                    required
                     value={mainImageUrl}
                     onChange={(e) => setMainImageUrl(e.target.value)}
                     placeholder="رابط الصورة أو اختر ملفاً..."
