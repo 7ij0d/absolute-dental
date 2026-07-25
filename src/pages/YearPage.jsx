@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import supabase from '../supabaseClient';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { cacheGet, cacheSet } from '../cache';
 import { BookOpen, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, Package } from 'lucide-react';
 
 const SUBJECT_IMAGES = [
@@ -24,25 +25,50 @@ export const YearPage = () => {
   const [allYears, setAllYears] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+    const CACHE_KEY = `year:${slug}`;
+
+    const applyData = ({ year, subs, yrs }) => {
+      setYearData(year);
+      setSubjects(subs || []);
+      setAllYears(yrs || []);
+    };
+
+    const fetchAndCache = async (showLoader) => {
+      if (showLoader) setLoading(true);
       try {
-        const { data: year } = await supabase.from('years').select('*').eq('slug', slug).single();
-        if (year) {
-          setYearData(year);
-          const { data: subs } = await supabase.from('subjects').select('*').eq('year_id', year.id);
-          if (subs) setSubjects(subs);
-        }
-        const { data: yrs } = await supabase.from('years').select('*').order('slug', { ascending: true });
-        if (yrs) setAllYears(yrs);
+        // Fetch year first (need id for subjects)
+        const { data: year } = await supabase
+          .from('years').select('*').eq('slug', slug).single();
+
+        if (!year) { setLoading(false); return; }
+
+        // Fetch subjects + all years IN PARALLEL
+        const [{ data: subs }, { data: yrs }] = await Promise.all([
+          supabase.from('subjects').select('*').eq('year_id', year.id),
+          supabase.from('years').select('*').order('slug', { ascending: true })
+        ]);
+
+        const bundle = { year, subs: subs || [], yrs: yrs || [] };
+        cacheSet(CACHE_KEY, bundle, 5 * 60);
+        applyData(bundle);
       } catch (err) {
-        console.error('Error loading year info', err);
+        console.error('YearPage fetch error', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+
+    // Instant load from cache, then refresh silently
+    const cached = cacheGet(CACHE_KEY);
+    if (cached) {
+      applyData(cached);
+      setLoading(false);
+      fetchAndCache(false);
+    } else {
+      fetchAndCache(true);
+    }
   }, [slug]);
+
 
   const ChevronFwd = isRtl ? ChevronLeft : ChevronRight;
   const ArrowFwd = isRtl ? ArrowLeft : ArrowRight;
