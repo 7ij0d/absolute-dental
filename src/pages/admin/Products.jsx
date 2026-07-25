@@ -29,7 +29,8 @@ export const Products = () => {
   const [stockQuantity, setStockQuantity] = useState(10);
   const [availability, setAvailability] = useState('available');
   const [yearId, setYearId] = useState('');
-  const [subjectId, setSubjectId] = useState('');
+  const [selectedSubjectIds, setSelectedSubjectIds] = useState([]); // multi-subject
+  const [subjectId, setSubjectId] = useState(''); // kept for backward compat (primary)
   const [mainImageUrl, setMainImageUrl] = useState('');
   const [extraImageUrls, setExtraImageUrls] = useState([]);
   const [usageVideoUrl, setUsageVideoUrl] = useState('');
@@ -300,6 +301,7 @@ export const Products = () => {
     setAvailability('available');
     setYearId(years.length > 0 ? years[0].id : '');
     setSubjectId('');
+    setSelectedSubjectIds([]);
     setMainImageUrl('');
     setExtraImageUrls([]);
     setUsageVideoUrl('');
@@ -325,6 +327,14 @@ export const Products = () => {
     setAvailability(prod.availability || 'available');
     setYearId(prod.year_id || '');
     setSubjectId(prod.subject_id || '');
+
+    // Fetch assigned subjects from junction table
+    const { data: ps } = await supabase
+      .from('product_subjects')
+      .select('subject_id')
+      .eq('product_id', prod.id);
+    setSelectedSubjectIds(ps ? ps.map(r => r.subject_id) : (prod.subject_id ? [prod.subject_id] : []));
+
     setMainImageUrl(prod.image_url || '');
     setUsageVideoUrl(prod.usage_video_url || '');
     setIsFeatured(prod.is_featured || false);
@@ -374,7 +384,7 @@ export const Products = () => {
       stock_quantity: stockQuantity !== '' ? parseInt(stockQuantity) : 0,
       availability,
       year_id: yearId || null,
-      subject_id: subjectId || null,
+      subject_id: selectedSubjectIds[0] || null, // primary subject for backward compat
       image_url: mainImageUrl.trim(),
       usage_video_url: usageVideoUrl.trim() || null,
       audio_url: audioUrl.trim() || null,
@@ -404,6 +414,16 @@ export const Products = () => {
         
         if (error) throw error;
         productId = data.id;
+      }
+
+      // Save multi-subject links in junction table
+      if (productId) {
+        await supabase.from('product_subjects').delete().eq('product_id', productId);
+        if (selectedSubjectIds.length > 0) {
+          await supabase.from('product_subjects').insert(
+            selectedSubjectIds.map(sid => ({ product_id: productId, subject_id: sid }))
+          );
+        }
       }
 
       // Add supplementary images
@@ -638,24 +658,46 @@ export const Products = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }} className="modal-form-row">
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">{t('admin.year')} *</label>
-                  <select className="form-input" value={yearId} onChange={(e) => setYearId(e.target.value)}>
-                    <option value="">اختر السنة الدراسية</option>
-                    {years.map((y) => (
-                      <option key={y.id} value={y.id}>{y.name_ar}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">{t('admin.subject')} *</label>
-                  <select className="form-input" value={subjectId} onChange={(e) => setSubjectId(e.target.value)}>
-                    <option value="">اختر المادة الدراسية</option>
-                    {filteredSubjects.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name_ar}</option>
-                    ))}
-                  </select>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">{t('admin.year')}</label>
+                <select className="form-input" value={yearId} onChange={(e) => setYearId(e.target.value)}>
+                  <option value="">اختر السنة الدراسية</option>
+                  {years.map((y) => (
+                    <option key={y.id} value={y.id}>{y.name_ar}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Multi-subject checkboxes */}
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">المواد الدراسية (يمكن اختيار أكثر من مادة)</label>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                  gap: '0.5rem',
+                  padding: '0.75rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--accent)'
+                }}>
+                  {subjects.map((s) => (
+                    <label key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', fontWeight: selectedSubjectIds.includes(s.id) ? 700 : 400 }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedSubjectIds.includes(s.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedSubjectIds(prev => [...prev, s.id]);
+                          } else {
+                            setSelectedSubjectIds(prev => prev.filter(id => id !== s.id));
+                          }
+                        }}
+                        style={{ accentColor: 'var(--primary)', width: '15px', height: '15px' }}
+                      />
+                      {s.name_ar}
+                    </label>
+                  ))}
+                  {subjects.length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>لا توجد مواد</span>}
                 </div>
               </div>
 
