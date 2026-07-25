@@ -3,8 +3,21 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-// Determine if we should use Mock Fallback (when env credentials are not set or unresolvable)
-const useMock = !supabaseUrl || !supabaseAnonKey || supabaseUrl === 'YOUR_SUPABASE_URL' || supabaseUrl.includes('vqrpodmnzubpcsvqohwj');
+// Use Mock ONLY when real credentials are absent
+// Once you add your Supabase URL + ANON KEY to .env, this switches to live data automatically
+const useMock = (
+  !supabaseUrl ||
+  !supabaseAnonKey ||
+  supabaseUrl === 'YOUR_SUPABASE_URL' ||
+  supabaseUrl.trim() === '' ||
+  supabaseAnonKey.trim() === ''
+);
+
+if (!useMock) {
+  console.log('🟢 Smylodent: Connected to live Supabase →', supabaseUrl);
+} else {
+  console.warn('🟡 Smylodent: Using MOCK database (no Supabase credentials found in .env)');
+}
 
 // -------------------------------------------------------------
 // 1. MOCK SEED DATA DEFINITIONS
