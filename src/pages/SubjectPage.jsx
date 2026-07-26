@@ -40,15 +40,36 @@ export const SubjectPage = () => {
           .from('subjects').select('*').eq('slug', slug).single();
         if (!subject) { setLoading(false); return; }
 
-        // Fetch year + products IN PARALLEL
-        const [{ data: year }, { data: prods }] = await Promise.all([
+        // Fetch year + primary products + junction products IN PARALLEL
+        const [{ data: year }, { data: primaryProds }, { data: junctionLinks }] = await Promise.all([
           supabase.from('years').select('*').eq('id', subject.year_id).single(),
+          // Products where subject_id = this subject (primary)
           supabase.from('products').select('*')
             .eq('is_active', true).eq('is_archived', false)
-            .eq('subject_id', subject.id)
+            .eq('subject_id', subject.id),
+          // Products linked via product_subjects junction table
+          supabase.from('product_subjects').select('product_id').eq('subject_id', subject.id)
         ]);
 
-        const bundle = { subject, year: year || null, prods: prods || [] };
+        // Get extra product IDs from junction table (exclude already fetched)
+        const primaryIds = new Set((primaryProds || []).map(p => p.id));
+        const extraIds = (junctionLinks || [])
+          .map(r => r.product_id)
+          .filter(id => !primaryIds.has(id));
+
+        // Fetch extra products if any
+        let extraProds = [];
+        if (extraIds.length > 0) {
+          const { data: ep } = await supabase.from('products').select('*')
+            .in('id', extraIds)
+            .eq('is_active', true).eq('is_archived', false);
+          extraProds = ep || [];
+        }
+
+        // Merge + deduplicate
+        const allProds = [...(primaryProds || []), ...extraProds];
+
+        const bundle = { subject, year: year || null, prods: allProds };
         cacheSet(CACHE_KEY, bundle, 5 * 60);
         applyData(bundle);
       } catch (err) {
