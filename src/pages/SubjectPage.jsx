@@ -70,7 +70,7 @@ export const SubjectPage = () => {
         const allProds = [...(primaryProds || []), ...extraProds];
 
         const bundle = { subject, year: year || null, prods: allProds };
-        cacheSet(CACHE_KEY, bundle, 5 * 60);
+        cacheSet(CACHE_KEY, bundle, 60); // 60 sec TTL — products update fast
         applyData(bundle);
       } catch (err) {
         console.error('SubjectPage fetch error', err);
