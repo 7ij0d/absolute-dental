@@ -36,6 +36,8 @@ export const Products = () => {
   const [usageVideoUrl, setUsageVideoUrl] = useState('');
   const [isFeatured, setIsFeatured] = useState(false);
   const [isActive, setIsActive] = useState(true);
+  const [unitMultiplier, setUnitMultiplier] = useState(1);
+  const [sharedInventoryProductId, setSharedInventoryProductId] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
   const [uploadingMain, setUploadingMain] = useState(false);
@@ -311,6 +313,8 @@ export const Products = () => {
     setUsageVideoUrl('');
     setIsFeatured(false);
     setIsActive(true);
+    setUnitMultiplier(1);
+    setSharedInventoryProductId('');
     setAudioUrl('');
     setRecordedBlobUrl('');
     setAudioChunks([]);
@@ -343,6 +347,8 @@ export const Products = () => {
     setUsageVideoUrl(prod.usage_video_url || '');
     setIsFeatured(prod.is_featured || false);
     setIsActive(prod.is_active !== false);
+    setUnitMultiplier(prod.unit_multiplier || 1);
+    setSharedInventoryProductId(prod.shared_inventory_product_id || '');
     setAudioUrl(prod.audio_url || '');
     setRecordedBlobUrl('');
     setAudioChunks([]);
@@ -393,7 +399,9 @@ export const Products = () => {
       usage_video_url: usageVideoUrl.trim() || null,
       audio_url: audioUrl.trim() || null,
       is_featured: isFeatured,
-      is_active: isActive
+      is_active: isActive,
+      unit_multiplier: parseInt(unitMultiplier) || 1,
+      shared_inventory_product_id: sharedInventoryProductId || null,
     };
 
     try {
@@ -660,6 +668,53 @@ export const Products = () => {
                     <option value="unavailable">غير متوفر / Out of Stock</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Shared Inventory */}
+              <div style={{
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1rem',
+                backgroundColor: 'rgba(139,92,246,0.06)'
+              }}>
+                <label className="form-label" style={{ marginBottom: '0.75rem', display: 'block', color: 'var(--primary)', fontWeight: 700 }}>
+                  🔗 ربط المخزن (للمنتجات المرتبطة مثل البوكس والقطعة)
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.75rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>ربط بمنتج آخر (المخزن الرئيسي)</label>
+                    <select
+                      className="form-input"
+                      value={sharedInventoryProductId}
+                      onChange={(e) => setSharedInventoryProductId(e.target.value)}
+                    >
+                      <option value="">— بدون ربط —</option>
+                      {products
+                        .filter(p => !editingProduct || p.id !== editingProduct.id)
+                        .map(p => (
+                          <option key={p.id} value={p.id}>{p.name_ar}</option>
+                        ))
+                      }
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>عدد القطع في الوحدة</label>
+                    <input
+                      type="number"
+                      min="1"
+                      className="form-input"
+                      value={unitMultiplier}
+                      onChange={(e) => setUnitMultiplier(e.target.value)}
+                      placeholder="1"
+                      disabled={!sharedInventoryProductId}
+                    />
+                  </div>
+                </div>
+                {sharedInventoryProductId && (
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem', marginBottom: 0 }}>
+                    ✅ كل طلب من هذا المنتج سيطرح <strong>{unitMultiplier}</strong> قطعة من مخزن المنتج المرتبط تلقائياً
+                  </p>
+                )}
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
