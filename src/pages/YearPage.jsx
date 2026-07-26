@@ -112,7 +112,7 @@ export const YearPage = () => {
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '420px', lineHeight: 1.7, marginBottom: '2rem' }}>
           {lang === 'ar'
-            ? 'نعمل على توفير أدوات وكراسات هذه السنة. تابعنا على واتساب وتليجرام لتعرف أول ما نطلق المنتجات.'
+            ? 'نعمل على توفير أدوات هذه السنة. تابعنا على واتساب وتليجرام لتعرف أول ما نطلق المنتجات.'
             : "We're working on sourcing tools and supplies for this year. Follow us on WhatsApp or Telegram to be the first to know when we launch."
           }
         </p>
