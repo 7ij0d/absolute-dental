@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
-import { Plus, Edit, Trash2, X, PlusCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, X, PlusCircle, ToggleLeft, ToggleRight } from 'lucide-react';
 
 export const Subjects = () => {
   const { t } = useLanguage();
@@ -166,6 +166,17 @@ export const Subjects = () => {
     }
   };
 
+  const handleToggleComingSoon = async (year) => {
+    const newVal = !year.is_coming_soon;
+    const { error } = await supabase
+      .from('years')
+      .update({ is_coming_soon: newVal })
+      .eq('id', year.id);
+    if (!error) {
+      setYears(prev => prev.map(y => y.id === year.id ? { ...y, is_coming_soon: newVal } : y));
+    }
+  };
+
   const openAddModal = () => {
     setEditingSubject(null);
     setNameAr('');
@@ -324,6 +335,7 @@ export const Subjects = () => {
                     <th style={{ padding: '1rem' }}>الخلفية</th>
                     <th style={{ padding: '1rem' }}>السنة (عربي)</th>
                     <th style={{ padding: '1rem' }}>السنة (إنجليزي)</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>حالة العرض</th>
                     <th style={{ padding: '1rem', textAlign: 'center' }}>الخيارات</th>
                   </tr>
                 </thead>
@@ -339,6 +351,24 @@ export const Subjects = () => {
                       </td>
                       <td style={{ padding: '1rem', fontWeight: 700 }}>{y.name_ar}</td>
                       <td style={{ padding: '1rem' }}>{y.name_en}</td>
+                      <td style={{ padding: '1rem', textAlign: 'center' }}>
+                        <button
+                          onClick={() => handleToggleComingSoon(y)}
+                          title={y.is_coming_soon ? 'اضغط لتفعيل السنة' : 'اضغط لجعلها قريباً'}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                            padding: '0.25rem 0.7rem', borderRadius: '999px', border: 'none',
+                            cursor: 'pointer', fontWeight: 700, fontSize: '0.72rem',
+                            background: y.is_coming_soon ? 'rgba(139,92,246,0.15)' : 'rgba(16,185,129,0.15)',
+                            color: y.is_coming_soon ? 'var(--primary)' : 'var(--success)',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          {y.is_coming_soon
+                            ? <><ToggleLeft size={14}/> قريباً</>
+                            : <><ToggleRight size={14}/> نشط</>}
+                        </button>
+                      </td>
                       <td style={{ padding: '1rem', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
                           <button onClick={() => openEditYearModal(y)} className="action-btn" title="Edit"><Edit size={14} /></button>
