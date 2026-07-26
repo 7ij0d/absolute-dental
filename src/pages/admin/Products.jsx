@@ -573,7 +573,18 @@ export const Products = () => {
                     <p style={{ fontWeight: 700 }}>{prod.name_ar}</p>
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem', fontWeight: 800 }}>{prod.price} د.ل</td>
-                  <td style={{ padding: '0.6rem 0.75rem', fontWeight: 700 }}>{prod.stock_quantity}</td>
+                  <td style={{ padding: '0.6rem 0.75rem', fontWeight: 700 }}>
+                    {prod.shared_inventory_product_id ? (() => {
+                      const master = products.find(p => p.id === prod.shared_inventory_product_id);
+                      const mult = prod.unit_multiplier || 1;
+                      const effective = master ? Math.floor(master.stock_quantity / mult) : '—';
+                      return (
+                        <span title={`مرتبط بـ: ${master?.name_ar || '?'} (${master?.stock_quantity || 0} قطعة ÷ ${mult})`}>
+                          🔗 {effective}
+                        </span>
+                      );
+                    })() : prod.stock_quantity}
+                  </td>
                   <td style={{ padding: '0.6rem 0.75rem' }}>
                     {prod.is_archived ? (
                       <span style={{ fontSize: '0.7rem', fontWeight: 'bold', padding: '1px 6px', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)' }}>أرشيف</span>

@@ -221,17 +221,43 @@ export const CheckoutPage = () => {
 
       if (itemsErr) throw itemsErr;
 
-      // 3. Update stock levels on products (only if running on Mock DB, live Supabase would use trigger or backend)
-      if (supabase.isMock) {
-        const productsBuilder = supabase.from('products');
-        for (const item of cartItems) {
-          const currentQty = item.stock_quantity || 0;
-          const updatedQty = Math.max(0, currentQty - item.quantity);
-          const availability = updatedQty === 0 ? 'unavailable' : (updatedQty < 5 ? 'limited_quantity' : 'available');
-          await productsBuilder.eq('id', item.id).update({
-            stock_quantity: updatedQty,
-            availability
-          });
+      // 3. Update stock levels — works for both real Supabase and Mock
+      for (const item of cartItems) {
+        // Fetch latest product data (shared_inventory_product_id + unit_multiplier)
+        const { data: prodData } = await supabase
+          .from('products')
+          .select('id, stock_quantity, shared_inventory_product_id, unit_multiplier')
+          .eq('id', item.id)
+          .single();
+
+        if (!prodData) continue;
+
+        if (prodData.shared_inventory_product_id) {
+          // Linked product: deduct from the MASTER stock
+          const { data: master } = await supabase
+            .from('products')
+            .select('id, stock_quantity')
+            .eq('id', prodData.shared_inventory_product_id)
+            .single();
+
+          if (master) {
+            const mult = prodData.unit_multiplier || 1;
+            const deduct = item.quantity * mult;
+            const newMasterQty = Math.max(0, master.stock_quantity - deduct);
+            const availability = newMasterQty === 0 ? 'unavailable'
+              : newMasterQty < 5 * mult ? 'limited_quantity' : 'available';
+            await supabase.from('products').update({
+              stock_quantity: newMasterQty, availability
+            }).eq('id', master.id);
+          }
+        } else {
+          // Regular product: deduct directly
+          const newQty = Math.max(0, (prodData.stock_quantity || 0) - item.quantity);
+          const availability = newQty === 0 ? 'unavailable'
+            : newQty < 5 ? 'limited_quantity' : 'available';
+          await supabase.from('products').update({
+            stock_quantity: newQty, availability
+          }).eq('id', item.id);
         }
       }
 
