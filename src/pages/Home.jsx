@@ -21,24 +21,24 @@ const YEAR_IMAGES = [
 ];
 
 const WHY_ITEMS_AR = [
-  { icon: <Truck size={22} />,        title: 'توصيل سريع',         desc: 'توصيل مجاني لكلية الأسنان وتوصيل سريع لجميع مناطق طرابلس خلال 24 ساعة.' },
-  { icon: <ShieldCheck size={22} />,  title: 'جودة مضمونة',        desc: 'جميع الأدوات الطبية أصلية ومعتمدة وتحمل ضمان الجودة والأصالة.' },
-  { icon: <Award size={22} />,        title: 'أسعار طلابية',       desc: 'أسعار خاصة ومخفضة صُممت خصيصاً لتناسب ميزانية طلاب طب الأسنان.' },
-  { icon: <Headphones size={22} />,   title: 'دعم متواصل',          desc: 'فريق دعم متاح عبر واتساب وتليجرام للإجابة على جميع استفساراتك.' },
+  { icon: <Truck size={22} />,        title: 'توصيل للكلية مجاناً',    desc: 'طلاب كلية الأسنان يوصلهم مجاناً. ولبقية مناطق طرابلس بسعر رمزي خلال 24 ساعة.' },
+  { icon: <ShieldCheck size={22} />,  title: 'كل شيء أصلي',           desc: 'ما نبيع صورة — كل الأدوات اللي عندنا أصلية وجربناها بأنفسنا قبل ما نوفرها.' },
+  { icon: <Award size={22} />,        title: 'أسعار تناسب الطلبة',    desc: 'أسعارنا مراعية إن الطالب ميزانيته محدودة — حاولنا نوفر أفضل سعر ممكن.' },
+  { icon: <Headphones size={22} />,   title: 'رد سريع',                desc: 'تواصل معنا على واتساب وتليجرام — عادةً نرد في نفس اليوم.' },
 ];
 
 const WHY_ITEMS_EN = [
-  { icon: <Truck size={22} />,        title: 'Fast Delivery',       desc: 'Free delivery to the Dental College and fast delivery all over Tripoli within 24 hours.' },
-  { icon: <ShieldCheck size={22} />,  title: 'Certified Quality',   desc: 'All medical tools are original, certified, and come with quality guarantees.' },
-  { icon: <Award size={22} />,        title: 'Student Prices',      desc: 'Special discounted prices designed specifically for dental students\' budgets.' },
-  { icon: <Headphones size={22} />,   title: 'Continuous Support',  desc: 'Support team available via WhatsApp and Telegram to answer all your queries.' },
+  { icon: <Truck size={22} />,        title: 'Free College Delivery',  desc: 'Free delivery for dental college students. Other Tripoli areas delivered within 24 hours.' },
+  { icon: <ShieldCheck size={22} />,  title: '100% Original',          desc: "We only sell what we've personally verified — no knockoffs, ever." },
+  { icon: <Award size={22} />,        title: 'Student-Friendly Prices', desc: "We know students' budgets are tight — we've worked hard to keep prices as low as possible." },
+  { icon: <Headphones size={22} />,   title: 'Fast Replies',           desc: 'Reach us on WhatsApp or Telegram — we usually reply the same day.' },
 ];
 
 const MOCK_REVIEWS = [
-  { name_ar: 'سارة الأمين',    name_en: 'Sara Al-Amin',    rating: 5, comment_ar: 'جودة الأدوات ممتازة والتوصيل كان سريع جداً. نوصي به لكل طلاب الكلية!',         comment_en: 'Excellent quality tools and very fast delivery. Highly recommend to all college students!', subject_ar: 'طالبة - سنة ثانية',  subject_en: '2nd Year Student' },
-  { name_ar: 'محمد الترهوني',  name_en: 'Mohamed Al-Tarhuni', rating: 5, comment_ar: 'أسعار مناسبة جداً مقارنة بالسوق وكل شيء أصلي. متجر موثوق 100%.',          comment_en: 'Very reasonable prices compared to the market and everything is genuine. 100% trustworthy store.', subject_ar: 'طالب - سنة رابعة',   subject_en: '4th Year Student' },
-  { name_ar: 'رقية البوسيفي',  name_en: 'Ruqayya Al-Busaifi', rating: 5, comment_ar: 'استخدمت الأدوات في المعمل وكانت ذات جودة عالية. خدمة العملاء ممتازة.',      comment_en: 'Used the tools in the lab and they were high quality. Customer service is excellent.',        subject_ar: 'طالبة - سنة ثالثة', subject_en: '3rd Year Student' },
-  { name_ar: 'عمر الزروق',     name_en: 'Omar Al-Zarouq',   rating: 4, comment_ar: 'توصيل الكلية مجاني وهذا يوفر علينا كثيراً. المنتجات ممتازة والتغليف جيد.',    comment_en: 'College delivery is free which saves us a lot. Products are excellent and packaging is good.', subject_ar: 'طالب - سنة أولى',   subject_en: '1st Year Student' },
+  { name_ar: 'ريم القماطي',     name_en: 'Reem Al-Qamati',    rating: 5, comment_ar: 'اشتريت البيرز والهاندبيس وجاءت زي ما توقعت تماماً. التوصيل للكلية مجاني وهذا وفّر عليّ كثير.',  comment_en: 'Ordered the burs and handpiece — exactly as expected. Free college delivery saved me a lot.',  subject_ar: 'طالبة - سنة ثانية',  subject_en: '2nd Year Student' },
+  { name_ar: 'أحمد الورفلي',   name_en: 'Ahmed Al-Warfali',  rating: 5, comment_ar: 'السعر أرخص من السوق وما في فرق بالجودة. بجرب أطلب مرة ثانية قريباً.',                            comment_en: 'Cheaper than the market and same quality. Will order again soon.',                           subject_ar: 'طالب - سنة ثالثة',   subject_en: '3rd Year Student' },
+  { name_ar: 'سلمى الزبيدي',   name_en: 'Salma Al-Zubaidi',  rating: 5, comment_ar: 'استخدمت dental cast في المعمل وكان تمام. التواصل على واتساب كان سريع وما في تعقيد.',            comment_en: 'Used the dental cast in the lab and it was perfect. WhatsApp communication was quick.',       subject_ar: 'طالبة - سنة ثانية', subject_en: '2nd Year Student' },
+  { name_ar: 'يوسف الشريف',    name_en: 'Yousef Al-Sharif',  rating: 4, comment_ar: 'أفضل شي في سمايلودنت إنهم يعرفوا ويش يحتاجه طالب طب الأسنان بالضبط. ما احتجت أشرح كثير.',   comment_en: 'Best part is they actually know what a dental student needs. No need to explain much.',         subject_ar: 'طالب - سنة أولى',   subject_en: '1st Year Student' },
 ];
 
 export const Home = () => {
@@ -85,10 +85,10 @@ export const Home = () => {
       <div className="stats-strip">
         <div className="stats-strip-inner">
           {[
-            { icon: <Users size={20} />,  num: '+500',  label: lang === 'ar' ? 'طالب سعيد' : 'Happy Students' },
-            { icon: <Package size={20} />, num: '+100', label: lang === 'ar' ? 'منتج طبي' : 'Medical Products' },
-            { icon: <Truck size={20} />,  num: '24h',   label: lang === 'ar' ? 'توصيل سريع' : 'Fast Delivery' },
-            { icon: <Star size={20} />,   num: '4.9',   label: lang === 'ar' ? 'تقييم الطلاب' : 'Student Rating' },
+            { icon: <Users size={20} />,  num: '+30',   label: lang === 'ar' ? 'طالب طلب منّا' : 'Students Served' },
+            { icon: <Package size={20} />, num: '+25',  label: lang === 'ar' ? 'منتج متوفر' : 'Products Available' },
+            { icon: <Truck size={20} />,  num: '24h',   label: lang === 'ar' ? 'توصيل طرابلس' : 'Tripoli Delivery' },
+            { icon: <Star size={20} />,   num: 'مجاني', label: lang === 'ar' ? 'توصيل الكلية' : 'College Delivery' },
           ].map((s, i) => (
             <div key={i} className="stat-item">
               <div className="stat-icon">{s.icon}</div>
