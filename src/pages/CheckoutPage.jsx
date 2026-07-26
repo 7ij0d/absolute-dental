@@ -198,6 +198,47 @@ export const CheckoutPage = () => {
           .eq('id', user.id);
       }
 
+      // 0. Pre-flight: validate stock is sufficient for every item
+      for (const item of cartItems) {
+        const { data: prodData } = await supabase
+          .from('products')
+          .select('id, name_ar, stock_quantity, shared_inventory_product_id, unit_multiplier')
+          .eq('id', item.id)
+          .single();
+
+        if (!prodData) continue;
+
+        if (prodData.shared_inventory_product_id) {
+          // Linked product — check master stock
+          const { data: master } = await supabase
+            .from('products')
+            .select('stock_quantity, name_ar')
+            .eq('id', prodData.shared_inventory_product_id)
+            .single();
+
+          const mult = prodData.unit_multiplier || 1;
+          const needed = item.quantity * mult;
+          const available = master ? master.stock_quantity : 0;
+
+          if (available < needed) {
+            const availableUnits = Math.floor(available / mult);
+            throw new Error(
+              `❌ "${prodData.name_ar}": الكمية المطلوبة غير متوفرة.\n` +
+              `المتاح: ${availableUnits} وحدة فقط (المخزن: ${available} قطعة، كل وحدة = ${mult} قطع)`
+            );
+          }
+        } else {
+          // Regular product
+          const available = prodData.stock_quantity || 0;
+          if (available < item.quantity) {
+            throw new Error(
+              `❌ "${prodData.name_ar}": الكمية المطلوبة غير متوفرة.\n` +
+              `المتاح: ${available} فقط`
+            );
+          }
+        }
+      }
+
       // 1. Insert order record
       const { data: newOrder, error: orderErr } = await supabase
         .from('orders')
@@ -206,6 +247,7 @@ export const CheckoutPage = () => {
         .single();
 
       if (orderErr) throw orderErr;
+
 
       // 2. Insert items
       const orderItemsData = cartItems.map((item) => ({

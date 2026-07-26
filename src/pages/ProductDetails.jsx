@@ -201,6 +201,7 @@ export const ProductDetails = () => {
   // Sharing states
   const [copied, setCopied] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
+  const [effectiveStock, setEffectiveStock] = useState(null); // null = no limit / not a linked product
 
   // Load product details
   useEffect(() => {
@@ -216,6 +217,20 @@ export const ProductDetails = () => {
         if (prod) {
           setProduct(prod);
           
+          // Effective stock: handle shared inventory
+          if (prod.shared_inventory_product_id) {
+            const { data: master } = await supabase
+              .from('products')
+              .select('stock_quantity')
+              .eq('id', prod.shared_inventory_product_id)
+              .single();
+            const mult = prod.unit_multiplier || 1;
+            const eff = master ? Math.floor(master.stock_quantity / mult) : 0;
+            setEffectiveStock(eff);
+          } else {
+            setEffectiveStock(prod.stock_quantity ?? null);
+          }
+
           // Image gallery setups (main photo + any supplementary product_images)
           const imgList = [prod.image_url];
           const { data: extraImgs } = await supabase
@@ -288,9 +303,17 @@ export const ProductDetails = () => {
   };
 
   const handleAddToCart = () => {
-    if (product) {
-      addToCart(product, quantity);
+    if (!product) return;
+    // Linked product stock check
+    if (effectiveStock !== null && quantity > effectiveStock) {
+      alert(
+        effectiveStock === 0
+          ? `❌ "${product.name_ar}" غير متوفر حالياً.`
+          : `❌ الكمية المطلوبة (${quantity}) تتجاوز المتاح (${effectiveStock} وحدة فقط).`
+      );
+      return;
     }
+    addToCart(product, quantity);
   };
 
   const handleBuyNow = () => {
@@ -547,14 +570,21 @@ export const ProductDetails = () => {
           )}
 
           {/* Quantity selector & Actions */}
-          {product.availability !== 'unavailable' ? (
+          {(product.availability !== 'unavailable' && (effectiveStock === null || effectiveStock > 0)) ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
               
               {/* Qty count control */}
               <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
                 <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ padding: '0.5rem 1rem', fontWeight: 'bold' }}>-</button>
                 <span style={{ width: '40px', textAlign: 'center', fontWeight: 700 }}>{quantity}</span>
-                <button onClick={() => setQuantity(Math.min(product.stock_quantity || 99, quantity + 1))} style={{ padding: '0.5rem 1rem', fontWeight: 'bold' }}>+</button>
+                <button
+                  onClick={() => {
+                    const maxQ = effectiveStock !== null ? effectiveStock : (product.stock_quantity || 99);
+                    setQuantity(Math.min(maxQ, quantity + 1));
+                  }}
+                  style={{ padding: '0.5rem 1rem', fontWeight: 'bold' }}
+                  disabled={effectiveStock !== null && quantity >= effectiveStock}
+                >+</button>
               </div>
 
               {/* Add to Cart */}
