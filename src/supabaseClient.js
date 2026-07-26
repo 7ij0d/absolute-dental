@@ -430,7 +430,7 @@ const defaultBanners = [
     id: 'b2',
     title_ar: 'أدوات ومعدات العيادة السريرية',
     title_en: 'Pre-clinical & Clinical Gear',
-    subtitle_ar: 'جميع حقائب وأدوات خلع وجراحة الأسنان وعلاج الجذور لطلبة سنة ثالثة ورابعة',
+    subtitle_ar: 'جميع أدوات خلع وجراحة الأسنان وعلاج الجذور لطلبة سنة ثالثة ورابعة',
     subtitle_en: 'Exodontia forceps, root canal files, and turbines for clinical practices.',
     image_url: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=1200&auto=format&fit=crop&q=80',
     link_url: '/year/3rd-year',

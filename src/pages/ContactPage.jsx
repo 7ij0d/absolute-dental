@@ -171,7 +171,7 @@ export const ContactPage = () => {
                 <div style={{ color: 'var(--secondary)' }}><Send size={20} /></div>
                 <div>
                   <p style={{ fontWeight: 700, color: 'var(--text-main)' }}>تيليجرام / Telegram</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>مجموعات وقنوات الدفعة وتوفير الحقائب</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>مجموعات وقنوات الدفعة والتواصل مع الطلبة</p>
                 </div>
               </a>
 
