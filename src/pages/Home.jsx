@@ -123,21 +123,36 @@ export const Home = () => {
           <div className="grid-4">
             {years.length > 0
               ? years.map((year, idx) => (
-                  <Link key={year.id} to={`/year/${year.slug}`} className="year-card">
+                  <Link key={year.id} to={`/year/${year.slug}`} className="year-card" style={year.is_coming_soon ? { opacity: 0.72, position: 'relative' } : {}}>
                     <img
                       src={year.image_url || YEAR_IMAGES[idx % YEAR_IMAGES.length]}
                       alt={lang === 'ar' ? year.name_ar : year.name_en}
                       onError={e => { e.target.src = YEAR_IMAGES[idx % YEAR_IMAGES.length]; }}
                     />
+                    {year.is_coming_soon && (
+                      <div style={{
+                        position: 'absolute', top: '0.6rem', right: '0.6rem',
+                        background: 'rgba(139,92,246,0.9)', backdropFilter: 'blur(6px)',
+                        color: '#fff', fontSize: '0.65rem', fontWeight: 800,
+                        padding: '0.2rem 0.55rem', borderRadius: '999px', letterSpacing: '0.03em'
+                      }}>
+                        🕐 {lang === 'ar' ? 'قريباً' : 'Coming Soon'}
+                      </div>
+                    )}
                     <div className="year-card-body">
                       <div className="year-card-title">{lang === 'ar' ? year.name_ar : year.name_en}</div>
                       <div className="year-card-subtitle">
-                        {lang === 'ar' ? 'اضغط للتصفح' : 'Browse products'}
+                        {year.is_coming_soon
+                          ? (lang === 'ar' ? 'سيتوفر قريباً' : 'Coming soon')
+                          : (lang === 'ar' ? 'اضغط للتصفح' : 'Browse products')
+                        }
                       </div>
-                      <div className="year-card-arrow">
-                        {lang === 'ar' ? 'تسوق الآن' : 'Shop Now'}
-                        <ChevronIcon size={13} />
-                      </div>
+                      {!year.is_coming_soon && (
+                        <div className="year-card-arrow">
+                          {lang === 'ar' ? 'تسوق الآن' : 'Shop Now'}
+                          <ChevronIcon size={13} />
+                        </div>
+                      )}
                     </div>
                   </Link>
                 ))

@@ -102,6 +102,27 @@ export const YearPage = () => {
     );
   }
 
+  // Coming Soon year — show banner instead of subjects
+  if (yearData.is_coming_soon) {
+    return (
+      <div style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '3rem 1rem' }}>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🕐</div>
+        <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '0.5rem' }}>
+          {lang === 'ar' ? `${yearData.name_ar} — قريباً` : `${yearData.name_en} — Coming Soon`}
+        </h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '420px', lineHeight: 1.7, marginBottom: '2rem' }}>
+          {lang === 'ar'
+            ? 'نعمل على توفير أدوات وكراسات هذه السنة. تابعنا على واتساب وتليجرام لتعرف أول ما نطلق المنتجات.'
+            : "We're working on sourcing tools and supplies for this year. Follow us on WhatsApp or Telegram to be the first to know when we launch."
+          }
+        </p>
+        <Link to="/" className="btn btn-secondary" style={{ padding: '0.75rem 2rem' }}>
+          {lang === 'ar' ? '← الرئيسية' : '← Back Home'}
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* ── YEAR HERO ── */}
