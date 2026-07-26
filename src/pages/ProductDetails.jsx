@@ -570,7 +570,25 @@ export const ProductDetails = () => {
           )}
 
           {/* Quantity selector & Actions */}
-          {(product.availability !== 'unavailable' && (effectiveStock === null || effectiveStock > 0)) ? (
+          {product.availability === 'coming_soon' ? (
+            /* ── COMING SOON banner ── */
+            <div style={{
+              padding: '1.25rem',
+              textAlign: 'center',
+              background: 'linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08))',
+              border: '1px solid rgba(139,92,246,0.3)',
+              borderRadius: 'var(--radius-md)',
+              marginTop: '1rem'
+            }}>
+              <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>🕐</div>
+              <p style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: '0.25rem' }}>
+                {lang === 'ar' ? 'قريباً — سيتوفر هذا المنتج قريباً' : 'Coming Soon — Available Soon'}
+              </p>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 0 }}>
+                {lang === 'ar' ? 'يمكنك متابعتنا للاطلاع على آخر الوصولات' : 'Follow us for the latest arrivals'}
+              </p>
+            </div>
+          ) : (product.availability !== 'unavailable' && (effectiveStock === null || effectiveStock > 0)) ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
               
               {/* Qty count control */}

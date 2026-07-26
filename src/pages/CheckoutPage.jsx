@@ -208,7 +208,16 @@ export const CheckoutPage = () => {
 
         if (!prodData) continue;
 
+        // Block coming_soon and unavailable products
+        if (prodData.availability === 'coming_soon') {
+          throw new Error(`❌ "${prodData.name_ar}" غير متاح للشراء حالياً — سيتوفر قريباً.`);
+        }
+        if (prodData.availability === 'unavailable') {
+          throw new Error(`❌ "${prodData.name_ar}" غير متوفر حالياً.`);
+        }
+
         if (prodData.shared_inventory_product_id) {
+
           // Linked product — check master stock
           const { data: master } = await supabase
             .from('products')
