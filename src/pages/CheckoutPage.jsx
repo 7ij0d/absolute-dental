@@ -124,12 +124,7 @@ export const CheckoutPage = () => {
   );
 
   // Calculate Shipping fee
-  const getShippingFee = () => {
-    if (shippingOption === 'faculty') return 0;
-    if (shippingOption === 'tripoli_center') return 10;
-    if (shippingOption === 'tripoli_suburbs') return 15;
-    return 0;
-  };
+  const getShippingFee = () => 0; // سعر التوصيل يتم تأكيده عبر الواتساب
 
   const finalTotal = subtotal + getShippingFee();
 
@@ -511,7 +506,7 @@ export const CheckoutPage = () => {
                 <MapPin size={20} style={{ color: 'var(--secondary)' }} />
                 <div>
                   <p style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('checkout.delivery_faculty')}</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>مجانًا تمامًا - تسليم مباشر بالكلية</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>مجانيًا - تسليم مباشر بالكلية</p>
                 </div>
               </label>
 
@@ -542,7 +537,7 @@ export const CheckoutPage = () => {
                 <Truck size={20} style={{ color: 'var(--secondary)' }} />
                 <div>
                   <p style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('checkout.delivery_tripoli_center')}</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lang === 'ar' ? 'توصيل للمنزل أو المعمل داخل طرابلس المركز في غضون 24-48 ساعة' : 'Home or lab delivery inside Tripoli Center within 24-48 hours'}</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lang === 'ar' ? 'سيتم تأكيد سعر التوصيل عبر الواتساب' : 'Delivery fee will be confirmed via WhatsApp'}</p>
                 </div>
               </label>
 
@@ -573,7 +568,7 @@ export const CheckoutPage = () => {
                 <Truck size={20} style={{ color: 'var(--secondary)' }} />
                 <div>
                   <p style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('checkout.delivery_tripoli_suburbs')}</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lang === 'ar' ? 'توصيل للمنزل أو المعمل بضواحي طرابلس في غضون 24-48 ساعة' : 'Home or lab delivery to Tripoli suburbs within 24-48 hours'}</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lang === 'ar' ? 'سيتم تأكيد سعر التوصيل عبر الواتساب' : 'Delivery fee will be confirmed via WhatsApp'}</p>
                 </div>
               </label>
 
@@ -697,14 +692,19 @@ export const CheckoutPage = () => {
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>{t('cart.shipping')}:</span>
-                <span style={{ fontWeight: 600 }}>
-                  {getShippingFee() === 0 ? t('cart.tripoli_free') : `${getShippingFee()} ${t('cart.currency')}`}
+                <span style={{ fontWeight: 600, color: 'var(--secondary)', fontSize: '0.8rem' }}>
+                  {shippingOption === 'faculty'
+                    ? (lang === 'ar' ? 'مجاني' : 'Free')
+                    : (lang === 'ar' ? 'يتم تأكيده عبر الواتساب  ⁦💬' : 'Confirmed via WhatsApp 💬')}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid var(--secondary)', paddingTop: '0.6rem', fontSize: '1.15rem', color: 'var(--primary)', fontWeight: 800 }}>
                 <span>{t('cart.total')}:</span>
-                <span>{finalTotal.toFixed(2)} {t('cart.currency')}</span>
+                <span>{subtotal.toFixed(2)} {t('cart.currency')}</span>
               </div>
+              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                {lang === 'ar' ? '* سعر التوصيل يُضاف بعد التأكيد عبر الواتساب' : '* Delivery fee added after WhatsApp confirmation'}
+              </p>
             </div>
 
           </div>
