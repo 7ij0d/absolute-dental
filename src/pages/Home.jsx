@@ -178,7 +178,7 @@ export const Home = () => {
             </div>
             <Link
               to="/year/1st-year"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--purple-300)', fontWeight: 700, fontSize: '0.9rem' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#CDBFA6', fontWeight: 700, fontSize: '0.9rem' }}
             >
               {lang === 'ar' ? 'عرض الكل' : 'View All'}
               <ChevronIcon size={16} />
@@ -313,4 +313,5 @@ export const Home = () => {
 };
 
 export default Home;
+
 

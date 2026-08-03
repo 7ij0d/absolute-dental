@@ -243,7 +243,7 @@ export const SubjectPage = () => {
         position: 'relative',
         overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(124,58,237,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.05) 1px, transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(205,191,166,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(205,191,166,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
           {/* Breadcrumb */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', marginBottom: '1rem', color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap' }}>
@@ -257,7 +257,7 @@ export const SubjectPage = () => {
                 <ChevronFwd size={13} />
               </>
             )}
-            <span style={{ color: 'var(--purple-300)', fontWeight: 700 }}>
+            <span style={{ color: '#CDBFA6', fontWeight: 700 }}>
               {lang === 'ar' ? subjectData.name_ar : subjectData.name_en}
             </span>
           </div>
@@ -361,3 +361,4 @@ export const SubjectPage = () => {
 };
 
 export default SubjectPage;
+

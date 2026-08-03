@@ -78,11 +78,19 @@ export const Navbar = () => {
 
           {/* Logo */}
           <Link to="/" className="navbar-logo">
-            <img
-              src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo.png"
-              alt="Absolute Dental Equipment"
-              style={{ width: 42, height: 42, objectFit: 'contain', filter: 'brightness(0) invert(1)', flexShrink: 0 }}
-            />
+            <div style={{
+              width: 42, height: 42, borderRadius: '50%',
+              backgroundColor: '#FFFFFF',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, overflow: 'hidden',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+            }}>
+              <img
+                src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo.png"
+                alt="Absolute Dental Equipment"
+                style={{ width: 38, height: 38, objectFit: 'contain' }}
+              />
+            </div>
             <span className="navbar-logo-text">
               {lang === 'ar' ? 'معدات طب الأسنان' : 'Absolute Dental'}
             </span>
@@ -114,7 +122,7 @@ export const Navbar = () => {
                     </span>
                     <Link
                       to="/year/1st-year"
-                      style={{ color: 'var(--purple-300)', fontSize: '0.8rem', fontWeight: 600 }}
+                      style={{ color: '#CDBFA6', fontSize: '0.8rem', fontWeight: 600 }}
                       onClick={() => setMegaOpen(false)}
                     >
                       {lang === 'ar' ? 'عرض الكل' : 'View all'}
@@ -204,7 +212,7 @@ export const Navbar = () => {
                     right: isRtl ? 'auto' : 0,
                     left: isRtl ? 0 : 'auto',
                     width: 220,
-                    background: 'var(--purple-900)',
+                    background: 'var(--brand-brown)',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: 'var(--radius-md)',
                     boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
@@ -243,7 +251,7 @@ export const Navbar = () => {
                       <Link to="/signin" style={dropItemStyle} onClick={() => setProfileOpen(false)}>
                         <User size={15} /> {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
                       </Link>
-                      <Link to="/signin?tab=register" style={{ ...dropItemStyle, color: 'var(--purple-300)' }} onClick={() => setProfileOpen(false)}>
+                      <Link to="/signin?tab=register" style={{ ...dropItemStyle, color: '#CDBFA6' }} onClick={() => setProfileOpen(false)}>
                         <ClipboardList size={15} /> {lang === 'ar' ? 'إنشاء حساب' : 'Create Account'}
                       </Link>
                     </>
@@ -328,7 +336,7 @@ export const Navbar = () => {
                 💬 {lang === 'ar' ? 'تواصل معنا' : 'Contact'}
               </Link>
               {user && isAdmin && (
-                <Link to="/admin" className="mobile-nav-link" style={{ color: 'var(--purple-300)' }}>
+                <Link to="/admin" className="mobile-nav-link" style={{ color: '#CDBFA6' }}>
                   ⚙️ {lang === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
                 </Link>
               )}
@@ -378,3 +386,4 @@ const dropItemStyle = {
 };
 
 export default Navbar;
+

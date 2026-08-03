@@ -134,19 +134,19 @@ export const YearPage = () => {
         overflow: 'hidden',
       }}>
         {/* Decoration */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(124,58,237,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.05) 1px, transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(205,191,166,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(205,191,166,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(124,58,237,0.2), transparent 70%)', borderRadius: '50%' }} />
 
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
           {/* Breadcrumb */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', marginBottom: '1.25rem', color: 'rgba(255,255,255,0.45)' }}>
             <Link to="/" style={{ color: 'inherit', transition: 'color 0.15s' }}
-              onMouseEnter={e => e.target.style.color = 'var(--purple-300)'}
+              onMouseEnter={e => e.target.style.color = '#CDBFA6'}
               onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.45)'}>
               {lang === 'ar' ? 'الرئيسية' : 'Home'}
             </Link>
             <ChevronFwd size={14} />
-            <span style={{ color: 'var(--purple-300)', fontWeight: 700 }}>
+            <span style={{ color: '#CDBFA6', fontWeight: 700 }}>
               {lang === 'ar' ? yearData.name_ar : yearData.name_en}
             </span>
           </div>
@@ -163,7 +163,7 @@ export const YearPage = () => {
       </div>
 
       {/* ── YEAR TABS ── */}
-      <div style={{ background: 'var(--purple-900)', borderBottom: '1px solid rgba(255,255,255,0.06)', overflowX: 'auto' }}>
+      <div style={{ background: 'var(--brand-brown)', borderBottom: '1px solid rgba(255,255,255,0.06)', overflowX: 'auto' }}>
         <div className="container">
           <div style={{ display: 'flex', gap: 0, whiteSpace: 'nowrap' }}>
             {allYears.map(yr => (
@@ -222,7 +222,7 @@ export const YearPage = () => {
                 onMouseEnter={e => {
                   e.currentTarget.style.transform = 'translateY(-6px)';
                   e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-                  e.currentTarget.style.borderColor = 'var(--purple-200)';
+                  e.currentTarget.style.borderColor = '#E6DAC6';
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.transform = '';
@@ -276,3 +276,4 @@ export const YearPage = () => {
 };
 
 export default YearPage;
+

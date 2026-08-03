@@ -17,7 +17,7 @@ const DEFAULT_SLIDES = [
     cta_en: 'Shop Now',
     cta_link: '/year/1st-year',
     image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&auto=format',
-    accent: '#7C3AED',
+    accent: '#CDBFA6',
   },
   {
     id: '2',
@@ -31,7 +31,7 @@ const DEFAULT_SLIDES = [
     cta_en: 'Browse Collection',
     cta_link: '/year/2nd-year',
     image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format',
-    accent: '#2563EB',
+    accent: '#A89A87',
   },
   {
     id: '3',
@@ -74,7 +74,7 @@ export const HeroCarousel = () => {
           cta_en: 'Shop Now',
           cta_link: b.link_url || '/',
           image: b.image_url,
-          accent: DEFAULT_SLIDES[i % 3]?.accent || '#7C3AED',
+          accent: DEFAULT_SLIDES[i % 3]?.accent || '#CDBFA6',
         }));
         setSlides(mapped);
       }
@@ -113,7 +113,7 @@ export const HeroCarousel = () => {
         {/* Grid lines */}
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'linear-gradient(rgba(124,58,237,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.05) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(205,191,166,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(205,191,166,0.08) 1px, transparent 1px)',
           backgroundSize: '60px 60px',
         }} />
       </div>
@@ -205,3 +205,4 @@ export const HeroCarousel = () => {
 };
 
 export default HeroCarousel;
+

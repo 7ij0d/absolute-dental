@@ -104,7 +104,7 @@ html[lang="en"] body { font-family: var(--font-en); }
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-color); }
-::-webkit-scrollbar-thumb { background: var(--purple-300); border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: #CDBFA6; border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--secondary); }
 
 /* Base Elements */
@@ -181,8 +181,8 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 }
 
 @keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(124,58,237,0.3); }
-  50%       { box-shadow: 0 0 40px rgba(124,58,237,0.6); }
+  0%, 100% { box-shadow: 0 0 20px rgba(205,191,166,0.3); }
+  50%       { box-shadow: 0 0 40px rgba(205,191,166,0.6); }
 }
 
 @keyframes spin {
@@ -235,7 +235,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 }
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(124,58,237,0.45);
+  box-shadow: 0 12px 40px rgba(86,79,69,0.35);
 }
 .btn-primary:active { transform: translateY(0); }
 
@@ -288,7 +288,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   transition: var(--transition-smooth);
   flex-shrink: 0;
 }
-.icon-btn:hover { background: rgba(124,58,237,0.1); color: var(--secondary); }
+.icon-btn:hover { background: rgba(205,191,166,0.15); color: var(--secondary); }
 
 /* ==========================================================================
    BADGES
@@ -321,11 +321,11 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 }
 .card:hover {
   box-shadow: var(--shadow-md);
-  border-color: var(--purple-200);
+  border-color: #E6DAC6;
 }
 
 .card-dark {
-  background: var(--purple-900);
+  background: var(--brand-brown);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -340,7 +340,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 }
 
 .glass-dark {
-  background: rgba(15,7,32,0.7);
+  background: rgba(58,53,48,0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255,255,255,0.08);
@@ -369,7 +369,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 .form-input:focus {
   border-color: var(--secondary);
   background-color: var(--surface-color);
-  box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+  box-shadow: 0 0 0 3px rgba(205,191,166,0.15);
 }
 .form-input::placeholder { color: var(--text-muted); }
 
@@ -472,7 +472,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   transition: var(--transition-smooth);
 }
 .navbar.scrolled {
-  background-color: rgba(15,7,32,0.92);
+  background-color: rgba(58,53,48,0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 4px 24px rgba(0,0,0,0.4);
@@ -499,7 +499,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 .navbar-logo-text {
   font-size: 1.2rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #fff 0%, var(--purple-300) 100%);
+  background: linear-gradient(135deg, #fff 0%, #CDBFA6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -557,7 +557,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(124,58,237,0.5);
+  box-shadow: 0 2px 6px rgba(205,191,166,0.5);
 }
 
 /* Navbar Search */
@@ -582,8 +582,8 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 .navbar-search input::placeholder { color: rgba(255,255,255,0.4); }
 .navbar-search input:focus {
   background: rgba(255,255,255,0.14);
-  border-color: var(--purple-400);
-  box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  border-color: var(--brand-gold);
+  box-shadow: 0 0 0 3px rgba(205,191,166,0.25);
 }
 .navbar-search-icon {
   position: absolute;
@@ -612,7 +612,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   position: relative;
   width: 300px;
   height: 100%;
-  background: var(--purple-950);
+  background: #3A3530;
   border-right: 1px solid rgba(255,255,255,0.08);
   display: flex;
   flex-direction: column;
@@ -668,14 +668,14 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 .hero-orb-1 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, #7C3AED, transparent 70%);
+  background: radial-gradient(circle, #CDBFA6, transparent 70%);
   top: -100px;
   right: -100px;
 }
 .hero-orb-2 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, #2563EB, transparent 70%);
+  background: radial-gradient(circle, #A89A87, transparent 70%);
   bottom: -80px;
   left: -80px;
 }
@@ -692,9 +692,9 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(124,58,237,0.2);
-  border: 1px solid rgba(124,58,237,0.4);
-  color: var(--purple-300);
+  background: rgba(205,191,166,0.25);
+  border: 1px solid rgba(205,191,166,0.4);
+  color: #CDBFA6;
   padding: 0.35rem 0.85rem;
   border-radius: var(--radius-full);
   font-size: 0.78rem;
@@ -849,11 +849,11 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(15,7,32,0.92) 0%, rgba(15,7,32,0.3) 60%, transparent 100%);
+  background: linear-gradient(to top, rgba(58,53,48,0.88) 0%, rgba(58,53,48,0.3) 60%, transparent 100%);
   z-index: 1;
   transition: var(--transition-smooth);
 }
-.year-card:hover::before { background: linear-gradient(to top, rgba(124,58,237,0.9) 0%, rgba(124,58,237,0.3) 60%, transparent 100%); }
+.year-card:hover::before { background: linear-gradient(to top, rgba(86,79,69,0.85) 0%, rgba(205,191,166,0.3) 60%, transparent 100%); }
 .year-card img {
   width: 100%;
   height: 100%;
@@ -886,7 +886,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: var(--purple-300);
+  color: #CDBFA6;
   font-size: 0.82rem;
   font-weight: 700;
   margin-top: 0.5rem;
@@ -912,13 +912,13 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 .product-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow-lg);
-  border-color: var(--purple-200);
+  border-color: #E6DAC6;
 }
 .product-card-image {
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
-  background: var(--purple-50);
+  background: #FAF8F4;
 }
 .product-card-image img {
   width: 100%;
@@ -940,7 +940,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   left: 0;
   right: 0;
   padding: 0.75rem;
-  background: linear-gradient(to top, rgba(124,58,237,0.95), transparent);
+  background: linear-gradient(to top, rgba(58,53,48,0.90), transparent);
   transform: translateY(100%);
   transition: var(--transition-smooth);
   display: flex;
@@ -1011,8 +1011,8 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   transition: var(--transition-smooth);
 }
 .why-card:hover {
-  background: rgba(124,58,237,0.15);
-  border-color: rgba(124,58,237,0.4);
+  background: rgba(205,191,166,0.2);
+  border-color: rgba(205,191,166,0.4);
   transform: translateY(-4px);
 }
 .why-icon {
@@ -1042,19 +1042,19 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 }
 .review-card:hover {
   background: rgba(255,255,255,0.09);
-  border-color: rgba(124,58,237,0.4);
+  border-color: rgba(205,191,166,0.4);
   transform: translateY(-3px);
 }
 .review-stars { color: #F59E0B; display: flex; gap: 2px; margin-bottom: 0.75rem; }
 .review-comment { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem; }
-.review-author { color: var(--purple-300); font-weight: 700; font-size: 0.85rem; }
+.review-author { color: #CDBFA6; font-weight: 700; font-size: 0.85rem; }
 .review-subject { color: var(--text-dim); font-size: 0.78rem; }
 
 /* ==========================================================================
    FOOTER
    ========================================================================== */
 .footer {
-  background: var(--purple-950);
+  background: #3A3530;
   border-top: 1px solid rgba(255,255,255,0.06);
   padding: 3.5rem 0 1.5rem;
 }
@@ -1067,7 +1067,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 .footer-brand-name {
   font-size: 1.3rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #fff, var(--purple-300));
+  background: linear-gradient(135deg, #fff, #CDBFA6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1081,7 +1081,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   font-size: 0.875rem;
   transition: var(--transition-fast);
 }
-.footer-link:hover { color: var(--purple-300); }
+.footer-link:hover { color: #CDBFA6; }
 .footer-social {
   display: flex;
   gap: 0.75rem;
@@ -1127,7 +1127,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   left: 50%;
   transform: translateX(-50%);
   width: 700px;
-  background: var(--purple-900);
+  background: var(--brand-brown);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: var(--radius-lg);
   box-shadow: 0 24px 60px rgba(0,0,0,0.5);
@@ -1149,8 +1149,8 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   border: 1px solid transparent;
 }
 .mega-menu-year:hover, .mega-menu-year.active {
-  background: rgba(124,58,237,0.15);
-  border-color: rgba(124,58,237,0.3);
+  background: rgba(205,191,166,0.2);
+  border-color: rgba(205,191,166,0.3);
 }
 .mega-menu-year-name { color: #fff; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem; }
 .mega-menu-subjects { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.35rem; }
@@ -1159,7 +1159,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   align-items: center;
   padding: 0.2rem 0.55rem;
   background: rgba(255,255,255,0.07);
-  color: var(--purple-300);
+  color: #CDBFA6;
   border-radius: var(--radius-full);
   font-size: 0.72rem;
   font-weight: 600;
@@ -1227,7 +1227,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
    ========================================================================== */
 .audio-explanation-player {
   background: var(--surface-color);
-  border: 1.5px solid var(--purple-200);
+  border: 1.5px solid #E6DAC6;
   border-radius: var(--radius-md);
   padding: 0.9rem 1.1rem;
   display: flex;
@@ -1300,5 +1300,6 @@ select option { background-color: var(--surface-color); color: var(--text-main);
    ========================================================================== */
 .section { padding: 4.5rem 0; }
 .section-sm { padding: 3rem 0; }
-.section-dark { background: var(--purple-950); }
-.section-purple { background: var(--purple-900); }
+.section-dark { background: #3A3530; }
+.section-purple { background: var(--brand-brown); }
+

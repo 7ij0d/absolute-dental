@@ -368,7 +368,7 @@ export const ProductDetails = () => {
                 <span>/</span>
               </>
             )}
-            <span style={{ color: 'var(--purple-300)', fontWeight: 700 }}>
+            <span style={{ color: '#CDBFA6', fontWeight: 700 }}>
               {lang === 'ar' ? product.name_ar : product.name_en}
             </span>
           </div>
@@ -706,3 +706,4 @@ export const ProductDetails = () => {
 };
 
 export default ProductDetails;
+

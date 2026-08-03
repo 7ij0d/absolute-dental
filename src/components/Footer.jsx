@@ -53,10 +53,10 @@ export const Footer = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
               <div style={{
                 width: 40, height: 40, borderRadius: 10,
-                background: 'linear-gradient(135deg, #7C3AED, #2563EB)',
+                background: 'linear-gradient(135deg, #CDBFA6, #A89A87)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '1.1rem', fontWeight: 900, color: '#fff',
-                boxShadow: '0 4px 12px rgba(124,58,237,0.4)',
+                boxShadow: '0 4px 12px rgba(205,191,166,0.4)',
               }}>
                 S
               </div>
@@ -83,7 +83,7 @@ export const Footer = () => {
               <a
                 href="mailto:smylodent@gmail.com"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem', transition: 'color 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.color = 'var(--purple-300)'}
+                onMouseEnter={e => e.currentTarget.style.color = '#CDBFA6'}
                 onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
               >
                 <Mail size={14} /> smylodent@gmail.com
@@ -157,11 +157,11 @@ export const Footer = () => {
             <div style={{
               marginTop: '1.5rem',
               padding: '1rem',
-              background: 'rgba(124,58,237,0.12)',
-              border: '1px solid rgba(124,58,237,0.25)',
+              background: 'rgba(205,191,166,0.15)',
+              border: '1px solid rgba(205,191,166,0.3)',
               borderRadius: 'var(--radius-md)',
             }}>
-              <p style={{ color: 'var(--purple-300)', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem' }}>
+              <p style={{ color: '#CDBFA6', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem' }}>
                 🚚 {lang === 'ar' ? 'معلومات التوصيل' : 'Delivery Info'}
               </p>
               <p style={{ color: 'var(--text-dim)', fontSize: '0.78rem', lineHeight: 1.6 }}>
@@ -191,3 +191,4 @@ export const Footer = () => {
 };
 
 export default Footer;
+
