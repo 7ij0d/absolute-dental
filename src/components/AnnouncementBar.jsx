@@ -10,14 +10,12 @@ const AnnouncementBar = () => {
     ? [
         { icon: <Truck size={13} />, text: 'توصيل مجاني لكلية طب الأسنان طرابلس 🦷' },
         { icon: <Tag size={13} />,   text: 'أسعار خاصة لطلاب الطب للعام الدراسي 2025-2026' },
-        { icon: <Gift size={13} />,  text: 'احصل على خصم 10% عند طلبك الأول مع كود: SMILE10' },
         { icon: <Truck size={13} />, text: 'تتبع طلبك في أي وقت برقم هاتفك فقط 📦' },
         { icon: <Tag size={13} />,   text: 'جميع الأدوات الطبية أصلية ومعتمدة عالمياً ✅' },
       ]
     : [
         { icon: <Truck size={13} />, text: 'Free delivery to Tripoli Dental College 🦷' },
         { icon: <Tag size={13} />,   text: 'Special prices for dental students 2025-2026' },
-        { icon: <Gift size={13} />,  text: 'Get 10% off your first order with code: SMILE10' },
         { icon: <Truck size={13} />, text: 'Track your order anytime using your phone number 📦' },
         { icon: <Tag size={13} />,   text: 'All medical tools are certified and authentic ✅' },
       ];
