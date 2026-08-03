@@ -82,29 +82,33 @@ export const Navbar = () => {
             textDecoration: 'none',
             alignItems: 'center',
             display: 'flex',
-            flexShrink: 0
+            flexShrink: 0,
+            direction: 'ltr',       /* always LTR: logo left, text right */
+            order: -1,              /* always first visually */
           }}>
             <img
               src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
               alt="Absolute Dental"
               style={{
-                width: 140,
-                height: 140,
+                width: 130,
+                height: 130,
                 objectFit: 'contain',
                 flexShrink: 0,
+                display: 'block',
               }}
             />
             <span style={{
               display: 'flex',
               alignItems: 'baseline',
-              gap: '0.35em',
+              gap: '0.3em',
               whiteSpace: 'nowrap',
+              direction: 'ltr',
             }}>
               <span style={{
                 fontFamily: "'Playfair Display', serif",
                 fontStyle: 'italic',
                 fontWeight: 600,
-                fontSize: '1.6rem',
+                fontSize: '1.55rem',
                 color: '#FFFFFF',
                 letterSpacing: '0.01em',
               }}>Absolute</span>
@@ -112,7 +116,7 @@ export const Navbar = () => {
                 fontFamily: "'Playfair Display', serif",
                 fontStyle: 'italic',
                 fontWeight: 600,
-                fontSize: '2.4rem',
+                fontSize: '2.3rem',
                 color: '#FFFFFF',
                 letterSpacing: '0.01em',
               }}>Dental</span>

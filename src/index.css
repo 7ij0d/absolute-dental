@@ -483,6 +483,12 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   align-items: center;
   gap: 1rem;
   height: 120px;
+  overflow: visible;
+}
+/* In RTL, push logo to the left (logical start for LTR content) */
+[dir="rtl"] .navbar-logo {
+  margin-right: 0;
+  margin-left: auto;
 }
 .navbar-logo {
   display: flex;
