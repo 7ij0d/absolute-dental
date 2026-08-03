@@ -931,21 +931,22 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   /* ── NAVBAR ───────────────────────────────────── */
   .navbar-inner {
     height: 72px !important;
-    gap: 0.5rem;
-    overflow: visible;  /* MUST be visible — overflow:hidden clips the mega menu */
+    gap: 0.75rem;
+    overflow: visible;  /* MUST be visible — clips mega menu otherwise */
+    padding: 0 1.5rem;
   }
 
-  /* Prevent navbar itself from creating horizontal scroll */
+  /* Prevent horizontal scroll */
   .navbar { overflow: visible; max-width: 100vw; }
 
-  /* Logo: scale down the 200px desktop logo */
+  /* Logo: scale down */
   .navbar-logo img {
     width: 68px !important;
     height: 68px !important;
     transform: translate(-12px, 3px) !important;
   }
 
-  /* Brand text: independent tablet sizes */
+  /* Brand text */
   .navbar-logo span span:first-child {
     font-size: 18px !important;
     letter-spacing: 0.04em !important;
@@ -957,32 +958,18 @@ select option { background-color: var(--surface-color); color: var(--text-main);
     letter-spacing: 0.04em !important;
     transform: translateX(-20px) !important;
   }
+  .navbar-logo { gap: 6px !important; }
 
-  /* Logo link gap */
-  .navbar-logo {
-    gap: 6px !important;
-  }
+  /* ── HIDE desktop nav + search on tablet → use hamburger ── */
+  #desktop-nav    { display: none !important; }
+  #desktop-search { display: none !important; }
+  #mobile-menu-btn { display: flex !important; }
 
-  /* Nav links: compact */
-  .navbar-nav { gap: 0; }
-  .nav-link {
-    font-size: 0.78rem;
-    padding: 0.35rem 0.55rem;
-  }
+  /* Action icons: well-spaced */
+  .navbar-actions { gap: 0.35rem; flex-shrink: 0; }
+  .nav-icon-btn { width: 38px; height: 38px; }
 
-  /* Search: constrained with flex so it shrinks */
-  .navbar-search { max-width: 160px; min-width: 80px; flex-shrink: 1; }
-  .navbar-search input { font-size: 0.78rem; padding: 0.35rem 0.6rem 0.35rem 2rem; }
-
-  /* Action icons: tighter + shrink-safe */
-  .navbar-actions { gap: 0.1rem; flex-shrink: 0; }
-  .nav-icon-btn { width: 32px; height: 32px; }
-
-  /* Nav links: shrink if needed */
-  .navbar-nav { min-width: 0; flex-shrink: 1; }
-  .nav-link { white-space: nowrap; }
-
-  /* Mega menu dropdown: responsive width */
+  /* Mega menu still works on tablet via mobile menu */
   .mega-menu {
     max-width: calc(100vw - 2rem);
     left: 0;
