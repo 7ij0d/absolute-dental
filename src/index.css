@@ -939,9 +939,30 @@ select option { background-color: var(--surface-color); color: var(--text-main);
     padding: 0 1.25rem;
   }
 
-  /* ── MOBILE HAMBURGER — hide on tablet, show desktop nav ── */
-  #desktop-nav { display: flex !important; }
+  /* ── MOBILE HAMBURGER — hide on tablet, show desktop nav + search ── */
+  #desktop-nav    { display: flex !important; }
+  #desktop-search { display: block !important; }
   #mobile-menu-btn { display: none !important; }
+
+  /* Override inline JSX styles for logo img on tablet */
+  .navbar-logo > img {
+    width: 64px !important;
+    height: 64px !important;
+    transform: translate(-10px, 3px) !important;
+  }
+
+  /* Override inline JSX styles for brand text spans */
+  .navbar-logo > span > span:first-child {
+    font-size: 17px !important;
+    letter-spacing: 0.04em !important;
+    transform: translateX(-18px) !important;
+    margin-right: 2px !important;
+  }
+  .navbar-logo > span > span:last-child {
+    font-size: 17px !important;
+    letter-spacing: 0.04em !important;
+    transform: translateX(-16px) !important;
+  }
 }
 
 
