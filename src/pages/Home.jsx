@@ -8,7 +8,7 @@ import SkeletonLoader from '../components/SkeletonLoader';
 import { cacheGet, cacheSet } from '../cache';
 import {
   Truck, ShieldCheck, Award, Headphones,
-  ArrowRight, ArrowLeft, Users, Package, Clock,
+  ArrowRight, ArrowLeft, Star, Users, Package, Clock,
   ChevronRight, BookOpen
 } from 'lucide-react';
 
