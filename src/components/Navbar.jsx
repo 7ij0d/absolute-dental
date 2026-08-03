@@ -76,37 +76,47 @@ export const Navbar = () => {
       <header className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <div className="container navbar-inner">
 
-          {/* Logo */}
-          <Link to="/" className="navbar-logo" style={{ gap: '1rem', textDecoration: 'none', alignItems: 'center' }}>
+          {/* Logo + Brand */}
+          <Link to="/" className="navbar-logo" style={{
+            gap: '1.1rem',
+            textDecoration: 'none',
+            alignItems: 'center',
+            display: 'flex',
+            flexDirection: 'row',
+            flexShrink: 0
+          }}>
             <img
               src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
               alt="Absolute Dental"
               style={{
-                width: 72, height: 72,
+                width: 96,
+                height: 96,
                 objectFit: 'contain',
                 flexShrink: 0,
               }}
             />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45em' }}>
               <span style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '0.62rem',
+                fontFamily: "'Playfair Display', serif",
+                fontStyle: 'italic',
                 fontWeight: 600,
-                color: '#CDBFA6',
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                lineHeight: 1
+                fontSize: '1.45rem',
+                color: '#FFFFFF',
+                letterSpacing: '0.01em',
+                lineHeight: 1,
+                whiteSpace: 'nowrap',
               }}>
-                ABSOLUTE
+                Absolute
               </span>
               <span style={{
                 fontFamily: "'Playfair Display', serif",
-                fontSize: '1.5rem',
-                fontWeight: 700,
                 fontStyle: 'italic',
+                fontWeight: 700,
+                fontSize: '2rem',
                 color: '#FFFFFF',
-                letterSpacing: '0.04em',
-                lineHeight: 1
+                letterSpacing: '0.01em',
+                lineHeight: 1,
+                whiteSpace: 'nowrap',
               }}>
                 Dental
               </span>
