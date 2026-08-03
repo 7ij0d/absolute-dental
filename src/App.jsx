@@ -31,6 +31,8 @@ import Settings from './pages/admin/Settings';
 import Messages from './pages/admin/Messages';
 import Users from './pages/admin/Users';
 import { runPrefetch } from './prefetch';
+import { clearStaleCache } from './cache';
+
 
 // Public Layout Wrapper
 const PublicLayout = () => {
@@ -47,8 +49,12 @@ const PublicLayout = () => {
 };
 
 export const App = () => {
-  // Warm the cache immediately on app startup (non-blocking)
-  useEffect(() => { runPrefetch(); }, []);
+  // Clear old Smylodent-era cache on first load, then prefetch fresh data
+  useEffect(() => {
+    clearStaleCache();
+    runPrefetch();
+  }, []);
+
 
   return (
     <Routes>

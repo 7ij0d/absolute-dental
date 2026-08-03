@@ -1,30 +1,47 @@
 /**
- * Simple two-layer cache:
- * 1. In-memory (Map) – fastest, resets on full page reload
- * 2. sessionStorage  – survives React navigation, resets when tab closes
- *
- * Usage:
- *   import { cacheGet, cacheSet } from '../cache';
- *   const cached = cacheGet('subjects:dental-anatomy');
- *   cacheSet('subjects:dental-anatomy', data, 5 * 60); // 5 min TTL
+ * Two-layer cache: in-memory (Map) + sessionStorage
+ * Prefix: 'ad:' (absolute-dental) — changing this prefix from 'smyl:'
+ * instantly invalidates ALL old cached data from the previous branding.
  */
 
+const CACHE_PREFIX = 'ad:';
 const memCache = new Map();
 
-export function cacheGet(key) {
-  // Check memory first (fastest)
-  if (memCache.has(key)) return memCache.get(key);
-
-  // Fall back to sessionStorage
+/**
+ * Called once on app startup — purges any stale keys from the old 'smyl:' prefix
+ * and any old mock_ localStorage entries from the Smylodent era.
+ */
+export function clearStaleCache() {
   try {
-    const raw = sessionStorage.getItem(`smyl:${key}`);
+    // Remove old sessionStorage keys with 'smyl:' prefix
+    const keysToDelete = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      if (k && k.startsWith('smyl:')) keysToDelete.push(k);
+    }
+    keysToDelete.forEach(k => sessionStorage.removeItem(k));
+
+    // Remove old mock_ localStorage keys (Smylodent era)
+    const lsKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && (k.startsWith('mock_') || k === 'mock_user_session')) lsKeys.push(k);
+    }
+    lsKeys.forEach(k => localStorage.removeItem(k));
+  } catch (_) {}
+}
+
+export function cacheGet(key) {
+  if (memCache.has(key)) return memCache.get(key);
+  try {
+    const raw = sessionStorage.getItem(`${CACHE_PREFIX}${key}`);
     if (!raw) return null;
     const { value, expiresAt } = JSON.parse(raw);
     if (expiresAt && Date.now() > expiresAt) {
-      sessionStorage.removeItem(`smyl:${key}`);
+      sessionStorage.removeItem(`${CACHE_PREFIX}${key}`);
       return null;
     }
-    memCache.set(key, value); // warm the memory cache
+    memCache.set(key, value);
     return value;
   } catch {
     return null;
@@ -35,15 +52,15 @@ export function cacheSet(key, value, ttlSeconds = 1800) {
   memCache.set(key, value);
   try {
     sessionStorage.setItem(
-      `smyl:${key}`,
+      `${CACHE_PREFIX}${key}`,
       JSON.stringify({ value, expiresAt: Date.now() + ttlSeconds * 1000 })
     );
   } catch {
-    // sessionStorage full or unavailable – memory cache still works
+    // sessionStorage full — memory cache still works
   }
 }
 
 export function cacheDelete(key) {
   memCache.delete(key);
-  try { sessionStorage.removeItem(`smyl:${key}`); } catch {}
+  try { sessionStorage.removeItem(`${CACHE_PREFIX}${key}`); } catch {}
 }
