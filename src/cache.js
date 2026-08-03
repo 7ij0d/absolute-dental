@@ -31,7 +31,7 @@ export function cacheGet(key) {
   }
 }
 
-export function cacheSet(key, value, ttlSeconds = 300) {
+export function cacheSet(key, value, ttlSeconds = 1800) {
   memCache.set(key, value);
   try {
     sessionStorage.setItem(

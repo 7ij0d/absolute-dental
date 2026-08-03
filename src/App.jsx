@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -30,6 +30,7 @@ import Banners from './pages/admin/Banners';
 import Settings from './pages/admin/Settings';
 import Messages from './pages/admin/Messages';
 import Users from './pages/admin/Users';
+import { runPrefetch } from './prefetch';
 
 // Public Layout Wrapper
 const PublicLayout = () => {
@@ -46,6 +47,9 @@ const PublicLayout = () => {
 };
 
 export const App = () => {
+  // Warm the cache immediately on app startup (non-blocking)
+  useEffect(() => { runPrefetch(); }, []);
+
   return (
     <Routes>
 
