@@ -800,7 +800,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   .navbar-inner {
     height: 49px !important;
     gap: 0;
-    overflow: hidden;
+    overflow: visible;  /* MUST be visible — overflow:hidden clips the mega menu */
     padding: 0 8px;
   }
 
@@ -931,9 +931,12 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   /* ── NAVBAR ───────────────────────────────────── */
   .navbar-inner {
     height: 72px !important;
-    gap: 0.75rem;
-    overflow: hidden;
+    gap: 0.5rem;
+    overflow: visible;  /* MUST be visible — overflow:hidden clips the mega menu */
   }
+
+  /* Prevent navbar itself from creating horizontal scroll */
+  .navbar { overflow: visible; max-width: 100vw; }
 
   /* Logo: scale down the 200px desktop logo */
   .navbar-logo img {
@@ -967,17 +970,24 @@ select option { background-color: var(--surface-color); color: var(--text-main);
     padding: 0.35rem 0.55rem;
   }
 
-  /* Search: shorter */
-  .navbar-search { max-width: 180px; }
-  .navbar-search input { font-size: 0.8rem; padding: 0.4rem 0.75rem 0.4rem 2.25rem; }
+  /* Search: constrained with flex so it shrinks */
+  .navbar-search { max-width: 160px; min-width: 80px; flex-shrink: 1; }
+  .navbar-search input { font-size: 0.78rem; padding: 0.35rem 0.6rem 0.35rem 2rem; }
 
-  /* Action icons: tighter */
-  .navbar-actions { gap: 0.2rem; }
-  .nav-icon-btn { width: 34px; height: 34px; }
+  /* Action icons: tighter + shrink-safe */
+  .navbar-actions { gap: 0.1rem; flex-shrink: 0; }
+  .nav-icon-btn { width: 32px; height: 32px; }
 
-  /* Mega menu dropdown: don't go off screen */
+  /* Nav links: shrink if needed */
+  .navbar-nav { min-width: 0; flex-shrink: 1; }
+  .nav-link { white-space: nowrap; }
+
+  /* Mega menu dropdown: responsive width */
   .mega-menu {
-    max-width: 95vw;
+    max-width: calc(100vw - 2rem);
+    left: 0;
+    transform: none;
+    width: min(680px, calc(100vw - 2rem));
   }
 
   /* ── HERO SECTION ─────────────────────────────── */
@@ -1425,6 +1435,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   left: 50%;
   transform: translateX(-50%);
   width: 700px;
+  max-width: calc(100vw - 2rem); /* never wider than screen */
   background: var(--brand-brown);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: var(--radius-lg);
