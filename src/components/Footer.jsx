@@ -58,9 +58,9 @@ export const Footer = () => {
                 fontSize: '1.1rem', fontWeight: 900, color: '#fff',
                 boxShadow: '0 4px 12px rgba(205,191,166,0.4)',
               }}>
-                S
+                AD
               </div>
-              <div className="footer-brand-name">سمايلودنت</div>
+              <div className="footer-brand-name">{lang === 'ar' ? 'Absolute Dental' : 'Absolute Dental'}</div>
             </div>
             <p className="footer-desc">
               {lang === 'ar'
@@ -81,12 +81,12 @@ export const Footer = () => {
                 <Phone size={14} /> 218-91-1234567+
               </a>
               <a
-                href="mailto:smylodent@gmail.com"
+                href="mailto:absolutedental.ly@gmail.com"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem', transition: 'color 0.15s' }}
                 onMouseEnter={e => e.currentTarget.style.color = '#CDBFA6'}
                 onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
               >
-                <Mail size={14} /> smylodent@gmail.com
+                <Mail size={14} /> absolutedental.ly@gmail.com
               </a>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem' }}>
                 <MapPin size={14} /> {lang === 'ar' ? 'طرابلس، ليبيا' : 'Tripoli, Libya'}
@@ -102,21 +102,21 @@ export const Footer = () => {
               >
                 <MessageCircle size={16} />
               </a>
-              <a href="https://t.me/smylodent_libya" target="_blank" rel="noreferrer" className="social-btn" title="Telegram"
+              <a href="https://t.me/absolutedental_ly" target="_blank" rel="noreferrer" className="social-btn" title="Telegram"
                 style={{ color: 'var(--text-dim)' }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#0088cc'; e.currentTarget.style.borderColor = '#0088cc'; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
               >
                 <Send size={16} />
               </a>
-              <a href="https://instagram.com/smylodent" target="_blank" rel="noreferrer" className="social-btn" title="Instagram"
+              <a href="https://instagram.com/absolutedental.ly" target="_blank" rel="noreferrer" className="social-btn" title="Instagram"
                 style={{ color: 'var(--text-dim)' }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#E1306C'; e.currentTarget.style.borderColor = '#E1306C'; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
               >
               <ExternalLink size={16} />
               </a>
-              <a href="https://facebook.com/smylodent" target="_blank" rel="noreferrer" className="social-btn" title="Facebook"
+              <a href="https://facebook.com/absolutedental.ly" target="_blank" rel="noreferrer" className="social-btn" title="Facebook"
                 style={{ color: 'var(--text-dim)' }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#1877F2'; e.currentTarget.style.borderColor = '#1877F2'; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
@@ -177,7 +177,7 @@ export const Footer = () => {
         {/* Footer Bottom */}
         <div className="footer-bottom">
           <p className="footer-copy">
-            © {currentYear} سمايلودنت — {lang === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
+            © {currentYear} Absolute Dental — {lang === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
           </p>
           <p className="footer-copy" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             {lang === 'ar' ? 'صُنع بـ' : 'Made with'}

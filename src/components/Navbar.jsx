@@ -314,7 +314,7 @@ export const Navbar = () => {
           <div className="mobile-menu-panel" style={{ marginRight: isRtl ? 'auto' : 0 }}>
             {/* Mobile Header */}
             <div className="mobile-menu-header">
-              <span className="navbar-logo-text">سمايلودنت</span>
+              <span className="navbar-logo-text">Absolute Dental</span>
               <button className="nav-icon-btn" onClick={() => setMobileOpen(false)}>
                 <X size={20} />
               </button>
