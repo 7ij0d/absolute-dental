@@ -798,6 +798,154 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 }
 
 /* ==========================================================================
+   TABLET LAYOUT — 768px to 1024px
+   Completely independent from desktop. Not a scaled-down version.
+   ========================================================================== */
+@media (min-width: 768px) and (max-width: 1024px) {
+
+  /* ── NAVBAR ───────────────────────────────────── */
+  .navbar-inner {
+    height: 72px !important;
+    gap: 0.75rem;
+    overflow: hidden;
+  }
+
+  /* Logo: scale down the 200px desktop logo */
+  .navbar-logo img {
+    width: 68px !important;
+    height: 68px !important;
+    transform: translate(-12px, 3px) !important;
+  }
+
+  /* Brand text: independent tablet sizes */
+  .navbar-logo span span:first-child {
+    font-size: 18px !important;
+    letter-spacing: 0.04em !important;
+    transform: translateX(-22px) !important;
+    margin-right: 2px !important;
+  }
+  .navbar-logo span span:last-child {
+    font-size: 18px !important;
+    letter-spacing: 0.04em !important;
+    transform: translateX(-20px) !important;
+  }
+
+  /* Logo link gap */
+  .navbar-logo {
+    gap: 6px !important;
+  }
+
+  /* Nav links: compact */
+  .navbar-nav { gap: 0; }
+  .nav-link {
+    font-size: 0.78rem;
+    padding: 0.35rem 0.55rem;
+  }
+
+  /* Search: shorter */
+  .navbar-search { max-width: 180px; }
+  .navbar-search input { font-size: 0.8rem; padding: 0.4rem 0.75rem 0.4rem 2.25rem; }
+
+  /* Action icons: tighter */
+  .navbar-actions { gap: 0.2rem; }
+  .nav-icon-btn { width: 34px; height: 34px; }
+
+  /* Mega menu dropdown: don't go off screen */
+  .mega-menu {
+    max-width: 95vw;
+  }
+
+  /* ── HERO SECTION ─────────────────────────────── */
+  .hero-section { min-height: unset; }
+
+  .hero-slide {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    padding: 2.5rem 0 4rem;
+    align-items: center;
+  }
+
+  .hero-title {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+  }
+
+  .hero-desc {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-tag {
+    font-size: 0.72rem;
+    padding: 0.28rem 0.65rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .hero-actions {
+    gap: 0.65rem;
+  }
+
+  .hero-actions .btn {
+    padding: 0.55rem 1.2rem;
+    font-size: 0.82rem;
+  }
+
+  .hero-image-wrapper { display: flex; }
+  .hero-image {
+    max-width: 300px;
+    border-radius: 12px;
+  }
+
+  .hero-orb-1 { width: 280px; height: 280px; }
+  .hero-orb-2 { width: 220px; height: 220px; }
+
+  .hero-nav-btn { width: 36px; height: 36px; }
+  .hero-controls { bottom: 1rem; }
+
+  /* ── STATS STRIP ──────────────────────────────── */
+  .stats-strip-inner {
+    gap: 1.5rem;
+  }
+  .stat-icon { width: 34px; height: 34px; }
+  .stat-number { font-size: 1.1rem; }
+  .stat-label { font-size: 0.72rem; }
+
+  /* ── YEAR CARDS / CATEGORY SECTION ───────────── */
+  .grid-3 { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+
+  .year-card-title { font-size: 0.95rem; }
+  .year-card-subtitle { font-size: 0.72rem; }
+  .year-card-body { padding: 1rem; }
+
+  /* ── PRODUCT CARDS ────────────────────────────── */
+  .product-card-image { height: 160px; }
+
+  /* ── SECTION TYPOGRAPHY ───────────────────────── */
+  .section-title {
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  }
+  .section-subtitle {
+    font-size: 0.85rem;
+  }
+
+  /* ── SECTIONS PADDING ─────────────────────────── */
+  .section { padding: 2.5rem 0; }
+
+  /* ── CONTAINER ────────────────────────────────── */
+  .container {
+    padding: 0 1.25rem;
+  }
+
+  /* ── MOBILE HAMBURGER — hide on tablet, show desktop nav ── */
+  #desktop-nav { display: flex !important; }
+  #mobile-menu-btn { display: none !important; }
+}
+
+
+/* ==========================================================================
    STATS STRIP
    ========================================================================== */
 .stats-strip {
