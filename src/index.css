@@ -798,34 +798,34 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 
   /* ── NAVBAR ─────────────────────────────────────── */
   .navbar-inner {
-    height: 64px !important;
-    gap: 0.4rem;
+    height: 49px !important;
+    gap: 0;
     overflow: hidden;
-    padding: 0 1rem;
+    padding: 0 8px;
   }
 
-  /* Logo image: shrink from 200px to 54px */
+  /* Logo image — mobile custom values */
   .navbar-logo > img {
-    width: 54px !important;
-    height: 54px !important;
-    transform: translate(-6px, 2px) !important;
+    width: 50px !important;
+    height: 130px !important;
+    transform: translate(-7px, 2px) !important;
   }
 
-  /* Brand text: readable on mobile */
+  /* Brand text — mobile custom values */
   .navbar-logo > span > span:first-child {
-    font-size: 14px !important;
+    font-size: 18px !important;
     letter-spacing: 0.03em !important;
-    transform: translateX(-12px) !important;
+    transform: translateX(-13px) !important;
     margin-right: 1px !important;
   }
   .navbar-logo > span > span:last-child {
-    font-size: 14px !important;
+    font-size: 18px !important;
     letter-spacing: 0.03em !important;
-    transform: translateX(-10px) !important;
+    transform: translateX(-11px) !important;
   }
 
   /* Logo link gap */
-  .navbar-logo { gap: 4px !important; }
+  .navbar-logo { gap: 0px !important; }
 
   /* Hide desktop nav + search on mobile */
   #desktop-nav    { display: none !important; }
