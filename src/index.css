@@ -87,6 +87,7 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  overflow-x: hidden;
 }
 
 body {
@@ -471,6 +472,8 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   border-bottom: 1px solid rgba(255,255,255,0.06);
   transition: var(--transition-smooth);
   overflow: visible;
+  /* Prevent logo negative-transform from creating left whitespace */
+  max-width: 100vw;
 }
 .navbar.scrolled {
   background-color: rgba(58,53,48,0.88);
