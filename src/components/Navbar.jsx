@@ -78,49 +78,45 @@ export const Navbar = () => {
 
           {/* Logo + Brand */}
           <Link to="/" className="navbar-logo" style={{
-            gap: '1.1rem',
+            gap: '0.9rem',
             textDecoration: 'none',
             alignItems: 'center',
             display: 'flex',
-            flexDirection: 'row',
             flexShrink: 0
           }}>
             <img
               src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
               alt="Absolute Dental"
               style={{
-                width: 96,
-                height: 96,
+                width: 140,
+                height: 140,
                 objectFit: 'contain',
                 flexShrink: 0,
               }}
             />
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45em' }}>
+            <span style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: '0.35em',
+              whiteSpace: 'nowrap',
+            }}>
               <span style={{
                 fontFamily: "'Playfair Display', serif",
                 fontStyle: 'italic',
                 fontWeight: 600,
-                fontSize: '1.45rem',
+                fontSize: '1.6rem',
                 color: '#FFFFFF',
                 letterSpacing: '0.01em',
-                lineHeight: 1,
-                whiteSpace: 'nowrap',
-              }}>
-                Absolute
-              </span>
+              }}>Absolute</span>
               <span style={{
                 fontFamily: "'Playfair Display', serif",
                 fontStyle: 'italic',
-                fontWeight: 700,
-                fontSize: '2rem',
+                fontWeight: 600,
+                fontSize: '2.4rem',
                 color: '#FFFFFF',
                 letterSpacing: '0.01em',
-                lineHeight: 1,
-                whiteSpace: 'nowrap',
-              }}>
-                Dental
-              </span>
-            </div>
+              }}>Dental</span>
+            </span>
           </Link>
 
           {/* Desktop Nav */}
