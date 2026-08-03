@@ -78,8 +78,6 @@ export const Home = () => {
       <div className="stats-strip">
         <div className="stats-strip-inner">
           {[
-            { icon: <Users size={20} />,  num: '+30',   label: lang === 'ar' ? 'طالب طلب منّا' : 'Students Served' },
-            { icon: <Package size={20} />, num: '+25',  label: lang === 'ar' ? 'منتج متوفر' : 'Products Available' },
             { icon: <Truck size={20} />,  num: '24h',   label: lang === 'ar' ? 'توصيل طرابلس' : 'Tripoli Delivery' },
             { icon: <Star size={20} />,   num: 'مجاني', label: lang === 'ar' ? 'توصيل الكلية' : 'College Delivery' },
           ].map((s, i) => (
