@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<title>Header Builder — Absolute Dental</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Cinzel:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Raleway:wght@400;600;700;800;900&family=Montserrat:wght@400;600;700;800;900&family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #111113;
+  --panel: #1C1C1F;
+  --panel2: #242428;
+  --border: #2E2E33;
+  --accent: #CDBFA6;
+  --accent2: #A89A87;
+  --text: #E8E8EC;
+  --label: #7A7A85;
+  --selected: #4A90E2;
+  --danger: #E25555;
+  --success: #55BE7A;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; overflow: hidden; height: 100vh; display: flex; flex-direction: column; user-select: none; }
+
+/* ── TOOLBAR ─────────────────────────────── */
+#toolbar {
+  height: 44px; background: var(--panel); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0; z-index: 100;
+}
+.tb-brand { font-weight: 700; color: var(--accent); font-size: 13px; letter-spacing: 0.05em; margin-right: 8px; }
+.tb-sep { width: 1px; height: 20px; background: var(--border); }
+.device-btn {
+  padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);
+  background: transparent; color: var(--label); cursor: pointer; font-size: 12px;
+  font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 5px;
+  transition: all 0.15s;
+}
+.device-btn.active { background: var(--accent); color: #2A2218; border-color: var(--accent); font-weight: 600; }
+.device-btn:hover:not(.active) { border-color: var(--accent2); color: var(--text); }
+.spacer { flex: 1; }
+.tb-btn {
+  padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; gap: 5px; transition: all 0.15s;
+}
+.tb-btn.primary { background: var(--accent); color: #2A2218; }
+.tb-btn.secondary { background: var(--panel2); color: var(--text); border: 1px solid var(--border); }
+.tb-btn:hover { opacity: 0.85; }
+
+/* ── MAIN LAYOUT ─────────────────────────── */
+#main { display: flex; flex: 1; overflow: hidden; }
+
+/* ── LEFT PANEL: ELEMENT TREE ────────────── */
+#left-panel {
+  width: 200px; background: var(--panel); border-right: 1px solid var(--border);
+  overflow-y: auto; flex-shrink: 0; display: flex; flex-direction: column;
+}
+.panel-title {
+  padding: 12px 14px 8px; font-size: 10px; font-weight: 700; color: var(--label);
+  text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border);
+}
+.tree-item {
+  padding: 8px 14px 8px 20px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  border-left: 2px solid transparent; transition: all 0.12s; color: var(--label); font-size: 12px;
+}
+.tree-item:hover { background: var(--panel2); color: var(--text); }
+.tree-item.selected { border-left-color: var(--selected); background: rgba(74,144,226,0.1); color: var(--text); font-weight: 600; }
+.tree-item.child { padding-left: 34px; }
+.tree-icon { font-size: 14px; flex-shrink: 0; }
+
+/* ── CENTER: PREVIEW ─────────────────────── */
+#preview-area {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #0D0D0F;
+}
+#preview-scale-wrap {
+  flex: 1; overflow: auto; display: flex; align-items: flex-start; justify-content: center;
+  padding: 0;
+}
+#preview-scale {
+  width: 100%; transform-origin: top left;
+}
+
+/* NAVBAR PREVIEW */
+#preview-navbar {
+  width: 100%; position: relative; overflow: visible;
+  display: flex; align-items: center;
+  background: #564F45;
+  direction: ltr;
+}
+#preview-navbar > * { position: relative; }
+
+/* Selectable elements */
+.sel-wrap {
+  position: relative; cursor: pointer;
+}
+.sel-wrap.selected::after {
+  content: ''; position: absolute; inset: -2px;
+  border: 2px solid var(--selected); border-radius: 3px;
+  pointer-events: none; z-index: 9999;
+}
+.sel-handle {
+  position: absolute; background: var(--selected); width: 6px; height: 6px;
+  border-radius: 50%; pointer-events: all; z-index: 99999;
+  display: none;
+}
+.sel-wrap.selected .sel-handle { display: block; }
+
+/* BRAND LINK */
+#el-brand-group {
+  display: flex; align-items: center; text-decoration: none; flex-shrink: 0;
+}
+#el-logo { object-fit: contain; display: block; flex-shrink: 0; }
+#el-brand-text { display: flex; align-items: baseline; }
+#el-absolute { display: inline; }
+#el-dental { display: inline; }
+
+/* NAV */
+#el-navlinks {
+  display: flex; align-items: center; flex: 1; justify-content: center;
+}
+#el-navlinks a {
+  color: rgba(255,255,255,0.85); text-decoration: none; font-family: 'Cairo', sans-serif;
+  white-space: nowrap; border-radius: 6px; transition: background 0.2s;
+}
+#el-navlinks a:hover { background: rgba(255,255,255,0.1); }
+
+/* SEARCH */
+#el-search {
+  display: flex; align-items: center; background: rgba(255,255,255,0.1);
+  border-radius: 24px; gap: 8px;
+}
+#el-search input {
+  background: none; border: none; outline: none; color: #fff;
+  font-family: 'Cairo', sans-serif;
+}
+#el-search input::placeholder { color: rgba(255,255,255,0.4); }
+
+/* ICONS */
+#el-icons { display: flex; align-items: center; }
+.icon-btn-p {
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.8);
+}
+
+/* ── RIGHT PANEL: PROPERTIES ─────────────── */
+#right-panel {
+  width: 280px; background: var(--panel); border-left: 1px solid var(--border);
+  overflow-y: auto; flex-shrink: 0; display: flex; flex-direction: column;
+}
+.prop-section { border-bottom: 1px solid var(--border); }
+.prop-section-head {
+  padding: 10px 14px; font-size: 10px; font-weight: 700; color: var(--label);
+  text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.prop-section-head:hover { color: var(--text); }
+.prop-section-body { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+.prop-section-body.collapsed { display: none; }
+
+/* Control row */
+.ctrl { display: flex; flex-direction: column; gap: 4px; }
+.ctrl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ctrl-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.ctrl-row4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; }
+.ctrl label { font-size: 10px; color: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.ctrl-input {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 6px;
+  padding: 0 6px; height: 28px; transition: border 0.15s;
+}
+.ctrl-input:focus-within { border-color: var(--selected); }
+.ctrl-input input[type=number] {
+  flex: 1; background: none; border: none; outline: none; color: var(--text);
+  font-size: 12px; font-family: 'Inter', sans-serif; width: 100%; min-width: 0;
+  -moz-appearance: textfield;
+}
+.ctrl-input input[type=number]::-webkit-inner-spin-button,
+.ctrl-input input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+.ctrl-input .unit { font-size: 10px; color: var(--label); flex-shrink: 0; }
+.ctrl-input input[type=range] { flex: 1; accent-color: var(--accent); min-width: 0; }
+.ctrl select {
+  width: 100%; background: var(--panel2); border: 1px solid var(--border);
+  color: var(--text); padding: 5px 8px; border-radius: 6px; font-size: 12px;
+  font-family: 'Inter', sans-serif; outline: none; height: 28px;
+}
+.ctrl input[type=color] {
+  width: 100%; height: 28px; border: 1px solid var(--border); border-radius: 6px;
+  cursor: pointer; background: var(--panel2); padding: 2px;
+}
+.ctrl-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.toggle {
+  width: 34px; height: 18px; border-radius: 9px; background: var(--border);
+  cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0;
+}
+.toggle.on { background: var(--selected); }
+.toggle::after {
+  content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; top: 2px; left: 2px; transition: left 0.2s;
+}
+.toggle.on::after { left: 18px; }
+.prop-tabs {
+  display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.prop-tab {
+  flex: 1; padding: 10px 6px; text-align: center; font-size: 11px; cursor: pointer;
+  color: var(--label); border-bottom: 2px solid transparent; transition: all 0.15s;
+}
+.prop-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.no-sel {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex: 1; color: var(--label); gap: 8px; padding: 32px;
+}
+.no-sel .icon { font-size: 32px; }
+
+/* BOTTOM STATUSBAR */
+#statusbar {
+  height: 26px; background: var(--panel); border-top: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 14px; gap: 16px;
+  font-size: 11px; color: var(--label); flex-shrink: 0;
+}
+#statusbar span { color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- ══════ TOOLBAR ══════ -->
+<div id="toolbar">
+  <div class="tb-brand">⬡ Header Builder</div>
+  <div class="tb-sep"></div>
+  <button class="device-btn active" data-device="desktop" onclick="setDevice(this)">🖥 Desktop</button>
+  <button class="device-btn" data-device="laptop" onclick="setDevice(this)">💻 Laptop</button>
+  <button class="device-btn" data-device="tablet" onclick="setDevice(this)">📱 Tablet</button>
+  <button class="device-btn" data-device="mobile" onclick="setDevice(this)">📲 Mobile</button>
+  <div class="spacer"></div>
+  <button class="tb-btn secondary" onclick="resetState()">↺ Reset</button>
+  <button class="tb-btn secondary" onclick="importJSON()">⬆ Import</button>
+  <button class="tb-btn primary" onclick="exportJSON()">⬇ Export JSON</button>
+  <button class="tb-btn primary" onclick="applySite()" style="background:#55BE7A;color:#0D2015">✓ Apply to Site</button>
+</div>
+
+<!-- ══════ MAIN ══════ -->
+<div id="main">
+
+  <!-- LEFT: ELEMENT TREE -->
+  <div id="left-panel">
+    <div class="panel-title">Elements</div>
+    <div class="tree-item" data-el="header" onclick="selectEl('header')">
+      <span class="tree-icon">▣</span> Header
+    </div>
+    <div class="tree-item child" data-el="brand" onclick="selectEl('brand')">
+      <span class="tree-icon">⊞</span> Brand Group
+    </div>
+    <div class="tree-item child" data-el="logo" onclick="selectEl('logo')" style="padding-left:48px">
+      <span class="tree-icon">🖼</span> Logo
+    </div>
+    <div class="tree-item child" data-el="absolute" onclick="selectEl('absolute')" style="padding-left:48px">
+      <span class="tree-icon">T</span> "Absolute"
+    </div>
+    <div class="tree-item child" data-el="dental" onclick="selectEl('dental')" style="padding-left:48px">
+      <span class="tree-icon">T</span> "Dental"
+    </div>
+    <div class="tree-item child" data-el="nav" onclick="selectEl('nav')">
+      <span class="tree-icon">≡</span> Navigation
+    </div>
+    <div class="tree-item child" data-el="search" onclick="selectEl('search')">
+      <span class="tree-icon">🔍</span> Search
+    </div>
+    <div class="tree-item child" data-el="icons" onclick="selectEl('icons')">
+      <span class="tree-icon">⊙</span> Icons
+    </div>
+  </div>
+
+  <!-- CENTER: PREVIEW -->
+  <div id="preview-area">
+    <div id="preview-scale-wrap">
+      <div id="preview-scale">
+        <!-- LIVE NAVBAR -->
+        <div id="preview-navbar">
+
+          <!-- BRAND GROUP -->
+          <div class="sel-wrap" id="wrap-brand" onclick="selectEl('brand',event)">
+            <div id="el-brand-group">
+              <!-- LOGO -->
+              <div class="sel-wrap" id="wrap-logo" onclick="selectEl('logo',event)">
+                <img id="el-logo"
+                  src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
+                  alt="Logo">
+              </div>
+              <!-- BRAND TEXT -->
+              <div id="el-brand-text">
+                <span class="sel-wrap" id="wrap-absolute" onclick="selectEl('absolute',event)">
+                  <span id="el-absolute">Absolute</span>
+                </span>
+                <span class="sel-wrap" id="wrap-dental" onclick="selectEl('dental',event)">
+                  <span id="el-dental">Dental</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- NAV LINKS -->
+          <div class="sel-wrap" id="wrap-nav" onclick="selectEl('nav',event)" style="flex:1">
+            <nav id="el-navlinks">
+              <a href="#">الرئيسية</a>
+              <a href="#">المنتجات ▾</a>
+              <a href="#">تتبع الطلب</a>
+              <a href="#">تواصل معنا</a>
+            </nav>
+          </div>
+
+          <!-- SEARCH -->
+          <div class="sel-wrap" id="wrap-search" onclick="selectEl('search',event)">
+            <div id="el-search">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" placeholder="ابحث...">
+            </div>
+          </div>
+
+          <!-- ICONS -->
+          <div class="sel-wrap" id="wrap-icons" onclick="selectEl('icons',event)">
+            <div id="el-icons">
+              <button class="icon-btn-p" title="Cart">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              </button>
+              <button class="icon-btn-p" title="Wishlist">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </button>
+              <button class="icon-btn-p" title="Account">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </button>
+              <button class="icon-btn-p" title="Language">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </button>
+            </div>
+          </div>
+
+        </div>
+        <!-- spacer below navbar -->
+        <div style="height:60vh;background:#2a2a2e;display:flex;align-items:center;justify-content:center;color:#444;font-size:14px">
+          ↑ Navbar preview area
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: PROPERTIES -->
+  <div id="right-panel">
+    <div id="props-container">
+      <div class="no-sel">
+        <div class="icon">←</div>
+        <div>Click an element<br>to edit its properties</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATUSBAR -->
+<div id="statusbar">
+  <span id="sb-element">No selection</span>
+  &nbsp;·&nbsp; X: <span id="sb-x">—</span> &nbsp; Y: <span id="sb-y">—</span> &nbsp; W: <span id="sb-w">—</span> &nbsp; H: <span id="sb-h">—</span>
+  <div style="flex:1"></div>
+  <span id="sb-device">Desktop</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+const DEFAULTS = {
+  header: {
+    height:120, minHeight:60, maxHeight:300,
+    paddingTop:0, paddingBottom:0, paddingLeft:32, paddingRight:32,
+    bg:'#564F45', bgOpacity:100, blur:0,
+    borderWidth:0, borderColor:'#ffffff', borderRadius:0,
+    boxShadow:0, sticky:true, zIndex:1000,
+    gap:16
+  },
+  brand: {
+    gap:14, flexDirection:'row', alignItems:'center',
+    x:0, y:0, width:'auto', marginLeft:0, marginRight:0, paddingLeft:0, paddingRight:0,
+    opacity:100
+  },
+  logo: {
+    width:130, height:130, x:0, y:0,
+    marginTop:0, marginBottom:0, marginLeft:0, marginRight:0,
+    borderRadius:0, opacity:100, rotation:0, zIndex:'auto'
+  },
+  absolute: {
+    fontFamily:"'Cormorant Garamond', serif", fontSize:36, fontWeight:600,
+    fontStyle:'normal', letterSpacing:6, lineHeight:100,
+    color:'#ffffff', opacity:100, rotation:0,
+    x:0, y:0, marginRight:4, marginLeft:0
+  },
+  dental: {
+    fontFamily:"'Cormorant Garamond', serif", fontSize:54, fontWeight:600,
+    fontStyle:'normal', letterSpacing:6, lineHeight:100,
+    color:'#ffffff', opacity:100, rotation:0,
+    x:0, y:0, marginRight:0, marginLeft:0
+  },
+  nav: {
+    fontSize:14, fontWeight:600, letterSpacing:0, gap:6,
+    color:'#ffffff', hoverColor:'#CDBFA6', activeColor:'#ffffff',
+    x:0, y:0, paddingX:10, paddingY:6, marginLeft:0
+  },
+  search: {
+    width:160, height:34, borderRadius:24,
+    fontSize:12, bg:'rgba(255,255,255,0.1)', border:'none',
+    x:0, y:0, paddingX:14, paddingY:6
+  },
+  icons: {
+    size:34, iconSize:17, gap:4, color:'#ffffff', hoverColor:'#CDBFA6',
+    x:0, y:0
+  }
+};
+
+let S = JSON.parse(JSON.stringify(DEFAULTS));
+let selectedEl = null;
+
+const FONTS = [
+  ["'Cormorant Garamond', serif", "Cormorant Garamond"],
+  ["'Cinzel', serif", "Cinzel"],
+  ["'Playfair Display', serif", "Playfair Display"],
+  ["'EB Garamond', serif", "EB Garamond"],
+  ["'Lora', serif", "Lora"],
+  ["'Raleway', sans-serif", "Raleway"],
+  ["'Montserrat', sans-serif", "Montserrat"],
+  ["'Cairo', sans-serif", "Cairo"],
+  ["'Inter', sans-serif", "Inter"],
+  ["Georgia, serif", "Georgia"]
+];
+
+// ══════════════════════════════════════════════
+// APPLY STATE → DOM
+// ══════════════════════════════════════════════
+function applyState() {
+  const h = S.header, b = S.brand, lo = S.logo, ab = S.absolute, de = S.dental,
+        nv = S.nav, se = S.search, ic = S.icons;
+
+  // Header
+  const nav = document.getElementById('preview-navbar');
+  nav.style.height = h.height + 'px';
+  nav.style.minHeight = h.minHeight + 'px';
+  nav.style.maxHeight = h.maxHeight + 'px';
+  nav.style.paddingTop = h.paddingTop + 'px';
+  nav.style.paddingBottom = h.paddingBottom + 'px';
+  nav.style.paddingLeft = h.paddingLeft + 'px';
+  nav.style.paddingRight = h.paddingRight + 'px';
+  nav.style.gap = h.gap + 'px';
+  nav.style.background = hexToRgba(h.bg, h.bgOpacity);
+  nav.style.backdropFilter = h.blur ? `blur(${h.blur}px)` : '';
+  nav.style.border = h.borderWidth ? `${h.borderWidth}px solid ${h.borderColor}` : '';
+  nav.style.borderRadius = h.borderRadius + 'px';
+  nav.style.boxShadow = h.boxShadow ? `0 ${h.boxShadow}px ${h.boxShadow*3}px rgba(0,0,0,0.4)` : '';
+  nav.style.zIndex = h.zIndex;
+
+  // Brand Group
+  const bg = document.getElementById('el-brand-group');
+  bg.style.gap = b.gap + 'px';
+  bg.style.flexDirection = b.flexDirection;
+  bg.style.alignItems = b.alignItems;
+  bg.style.transform = `translate(${b.x}px, ${b.y}px)`;
+  bg.style.marginLeft = b.marginLeft + 'px';
+  bg.style.marginRight = b.marginRight + 'px';
+  bg.style.paddingLeft = b.paddingLeft + 'px';
+  bg.style.paddingRight = b.paddingRight + 'px';
+  bg.style.opacity = b.opacity / 100;
+
+  // Logo
+  const img = document.getElementById('el-logo');
+  img.style.width = lo.width + 'px';
+  img.style.height = lo.height + 'px';
+  img.style.transform = `translate(${lo.x}px, ${lo.y}px) rotate(${lo.rotation}deg)`;
+  img.style.marginTop = lo.marginTop + 'px';
+  img.style.marginBottom = lo.marginBottom + 'px';
+  img.style.marginLeft = lo.marginLeft + 'px';
+  img.style.marginRight = lo.marginRight + 'px';
+  img.style.borderRadius = lo.borderRadius + 'px';
+  img.style.opacity = lo.opacity / 100;
+  img.style.zIndex = lo.zIndex;
+
+  // Brand text container
+  const bt = document.getElementById('el-brand-text');
+  bt.style.display = 'flex';
+  bt.style.alignItems = 'baseline';
+
+  // Absolute text
+  const abEl = document.getElementById('el-absolute');
+  abEl.style.fontFamily = ab.fontFamily;
+  abEl.style.fontSize = ab.fontSize + 'px';
+  abEl.style.fontWeight = ab.fontWeight;
+  abEl.style.fontStyle = ab.fontStyle;
+  abEl.style.letterSpacing = (ab.letterSpacing / 100).toFixed(2) + 'em';
+  abEl.style.lineHeight = (ab.lineHeight / 100).toFixed(2);
+  abEl.style.color = ab.color;
+  abEl.style.opacity = ab.opacity / 100;
+  abEl.style.transform = `translate(${ab.x}px, ${ab.y}px) rotate(${ab.rotation}deg)`;
+  abEl.style.marginRight = ab.marginRight + 'px';
+  abEl.style.marginLeft = ab.marginLeft + 'px';
+  abEl.style.display = 'inline-block';
+
+  // Dental text
+  const deEl = document.getElementById('el-dental');
+  deEl.style.fontFamily = de.fontFamily;
+  deEl.style.fontSize = de.fontSize + 'px';
+  deEl.style.fontWeight = de.fontWeight;
+  deEl.style.fontStyle = de.fontStyle;
+  deEl.style.letterSpacing = (de.letterSpacing / 100).toFixed(2) + 'em';
+  deEl.style.lineHeight = (de.lineHeight / 100).toFixed(2);
+  deEl.style.color = de.color;
+  deEl.style.opacity = de.opacity / 100;
+  deEl.style.transform = `translate(${de.x}px, ${de.y}px) rotate(${de.rotation}deg)`;
+  deEl.style.marginRight = de.marginRight + 'px';
+  deEl.style.marginLeft = de.marginLeft + 'px';
+  deEl.style.display = 'inline-block';
+
+  // Nav links
+  const navEl = document.getElementById('el-navlinks');
+  navEl.style.gap = nv.gap + 'px';
+  navEl.style.marginLeft = nv.marginLeft + 'px';
+  navEl.style.transform = `translate(${nv.x}px, ${nv.y}px)`;
+  navEl.querySelectorAll('a').forEach(a => {
+    a.style.fontSize = nv.fontSize + 'px';
+    a.style.fontWeight = nv.fontWeight;
+    a.style.letterSpacing = (nv.letterSpacing / 100).toFixed(2) + 'em';
+    a.style.color = nv.color;
+    a.style.paddingLeft = nv.paddingX + 'px';
+    a.style.paddingRight = nv.paddingX + 'px';
+    a.style.paddingTop = nv.paddingY + 'px';
+    a.style.paddingBottom = nv.paddingY + 'px';
+  });
+
+  // Search
+  const seEl = document.getElementById('el-search');
+  seEl.style.width = se.width + 'px';
+  seEl.style.height = se.height + 'px';
+  seEl.style.borderRadius = se.borderRadius + 'px';
+  seEl.style.paddingLeft = se.paddingX + 'px';
+  seEl.style.paddingRight = se.paddingX + 'px';
+  seEl.style.background = se.bg;
+  seEl.style.transform = `translate(${se.x}px, ${se.y}px)`;
+  const searchInput = seEl.querySelector('input');
+  if (searchInput) { searchInput.style.fontSize = se.fontSize + 'px'; }
+
+  // Icons
+  const icEl = document.getElementById('el-icons');
+  icEl.style.gap = ic.gap + 'px';
+  icEl.style.transform = `translate(${ic.x}px, ${ic.y}px)`;
+  icEl.querySelectorAll('.icon-btn-p').forEach(btn => {
+    btn.style.width = ic.size + 'px';
+    btn.style.height = ic.size + 'px';
+    btn.style.color = ic.color;
+  });
+  icEl.querySelectorAll('svg').forEach(svg => {
+    svg.style.width = ic.iconSize + 'px';
+    svg.style.height = ic.iconSize + 'px';
+  });
+
+  updateStatusbar();
+}
+
+function hexToRgba(hex, opacity) {
+  if (hex.startsWith('rgba')) return hex;
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${opacity/100})`;
+}
+
+// ══════════════════════════════════════════════
+// SELECTION
+// ══════════════════════════════════════════════
+function selectEl(name, event) {
+  if (event) event.stopPropagation();
+  selectedEl = name;
+  // Highlight tree
+  document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('selected'));
+  const treeEl = document.querySelector(`[data-el="${name}"]`);
+  if (treeEl) treeEl.classList.add('selected');
+  // Highlight wrap
+  document.querySelectorAll('.sel-wrap').forEach(el => el.classList.remove('selected'));
+  const wrapId = 'wrap-' + (name === 'brand' ? 'brand' : name === 'logo' ? 'logo' :
+    name === 'absolute' ? 'absolute' : name === 'dental' ? 'dental' :
+    name === 'nav' ? 'nav' : name === 'search' ? 'search' : name === 'icons' ? 'icons' : '');
+  const wrap = document.getElementById(wrapId);
+  if (wrap) wrap.classList.add('selected');
+  // Render props
+  renderProps(name);
+  updateStatusbar();
+}
+
+// ══════════════════════════════════════════════
+// PROPERTY PANEL RENDERING
+// ══════════════════════════════════════════════
+function renderProps(name) {
+  const container = document.getElementById('props-container');
+  const s = S[name];
+
+  let html = `<div style="padding:12px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--accent)">${getLabel(name)}</div>`;
+
+  if (name === 'header') html += propsHeader();
+  else if (name === 'brand') html += propsBrand();
+  else if (name === 'logo') html += propsLogo();
+  else if (name === 'absolute') html += propsText('absolute');
+  else if (name === 'dental') html += propsText('dental');
+  else if (name === 'nav') html += propsNav();
+  else if (name === 'search') html += propsSearch();
+  else if (name === 'icons') html += propsIcons();
+
+  container.innerHTML = html;
+  bindControls();
+}
+
+function getLabel(n) {
+  return {header:'▣ Header', brand:'⊞ Brand Group', logo:'🖼 Logo', absolute:'T "Absolute"', dental:'T "Dental"', nav:'≡ Navigation', search:'🔍 Search', icons:'⊙ Icons'}[n] || n;
+}
+
+function N(key, label, min, max, step=1, unit='px', grp=null) {
+  const path = grp ? grp+'.'+key : selectedEl+'.'+key;
+  const val = getVal(path);
+  return `<div class="ctrl">
+    <label>${label}</label>
+    <div class="ctrl-input">
+      <input type="number" data-key="${path}" min="${min}" max="${max}" step="${step}" value="${val}" onchange="setVal(this)" onwheel="wheelVal(event,this)">
+      <span class="unit">${unit}</span>
+    </div>
+  </div>`;
+}
+
+function COL(key, label, grp=null) {
+  const path = grp ? grp+'.'+key : selectedEl+'.'+key;
+  const val = getVal(path);
+  return `<div class="ctrl">
+    <label>${label}</label>
+    <input type="color" data-key="${path}" value="${val}" onchange="setVal(this)" oninput="setVal(this)">
+  </div>`;
+}
+
+function SEL(key, label, opts, grp=null) {
+  const path = grp ? grp+'.'+key : selectedEl+'.'+key;
+  const val = getVal(path);
+  const options = opts.map(([v,l]) => `<option value="${v}" ${v===val?'selected':''}>${l}</option>`).join('');
+  return `<div class="ctrl"><label>${label}</label><select data-key="${path}" onchange="setVal(this)">${options}</select></div>`;
+}
+
+function TOG(key, label, grp=null) {
+  const path = grp ? grp+'.'+key : selectedEl+'.'+key;
+  const val = getVal(path);
+  return `<div class="ctrl ctrl-toggle">
+    <label>${label}</label>
+    <div class="toggle ${val?'on':''}" data-key="${path}" data-type="bool" onclick="toggleBool(this)"></div>
+  </div>`;
+}
+
+function SEC(title, content, id='') {
+  return `<div class="prop-section">
+    <div class="prop-section-head" onclick="toggleSec(this)">
+      ${title} <span>▸</span>
+    </div>
+    <div class="prop-section-body">${content}</div>
+  </div>`;
+}
+
+function R(cols, ...items) {
+  const cls = cols===2?'ctrl-row':cols===3?'ctrl-row3':'ctrl-row4';
+  return `<div class="${cls}">${items.join('')}</div>`;
+}
+
+// HEADER PROPS
+function propsHeader() {
+  return SEC('Size & Height',
+    R(2, N('height','Height',40,300), N('minHeight','Min H',0,300)) +
+    R(2, N('maxHeight','Max H',40,500), N('gap','Items Gap',0,100))
+  ) + SEC('Padding',
+    R(2, N('paddingTop','Top',0,100), N('paddingBottom','Bottom',0,100)) +
+    R(2, N('paddingLeft','Left',0,200), N('paddingRight','Right',0,200))
+  ) + SEC('Background',
+    R(2, COL('bg','Color'), N('bgOpacity','Opacity',0,100,'1','%')) +
+    N('blur','Backdrop Blur',0,40,'1','px')
+  ) + SEC('Border & Shadow',
+    R(2, N('borderWidth','Border W',0,20), COL('borderColor','Color')) +
+    R(2, N('borderRadius','Radius',0,60), N('boxShadow','Shadow',0,50))
+  ) + SEC('Behavior',
+    TOG('sticky','Sticky') + N('zIndex','Z-index',0,9999,'1','')
+  );
+}
+
+// BRAND PROPS
+function propsBrand() {
+  return SEC('Position & Spacing',
+    R(2, N('x','X Offset',-500,500), N('y','Y Offset',-200,200)) +
+    R(2, N('marginLeft','Margin L',-100,300), N('marginRight','Margin R',-100,300)) +
+    R(2, N('paddingLeft','Padding L',0,100), N('paddingRight','Padding R',0,100))
+  ) + SEC('Layout',
+    R(2, N('gap','Logo↔Text Gap',-50,200), N('opacity','Opacity',0,100,'1','%')) +
+    SEL('flexDirection','Direction',[['row','Row (→)'],['row-reverse','Row Reverse (←)'],['column','Column (↓)'],['column-reverse','Column Reverse (↑)']]) +
+    SEL('alignItems','Align Items',[['center','Center'],['flex-start','Top'],['flex-end','Bottom'],['baseline','Baseline']])
+  );
+}
+
+// LOGO PROPS
+function propsLogo() {
+  return SEC('Size',
+    R(2, N('width','Width',10,400), N('height','Height',10,400))
+  ) + SEC('Position',
+    R(2, N('x','X Offset',-500,500), N('y','Y Offset',-200,200))
+  ) + SEC('Margin',
+    R(2, N('marginTop','Top',-100,100), N('marginBottom','Bottom',-100,100)) +
+    R(2, N('marginLeft','Left',-100,100), N('marginRight','Right',-100,100))
+  ) + SEC('Visual',
+    R(2, N('borderRadius','Radius',0,200), N('opacity','Opacity',0,100,'1','%')) +
+    N('rotation','Rotation',-360,360,'1','°')
+  );
+}
+
+// TEXT PROPS (Absolute / Dental)
+function propsText(which) {
+  return SEC('Typography',
+    SEL('fontFamily','Font Family', FONTS) +
+    R(2, N('fontSize','Font Size',6,200), N('fontWeight','Weight',100,900,'100','')) +
+    SEL('fontStyle','Style',[['normal','Normal'],['italic','Italic'],['oblique','Oblique']]) +
+    R(2, N('letterSpacing','Letter Space',-20,100,'1','em/100'), N('lineHeight','Line Height',0,300,'1','%'))
+  ) + SEC('Color & Effects',
+    R(2, COL('color','Color'), N('opacity','Opacity',0,100,'1','%'))
+  ) + SEC('Position & Transform',
+    R(2, N('x','X Offset',-500,500), N('y','Y Offset',-200,200)) +
+    N('rotation','Rotation',-360,360,'1','°')
+  ) + SEC('Spacing',
+    R(2, N('marginLeft','Margin L',-100,200), N('marginRight','Margin R',-100,200))
+  );
+}
+
+// NAV PROPS
+function propsNav() {
+  return SEC('Typography',
+    R(2, N('fontSize','Font Size',8,40), N('fontWeight','Weight',100,900,'100','')) +
+    N('letterSpacing','Letter Spacing',-10,50,'1','em/100')
+  ) + SEC('Layout',
+    R(2, N('gap','Items Gap',0,60), N('paddingX','Padding X',0,40)) +
+    R(2, N('paddingY','Padding Y',0,30), N('marginLeft','Margin L',-100,200))
+  ) + SEC('Colors',
+    R(2, COL('color','Color'), COL('hoverColor','Hover')) +
+    COL('activeColor','Active')
+  ) + SEC('Position',
+    R(2, N('x','X Offset',-500,500), N('y','Y Offset',-200,200))
+  );
+}
+
+// SEARCH PROPS
+function propsSearch() {
+  return SEC('Size',
+    R(2, N('width','Width',60,400), N('height','Height',20,80))
+  ) + SEC('Style',
+    R(2, N('borderRadius','Radius',0,50), N('fontSize','Font Size',8,24)) +
+    R(2, N('paddingX','Padding X',0,40), N('paddingY','Padding Y',0,30))
+  ) + SEC('Position',
+    R(2, N('x','X Offset',-500,500), N('y','Y Offset',-200,200))
+  );
+}
+
+// ICONS PROPS
+function propsIcons() {
+  return SEC('Size',
+    R(2, N('size','Button Size',16,80), N('iconSize','Icon Size',10,50))
+  ) + SEC('Layout',
+    R(2, N('gap','Gap',0,40), N('x','X Offset',-500,500)) +
+    N('y','Y Offset',-200,200)
+  ) + SEC('Color',
+    R(2, COL('color','Color'), COL('hoverColor','Hover'))
+  );
+}
+
+// ══════════════════════════════════════════════
+// CONTROL BINDING
+// ══════════════════════════════════════════════
+function getVal(path) {
+  const [obj, key] = path.split('.');
+  return S[obj]?.[key] ?? '';
+}
+
+function setVal(el) {
+  const [obj, key] = el.dataset.key.split('.');
+  if (!S[obj]) return;
+  S[obj][key] = el.type === 'checkbox' ? el.checked :
+    (el.type === 'number' ? (parseFloat(el.value)||0) : el.value);
+  applyState();
+}
+
+function toggleBool(el) {
+  const [obj, key] = el.dataset.key.split('.');
+  if (!S[obj]) return;
+  S[obj][key] = !S[obj][key];
+  el.classList.toggle('on');
+  applyState();
+}
+
+function wheelVal(e, el) {
+  e.preventDefault();
+  const step = parseFloat(el.step) || 1;
+  el.value = ((parseFloat(el.value)||0) + (e.deltaY < 0 ? step : -step));
+  setVal(el);
+}
+
+function bindControls() {
+  // Arrow key support on number inputs
+  document.querySelectorAll('#props-container input[type=number]').forEach(inp => {
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'ArrowUp') { inp.value = (parseFloat(inp.value)||0) + (parseFloat(inp.step)||1); setVal(inp); e.preventDefault(); }
+      if (e.key === 'ArrowDown') { inp.value = (parseFloat(inp.value)||0) - (parseFloat(inp.step)||1); setVal(inp); e.preventDefault(); }
+    });
+    inp.addEventListener('wheel', e => wheelVal(e, inp), {passive:false});
+  });
+}
+
+function toggleSec(head) {
+  const body = head.nextElementSibling;
+  body.classList.toggle('collapsed');
+  head.querySelector('span').textContent = body.classList.contains('collapsed') ? '▸' : '▾';
+}
+
+// ══════════════════════════════════════════════
+// DEVICE
+// ══════════════════════════════════════════════
+function setDevice(btn) {
+  document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const device = btn.dataset.device;
+  document.getElementById('sb-device').textContent = btn.textContent.replace(/[^\w\s]/gi,'').trim();
+  const scale = {desktop:1, laptop:0.85, tablet:0.65, mobile:0.45}[device];
+  const pw = document.getElementById('preview-scale');
+  pw.style.transform = `scale(${scale})`;
+  pw.style.transformOrigin = 'top left';
+  pw.style.width = `${100/scale}%`;
+}
+
+// ══════════════════════════════════════════════
+// EXPORT / IMPORT
+// ══════════════════════════════════════════════
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(S, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'absolute-dental-header.json';
+  a.click();
+}
+
+function importJSON() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        S = JSON.parse(ev.target.result);
+        applyState();
+        if (selectedEl) renderProps(selectedEl);
+        alert('✅ Imported successfully!');
+      } catch { alert('❌ Invalid JSON file'); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+function resetState() {
+  if (!confirm('Reset all settings to defaults?')) return;
+  S = JSON.parse(JSON.stringify(DEFAULTS));
+  applyState();
+  if (selectedEl) renderProps(selectedEl);
+}
+
+// ══════════════════════════════════════════════
+// APPLY TO SITE (copy code)
+// ══════════════════════════════════════════════
+function applySite() {
+  const ab = S.absolute, de = S.dental, lo = S.logo, b = S.brand, h = S.header;
+  const code = `/* ====== HEADER BUILDER OUTPUT ====== */
+/* Paste these values to me (Antigravity) to apply them to the site */
+
+HEADER:
+  height: ${h.height}px
+  paddingLeft: ${h.paddingLeft}px
+  paddingRight: ${h.paddingRight}px
+  background: ${h.bg}
+  gap: ${h.gap}px
+
+BRAND GROUP:
+  gap (logo↔text): ${b.gap}px
+  alignItems: ${b.alignItems}
+  marginLeft: ${b.marginLeft}px
+  x: ${b.x}px
+  y: ${b.y}px
+
+LOGO:
+  width: ${lo.width}px
+  height: ${lo.height}px
+  x: ${lo.x}px
+  y: ${lo.y}px
+  borderRadius: ${lo.borderRadius}px
+  opacity: ${lo.opacity}%
+
+"ABSOLUTE" TEXT:
+  fontFamily: ${ab.fontFamily}
+  fontSize: ${ab.fontSize}px
+  fontWeight: ${ab.fontWeight}
+  fontStyle: ${ab.fontStyle}
+  letterSpacing: ${(ab.letterSpacing/100).toFixed(2)}em
+  color: ${ab.color}
+  x: ${ab.x}px
+  y: ${ab.y}px
+  marginRight: ${ab.marginRight}px
+
+"DENTAL" TEXT:
+  fontFamily: ${de.fontFamily}
+  fontSize: ${de.fontSize}px
+  fontWeight: ${de.fontWeight}
+  fontStyle: ${de.fontStyle}
+  letterSpacing: ${(de.letterSpacing/100).toFixed(2)}em
+  color: ${de.color}
+  x: ${de.x}px
+  y: ${de.y}px`;
+
+  navigator.clipboard.writeText(code).then(() => {
+    alert('✅ Copied! Paste it in the chat with Antigravity to apply to the live site.');
+  }).catch(() => { prompt('Copy this:', code); });
+}
+
+// ══════════════════════════════════════════════
+// STATUS BAR
+// ══════════════════════════════════════════════
+function updateStatusbar() {
+  document.getElementById('sb-element').textContent = selectedEl ? getLabel(selectedEl) : 'No selection';
+  if (selectedEl) {
+    const el = document.getElementById('el-' + (selectedEl==='brand'?'brand-group':selectedEl==='absolute'?'absolute':selectedEl==='dental'?'dental':selectedEl==='nav'?'navlinks':selectedEl));
+    if (el) {
+      const r = el.getBoundingClientRect();
+      document.getElementById('sb-x').textContent = Math.round(r.left);
+      document.getElementById('sb-y').textContent = Math.round(r.top);
+      document.getElementById('sb-w').textContent = Math.round(r.width);
+      document.getElementById('sb-h').textContent = Math.round(r.height);
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+applyState();
+</script>
+</body>
+</html>

@@ -81,24 +81,47 @@ export const Navbar = () => {
             textDecoration: 'none',
             alignItems: 'center',
             display: 'flex',
-            gap: '1rem',
+            gap: '14px',
             flexShrink: 0,
           }}>
+            {/* LOGO — 200×200 offset x:-40 y:10 */}
             <img
               src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
               alt="Absolute Dental"
-              style={{ width: 130, height: 130, objectFit: 'contain', flexShrink: 0 }}
+              style={{
+                width: 200, height: 200,
+                objectFit: 'contain',
+                flexShrink: 0,
+                transform: 'translate(-40px, 10px)',
+              }}
             />
-            <span style={{
-              fontFamily: "'Cormorant Garamond', Georgia, serif",
-              fontWeight: 700,
-              fontSize: '2.6rem',
-              color: '#FFFFFF',
-              letterSpacing: '0.06em',
-              whiteSpace: 'nowrap',
-              lineHeight: 1,
-            }}>
-              Absolute Dental
+            {/* BRAND TEXT */}
+            <span style={{ display: 'flex', alignItems: 'baseline' }}>
+              {/* ABSOLUTE — Cairo 900 40px white x:-100 */}
+              <span style={{
+                fontFamily: "'Cairo', sans-serif",
+                fontSize: '40px',
+                fontWeight: 900,
+                fontStyle: 'normal',
+                letterSpacing: '0.06em',
+                color: '#ffffff',
+                transform: 'translateX(-100px)',
+                display: 'inline-block',
+                marginRight: '4px',
+                whiteSpace: 'nowrap',
+              }}>Absolute</span>
+              {/* DENTAL — Cairo 900 40px white x:-95 */}
+              <span style={{
+                fontFamily: "'Cairo', sans-serif",
+                fontSize: '40px',
+                fontWeight: 900,
+                fontStyle: 'normal',
+                letterSpacing: '0.06em',
+                color: '#ffffff',
+                transform: 'translateX(-95px)',
+                display: 'inline-block',
+                whiteSpace: 'nowrap',
+              }}>Dental</span>
             </span>
           </Link>
 
