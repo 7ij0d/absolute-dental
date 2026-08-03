@@ -794,10 +794,132 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 .hero-nav-prev { left: 1.5rem; }
 .hero-nav-next { right: 1.5rem; }
 
-@media (max-width: 768px) {
-  .hero-slide { grid-template-columns: 1fr; padding: 3rem 0 5rem; }
+@media (max-width: 767px) {
+
+  /* ── NAVBAR ─────────────────────────────────────── */
+  .navbar-inner {
+    height: 64px !important;
+    gap: 0.4rem;
+    overflow: hidden;
+    padding: 0 1rem;
+  }
+
+  /* Logo image: shrink from 200px to 54px */
+  .navbar-logo > img {
+    width: 54px !important;
+    height: 54px !important;
+    transform: translate(-6px, 2px) !important;
+  }
+
+  /* Brand text: readable on mobile */
+  .navbar-logo > span > span:first-child {
+    font-size: 14px !important;
+    letter-spacing: 0.03em !important;
+    transform: translateX(-12px) !important;
+    margin-right: 1px !important;
+  }
+  .navbar-logo > span > span:last-child {
+    font-size: 14px !important;
+    letter-spacing: 0.03em !important;
+    transform: translateX(-10px) !important;
+  }
+
+  /* Logo link gap */
+  .navbar-logo { gap: 4px !important; }
+
+  /* Hide desktop nav + search on mobile */
+  #desktop-nav    { display: none !important; }
+  #desktop-search { display: none !important; }
+
+  /* Show hamburger */
+  #mobile-menu-btn { display: flex !important; }
+
+  /* Action icons: tighter */
+  .navbar-actions { gap: 0.1rem; }
+  .nav-icon-btn { width: 32px; height: 32px; }
+  .nav-cart-badge { width: 14px; height: 14px; font-size: 0.5rem; top: 2px; right: 2px; }
+
+  /* ── HERO SECTION ────────────────────────────────── */
+  .hero-section { min-height: unset; }
+
+  .hero-slide {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 2rem 0 4.5rem;
+  }
+
   .hero-image-wrapper { display: none; }
-  .hero-title { font-size: 1.8rem; }
+
+  .hero-title {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+    line-height: 1.3;
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-desc {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-tag {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.6rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .hero-actions { gap: 0.6rem; flex-wrap: wrap; }
+  .hero-actions .btn { padding: 0.6rem 1.1rem; font-size: 0.82rem; }
+
+  .hero-orb-1 { width: 200px; height: 200px; }
+  .hero-orb-2 { width: 150px; height: 150px; }
+
+  .hero-nav-btn { width: 32px; height: 32px; }
+  .hero-nav-prev { left: 0.5rem; }
+  .hero-nav-next { right: 0.5rem; }
+  .hero-controls { bottom: 1rem; }
+
+  /* ── STATS STRIP ─────────────────────────────────── */
+  .stats-strip-inner {
+    gap: 2rem;
+    justify-content: center;
+  }
+  .stat-icon { width: 32px; height: 32px; }
+  .stat-number { font-size: 1rem; }
+  .stat-label { font-size: 0.7rem; }
+
+  /* ── GRIDS ───────────────────────────────────────── */
+  .grid-2 { grid-template-columns: 1fr; gap: 0.75rem; }
+  .grid-3 { grid-template-columns: 1fr; gap: 0.75rem; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+
+  /* ── YEAR CARDS ──────────────────────────────────── */
+  .year-card-title { font-size: 0.9rem; }
+  .year-card-subtitle { font-size: 0.7rem; }
+  .year-card-body { padding: 0.85rem; }
+
+  /* ── PRODUCT CARDS ───────────────────────────────── */
+  .product-card-image { height: 140px; }
+
+  /* ── SECTION TITLES ──────────────────────────────── */
+  .section-title { font-size: clamp(1.1rem, 5vw, 1.5rem); }
+  .section-subtitle { font-size: 0.82rem; }
+
+  /* ── SECTIONS PADDING ────────────────────────────── */
+  .section { padding: 2rem 0; }
+
+  /* ── CONTAINER ───────────────────────────────────── */
+  .container { padding: 0 1rem; }
+
+  /* ── WHY CARDS ───────────────────────────────────── */
+  .why-card { padding: 1.25rem; }
+  .why-icon { width: 44px; height: 44px; }
+  .why-title { font-size: 0.95rem; }
+  .why-desc { font-size: 0.8rem; }
+
+  /* ── FOOTER ──────────────────────────────────────── */
+  .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
 }
 
 /* ==========================================================================
