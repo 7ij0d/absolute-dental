@@ -51,15 +51,11 @@ export const Footer = () => {
           {/* Brand Column */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 10,
-                background: 'linear-gradient(135deg, #CDBFA6, #A89A87)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1.1rem', fontWeight: 900, color: '#fff',
-                boxShadow: '0 4px 12px rgba(205,191,166,0.4)',
-              }}>
-                AD
-              </div>
+              <img
+                src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
+                alt="Absolute Dental Logo"
+                style={{ width: 48, height: 48, objectFit: 'contain', flexShrink: 0 }}
+              />
               <div className="footer-brand-name">{lang === 'ar' ? 'Absolute Dental' : 'Absolute Dental'}</div>
             </div>
             <p className="footer-desc">
