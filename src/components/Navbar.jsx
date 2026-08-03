@@ -74,17 +74,15 @@ export const Navbar = () => {
     <>
       {/* ── NAVBAR ── */}
       <header className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-        <div className="container navbar-inner">
+        <div className="container navbar-inner" style={{ direction: 'ltr' }}>
 
           {/* Logo + Brand */}
           <Link to="/" className="navbar-logo" style={{
-            gap: '0.9rem',
+            gap: '1rem',
             textDecoration: 'none',
             alignItems: 'center',
             display: 'flex',
             flexShrink: 0,
-            direction: 'ltr',       /* always LTR: logo left, text right */
-            order: -1,              /* always first visually */
           }}>
             <img
               src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
@@ -102,7 +100,6 @@ export const Navbar = () => {
               alignItems: 'baseline',
               gap: '0.3em',
               whiteSpace: 'nowrap',
-              direction: 'ltr',
             }}>
               <span style={{
                 fontFamily: "'Playfair Display', serif",
