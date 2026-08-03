@@ -77,23 +77,69 @@ export const Navbar = () => {
         <div className="container navbar-inner">
 
           {/* Logo */}
-          <Link to="/" className="navbar-logo">
+          <Link to="/" className="navbar-logo" style={{ gap: '0.75rem', textDecoration: 'none' }}>
+            {/* Logo Icon with golden ring */}
             <div style={{
-              width: 42, height: 42, borderRadius: '50%',
-              backgroundColor: '#FFFFFF',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0, overflow: 'hidden',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+              width: 48, height: 48, borderRadius: '50%',
+              border: '2px solid #CDBFA6',
+              padding: '3px',
+              flexShrink: 0,
+              boxShadow: '0 0 0 1px rgba(205,191,166,0.3), 0 4px 16px rgba(0,0,0,0.25)',
+              background: '#FFFFFF',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
               <img
-                src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo.png"
+                src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
                 alt="Absolute Dental Equipment"
-                style={{ width: 38, height: 38, objectFit: 'contain' }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }}
               />
             </div>
-            <span className="navbar-logo-text">
-              {lang === 'ar' ? 'معدات طب الأسنان' : 'Absolute Dental'}
-            </span>
+
+            {/* Brand Name */}
+            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+              {lang === 'ar' ? (
+                <>
+                  <span style={{
+                    fontFamily: "'Cairo', sans-serif",
+                    fontSize: '1rem', fontWeight: 700,
+                    color: '#FFFFFF',
+                    letterSpacing: '0.01em'
+                  }}>
+                    معدات طب الأسنان
+                  </span>
+                  <span style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: '0.62rem', fontWeight: 400, fontStyle: 'italic',
+                    color: '#CDBFA6',
+                    letterSpacing: '0.08em'
+                  }}>
+                    Absolute Dental Equipment
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: '0.82rem', fontWeight: 700,
+                    color: '#FFFFFF',
+                    letterSpacing: '0.02em',
+                    lineHeight: 1.2
+                  }}>
+                    Absolute{' '}
+                    <span style={{ color: '#CDBFA6', fontStyle: 'italic' }}>Dental</span>
+                    {' '}Equipment
+                  </span>
+                  <span style={{
+                    fontFamily: "'Cairo', sans-serif",
+                    fontSize: '0.62rem', fontWeight: 400,
+                    color: 'rgba(205,191,166,0.85)',
+                    letterSpacing: '0.04em'
+                  }}>
+                    معدات طب الأسنان
+                  </span>
+                </>
+              )}
+            </div>
           </Link>
 
           {/* Desktop Nav */}
