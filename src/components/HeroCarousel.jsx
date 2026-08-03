@@ -110,11 +110,18 @@ export const HeroCarousel = () => {
       <div className="hero-bg-decoration">
         <div className="hero-orb hero-orb-1" style={{ background: `radial-gradient(circle, ${slide.accent}, transparent 70%)` }} />
         <div className="hero-orb hero-orb-2" />
-        {/* Grid lines */}
+        {/* Premium layered background — radial center glow + edge vignette */}
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'linear-gradient(rgba(205,191,166,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(205,191,166,0.08) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
+          background: 'radial-gradient(ellipse 80% 70% at 50% 40%, rgba(205,191,166,0.07) 0%, transparent 70%)',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'radial-gradient(ellipse 120% 100% at 50% 100%, rgba(30,25,20,0.55) 0%, transparent 60%)',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(135deg, rgba(86,79,69,0.18) 0%, transparent 50%, rgba(40,34,28,0.22) 100%)',
         }} />
       </div>
 
