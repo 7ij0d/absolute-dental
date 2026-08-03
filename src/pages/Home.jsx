@@ -8,7 +8,7 @@ import SkeletonLoader from '../components/SkeletonLoader';
 import { cacheGet, cacheSet } from '../cache';
 import {
   Truck, ShieldCheck, Award, Headphones,
-  ArrowRight, ArrowLeft, Star, Users, Package, Clock,
+  ArrowRight, ArrowLeft, Users, Package, Clock,
   ChevronRight, BookOpen
 } from 'lucide-react';
 
@@ -32,13 +32,6 @@ const WHY_ITEMS_EN = [
   { icon: <ShieldCheck size={22} />,  title: '100% Original',          desc: "We only sell what we've personally verified — no knockoffs, ever." },
   { icon: <Award size={22} />,        title: 'Student-Friendly Prices', desc: "We know students' budgets are tight — we've worked hard to keep prices as low as possible." },
   { icon: <Headphones size={22} />,   title: 'Fast Replies',           desc: 'Reach us on WhatsApp or Telegram — we usually reply the same day.' },
-];
-
-const MOCK_REVIEWS = [
-  { name_ar: 'ريم القماطي',     name_en: 'Reem Al-Qamati',    rating: 5, comment_ar: 'اشتريت البيرز والهاندبيس وجاءت زي ما توقعت تماماً. التوصيل للكلية مجاني وهذا وفّر عليّ كثير.',  comment_en: 'Ordered the burs and handpiece — exactly as expected. Free college delivery saved me a lot.',  subject_ar: 'طالبة - سنة ثانية',  subject_en: '2nd Year Student' },
-  { name_ar: 'أحمد الورفلي',   name_en: 'Ahmed Al-Warfali',  rating: 5, comment_ar: 'السعر أرخص من السوق وما في فرق بالجودة. بجرب أطلب مرة ثانية قريباً.',                            comment_en: 'Cheaper than the market and same quality. Will order again soon.',                           subject_ar: 'طالب - سنة ثالثة',   subject_en: '3rd Year Student' },
-  { name_ar: 'سلمى الزبيدي',   name_en: 'Salma Al-Zubaidi',  rating: 5, comment_ar: 'استخدمت dental cast في المعمل وكان تمام. التواصل على واتساب كان سريع وما في تعقيد.',            comment_en: 'Used the dental cast in the lab and it was perfect. WhatsApp communication was quick.',       subject_ar: 'طالبة - سنة ثانية', subject_en: '2nd Year Student' },
-  { name_ar: 'يوسف الشريف',    name_en: 'Yousef Al-Sharif',  rating: 4, comment_ar: 'أفضل شي في سمايلودنت إنهم يعرفوا ويش يحتاجه طالب طب الأسنان بالضبط. ما احتجت أشرح كثير.',   comment_en: 'Best part is they actually know what a dental student needs. No need to explain much.',         subject_ar: 'طالب - سنة أولى',   subject_en: '1st Year Student' },
 ];
 
 export const Home = () => {
@@ -219,7 +212,7 @@ export const Home = () => {
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <h2 className="section-title-light" style={{ display: 'inline-block' }}>
-              {lang === 'ar' ? 'لماذا سمايلودنت؟' : 'Why Absolute Dental?'}
+              {lang === 'ar' ? 'لماذا Absolute Dental؟' : 'Why Absolute Dental?'}
             </h2>
             <p style={{ color: 'var(--text-dim)', marginTop: '0.75rem', fontSize: '0.95rem' }}>
               {lang === 'ar'
@@ -233,39 +226,6 @@ export const Home = () => {
                 <div className="why-icon">{item.icon}</div>
                 <h3 className="why-title">{item.title}</h3>
                 <p className="why-desc">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 6. REVIEWS ── */}
-      <section className="section section-purple">
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <h2 className="section-title-light" style={{ display: 'inline-block' }}>
-              {lang === 'ar' ? 'ماذا يقول طلابنا؟' : 'What Students Say'}
-            </h2>
-            <p style={{ color: 'var(--text-dim)', marginTop: '0.5rem', fontSize: '0.9rem' }}>
-              {lang === 'ar' ? 'آراء حقيقية من طلاب كلية طب الأسنان' : 'Real reviews from dental college students'}
-            </p>
-          </div>
-
-          <div className="h-scroll" style={{ padding: '0.5rem 0 1.5rem' }}>
-            {MOCK_REVIEWS.map((review, i) => (
-              <div key={i} className="review-card">
-                <div className="review-stars">
-                  {Array.from({ length: review.rating }).map((_, j) => (
-                    <Star key={j} size={14} fill="#F59E0B" />
-                  ))}
-                </div>
-                <p className="review-comment">
-                  {lang === 'ar' ? review.comment_ar : review.comment_en}
-                </p>
-                <div>
-                  <div className="review-author">{lang === 'ar' ? review.name_ar : review.name_en}</div>
-                  <div className="review-subject">{lang === 'ar' ? review.subject_ar : review.subject_en}</div>
-                </div>
               </div>
             ))}
           </div>
