@@ -53,7 +53,7 @@ export const InvoiceView = ({ order }) => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #00a896', paddingBottom: '1.5rem', marginBottom: '1.5rem' }} className="invoice-header-row">
           
           <div style={{ textAlign: isRtl ? 'right' : 'left' }}>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0a335c', marginBottom: '0.3rem' }}>SMYLODENT</h1>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0a335c', marginBottom: '0.3rem' }}>Absolute Dental Equipment</h1>
             <p style={{ fontSize: '0.8rem', color: '#666' }}>{t('invoice.company')}</p>
           </div>
 
@@ -83,7 +83,7 @@ export const InvoiceView = ({ order }) => {
           
           {/* Company Details */}
           <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: 'var(--radius-sm)', border: '1px solid #e2e8f0' }}>
-            <h4 style={{ color: '#0a335c', fontWeight: 700, marginBottom: '0.6rem' }}>Smylodent</h4>
+            <h4 style={{ color: '#0a335c', fontWeight: 700, marginBottom: '0.6rem' }}>Absolute Dental Equipment</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', color: '#555' }}>
               <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <MapPin size={14} style={{ color: '#00a896' }} />
@@ -195,7 +195,7 @@ export const InvoiceView = ({ order }) => {
         )}
 
         <div style={{ textAlign: 'center', borderTop: '1px dashed #e2e8f0', marginTop: '2rem', paddingTop: '1rem', fontSize: '0.75rem', color: '#888' }}>
-          شكراً لتسوقكم مع سمايلودنت! / Thank you for choosing Smylodent!
+          شكراً لتسوقكم مع معدات طب الأسنان! / Thank you for choosing Absolute Dental Equipment!
         </div>
 
       </div>
@@ -242,3 +242,4 @@ export const InvoiceView = ({ order }) => {
 };
 
 export default InvoiceView;
+

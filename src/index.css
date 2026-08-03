@@ -1,31 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* ==========================================================================
-   SMYLODENT — DESIGN SYSTEM v2.0
-   Deep Purple Tech Aesthetic | Arabic-First
+   ABSOLUTE DENTAL EQUIPMENT — DESIGN SYSTEM v3.0
+   Warm Beige & Brown Premium Aesthetic | Arabic-First
    ========================================================================== */
 
 :root {
   /* ── Brand Colors ── */
-  --purple-950: #0F0720;
-  --purple-900: #1a0a35;
-  --purple-800: #2D1B69;
-  --purple-700: #4C1D95;
-  --purple-600: #6D28D9;
-  --purple-500: #7C3AED;
-  --purple-400: #8B5CF6;
-  --purple-300: #A78BFA;
-  --purple-200: #C4B5FD;
-  --purple-100: #EDE9FE;
-  --purple-50:  #F5F3FF;
+  --brand-gold:    #CDBFA6;
+  --brand-cream:   #E6DAC6;
+  --brand-ivory:   #F7F4EE;
+  --brand-brown:   #564F45;
+  --brand-brown-2: #6B6159;
+  --brand-brown-3: #8B8177;
+  --brand-light:   #FAF8F4;
 
   /* ── Primary & Accent ── */
-  --primary:        var(--purple-900);
-  --primary-hover:  var(--purple-800);
-  --secondary:      var(--purple-500);
-  --secondary-hover: var(--purple-600);
-  --accent:         var(--purple-50);
-  --accent-dark:    var(--purple-100);
+  --primary:        var(--brand-brown);
+  --primary-hover:  #3A3530;
+  --secondary:      var(--brand-gold);
+  --secondary-hover: #B8A890;
+  --accent:         var(--brand-ivory);
+  --accent-dark:    var(--brand-cream);
 
   /* ── Semantic Colors ── */
   --success: #10B981;
@@ -33,33 +29,33 @@
   --danger:  #EF4444;
   --info:    #3B82F6;
 
-  /* ── Background & Surface (Light Content Areas) ── */
-  --bg-color:      #F8F7FF;
+  /* ── Background & Surface ── */
+  --bg-color:      #F7F4EE;
   --surface-color: #FFFFFF;
-  --border-color:  #E4E0F7;
+  --border-color:  #E0D9CE;
 
-  /* ── Navbar/Hero (Dark) ── */
-  --navbar-bg:    var(--purple-950);
-  --hero-bg:      var(--purple-950);
+  /* ── Navbar/Hero (Dark Warm) ── */
+  --navbar-bg:    var(--brand-brown);
+  --hero-bg:      var(--brand-brown);
   --navbar-text:  #FFFFFF;
 
   /* ── Text ── */
-  --text-main:  #1A1A2E;
-  --text-muted: #6B7280;
-  --text-light: rgba(255,255,255,0.85);
-  --text-dim:   rgba(255,255,255,0.55);
+  --text-main:  #3A3530;
+  --text-muted: #8B8177;
+  --text-light: rgba(255,255,255,0.90);
+  --text-dim:   rgba(255,255,255,0.60);
 
   /* ── Gradients ── */
-  --gradient-primary: linear-gradient(135deg, #7C3AED 0%, #2563EB 100%);
-  --gradient-dark:    linear-gradient(135deg, #0F0720 0%, #1e0a45 60%, #0F0720 100%);
-  --gradient-card:    linear-gradient(180deg, rgba(124,58,237,0.08) 0%, rgba(255,255,255,0) 100%);
+  --gradient-primary: linear-gradient(135deg, #CDBFA6 0%, #A89A87 100%);
+  --gradient-dark:    linear-gradient(135deg, #564F45 0%, #3A3530 60%, #564F45 100%);
+  --gradient-card:    linear-gradient(180deg, rgba(205,191,166,0.10) 0%, rgba(255,255,255,0) 100%);
 
   /* ── Shadows ── */
-  --shadow-sm:     0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md:     0 4px 16px rgba(124,58,237,0.12), 0 2px 8px rgba(0,0,0,0.08);
-  --shadow-lg:     0 16px 40px rgba(124,58,237,0.18), 0 6px 20px rgba(0,0,0,0.1);
-  --shadow-purple: 0 8px 32px rgba(124,58,237,0.35);
-  --shadow-glow:   0 0 40px rgba(124,58,237,0.25);
+  --shadow-sm:     0 1px 3px rgba(86,79,69,0.06), 0 1px 2px rgba(86,79,69,0.04);
+  --shadow-md:     0 4px 16px rgba(86,79,69,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-lg:     0 16px 40px rgba(86,79,69,0.14), 0 6px 20px rgba(0,0,0,0.08);
+  --shadow-purple: 0 8px 32px rgba(205,191,166,0.35);
+  --shadow-glow:   0 0 40px rgba(205,191,166,0.30);
 
   /* ── Borders ── */
   --radius-xs: 4px;

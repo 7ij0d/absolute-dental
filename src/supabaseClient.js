@@ -451,8 +451,8 @@ const defaultSettings = {
     other_cities: 25
   },
   site_info: {
-    site_name_ar: 'سمايلودنت',
-    site_name_en: 'Smylodent',
+    site_name_ar: 'معدات طب الأسنان',
+    site_name_en: 'Absolute Dental Equipment',
     description_ar: 'المنصة المتكاملة لأدوات ومستلزمات طلبة طب الأسنان في ليبيا',
     description_en: 'The premier store and platform for dental students in Libya'
   }
@@ -461,9 +461,9 @@ const defaultSettings = {
 const defaultPagesContent = {
   about_us: {
     title_ar: 'من نحن - سمايلودنت',
-    title_en: 'About Us - Smylodent',
+    title_en: 'About Us - Absolute Dental Equipment',
     content_ar: 'سمايلودنت هي منصة ليبية متكاملة تهدف إلى تسهيل حياة طلاب كليات طب الأسنان في ليبيا، وخصوصاً جامعة طرابلس. نقوم بتوفير جميع الأدوات والمعدات اللازمة لكل سنة دراسية، مقسمة حسب المادة، مع ضمان الجودة وسهولة الشراء والتوصيل المباشر إلى الكلية أو المنزل.',
-    content_en: 'Smylodent is a Libyan platform built to support dental students, specifically at the University of Tripoli. We supply all the necessary kits and tools for each academic year, categorized by subject, with guaranteed quality and free delivery directly to the dental college.'
+    content_en: 'Absolute Dental Equipment is a Libyan platform built to support dental students, specifically at the University of Tripoli. We supply all the necessary kits and tools for each academic year, categorized by subject, with guaranteed quality and free delivery directly to the dental college.'
   },
   faq: {
     title_ar: 'الأسئلة الشائعة',
@@ -821,3 +821,4 @@ export const supabase = useMock
   : createClient(supabaseUrl, supabaseAnonKey);
 
 export default supabase;
+

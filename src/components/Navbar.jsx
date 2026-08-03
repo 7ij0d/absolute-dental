@@ -78,16 +78,14 @@ export const Navbar = () => {
 
           {/* Logo */}
           <Link to="/" className="navbar-logo">
-            <div style={{
-              width: 38, height: 38, borderRadius: 8,
-              background: 'linear-gradient(135deg, #7C3AED, #2563EB)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.1rem', fontWeight: 900, color: '#fff', flexShrink: 0,
-              boxShadow: '0 4px 12px rgba(124,58,237,0.4)'
-            }}>
-              S
-            </div>
-            <span className="navbar-logo-text">سمايلودنت</span>
+            <img
+              src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo.png"
+              alt="Absolute Dental Equipment"
+              style={{ width: 42, height: 42, objectFit: 'contain', filter: 'brightness(0) invert(1)', flexShrink: 0 }}
+            />
+            <span className="navbar-logo-text">
+              {lang === 'ar' ? 'معدات طب الأسنان' : 'Absolute Dental'}
+            </span>
           </Link>
 
           {/* Desktop Nav */}

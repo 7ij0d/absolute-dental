@@ -219,7 +219,7 @@ export const Home = () => {
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <h2 className="section-title-light" style={{ display: 'inline-block' }}>
-              {lang === 'ar' ? 'لماذا سمايلودنت؟' : 'Why Smylodent?'}
+              {lang === 'ar' ? 'لماذا سمايلودنت؟' : 'Why Absolute Dental?'}
             </h2>
             <p style={{ color: 'var(--text-dim)', marginTop: '0.75rem', fontSize: '0.95rem' }}>
               {lang === 'ar'
@@ -313,3 +313,4 @@ export const Home = () => {
 };
 
 export default Home;
+
