@@ -78,45 +78,27 @@ export const Navbar = () => {
 
           {/* Logo + Brand */}
           <Link to="/" className="navbar-logo" style={{
-            gap: '1rem',
             textDecoration: 'none',
             alignItems: 'center',
             display: 'flex',
+            gap: '1rem',
             flexShrink: 0,
           }}>
             <img
               src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
               alt="Absolute Dental"
-              style={{
-                width: 130,
-                height: 130,
-                objectFit: 'contain',
-                flexShrink: 0,
-                display: 'block',
-              }}
+              style={{ width: 130, height: 130, objectFit: 'contain', flexShrink: 0 }}
             />
             <span style={{
-              display: 'flex',
-              alignItems: 'baseline',
-              gap: '0.3em',
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontWeight: 700,
+              fontSize: '2.6rem',
+              color: '#FFFFFF',
+              letterSpacing: '0.06em',
               whiteSpace: 'nowrap',
+              lineHeight: 1,
             }}>
-              <span style={{
-                fontFamily: "'Playfair Display', serif",
-                fontStyle: 'italic',
-                fontWeight: 600,
-                fontSize: '1.55rem',
-                color: '#FFFFFF',
-                letterSpacing: '0.01em',
-              }}>Absolute</span>
-              <span style={{
-                fontFamily: "'Playfair Display', serif",
-                fontStyle: 'italic',
-                fontWeight: 600,
-                fontSize: '2.3rem',
-                color: '#FFFFFF',
-                letterSpacing: '0.01em',
-              }}>Dental</span>
+              Absolute Dental
             </span>
           </Link>
 
