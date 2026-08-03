@@ -241,7 +241,7 @@ export const Home = () => {
         <div className="container">
           <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🦷</div>
           <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', marginBottom: '0.75rem' }}>
-            {lang === 'ar' ? 'جاهز تبدأ تتسوق؟' : 'Ready to Start Shopping?'}
+            {lang === 'ar' ? 'جاهز تتسوق؟' : 'Ready to Start Shopping?'}
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.8)', marginBottom: '2rem', fontSize: '1rem' }}>
             {lang === 'ar'
