@@ -19,31 +19,16 @@ import {
 } from 'lucide-react';
 
 export const AdminLayout = () => {
-  const { user, profile, signIn, loading } = useAuth();
-  const { t, isRtl } = useLanguage();
-  const navigate = useNavigate();
+  const { isRtl } = useLanguage();
   const location = useLocation();
 
-  const [passcode, setPasscode] = useState(() => localStorage.getItem('admin_passcode') || '');
+  // PIN stored in sessionStorage only — clears when browser closes
+  const [passcode, setPasscode] = useState(() => sessionStorage.getItem('admin_pin') || '');
   const [inputCode, setInputCode] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
 
-  // Background Auto-Sign-in to Supabase if passcode is valid but session is not established
-  useEffect(() => {
-    let active = true;
-    const checkAndSignIn = async () => {
-      if (passcode === '9922' && !user && !loading) {
-        try {
-          await signIn('admin@smylodent.com', 'admin123');
-        } catch (err) {
-          console.warn('Auto background sign-in failed', err);
-        }
-      }
-    };
-    checkAndSignIn();
-    return () => { active = false; };
-  }, [passcode, user, loading, signIn]);
+
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -51,25 +36,23 @@ export const AdminLayout = () => {
     setLoginError('');
 
     if (inputCode === '9922') {
-      try {
-        // Log in the admin in the background using Supabase Auth to enable database writes
-        const { error } = await signIn('admin@smylodent.com', 'admin123');
-        if (error) {
-          console.warn('Background admin sign in failed', error);
-        }
-        localStorage.setItem('admin_passcode', '9922');
-        setPasscode('9922');
-      } catch (err) {
-        console.warn('Failed background sign in', err);
-        localStorage.setItem('admin_passcode', '9922');
-        setPasscode('9922');
-      } finally {
-        setLoginLoading(false);
-      }
+      // Store PIN in sessionStorage only — clears on browser close
+      sessionStorage.setItem('admin_pin', '9922');
+      // Remove any old localStorage entry
+      localStorage.removeItem('admin_passcode');
+      setPasscode('9922');
+      setLoginLoading(false);
     } else {
       setLoginError(isRtl ? 'الرمز الذي أدخلته غير صحيح!' : 'Incorrect access code!');
       setLoginLoading(false);
     }
+  };
+
+  const handleLock = () => {
+    sessionStorage.removeItem('admin_pin');
+    localStorage.removeItem('admin_passcode');
+    setPasscode('');
+    setInputCode('');
   };
 
   // Passcode Lock Guard Screen
@@ -136,14 +119,14 @@ export const AdminLayout = () => {
   }
 
   const menuItems = [
-    { path: '/admin', label: t('admin.dashboard'), icon: LayoutDashboard },
-    { path: '/admin/orders', label: t('admin.orders'), icon: ShoppingCart },
-    { path: '/admin/products', label: t('admin.products'), icon: Package },
-    { path: '/admin/subjects', label: t('admin.subjects'), icon: BookOpen },
+    { path: '/admin', label: isRtl ? 'الرئيسية' : 'Dashboard', icon: LayoutDashboard },
+    { path: '/admin/orders', label: isRtl ? 'الطلبات' : 'Orders', icon: ShoppingCart },
+    { path: '/admin/products', label: isRtl ? 'المنتجات' : 'Products', icon: Package },
+    { path: '/admin/subjects', label: isRtl ? 'المواد' : 'Subjects', icon: BookOpen },
     { path: '/admin/users', label: isRtl ? 'إدارة المستخدمين' : 'User Management', icon: Users },
-    { path: '/admin/banners', label: t('admin.banners'), icon: Image },
-    { path: '/admin/messages', label: t('admin.messages'), icon: Inbox },
-    { path: '/admin/settings', label: t('admin.settings'), icon: Settings }
+    { path: '/admin/banners', label: isRtl ? 'البانرات' : 'Banners', icon: Image },
+    { path: '/admin/messages', label: isRtl ? 'الرسائل' : 'Messages', icon: Inbox },
+    { path: '/admin/settings', label: isRtl ? 'الإعدادات' : 'Settings', icon: Settings }
   ];
 
   return (
@@ -191,21 +174,25 @@ export const AdminLayout = () => {
           })}
         </nav>
 
-        {/* Back to main storefront */}
-        <Link
-          to="/"
-          className="btn btn-outline"
-          style={{
-            marginTop: 'auto',
-            padding: '0.5rem',
-            fontSize: '0.8rem',
-            borderRadius: 'var(--radius-sm)',
-            justifyContent: 'center'
-          }}
-        >
-          {isRtl ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
-          <span style={{ margin: '0 0.2rem' }}>عرض المتجر / Storefront</span>
-        </Link>
+        {/* Lock + Back */}
+        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <button
+            onClick={handleLock}
+            className="btn btn-outline"
+            style={{ padding: '0.5rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)', justifyContent: 'center', color: 'var(--danger)', borderColor: 'var(--danger)' }}
+          >
+            <Lock size={14} />
+            <span style={{ margin: '0 0.2rem' }}>{isRtl ? 'قفل لوحة التحكم' : 'Lock Admin'}</span>
+          </button>
+          <Link
+            to="/"
+            className="btn btn-outline"
+            style={{ padding: '0.5rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)', justifyContent: 'center' }}
+          >
+            {isRtl ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
+            <span style={{ margin: '0 0.2rem' }}>عرض المتجر / Storefront</span>
+          </Link>
+        </div>
       </aside>
 
       {/* Main Admin Pages pane */}
