@@ -209,7 +209,7 @@ export const ProfilePage = () => {
       </div>
 
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
           .profile-grid {
             grid-template-columns: 1fr !important;
             gap: 2rem !important;

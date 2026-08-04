@@ -207,17 +207,17 @@ export const Navbar = () => {
 
           {/* Actions */}
           <div className="navbar-actions">
-            {/* Language Toggle */}
+            {/* Language Toggle — hidden on tablet, accessible via ☰ */}
             <button
               onClick={toggleLanguage}
-              className="nav-icon-btn"
+              className="nav-icon-btn nav-icon-desktop-only"
               title={lang === 'ar' ? 'English' : 'العربية'}
             >
               <Globe size={18} />
             </button>
 
-            {/* Favorites */}
-            <Link to="/favorites" className="nav-icon-btn" title={lang === 'ar' ? 'المفضلة' : 'Favorites'}>
+            {/* Favorites — hidden on tablet, accessible via ☰ */}
+            <Link to="/favorites" className="nav-icon-btn nav-icon-desktop-only" title={lang === 'ar' ? 'المفضلة' : 'Favorites'}>
               <Heart size={18} />
             </Link>
 
@@ -257,11 +257,6 @@ export const Navbar = () => {
                         </p>
                         <p style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>{user.email}</p>
                       </div>
-                      {isAdmin && (
-                        <Link to="/admin" style={dropItemStyle} onClick={() => setProfileOpen(false)}>
-                          <LayoutDashboard size={15} /> {lang === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
-                        </Link>
-                      )}
                       <Link to="/profile" style={dropItemStyle} onClick={() => setProfileOpen(false)}>
                         <User size={15} /> {lang === 'ar' ? 'حسابي' : 'My Account'}
                       </Link>
@@ -297,12 +292,16 @@ export const Navbar = () => {
         </div>
 
         {/* Inline style to show desktop nav on large screens */}
-        <style>{`
           @media (min-width: 900px) {
             #desktop-nav { display: flex !important; }
             #desktop-search { display: flex !important; }
             #mobile-menu-btn { display: none !important; }
             .navbar-actions { gap: 0.4rem; }
+          }
+          /* Tablet: hide globe + favorites to prevent overflow — they're in ☰ menu */
+          @media (max-width: 899px) {
+            .nav-icon-desktop-only { display: none !important; }
+            .navbar-actions { gap: 0.25rem; flex-shrink: 0; }
           }
         `}</style>
       </header>
@@ -364,11 +363,6 @@ export const Navbar = () => {
               <Link to="/contact" className="mobile-nav-link">
                 💬 {lang === 'ar' ? 'تواصل معنا' : 'Contact'}
               </Link>
-              {user && isAdmin && (
-                <Link to="/admin" className="mobile-nav-link" style={{ color: '#CDBFA6' }}>
-                  ⚙️ {lang === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
-                </Link>
-              )}
             </div>
 
             {/* Mobile Footer */}
