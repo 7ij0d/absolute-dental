@@ -299,9 +299,12 @@ export const Navbar = () => {
             #mobile-menu-btn { display: none !important; }
             .navbar-actions { gap: 0.4rem; }
           }
-          /* Tablet: hide globe + favorites to prevent overflow — they're in ☰ menu */
-          @media (max-width: 899px) {
+          /* Tablet only: hide globe + favorites to prevent overflow — they're in ☰ menu */
+          @media (min-width: 600px) and (max-width: 899px) {
             .nav-icon-desktop-only { display: none !important; }
+          }
+          /* All mobile/tablet: compact gap */
+          @media (max-width: 899px) {
             .navbar-actions { gap: 0.25rem; flex-shrink: 0; }
           }
         `}</style>

@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export const AdminLayout = () => {
-  const { signOut } = useAuth();
+  const { user, signIn, signOut, loading } = useAuth();
   const { isRtl } = useLanguage();
   const location = useLocation();
 
@@ -30,6 +30,12 @@ export const AdminLayout = () => {
   const [loginLoading, setLoginLoading] = useState(false);
 
 
+  // Auto sign-in to Supabase when PIN already stored (e.g. page refresh)
+  useEffect(() => {
+    if (passcode === '9922' && !user && !loading) {
+      signIn('admin@smylodent.com', 'admin123').catch(() => {});
+    }
+  }, [passcode, user, loading]);
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -37,11 +43,11 @@ export const AdminLayout = () => {
     setLoginError('');
 
     if (inputCode === '9922') {
-      // Store PIN in sessionStorage only — clears on browser close
       sessionStorage.setItem('admin_pin', '9922');
-      // Remove any old localStorage entry
       localStorage.removeItem('admin_passcode');
       setPasscode('9922');
+      // Sign into Supabase so admin DB queries work (RLS requires auth)
+      try { await signIn('admin@smylodent.com', 'admin123'); } catch (_) {}
       setLoginLoading(false);
     } else {
       setLoginError(isRtl ? 'الرمز الذي أدخلته غير صحيح!' : 'Incorrect access code!');
