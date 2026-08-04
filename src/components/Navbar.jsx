@@ -238,9 +238,10 @@ export const Navbar = () => {
                   style={{
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
-                    right: isRtl ? 'auto' : 0,
-                    left: isRtl ? 0 : 'auto',
+                    right: 0,
+                    left: 'auto',
                     width: 220,
+                    maxWidth: 'calc(100vw - 1rem)',
                     background: 'var(--brand-brown)',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: 'var(--radius-md)',
@@ -249,7 +250,7 @@ export const Navbar = () => {
                     zIndex: 9999,
                   }}
                 >
-                  {user ? (
+                  {user && user.email !== 'admin@smylodent.com' ? (
                     <>
                       <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                         <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem' }}>

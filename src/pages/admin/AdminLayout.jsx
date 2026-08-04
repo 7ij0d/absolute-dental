@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 
 export const AdminLayout = () => {
+  const { signOut } = useAuth();
   const { isRtl } = useLanguage();
   const location = useLocation();
 
@@ -48,9 +49,10 @@ export const AdminLayout = () => {
     }
   };
 
-  const handleLock = () => {
+  const handleLock = async () => {
     sessionStorage.removeItem('admin_pin');
     localStorage.removeItem('admin_passcode');
+    try { await signOut(); } catch (_) {}
     setPasscode('');
     setInputCode('');
   };
