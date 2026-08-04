@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export const AdminLayout = () => {
-  const { user, signIn, signOut, loading } = useAuth();
+  const { user, profile, signIn, signOut, loading } = useAuth();
   const { isRtl } = useLanguage();
   const location = useLocation();
 
@@ -147,7 +147,7 @@ export const AdminLayout = () => {
         <div className="card" style={{ padding: '1rem', backgroundColor: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <UserCheck size={20} style={{ color: 'var(--secondary)' }} />
           <div>
-            <p style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)' }}>{profile?.full_name || (isRtl ? 'مدير النظام' : 'Admin User')}</p>
+            <p style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)' }}>{isRtl ? 'مدير النظام' : 'Admin User'}</p>
             <span style={{ fontSize: '0.65rem', padding: '1px 6px', backgroundColor: 'var(--secondary)', color: 'white', borderRadius: 'var(--radius-full)', fontWeight: 'bold' }}>ADMIN</span>
           </div>
         </div>
