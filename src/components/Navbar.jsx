@@ -291,7 +291,7 @@ export const Navbar = () => {
           </div>
         </div>
 
-        {/* Inline style to show desktop nav on large screens */}
+        <style>{`
           @media (min-width: 900px) {
             #desktop-nav { display: flex !important; }
             #desktop-search { display: flex !important; }
