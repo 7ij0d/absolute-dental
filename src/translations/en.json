@@ -15,12 +15,12 @@
     "track": "Track Order"
   },
   "home": {
-    "welcome": "Welcome to Smylodent",
+    "welcome": "Welcome to Absolute Dental",
     "subtitle": "Everything a dental student needs in one place, organized by your academic year and subjects.",
     "select_year": "Select Your Academic Year to Begin",
     "featured": "Most Requested Tools",
     "discounted": "Current Special Offers",
-    "why_us": "Why Shop from Smylodent?",
+    "why_us": "Why Shop from Absolute Dental?",
     "delivery_tripoli": "Completely Free Delivery",
     "delivery_tripoli_desc": "Directly to the Faculty of Dentistry, University of Tripoli.",
     "delivery_libya": "Shipping Across Libya",
@@ -85,7 +85,7 @@
     "discounts": "Discounts",
     "shipping": "Shipping Fee",
     "checkout": "Proceed to Checkout",
-    "tripoli_free": "Free (Tripoli Dental College Faculty)",
+    "tripoli_free": "Free (Delivered at Faculty)",
     "currency": "LYD"
   },
   "checkout": {
@@ -135,7 +135,7 @@
   },
   "invoice": {
     "title": "Sales Invoice",
-    "company": "Smylodent Dental Student Services",
+    "company": "Absolute Dental Equipment",
     "date": "Order Date",
     "customer_info": "Customer Details",
     "items": "Requested Instruments & Supplies",
@@ -202,3 +202,4 @@
     "most_visited_subjects": "Most Visited Subjects"
   }
 }
+

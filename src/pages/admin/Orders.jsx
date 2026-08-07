@@ -83,8 +83,8 @@ export const Orders = () => {
         
         await supabase.from('notifications').insert({
           user_id: selectedOrder?.user_id || null, // null if guest, will still show up based on matching tokens in general query
-          title_ar: `تحديث حالة الطلب #${selectedOrder?.order_number}`,
-          title_en: `Order Status Updated #${selectedOrder?.order_number}`,
+          title_ar: `تحديث حالة الطلب ${selectedOrder?.order_number?.replace(/-/g, '').slice(0, 8)}`,
+          title_en: `Order Status Updated ${selectedOrder?.order_number?.replace(/-/g, '').slice(0, 8)}`,
           message_ar: `حالة طلبك الآن هي: ${statusTextAr}`,
           message_en: `Your order status is now: ${statusTextEn}`,
           type: 'order_status'
@@ -98,7 +98,7 @@ export const Orders = () => {
   };
 
   const handleDeleteOrder = async (orderId, orderNumber) => {
-    if (!window.confirm(`هل أنت متأكد من حذف الطلب #${orderNumber}؟\nThis will permanently delete the order and all its items.`)) return;
+    if (!window.confirm(`هل أنت متأكد من حذف الطلب ${orderNumber?.replace(/-/g, '').slice(0, 8)}؟\nThis will permanently delete the order and all its items.`)) return;
     try {
       await supabase.from('order_items').delete().eq('order_id', orderId);
       const { error } = await supabase.from('orders').delete().eq('id', orderId);
@@ -265,7 +265,16 @@ export const Orders = () => {
             <tbody>
               {filteredList.map((ord) => (
                 <tr key={ord.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '1rem 0.75rem', fontWeight: 700 }}>#{ord.order_number}</td>
+                  <td style={{ padding: '1rem 0.75rem', fontWeight: 700 }}>
+                    <span style={{ fontFamily: 'monospace', letterSpacing: '0.04em' }}>
+                      {ord.order_number?.replace(/-/g, '').slice(0, 8)}
+                    </span>
+                    {ord.order_items?.length > 0 && (
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem', maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {ord.order_items.map(i => i.products?.name_en || i.name_en).join(' • ')}
+                      </div>
+                    )}
+                  </td>
                   <td style={{ padding: '1rem 0.75rem' }}>
                     <p style={{ fontWeight: 600 }}>{ord.customer_name}</p>
                     <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{ord.customer_phone}</p>
@@ -399,7 +408,7 @@ export const Orders = () => {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>
-                ✏️ تعديل الطلب #{editingOrder.order_number?.slice(0, 12)}
+                ✏️ تعديل الطلب {editingOrder.order_number?.replace(/-/g, '').slice(0, 8)}
               </h3>
               <button onClick={() => setEditingOrder(null)} className="action-btn"><X size={18} /></button>
             </div>
@@ -515,7 +524,7 @@ export const Orders = () => {
           >
             {/* Modal Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>تفاصيل الطلب #{selectedOrder.order_number.slice(0, 12)}...</h3>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>تفاصيل الطلب {selectedOrder.order_number?.replace(/-/g, '').slice(0, 8)}</h3>
               <button onClick={() => setSelectedOrder(null)} className="action-btn">
                 <X size={18} />
               </button>

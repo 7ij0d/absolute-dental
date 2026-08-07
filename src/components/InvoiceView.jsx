@@ -72,7 +72,7 @@ export const InvoiceView = ({ order }) => {
             >
               {order.status ? t(`tracking.status_${order.status}`) : ''}
             </span>
-            <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>#{order.order_number}</p>
+            <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>{order.order_number?.replace(/-/g,'').slice(0,8)}</p>
             <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.2rem' }}>{formatDate(order.created_at)}</p>
           </div>
 
@@ -172,7 +172,9 @@ export const InvoiceView = ({ order }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>{t('cart.shipping')}:</span>
               <span style={{ fontWeight: 600 }}>
-                {order.shipping_fee === 0 ? t('cart.tripoli_free') : `${order.shipping_fee} ${t('cart.currency')}`}
+                {order.address_text
+                  ? (lang === 'ar' ? 'يتم تحديده عبر الواتساب 💬' : 'Via WhatsApp 💬')
+                  : (order.shipping_fee === 0 ? t('cart.tripoli_free') : `${order.shipping_fee} ${t('cart.currency')}`)}
               </span>
             </div>
 
