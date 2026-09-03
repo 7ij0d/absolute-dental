@@ -52,6 +52,31 @@ const DEFAULT_DONATIONS = [
   }
 ];
 
+const DEFAULT_STUDENT_REQUESTS = [
+  {
+    id: 'req_1',
+    item_title: 'ملازم ومذكرات رسم وتشريح الأسنان ملونة',
+    description: 'محتاج ملازم ومذكرة رسم الأسنان ملونة لدخول امتحان العملي الطارئ، لعدم توفر ميزانية الشراء حالياً.',
+    student_real_name: 'محمد الصادق علي',
+    student_phone: '0912345678',
+    student_telegram: '@dental_std1',
+    status: 'searching',
+    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+    years: { name_ar: 'السنة الأولى', name_en: '1st Year' }
+  },
+  {
+    id: 'req_2',
+    item_title: 'أدوات نحت الشمع PKT ووعاء الخلط معمل الفانتوم',
+    description: 'طالب محتاج طقم أدوات نحت شمع كامل لدخول معمل الفانتوم لعدم القدرة على شراء طقم جديد.',
+    student_real_name: 'فاطمة محمود التاورغي',
+    student_phone: '0923456789',
+    student_telegram: null,
+    status: 'searching',
+    created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
+    years: { name_ar: 'السنة الثانية', name_en: '2nd Year' }
+  }
+];
+
 const getLocalDonations = () => {
   try {
     const raw = localStorage.getItem('ad_donations');
@@ -71,9 +96,30 @@ const saveLocalDonationsList = (list) => {
   } catch (_) {}
 };
 
+const getLocalStudentRequestsList = () => {
+  try {
+    const raw = localStorage.getItem('ad_student_requests');
+    if (!raw) {
+      localStorage.setItem('ad_student_requests', JSON.stringify(DEFAULT_STUDENT_REQUESTS));
+      return DEFAULT_STUDENT_REQUESTS;
+    }
+    return JSON.parse(raw);
+  } catch {
+    return DEFAULT_STUDENT_REQUESTS;
+  }
+};
+
+const saveLocalStudentRequestsList = (list) => {
+  try {
+    localStorage.setItem('ad_student_requests', JSON.stringify(list));
+  } catch (_) {}
+};
+
 export const Donations = () => {
   const { lang, t, isRtl } = useLanguage();
+  const [adminTab, setAdminTab] = useState('donations'); // 'donations' or 'requests'
   const [items, setItems] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -81,6 +127,7 @@ export const Donations = () => {
 
   useEffect(() => {
     fetchDonations();
+    fetchStudentRequests();
   }, []);
 
   const fetchDonations = async () => {
@@ -101,6 +148,50 @@ export const Donations = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchStudentRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('student_requests')
+        .select('*, years(name_ar, name_en), subjects(name_ar, name_en)')
+        .order('created_at', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        setRequests(data);
+      } else {
+        setRequests(getLocalStudentRequestsList());
+      }
+    } catch {
+      setRequests(getLocalStudentRequestsList());
+    }
+  };
+
+  const handleUpdateReqStatus = async (id, newStatus) => {
+    try {
+      await supabase
+        .from('student_requests')
+        .update({ status: newStatus })
+        .eq('id', id);
+    } catch (_) {}
+
+    const updated = requests.map(item =>
+      item.id === id ? { ...item, status: newStatus } : item
+    );
+    setRequests(updated);
+    saveLocalStudentRequestsList(updated);
+  };
+
+  const handleDeleteRequest = async (id) => {
+    if (!window.confirm(isRtl ? 'هل أنت متأكد من حذف طلب الاحتياج هذا؟' : 'Are you sure you want to delete this request?')) return;
+
+    try {
+      await supabase.from('student_requests').delete().eq('id', id);
+    } catch (_) {}
+
+    const updated = requests.filter(item => item.id !== id);
+    setRequests(updated);
+    saveLocalStudentRequestsList(updated);
   };
 
   const handleUpdateStatus = async (id, newStatus) => {
@@ -226,94 +317,210 @@ export const Donations = () => {
         ))}
       </div>
 
-      {/* Table */}
-      <div className="card" style={{ overflowX: 'auto', backgroundColor: 'var(--surface-color)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'start' }}>
-          <thead>
-            <tr style={{ backgroundColor: 'var(--accent)', borderBottom: '2px solid var(--border-color)', color: 'var(--text-main)', fontWeight: 700 }}>
-              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الصورة' : 'Image'}</th>
-              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'العنوان' : 'Title'}</th>
-              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'النوع' : 'Type'}</th>
-              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الهاتف' : 'Phone'}</th>
-              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'السنة الدراسية / المادة' : 'Year / Subject'}</th>
-              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الحالة' : 'Status'}</th>
-              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'التاريخ' : 'Date'}</th>
-              <th style={{ padding: '1rem 0.75rem', textAlign: 'end' }}>{isRtl ? 'الإجراءات' : 'Actions'}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map(item => {
-              const statusColor = getStatusColor(item.status);
-              return (
-                <tr key={item.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '1rem 0.75rem' }}>
-                    {item.image_url ? (
-                      <img src={item.image_url} alt={item.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
-                    ) : (
-                      <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--border-color)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Gift size={20} color="var(--text-muted)" />
-                      </div>
-                    )}
-                  </td>
-                  <td style={{ padding: '1rem 0.75rem', fontWeight: 600 }}>{item.title}</td>
-                  <td style={{ padding: '1rem 0.75rem' }}>
-                    <span style={{ padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg)', border: '1px solid var(--border-color)', fontSize: '0.75rem' }}>
-                      {item.item_type}
-                    </span>
-                  </td>
-                  <td style={{ padding: '1rem 0.75rem', direction: 'ltr' }}>{item.donor_phone || '-'}</td>
-                  <td style={{ padding: '1rem 0.75rem' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{item.years ? (isRtl ? item.years.name_ar : item.years.name_en) : '-'}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.subjects ? (isRtl ? item.subjects.name_ar : item.subjects.name_en) : '-'}</div>
-                  </td>
-                  <td style={{ padding: '1rem 0.75rem' }}>
-                    <select 
-                      value={item.status} 
-                      onChange={(e) => handleUpdateStatus(item.id, e.target.value)}
-                      style={{ 
-                        padding: '0.25rem 0.5rem', 
-                        borderRadius: 'var(--radius-full)',
-                        backgroundColor: statusColor.bg,
-                        color: statusColor.text,
-                        border: 'none',
-                        outline: 'none',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <option value="pending">{isRtl ? 'معلق' : 'Pending'}</option>
-                      <option value="active">{isRtl ? 'نشط' : 'Active'}</option>
-                      <option value="claimed">{isRtl ? 'محجوز' : 'Claimed'}</option>
-                      <option value="archived">{isRtl ? 'مؤرشف' : 'Archived'}</option>
-                    </select>
-                  </td>
-                  <td style={{ padding: '1rem 0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    {new Date(item.created_at).toLocaleDateString(lang)}
-                  </td>
-                  <td style={{ padding: '1rem 0.75rem', textAlign: 'end' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                      <button onClick={() => openEditModal(item)} className="action-btn" title={isRtl ? 'تعديل' : 'Edit'}>
-                        <Edit size={16} color="var(--primary)" />
-                      </button>
-                      <button onClick={() => handleDelete(item.id)} className="action-btn" title={isRtl ? 'حذف' : 'Delete'}>
-                        <Trash2 size={16} color="var(--danger)" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-            {items.length === 0 && (
-              <tr>
-                <td colSpan="9" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  {isRtl ? 'لا توجد تبرعات' : 'No donations found'}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      {/* Sub-Tabs: Donations vs Confidential Student Requests */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+        <button
+          onClick={() => setAdminTab('donations')}
+          className={`btn ${adminTab === 'donations' ? 'btn-primary' : 'btn-outline'}`}
+          style={{ padding: '0.5rem 1.25rem', borderRadius: 'var(--radius-full)', fontSize: '0.85rem', fontWeight: 700 }}
+        >
+          🎁 {isRtl ? `الأدوات المتبرع بها (${items.length})` : `Donated Items (${items.length})`}
+        </button>
+        <button
+          onClick={() => setAdminTab('requests')}
+          className={`btn ${adminTab === 'requests' ? 'btn-primary' : 'btn-outline'}`}
+          style={{ padding: '0.5rem 1.25rem', borderRadius: 'var(--radius-full)', fontSize: '0.85rem', fontWeight: 700, borderColor: adminTab === 'requests' ? undefined : 'var(--primary)' }}
+        >
+          🙋‍♂️ {isRtl ? `طلبات الاحتياج السرية (${requests.length})` : `Secret Need Requests (${requests.length})`}
+        </button>
       </div>
+
+      {adminTab === 'donations' ? (
+        <>
+          {/* Table for Donated Items */}
+          <div className="card" style={{ overflowX: 'auto', backgroundColor: 'var(--surface-color)' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'start' }}>
+              <thead>
+                <tr style={{ backgroundColor: 'var(--accent)', borderBottom: '2px solid var(--border-color)', color: 'var(--text-main)', fontWeight: 700 }}>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الصورة' : 'Image'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'العنوان' : 'Title'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'النوع' : 'Type'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الهاتف' : 'Phone'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'السنة الدراسية / المادة' : 'Year / Subject'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الحالة' : 'Status'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'التاريخ' : 'Date'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'end' }}>{isRtl ? 'الإجراءات' : 'Actions'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map(item => {
+                  const statusColor = getStatusColor(item.status);
+                  return (
+                    <tr key={item.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td style={{ padding: '1rem 0.75rem' }}>
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
+                        ) : (
+                          <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--border-color)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Gift size={20} color="var(--text-muted)" />
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ padding: '1rem 0.75rem', fontWeight: 600 }}>{item.title}</td>
+                      <td style={{ padding: '1rem 0.75rem' }}>
+                        <span style={{ padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg)', border: '1px solid var(--border-color)', fontSize: '0.75rem' }}>
+                          {item.item_type}
+                        </span>
+                      </td>
+                      <td style={{ padding: '1rem 0.75rem', direction: 'ltr' }}>{item.donor_phone || '-'}</td>
+                      <td style={{ padding: '1rem 0.75rem' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{item.years ? (isRtl ? item.years.name_ar : item.years.name_en) : '-'}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.subjects ? (isRtl ? item.subjects.name_ar : item.subjects.name_en) : '-'}</div>
+                      </td>
+                      <td style={{ padding: '1rem 0.75rem' }}>
+                        <select 
+                          value={item.status} 
+                          onChange={(e) => handleUpdateStatus(item.id, e.target.value)}
+                          style={{ 
+                            padding: '0.25rem 0.5rem', 
+                            borderRadius: 'var(--radius-full)',
+                            backgroundColor: statusColor.bg,
+                            color: statusColor.text,
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <option value="pending">{isRtl ? 'معلق' : 'Pending'}</option>
+                          <option value="active">{isRtl ? 'نشط' : 'Active'}</option>
+                          <option value="claimed">{isRtl ? 'محجوز' : 'Claimed'}</option>
+                          <option value="archived">{isRtl ? 'مؤرشف' : 'Archived'}</option>
+                        </select>
+                      </td>
+                      <td style={{ padding: '1rem 0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                        {new Date(item.created_at).toLocaleDateString(lang)}
+                      </td>
+                      <td style={{ padding: '1rem 0.75rem', textAlign: 'end' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                          <button onClick={() => openEditModal(item)} className="action-btn" title={isRtl ? 'تعديل' : 'Edit'}>
+                            <Edit size={16} color="var(--primary)" />
+                          </button>
+                          <button onClick={() => handleDelete(item.id)} className="action-btn" title={isRtl ? 'حذف' : 'Delete'}>
+                            <Trash2 size={16} color="var(--danger)" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {items.length === 0 && (
+                  <tr>
+                    <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                      {isRtl ? 'لا توجد تبرعات' : 'No donations found'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Table for Confidential Student Requests */}
+          <div className="card" style={{ overflowX: 'auto', backgroundColor: 'var(--surface-color)' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'start' }}>
+              <thead>
+                <tr style={{ backgroundColor: 'var(--accent)', borderBottom: '2px solid var(--border-color)', color: 'var(--text-main)', fontWeight: 700 }}>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الأداة المطلوبة' : 'Requested Item'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'بيانات الطالب (سرية 🔒)' : 'Student Info (Private 🔒)'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الهاتف والتليجرام' : 'Phone & Telegram'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'السنة / المادة' : 'Year / Subject'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الحالة' : 'Status'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'التاريخ' : 'Date'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'end' }}>{isRtl ? 'الإجراءات' : 'Actions'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {requests.map(req => {
+                  let reqColor = { bg: '#FEF3C7', text: '#D97706' }; // searching
+                  if (req.status === 'fulfilled') reqColor = { bg: '#D1FAE5', text: '#059669' };
+                  if (req.status === 'cancelled') reqColor = { bg: '#FEE2E2', text: '#DC2626' };
+
+                  return (
+                    <tr key={req.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td style={{ padding: '1rem 0.75rem' }}>
+                        <div style={{ fontWeight: 700, color: 'var(--primary)' }}>{req.item_title}</div>
+                        {req.description && (
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem', maxWidth: '280px' }}>
+                            {req.description}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ padding: '1rem 0.75rem', fontWeight: 600 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: 'var(--secondary)' }}>
+                          🔒 {req.student_real_name || (isRtl ? 'طالب غير مسمى' : 'Anonymous')}
+                        </span>
+                      </td>
+                      <td style={{ padding: '1rem 0.75rem' }}>
+                        <div style={{ direction: 'ltr', textAlign: isRtl ? 'right' : 'left', fontWeight: 600 }}>
+                          {req.student_phone || '-'}
+                        </div>
+                        {req.student_telegram && (
+                          <div style={{ fontSize: '0.75rem', color: '#0088cc', direction: 'ltr', textAlign: isRtl ? 'right' : 'left' }}>
+                            {req.student_telegram}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ padding: '1rem 0.75rem' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{req.years ? (isRtl ? req.years.name_ar : req.years.name_en) : '-'}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{req.subjects ? (isRtl ? req.subjects.name_ar : req.subjects.name_en) : '-'}</div>
+                      </td>
+                      <td style={{ padding: '1rem 0.75rem' }}>
+                        <select 
+                          value={req.status} 
+                          onChange={(e) => handleUpdateReqStatus(req.id, e.target.value)}
+                          style={{ 
+                            padding: '0.25rem 0.5rem', 
+                            borderRadius: 'var(--radius-full)',
+                            backgroundColor: reqColor.bg,
+                            color: reqColor.text,
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <option value="searching">{isRtl ? 'جاري البحث 🔍' : 'Searching 🔍'}</option>
+                          <option value="fulfilled">{isRtl ? 'تم التوفير ✅' : 'Fulfilled ✅'}</option>
+                          <option value="cancelled">{isRtl ? 'ملغي ❌' : 'Cancelled ❌'}</option>
+                        </select>
+                      </td>
+                      <td style={{ padding: '1rem 0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                        {new Date(req.created_at).toLocaleDateString(lang)}
+                      </td>
+                      <td style={{ padding: '1rem 0.75rem', textAlign: 'end' }}>
+                        <button onClick={() => handleDeleteRequest(req.id)} className="action-btn" title={isRtl ? 'حذف' : 'Delete'}>
+                          <Trash2 size={16} color="var(--danger)" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {requests.length === 0 && (
+                  <tr>
+                    <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                      {isRtl ? 'لا توجد طلبات احتياج' : 'No student requests found'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       {/* Modal */}
       {showModal && createPortal(
