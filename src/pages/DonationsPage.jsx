@@ -39,8 +39,8 @@ const FALLBACK_YEARS = [
 const DEFAULT_STUDENT_REQUESTS = [
   {
     id: 'req_1',
-    item_title: 'ملازم ومذكرات رسم وتشريح الأسنان ملونة',
-    description: 'محتاج ملازم ومذكرة رسم الأسنان ملونة لدخول امتحان العملي الطارئ، لعدم توفر ميزانية الشراء حالياً.',
+    item_title: 'شيتات ومذكرات رسم وتشريح الأسنان ملونة',
+    description: 'محتاج شيتات ومذكرة رسم الأسنان ملونة لدخول امتحان العملي الطارئ، لعدم توفر ميزانية الشراء حالياً.',
     year_id: '10000000-0000-0000-0000-000000000001',
     student_real_name: 'طالب سنة أولى',
     student_phone: '0910000000',
@@ -107,8 +107,8 @@ const DEFAULT_DONATIONS = [
   },
   {
     id: 'd2',
-    title: 'ملازم ومذكرات تشريح ورسم الأسنان',
-    description: 'ملازم شاملة ومذكرة رسم الأسنان ملونة ومطبوعة ورق مقوى إهداء لزملائنا الدفعة الجديدة.',
+    title: 'شيتات ومذكرات تشريح ورسم الأسنان',
+    description: 'شيتات شاملة ومذكرة رسم الأسنان ملونة ومطبوعة ورق مقوى إهداء لزملائنا الدفعة الجديدة.',
     item_type: 'sheets',
     condition: 'good',
     year_id: '10000000-0000-0000-0000-000000000001',
@@ -922,7 +922,7 @@ export default function DonationsPage() {
                     onChange={handleInputChange}
                   >
                     <option value="equipment">{t('donations.type_equipment') || 'أدوات ومعدات'}</option>
-                    <option value="sheets">{t('donations.type_sheets') || 'ملازم ومذكرات'}</option>
+                    <option value="sheets">{t('donations.type_sheets') || 'شيتات ومذكرات'}</option>
                     <option value="other">{t('donations.type_other') || 'أخرى'}</option>
                   </select>
                 </div>
@@ -1107,7 +1107,7 @@ export default function DonationsPage() {
                   <span>{t('donations.requests_tab') || 'طلبات الاحتياج الطلابية'}</span>
                 </h2>
                 <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-                  {isRtl ? 'قائمة بالأدوات والملازم المطلوبة من الطلاب لظروف دراسية أو طارئة' : 'List of tools & notes needed by students'}
+                  {isRtl ? 'قائمة بالأدوات والشيتات المطلوبة من الطلاب لظروف دراسية أو طارئة' : 'List of tools & notes needed by students'}
                 </p>
               </div>
               <button
@@ -1155,7 +1155,7 @@ export default function DonationsPage() {
                       value={requestForm.item_title}
                       onChange={(e) => setRequestForm({ ...requestForm, item_title: e.target.value })}
                       required
-                      placeholder={isRtl ? 'مثال: طقم نحت الشمع PKT، ملازم التشريح...' : 'e.g. PKT Wax Carving set, Anatomy sheets'}
+                      placeholder={isRtl ? 'مثال: طقم نحت الشمع PKT، شيتات التشريح...' : 'e.g. PKT Wax Carving set, Anatomy sheets'}
                     />
                   </div>
 
@@ -1383,7 +1383,7 @@ export default function DonationsPage() {
 
             <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', maxWidth: '520px', lineHeight: '1.6', margin: 0 }}>
               {isRtl
-                ? 'ستتاح ميزة التبرع المالي عبر كروت شحن (ليبيانا / مدار) والتحويلات المصرفية المباشرة قريباً لدعم بنك الأدوات والملازم والطلاب المحتاجين.'
+                ? 'ستتاح ميزة التبرع المالي عبر كروت شحن (ليبيانا / مدار) والتحويلات المصرفية المباشرة قريباً لدعم بنك الأدوات والشيتات والطلاب المحتاجين.'
                 : 'Mobile balance transfers (Libyana / Madar) and direct bank transfer options will be available soon to support the dental student tool bank.'
               }
             </p>
