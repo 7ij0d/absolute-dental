@@ -34,32 +34,59 @@ const WHY_ITEMS_EN = [
   { icon: <Headphones size={22} />,   title: 'Fast Replies',           desc: 'Reach us on WhatsApp or Telegram — we usually reply the same day.' },
 ];
 
+/* ── FALLBACK YEARS (shown instantly while Supabase loads) ── */
+const FALLBACK_YEARS = [
+  { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى',  name_en: '1st Year', slug: '1st-year', sort_order: 1, is_coming_soon: false, image_url: 'https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/year-images/1st-year.jpg' },
+  { id: '20000000-0000-0000-0000-000000000002', name_ar: 'السنة الثانية', name_en: '2nd Year', slug: '2nd-year', sort_order: 2, is_coming_soon: false, image_url: 'https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/year-images/2nd-year.jpg' },
+  { id: '30000000-0000-0000-0000-000000000003', name_ar: 'السنة الثالثة', name_en: '3rd Year', slug: '3rd-year', sort_order: 3, is_coming_soon: false, image_url: 'https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/year-images/3rd-year.jpg' },
+  { id: '40000000-0000-0000-0000-000000000004', name_ar: 'السنة الرابعة', name_en: '4th Year', slug: '4th-year', sort_order: 4, is_coming_soon: false, image_url: 'https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/year-images/4th-year.jpg' },
+];
+
 export const Home = () => {
   const { lang, t, isRtl } = useLanguage();
 
-  const [years, setYears]                   = useState([]);
+  // Start with fallback data so UI renders immediately without waiting for Supabase
+  const [years, setYears]                   = useState(() => {
+    const cached = cacheGet('home:years');
+    return (cached && cached.length > 0) ? cached : FALLBACK_YEARS;
+  });
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loadingProducts, setLoadingProducts]   = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
-      // Serve from cache instantly
-      const cachedYears = cacheGet('home:years');
+      // Check cache for featured products
       const cachedFeatured = cacheGet('home:featured');
-      if (cachedYears) setYears(cachedYears);
-      if (cachedFeatured) { setFeaturedProducts(cachedFeatured); setLoadingProducts(false); }
+      if (cachedFeatured && cachedFeatured.length > 0) {
+        setFeaturedProducts(cachedFeatured);
+        setLoadingProducts(false);
+      }
 
-      // Fetch in parallel (background if cached, foreground if not)
-      const [{ data: yrs }, { data: featured }] = await Promise.all([
-        supabase.from('years').select('*').order('slug', { ascending: true }),
-        supabase.from('products').select('*')
-          .eq('is_featured', true).eq('is_active', true).eq('is_archived', false).limit(8)
-      ]);
+      try {
+        // Fetch in parallel
+        const [{ data: yrs, error: yrsErr }, { data: featured, error: featErr }] = await Promise.all([
+          supabase.from('years').select('*').order('sort_order', { ascending: true }),
+          supabase.from('products').select('*')
+            .eq('is_featured', true).eq('is_active', true).eq('is_archived', false).limit(8)
+        ]);
 
-      if (yrs)      { setYears(yrs);                   cacheSet('home:years',     yrs,      5 * 60); }
-      if (featured) { setFeaturedProducts(featured);    cacheSet('home:featured',  featured, 5 * 60); }
-      else          { setFeaturedProducts([]); }
-      setLoadingProducts(false);
+        if (yrs && yrs.length > 0) {
+          setYears(yrs);
+          cacheSet('home:years', yrs, 5 * 60);
+        }
+        // else keep fallback years
+
+        if (featured && featured.length > 0) {
+          setFeaturedProducts(featured);
+          cacheSet('home:featured', featured, 5 * 60);
+        } else {
+          setFeaturedProducts([]);
+        }
+      } catch (err) {
+        console.error('Home data load error:', err);
+      } finally {
+        setLoadingProducts(false);
+      }
     };
     loadData();
   }, []);

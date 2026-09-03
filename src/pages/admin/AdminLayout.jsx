@@ -15,7 +15,8 @@ import {
   ArrowRight,
   UserCheck,
   Lock,
-  Users
+  Users,
+  Gift
 } from 'lucide-react';
 
 export const AdminLayout = () => {
@@ -134,6 +135,7 @@ export const AdminLayout = () => {
     { path: '/admin/users', label: isRtl ? 'إدارة المستخدمين' : 'User Management', icon: Users },
     { path: '/admin/banners', label: isRtl ? 'البانرات' : 'Banners', icon: Image },
     { path: '/admin/messages', label: isRtl ? 'الرسائل' : 'Messages', icon: Inbox },
+    { path: '/admin/donations', label: isRtl ? 'التبرعات' : 'Donations', icon: Gift },
     { path: '/admin/settings', label: isRtl ? 'الإعدادات' : 'Settings', icon: Settings }
   ];
 

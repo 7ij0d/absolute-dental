@@ -1,0 +1,372 @@
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useLanguage } from '../../context/LanguageContext';
+import supabase from '../../supabaseClient';
+import { Plus, Edit, Trash2, X, Eye, CheckCircle, Archive, Gift } from 'lucide-react';
+
+export const Donations = () => {
+  const { lang, t, isRtl } = useLanguage();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editingItem, setEditingItem] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetchDonations();
+  }, []);
+
+  const fetchDonations = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('donations')
+        .select('*, years(name_ar, name_en), subjects(name_ar, name_en)')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setItems(data || []);
+    } catch (error) {
+      console.error('Error fetching donations:', error);
+      alert(isRtl ? 'حدث خطأ أثناء جلب البيانات' : 'Error fetching data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async (id, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('donations')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setItems(items.map(item => 
+        item.id === id ? { ...item, status: newStatus } : item
+      ));
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert(isRtl ? 'حدث خطأ أثناء تحديث الحالة' : 'Error updating status');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm(isRtl ? 'هل أنت متأكد من حذف هذا التبرع؟' : 'Are you sure you want to delete this donation?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('donations')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setItems(items.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Error deleting donation:', error);
+      alert(isRtl ? 'حدث خطأ أثناء الحذف' : 'Error deleting');
+    }
+  };
+
+  const openEditModal = (item) => {
+    setEditingItem(item);
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingItem) return;
+    
+    setSubmitting(true);
+    try {
+      const updates = {
+        title: e.target.title.value,
+        description: e.target.description.value,
+        item_type: e.target.item_type.value,
+        donor_name: e.target.donor_name.value,
+        donor_phone: e.target.donor_phone.value,
+        donor_whatsapp: e.target.donor_whatsapp.value,
+        status: e.target.status.value,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('donations')
+        .update(updates)
+        .eq('id', editingItem.id);
+
+      if (error) throw error;
+      
+      await fetchDonations();
+      setShowModal(false);
+    } catch (error) {
+      console.error('Error updating donation:', error);
+      alert(isRtl ? 'حدث خطأ أثناء الحفظ' : 'Error saving');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'pending': return { bg: '#FEF3C7', text: '#D97706' }; // orange
+      case 'active': return { bg: '#D1FAE5', text: '#059669' }; // green
+      case 'claimed': return { bg: '#DBEAFE', text: '#2563EB' }; // blue
+      case 'archived': return { bg: '#F3F4F6', text: '#4B5563' }; // gray
+      default: return { bg: '#F3F4F6', text: '#4B5563' };
+    }
+  };
+
+  if (loading && items.length === 0) {
+    return (
+      <div className="container section">
+        <div className="skeleton" style={{ height: '100px', marginBottom: '1.5rem' }}></div>
+        <div className="skeleton" style={{ height: '400px' }}></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container section animate-fade-in" style={{ padding: '2rem 1rem' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>
+            {isRtl ? '🎁 إدارة التبرعات' : '🎁 Donations Management'}
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+            {isRtl ? 'مراجعة وإدارة تبرعات الطلاب بالأدوات والمستلزمات' : 'Review and manage student tool donations'}
+          </p>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+        {[
+          { label: isRtl ? 'إجمالي التبرعات' : 'Total', value: items.length, color: 'var(--primary)' },
+          { label: isRtl ? 'نشط' : 'Active', value: items.filter(i => i.status === 'active').length, color: 'var(--success)' },
+          { label: isRtl ? 'محجوز' : 'Claimed', value: items.filter(i => i.status === 'claimed').length, color: '#3B82F6' },
+          { label: isRtl ? 'معلق' : 'Pending', value: items.filter(i => i.status === 'pending').length, color: '#F59E0B' },
+        ].map((stat, i) => (
+          <div key={i} className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: stat.color }}>{stat.value}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{stat.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Table */}
+      <div className="card" style={{ overflowX: 'auto', backgroundColor: 'var(--surface-color)' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'start' }}>
+          <thead>
+            <tr style={{ backgroundColor: 'var(--accent)', borderBottom: '2px solid var(--border-color)', color: 'var(--text-main)', fontWeight: 700 }}>
+              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الصورة' : 'Image'}</th>
+              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'العنوان' : 'Title'}</th>
+              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'النوع' : 'Type'}</th>
+              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'المتبرع' : 'Donor'}</th>
+              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الهاتف' : 'Phone'}</th>
+              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'السنة الدراسية / المادة' : 'Year / Subject'}</th>
+              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الحالة' : 'Status'}</th>
+              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'التاريخ' : 'Date'}</th>
+              <th style={{ padding: '1rem 0.75rem', textAlign: 'end' }}>{isRtl ? 'الإجراءات' : 'Actions'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map(item => {
+              const statusColor = getStatusColor(item.status);
+              return (
+                <tr key={item.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '1rem 0.75rem' }}>
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
+                    ) : (
+                      <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--border-color)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Gift size={20} color="var(--text-muted)" />
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ padding: '1rem 0.75rem', fontWeight: 600 }}>{item.title}</td>
+                  <td style={{ padding: '1rem 0.75rem' }}>
+                    <span style={{ padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg)', border: '1px solid var(--border-color)', fontSize: '0.75rem' }}>
+                      {item.item_type}
+                    </span>
+                  </td>
+                  <td style={{ padding: '1rem 0.75rem' }}>{item.donor_name}</td>
+                  <td style={{ padding: '1rem 0.75rem', direction: 'ltr' }}>{item.donor_phone || '-'}</td>
+                  <td style={{ padding: '1rem 0.75rem' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{item.years ? (isRtl ? item.years.name_ar : item.years.name_en) : '-'}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.subjects ? (isRtl ? item.subjects.name_ar : item.subjects.name_en) : '-'}</div>
+                  </td>
+                  <td style={{ padding: '1rem 0.75rem' }}>
+                    <select 
+                      value={item.status} 
+                      onChange={(e) => handleUpdateStatus(item.id, e.target.value)}
+                      style={{ 
+                        padding: '0.25rem 0.5rem', 
+                        borderRadius: 'var(--radius-full)',
+                        backgroundColor: statusColor.bg,
+                        color: statusColor.text,
+                        border: 'none',
+                        outline: 'none',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <option value="pending">{isRtl ? 'معلق' : 'Pending'}</option>
+                      <option value="active">{isRtl ? 'نشط' : 'Active'}</option>
+                      <option value="claimed">{isRtl ? 'محجوز' : 'Claimed'}</option>
+                      <option value="archived">{isRtl ? 'مؤرشف' : 'Archived'}</option>
+                    </select>
+                  </td>
+                  <td style={{ padding: '1rem 0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    {new Date(item.created_at).toLocaleDateString(lang)}
+                  </td>
+                  <td style={{ padding: '1rem 0.75rem', textAlign: 'end' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                      <button onClick={() => openEditModal(item)} className="action-btn" title={isRtl ? 'تعديل' : 'Edit'}>
+                        <Edit size={16} color="var(--primary)" />
+                      </button>
+                      <button onClick={() => handleDelete(item.id)} className="action-btn" title={isRtl ? 'حذف' : 'Delete'}>
+                        <Trash2 size={16} color="var(--danger)" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+            {items.length === 0 && (
+              <tr>
+                <td colSpan="9" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  {isRtl ? 'لا توجد تبرعات' : 'No donations found'}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Modal */}
+      {showModal && createPortal(
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, padding: '1rem'
+        }}>
+          <div className="card animate-fade-in" style={{
+            width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto',
+            backgroundColor: 'var(--surface-color)', padding: '2rem 1.5rem',
+            display: 'flex', flexDirection: 'column', gap: '1.25rem',
+            boxShadow: 'var(--shadow-lg)'
+          }}>
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>
+                {isRtl ? 'تعديل التبرع' : 'Edit Donation'}
+              </h3>
+              <button onClick={() => setShowModal(false)} className="action-btn" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              
+              <div className="form-group">
+                <label className="form-label">{isRtl ? 'العنوان' : 'Title'}</label>
+                <input 
+                  type="text" 
+                  name="title"
+                  className="form-input" 
+                  defaultValue={editingItem?.title || ''}
+                  required 
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">{isRtl ? 'الوصف' : 'Description'}</label>
+                <textarea 
+                  name="description"
+                  className="form-input" 
+                  defaultValue={editingItem?.description || ''}
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'النوع' : 'Type'}</label>
+                  <select name="item_type" className="form-input" defaultValue={editingItem?.item_type || 'sheets'}>
+                    <option value="sheets">{isRtl ? 'مذكرات/ورق' : 'Sheets'}</option>
+                    <option value="equipment">{isRtl ? 'أدوات' : 'Equipment'}</option>
+                    <option value="other">{isRtl ? 'أخرى' : 'Other'}</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'الحالة' : 'Status'}</label>
+                  <select name="status" className="form-input" defaultValue={editingItem?.status || 'pending'}>
+                    <option value="pending">{isRtl ? 'معلق' : 'Pending'}</option>
+                    <option value="active">{isRtl ? 'نشط' : 'Active'}</option>
+                    <option value="claimed">{isRtl ? 'محجوز' : 'Claimed'}</option>
+                    <option value="archived">{isRtl ? 'مؤرشف' : 'Archived'}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">{isRtl ? 'المتبرع' : 'Donor Name'}</label>
+                <input 
+                  type="text" 
+                  name="donor_name"
+                  className="form-input" 
+                  defaultValue={editingItem?.donor_name || ''}
+                  required 
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'الهاتف' : 'Phone'}</label>
+                  <input 
+                    type="text" 
+                    name="donor_phone"
+                    className="form-input" 
+                    defaultValue={editingItem?.donor_phone || ''}
+                    style={{ direction: 'ltr' }}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'واتساب' : 'WhatsApp'}</label>
+                  <input 
+                    type="text" 
+                    name="donor_whatsapp"
+                    className="form-input" 
+                    defaultValue={editingItem?.donor_whatsapp || ''}
+                    style={{ direction: 'ltr' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setShowModal(false)} className="btn btn-outline">
+                  {isRtl ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button type="submit" disabled={submitting} className="btn btn-secondary">
+                  {submitting ? (isRtl ? 'جاري الحفظ...' : 'Saving...') : (isRtl ? 'حفظ التغييرات' : 'Save Changes')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      , document.body)}
+    </div>
+  );
+};
+
+export default Donations;

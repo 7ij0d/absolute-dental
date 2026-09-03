@@ -12,7 +12,8 @@
     "about": "About Us",
     "contact": "Contact",
     "faq": "FAQ",
-    "track": "Track Order"
+    "track": "Track Order",
+    "donations": "Donations"
   },
   "home": {
     "welcome": "Welcome to Absolute Dental",
@@ -199,7 +200,45 @@
     "details_en": "Specifications (English) - One point per line",
     "stats": "Statistics & Performance",
     "most_ordered": "Most Demanded Tools",
-    "most_visited_subjects": "Most Visited Subjects"
+    "most_visited_subjects": "Most Visited Subjects",
+    "donations": "Donations Management"
+  },
+  "donations": {
+    "title": "Free Student Donations & Tool Exchange",
+    "subtitle": "Donate your used tools to fellow students or browse available donated items",
+    "donate_tab": "Donate a Tool",
+    "browse_tab": "Available Donations",
+    "item_name": "Tool / Instrument Name",
+    "description": "Additional description about the tool",
+    "category": "Subject / Speciality",
+    "condition": "Tool Condition",
+    "condition_excellent": "Excellent / Like New",
+    "condition_good": "Good & Usable",
+    "condition_fair": "Fair",
+    "donor_name": "Donor Name",
+    "phone": "Phone Number",
+    "whatsapp": "WhatsApp Number (Optional)",
+    "notes": "Additional Notes",
+    "image": "Tool Photo (Optional)",
+    "select_year": "Academic Year",
+    "select_subject": "Subject",
+    "item_type": "Donation Type",
+    "type_sheets": "Sheets & Notes",
+    "type_equipment": "Tools & Equipment",
+    "type_other": "Other",
+    "submit": "Submit Donation",
+    "submitting": "Submitting...",
+    "success_msg": "Your donation has been submitted successfully! Thank you for your generosity \ud83c\udf89 It will be reviewed and published soon.",
+    "status_pending": "Under Review",
+    "status_active": "Available",
+    "status_claimed": "Claimed",
+    "status_archived": "Archived",
+    "no_donations": "No donations available yet. Be the first to donate!",
+    "contact_donor": "Contact Donor",
+    "filter_all": "All",
+    "hero_title": "Dental Tool Donation Bank",
+    "hero_subtitle": "Help fellow students with tools you no longer need, or find the support you're looking for",
+    "views": "views"
   }
 }
 

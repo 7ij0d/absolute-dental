@@ -19,7 +19,7 @@ import SignInPage from './pages/SignInPage';
 import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
 import InvoicePage from './pages/InvoicePage';
-
+import DonationsPage from './pages/DonationsPage';
 // Admin Pages
 import AdminLayout from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
@@ -30,7 +30,7 @@ import Banners from './pages/admin/Banners';
 import Settings from './pages/admin/Settings';
 import Messages from './pages/admin/Messages';
 import Users from './pages/admin/Users';
-import { runPrefetch } from './prefetch';
+import AdminDonations from './pages/admin/Donations';import { runPrefetch } from './prefetch';
 import { clearStaleCache } from './cache';
 
 
@@ -74,7 +74,7 @@ export const App = () => {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="search" element={<SearchPage />} />
         <Route path="invoice/:id" element={<InvoicePage />} />
-
+        <Route path="donations" element={<DonationsPage />} />
         {/* Policy & Static Pages */}
         <Route path="about" element={<StaticPages pageKey="about_us" />} />
         <Route path="faq" element={<StaticPages pageKey="faq" />} />
@@ -91,7 +91,7 @@ export const App = () => {
         <Route path="settings" element={<Settings />} />
         <Route path="messages" element={<Messages />} />
         <Route path="users" element={<Users />} />
-      </Route>
+        <Route path="donations" element={<AdminDonations />} />      </Route>
 
     </Routes>
   );
