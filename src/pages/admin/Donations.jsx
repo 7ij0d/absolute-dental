@@ -293,11 +293,12 @@ export const Donations = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>
-            {isRtl ? '🎁 إدارة التبرعات' : '🎁 Donations Management'}
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Gift size={24} color="var(--primary)" />
+            <span>{isRtl ? 'إدارة التبرعات والطلبات' : 'Donations & Requests Management'}</span>
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-            {isRtl ? 'مراجعة وإدارة تبرعات الطلاب بالأدوات والمستلزمات' : 'Review and manage student tool donations'}
+            {isRtl ? 'مراجعة وإدارة تبرعات الطلاب بالأدوات والمستلزمات وطلبات الاحتياج' : 'Review and manage student tool donations and need requests'}
           </p>
         </div>
       </div>
@@ -322,16 +323,18 @@ export const Donations = () => {
         <button
           onClick={() => setAdminTab('donations')}
           className={`btn ${adminTab === 'donations' ? 'btn-primary' : 'btn-outline'}`}
-          style={{ padding: '0.5rem 1.25rem', borderRadius: 'var(--radius-full)', fontSize: '0.85rem', fontWeight: 700 }}
+          style={{ padding: '0.5rem 1.25rem', borderRadius: 'var(--radius-full)', fontSize: '0.85rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
         >
-          🎁 {isRtl ? `الأدوات المتبرع بها (${items.length})` : `Donated Items (${items.length})`}
+          <Gift size={16} />
+          <span>{isRtl ? `الأدوات المتبرع بها (${items.length})` : `Donated Items (${items.length})`}</span>
         </button>
         <button
           onClick={() => setAdminTab('requests')}
           className={`btn ${adminTab === 'requests' ? 'btn-primary' : 'btn-outline'}`}
-          style={{ padding: '0.5rem 1.25rem', borderRadius: 'var(--radius-full)', fontSize: '0.85rem', fontWeight: 700, borderColor: adminTab === 'requests' ? undefined : 'var(--primary)' }}
+          style={{ padding: '0.5rem 1.25rem', borderRadius: 'var(--radius-full)', fontSize: '0.85rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem', borderColor: adminTab === 'requests' ? undefined : 'var(--primary)' }}
         >
-          🙋‍♂️ {isRtl ? `طلبات الاحتياج السرية (${requests.length})` : `Secret Need Requests (${requests.length})`}
+          <Lock size={16} />
+          <span>{isRtl ? `طلبات الاحتياج السرية (${requests.length})` : `Secret Need Requests (${requests.length})`}</span>
         </button>
       </div>
 
@@ -434,7 +437,7 @@ export const Donations = () => {
               <thead>
                 <tr style={{ backgroundColor: 'var(--accent)', borderBottom: '2px solid var(--border-color)', color: 'var(--text-main)', fontWeight: 700 }}>
                   <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الأداة المطلوبة' : 'Requested Item'}</th>
-                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'بيانات الطالب (سرية 🔒)' : 'Student Info (Private 🔒)'}</th>
+                  <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'بيانات الطالب (سرية)' : 'Student Info (Private)'}</th>
                   <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الهاتف والتليجرام' : 'Phone & Telegram'}</th>
                   <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'السنة / المادة' : 'Year / Subject'}</th>
                   <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الحالة' : 'Status'}</th>
@@ -459,8 +462,9 @@ export const Donations = () => {
                         )}
                       </td>
                       <td style={{ padding: '1rem 0.75rem', fontWeight: 600 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: 'var(--secondary)' }}>
-                          🔒 {req.student_real_name || (isRtl ? 'طالب غير مسمى' : 'Anonymous')}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--secondary)' }}>
+                          <Lock size={14} />
+                          <span>{req.student_real_name || (isRtl ? 'طالب غير مسمى' : 'Anonymous')}</span>
                         </span>
                       </td>
                       <td style={{ padding: '1rem 0.75rem' }}>
@@ -493,9 +497,9 @@ export const Donations = () => {
                             cursor: 'pointer'
                           }}
                         >
-                          <option value="searching">{isRtl ? 'جاري البحث 🔍' : 'Searching 🔍'}</option>
-                          <option value="fulfilled">{isRtl ? 'تم التوفير ✅' : 'Fulfilled ✅'}</option>
-                          <option value="cancelled">{isRtl ? 'ملغي ❌' : 'Cancelled ❌'}</option>
+                          <option value="searching">{isRtl ? 'جاري البحث' : 'Searching'}</option>
+                          <option value="fulfilled">{isRtl ? 'تم التوفير' : 'Fulfilled'}</option>
+                          <option value="cancelled">{isRtl ? 'ملغي' : 'Cancelled'}</option>
                         </select>
                       </td>
                       <td style={{ padding: '1rem 0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>

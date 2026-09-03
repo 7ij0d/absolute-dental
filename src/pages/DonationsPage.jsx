@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import supabase from '../supabaseClient';
 import { useLanguage } from '../context/LanguageContext';
 import { 
   HeartHandshake, CheckCircle2, AlertCircle, Upload, Image as ImageIcon, 
   Phone, MessageCircle, Calendar, Eye, Filter, Loader2, X,
-  Lock, ShieldCheck, Smartphone, Send, Copy, Plus, HelpCircle
+  Lock, ShieldCheck, Smartphone, Send, Copy, Plus, HelpCircle,
+  Package, Gift, FileText, Clock, ChevronRight
 } from 'lucide-react';
 
 const compressImage = (file, maxWidth = 800, quality = 0.8) => {
@@ -85,130 +87,6 @@ const saveLocalStudentRequest = (newItem) => {
   }
 };
 
-export default function DonationsPage() {
-  const { t, isRtl, lang } = useLanguage();
-  const [activeTab, setActiveTab] = useState('browse'); // 'browse', 'donate', 'requests', 'balance'
-  
-  // Data state
-  const [years, setYears] = useState(FALLBACK_YEARS);
-  const [subjects, setSubjects] = useState([]);
-  const [donations, setDonations] = useState([]);
-  const [studentRequests, setStudentRequests] = useState([]);
-  
-  // Filter state
-  const [filterType, setFilterType] = useState('');
-  const [filterYear, setFilterYear] = useState('');
-  
-  // Tool Donation Form state
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    item_type: 'equipment',
-    year_id: '',
-    subject_id: '',
-    condition: 'good',
-    donor_phone: '',
-    donor_whatsapp: ''
-  });
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Student Need Request Form state
-  const [showRequestForm, setShowRequestForm] = useState(false);
-  const [requestForm, setRequestForm] = useState({
-    item_title: '',
-    description: '',
-    year_id: '',
-    subject_id: '',
-    student_real_name: '',
-    student_phone: '',
-    student_telegram: ''
-  });
-  const [requestSubjects, setRequestSubjects] = useState([]);
-  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
-  const [requestSuccessMsg, setRequestSuccessMsg] = useState('');
-  const [requestErrorMsg, setRequestErrorMsg] = useState('');
-
-  // Balance Scratch Card Form state
-  const [scratchCard, setScratchCard] = useState({
-    network: 'libyana',
-    code: '',
-    amount: '5'
-  });
-  const [copiedNumber, setCopiedNumber] = useState('');
-  
-  // Status messages
-  const [successMsg, setSuccessMsg] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-
-  // Fetch initial data
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      setIsLoading(true);
-      try {
-        const { data: yearsData, error: yearsError } = await supabase
-          .from('years')
-          .select('*')
-          .order('order_index', { ascending: true });
-        
-        if (!yearsError && yearsData && yearsData.length > 0) {
-          setYears(yearsData);
-        } else {
-          setYears(FALLBACK_YEARS);
-        }
-        
-        await fetchDonations();
-        await fetchStudentRequests();
-      } catch (err) {
-        console.error('Error fetching initial data:', err);
-        setYears(FALLBACK_YEARS);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchInitialData();
-  }, []);
-
-  const fetchStudentRequests = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('student_requests')
-        .select('*, years(name_ar, name_en)')
-        .order('created_at', { ascending: false });
-
-      if (!error && data && data.length > 0) {
-        setStudentRequests(data);
-      } else {
-        setStudentRequests(getLocalStudentRequests());
-      }
-    } catch {
-      setStudentRequests(getLocalStudentRequests());
-    }
-  };
-
-  // Fetch subjects when year changes in form
-  useEffect(() => {
-    if (!formData.year_id) {
-      setSubjects([]);
-      return;
-    }
-    
-    const fetchSubjects = async () => {
-      const { data } = await supabase
-        .from('subjects')
-        .select('*')
-        .eq('year_id', formData.year_id)
-        .order('name_' + lang, { ascending: true });
-      
-      if (data) setSubjects(data);
-    };
-    
-    fetchSubjects();
-  }, [formData.year_id, lang]);
-
 const DEFAULT_DONATIONS = [
   {
     id: 'd1',
@@ -287,6 +165,123 @@ const saveLocalDonation = (newItem) => {
   }
 };
 
+export default function DonationsPage() {
+  const { t, isRtl, lang } = useLanguage();
+  const [activeTab, setActiveTab] = useState('browse'); // 'browse', 'donate', 'requests', 'balance'
+  
+  // Data state
+  const [years, setYears] = useState(FALLBACK_YEARS);
+  const [subjects, setSubjects] = useState([]);
+  const [donations, setDonations] = useState([]);
+  const [studentRequests, setStudentRequests] = useState([]);
+  
+  // Filter state
+  const [filterType, setFilterType] = useState('');
+  const [filterYear, setFilterYear] = useState('');
+  
+  // Fulfill Need Modal State
+  const [fulfillModalItem, setFulfillModalItem] = useState(null);
+
+  // Tool Donation Form state
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    item_type: 'equipment',
+    year_id: '',
+    subject_id: '',
+    condition: 'good',
+    donor_phone: '',
+    donor_whatsapp: ''
+  });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Student Need Request Form state
+  const [showRequestForm, setShowRequestForm] = useState(false);
+  const [requestForm, setRequestForm] = useState({
+    item_title: '',
+    description: '',
+    year_id: '',
+    subject_id: '',
+    student_real_name: '',
+    student_phone: '',
+    student_telegram: ''
+  });
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
+  const [requestSuccessMsg, setRequestSuccessMsg] = useState('');
+  
+  // Status messages
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // Fetch initial data
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      setIsLoading(true);
+      try {
+        const { data: yearsData, error: yearsError } = await supabase
+          .from('years')
+          .select('*')
+          .order('order_index', { ascending: true });
+        
+        if (!yearsError && yearsData && yearsData.length > 0) {
+          setYears(yearsData);
+        } else {
+          setYears(FALLBACK_YEARS);
+        }
+        
+        await fetchDonations();
+        await fetchStudentRequests();
+      } catch (err) {
+        console.error('Error fetching initial data:', err);
+        setYears(FALLBACK_YEARS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchInitialData();
+  }, []);
+
+  const fetchStudentRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('student_requests')
+        .select('*, years(name_ar, name_en)')
+        .order('created_at', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        setStudentRequests(data);
+      } else {
+        setStudentRequests(getLocalStudentRequests());
+      }
+    } catch {
+      setStudentRequests(getLocalStudentRequests());
+    }
+  };
+
+  // Fetch subjects when year changes in form
+  useEffect(() => {
+    if (!formData.year_id) {
+      setSubjects([]);
+      return;
+    }
+    
+    const fetchSubjects = async () => {
+      const { data } = await supabase
+        .from('subjects')
+        .select('*')
+        .eq('year_id', formData.year_id)
+        .order('name_' + lang, { ascending: true });
+      
+      if (data) setSubjects(data);
+    };
+    
+    fetchSubjects();
+  }, [formData.year_id, lang]);
+
   const fetchDonations = async () => {
     try {
       let query = supabase
@@ -306,7 +301,6 @@ const saveLocalDonation = (newItem) => {
       if (!error && data && data.length > 0) {
         setDonations(data);
       } else {
-        // Fallback to local storage with resilient year matching
         let localData = getLocalDonations().filter(d => d.status === 'active');
         if (filterType) localData = localData.filter(d => d.item_type === filterType);
         if (filterYear) {
@@ -378,7 +372,6 @@ const saveLocalDonation = (newItem) => {
     try {
       let imageUrl = null;
       
-      // Upload image if selected
       if (imageFile) {
         const compressedBlob = await compressImage(imageFile);
         const fileExt = 'jpg';
@@ -419,7 +412,6 @@ const saveLocalDonation = (newItem) => {
         created_at: new Date().toISOString()
       };
 
-      // Try Supabase insert
       try {
         const { error: insertError } = await supabase
           .from('donations')
@@ -445,17 +437,7 @@ const saveLocalDonation = (newItem) => {
         saveLocalDonation(newDonationObj);
       }
 
-      // Insert notification for admins if table available
-      try {
-        await supabase.from('notifications').insert([{
-          title: 'New Donation Pending',
-          message: `New donation offer: ${formData.title}`,
-          type: 'donation',
-          is_read: false
-        }]);
-      } catch (_) {}
-
-      setSuccessMsg(t('donations.success_msg') || 'Donation submitted successfully and is pending approval.');
+      setSuccessMsg(t('donations.success_msg') || 'تم تسجيل تبرعك بنجاح! سيتم مراجعته ونشره قريباً.');
       clearForm();
       
     } catch (err) {
@@ -477,7 +459,7 @@ const saveLocalDonation = (newItem) => {
         created_at: new Date().toISOString()
       };
       saveLocalDonation(fallbackObj);
-      setSuccessMsg(t('donations.success_msg') || 'Donation submitted successfully and is pending approval.');
+      setSuccessMsg(t('donations.success_msg') || 'تم تسجيل تبرعك بنجاح! سيتم مراجعته ونشره قريباً.');
       clearForm();
     } finally {
       setIsSubmitting(false);
@@ -488,7 +470,6 @@ const saveLocalDonation = (newItem) => {
     e.preventDefault();
     setIsSubmittingRequest(true);
     setRequestSuccessMsg('');
-    setRequestErrorMsg('');
 
     const newReq = {
       id: 'req_' + Date.now(),
@@ -520,7 +501,7 @@ const saveLocalDonation = (newItem) => {
 
     saveLocalStudentRequest(newReq);
     setStudentRequests(prev => [newReq, ...prev]);
-    setRequestSuccessMsg(t('donations.request_success') || 'تم تسجيل طلب احتياجك بنجاح! يسعى المشرفون لتوفيره وسيتم التواصل معك فور توفره 🎉');
+    setRequestSuccessMsg(t('donations.request_success') || 'تم تسجيل طلب احتياجك بنجاح. يسعى المشرفون لتوفيره وسيتم التواصل معك فور توفره.');
     setRequestForm({
       item_title: '',
       description: '',
@@ -533,18 +514,7 @@ const saveLocalDonation = (newItem) => {
     setIsSubmittingRequest(false);
   };
 
-  const handleSendScratchCard = (e) => {
-    e.preventDefault();
-    if (!scratchCard.code) return;
-
-    const networkName = scratchCard.network === 'libyana' ? 'ليبيانا Libyana' : 'مدار Madar';
-    const message = `السلام عليكم، أود التبرع برصيد ${networkName} بكود الكرت: ${scratchCard.code} بقيمة ${scratchCard.amount} د.ل لدعم بنك أدوات ومستلزمات الطلاب.`;
-    const whatsappUrl = `https://wa.me/218911234567?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
   const handleCardClick = async (donation) => {
-    // Increment view count
     try {
       await supabase
         .from('donations')
@@ -611,7 +581,7 @@ const saveLocalDonation = (newItem) => {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs - Emojis removed, clean SVG icons */}
       <div style={{ 
         display: 'flex', 
         borderBottom: '1px solid var(--border-color)', 
@@ -625,15 +595,19 @@ const saveLocalDonation = (newItem) => {
             background: 'none',
             border: 'none',
             padding: '0.85rem 0',
-            fontSize: '1.05rem',
-            fontWeight: activeTab === 'browse' ? 'bold' : 'normal',
+            fontSize: '1rem',
+            fontWeight: activeTab === 'browse' ? 700 : 500,
             color: activeTab === 'browse' ? 'var(--primary)' : 'var(--text-muted)',
             borderBottom: activeTab === 'browse' ? '3px solid var(--primary)' : '3px solid transparent',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
             transition: 'var(--transition-fast)'
           }}
         >
-          📦 {t('donations.browse_tab') || 'الأدوات المتبرع بها'}
+          <Package size={18} />
+          <span>{t('donations.browse_tab') || 'الأدوات المتبرع بها'}</span>
         </button>
 
         <button
@@ -642,15 +616,19 @@ const saveLocalDonation = (newItem) => {
             background: 'none',
             border: 'none',
             padding: '0.85rem 0',
-            fontSize: '1.05rem',
-            fontWeight: activeTab === 'donate' ? 'bold' : 'normal',
+            fontSize: '1rem',
+            fontWeight: activeTab === 'donate' ? 700 : 500,
             color: activeTab === 'donate' ? 'var(--primary)' : 'var(--text-muted)',
             borderBottom: activeTab === 'donate' ? '3px solid var(--primary)' : '3px solid transparent',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
             transition: 'var(--transition-fast)'
           }}
         >
-          🎁 {t('donations.donate_tab') || 'تبرع بأداة'}
+          <Gift size={18} />
+          <span>{t('donations.donate_tab') || 'تبرع بأداة'}</span>
         </button>
 
         <button
@@ -659,15 +637,19 @@ const saveLocalDonation = (newItem) => {
             background: 'none',
             border: 'none',
             padding: '0.85rem 0',
-            fontSize: '1.05rem',
-            fontWeight: activeTab === 'requests' ? 'bold' : 'normal',
+            fontSize: '1rem',
+            fontWeight: activeTab === 'requests' ? 700 : 500,
             color: activeTab === 'requests' ? 'var(--primary)' : 'var(--text-muted)',
             borderBottom: activeTab === 'requests' ? '3px solid var(--primary)' : '3px solid transparent',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
             transition: 'var(--transition-fast)'
           }}
         >
-          🙋‍♂️ {t('donations.requests_tab') || 'طلبات الاحتياج الطلابية'}
+          <FileText size={18} />
+          <span>{t('donations.requests_tab') || 'طلبات الاحتياج الطلابية'}</span>
         </button>
 
         <button
@@ -676,15 +658,19 @@ const saveLocalDonation = (newItem) => {
             background: 'none',
             border: 'none',
             padding: '0.85rem 0',
-            fontSize: '1.05rem',
-            fontWeight: activeTab === 'balance' ? 'bold' : 'normal',
+            fontSize: '1rem',
+            fontWeight: activeTab === 'balance' ? 700 : 500,
             color: activeTab === 'balance' ? 'var(--primary)' : 'var(--text-muted)',
             borderBottom: activeTab === 'balance' ? '3px solid var(--primary)' : '3px solid transparent',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
             transition: 'var(--transition-fast)'
           }}
         >
-          📱 {t('donations.balance_tab') || 'التبرع برصيد (ليبيانا / مدار)'}
+          <Smartphone size={18} />
+          <span>{t('donations.balance_tab') || 'التبرع بالرصيد والتحويل المصرفي'}</span>
         </button>
       </div>
 
@@ -798,52 +784,67 @@ const saveLocalDonation = (newItem) => {
                   </div>
                   
                   <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.2rem' }}>{donation.title}</h3>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', flex: 1, marginBottom: '1rem', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {donation.description}
-                    </p>
+                    <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                      {donation.title}
+                    </h3>
                     
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--primary)', fontWeight: 'bold' }}>
-                        <span>{isRtl ? 'إهداء مجاني 🎁' : 'Free Gift 🎁'}</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <Calendar size={14} />
-                        <span>{new Date(donation.created_at).toLocaleDateString()}</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <Eye size={14} />
-                        <span>{donation.views_count || 0}</span>
-                      </div>
-                    </div>
+                    {donation.description && (
+                      <p style={{ 
+                        fontSize: '0.85rem', 
+                        color: 'var(--text-muted)', 
+                        marginBottom: '1rem',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}>
+                        {donation.description}
+                      </p>
+                    )}
                     
-                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
-                      {donation.donor_whatsapp && (
-                        <a 
-                          href={`https://wa.me/${donation.donor_whatsapp.replace(/\D/g, '')}`}
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="btn"
-                          style={{ flex: 1, background: '#25D366', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '0.5rem' }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MessageCircle size={16} /> WhatsApp
-                        </a>
-                      )}
-                      <a 
-                        href={`tel:${donation.donor_phone}`}
-                        className="btn btn-outline"
-                        style={{ flex: donation.donor_whatsapp ? '0 0 auto' : 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '0.5rem' }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Phone size={16} /> {donation.donor_whatsapp ? '' : 'Call'}
-                      </a>
+                    <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                        <span>{isRtl ? 'المتبرع:' : 'Donor:'} {donation.donor_name ? donation.donor_name.split(' ')[0] : (isRtl ? 'فاعل خير' : 'Anonymous')}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Eye size={14} />
+                          <span>{donation.views_count || 0}</span>
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                        {donation.donor_phone && (
+                          <a 
+                            href={`tel:${donation.donor_phone}`}
+                            className="btn btn-outline" 
+                            style={{ flex: 1, padding: '0.4rem', fontSize: '0.8rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.25rem' }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Phone size={14} />
+                            {isRtl ? 'اتصال' : 'Call'}
+                          </a>
+                        )}
+                        {donation.donor_whatsapp && (
+                          <a 
+                            href={`https://wa.me/${donation.donor_whatsapp.replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn" 
+                            style={{ flex: 1, padding: '0.4rem', fontSize: '0.8rem', backgroundColor: '#25D366', color: 'white', border: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.25rem' }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MessageCircle size={14} />
+                            {isRtl ? 'واتساب' : 'WhatsApp'}
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
+
         </div>
       )}
 
@@ -1038,7 +1039,7 @@ const saveLocalDonation = (newItem) => {
               </div>
 
               <div className="form-group" style={{ marginTop: '1.5rem' }}>
-                <label className="form-label">Image (Optional, max 800px width)</label>
+                <label className="form-label">صورة الأداة (اختياري)</label>
                 <div style={{
                   border: '2px dashed var(--border-color)',
                   borderRadius: 'var(--radius-md)',
@@ -1062,12 +1063,12 @@ const saveLocalDonation = (newItem) => {
                   {imagePreview ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                       <img src={imagePreview} alt="Preview" style={{ maxHeight: '150px', borderRadius: 'var(--radius-sm)' }} />
-                      <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>Change Image</span>
+                      <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>تغيير الصورة</span>
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
                       <Upload size={32} />
-                      <p>Click or drag to upload image</p>
+                      <p>اضغط أو اسحب الصورة هنا للرفع</p>
                     </div>
                   )}
                 </div>
@@ -1093,16 +1094,17 @@ const saveLocalDonation = (newItem) => {
         </div>
       )}
 
-      {/* Tab Content: Student Requests */}
+      {/* Tab Content: Student Requests (Refactored to match Requirements 1, 2, 3) */}
       {activeTab === 'requests' && (
         <div className="section animate-fade-in">
           
-          {/* Privacy & Info Banner */}
-          <div className="card" style={{ padding: '1.5rem', marginBottom: '2rem', backgroundColor: 'var(--surface-color)', border: '1px solid var(--border-color)' }}>
+          {/* Header & Privacy Info */}
+          <div className="card" style={{ padding: '1.5rem', marginBottom: '2rem', backgroundColor: 'var(--surface-color)', border: '1px solid rgba(0,0,0,0.08)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  🙋‍♂️ {t('donations.requests_tab') || 'طلبات الاحتياج الطلابية'}
+                  <FileText size={22} color="var(--primary)" />
+                  <span>{t('donations.requests_tab') || 'طلبات الاحتياج الطلابية'}</span>
                 </h2>
                 <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
                   {isRtl ? 'قائمة بالأدوات والملازم المطلوبة من الطلاب لظروف دراسية أو طارئة' : 'List of tools & notes needed by students'}
@@ -1114,13 +1116,13 @@ const saveLocalDonation = (newItem) => {
                 style={{ padding: '0.65rem 1.25rem', gap: '0.5rem' }}
               >
                 <Plus size={18} />
-                {t('donations.request_tool_btn') || 'اطلب أداة تحتاجها 🙋‍♂️'}
+                <span>{t('donations.request_tool_btn') || 'تقديم طلب احتياج جديد'}</span>
               </button>
             </div>
 
             <div style={{ padding: '0.85rem 1rem', backgroundColor: 'rgba(13, 148, 136, 0.08)', border: '1px solid rgba(13, 148, 136, 0.25)', borderRadius: 'var(--radius-md)', fontSize: '0.82rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Lock size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} />
-              <span>{t('donations.request_privacy_note') || '🔒 جميع بياناتك واسمك تظل سرية ومحمية لدى إدارة الكلية والمشرفين فقط لتوفير الأداة وتسليمها لك ولا تظهر للعامة مطلقاً.'}</span>
+              <ShieldCheck size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+              <span>{t('donations.request_privacy_note')}</span>
             </div>
           </div>
 
@@ -1187,7 +1189,7 @@ const saveLocalDonation = (newItem) => {
                 <div style={{ padding: '1rem', backgroundColor: 'var(--bg)', borderRadius: 'var(--radius-md)', marginBottom: '1.25rem', border: '1px dashed var(--border-color)' }}>
                   <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <Lock size={14} />
-                    {isRtl ? 'بيانات التواصل الشخصية (سرية للأدمن فقط ولن تظهر بالواجهة)' : 'Confidential Student Info (Private to Admin)'}
+                    <span>{isRtl ? 'بيانات التواصل الشخصية (سرية للأدمن فقط ولن تظهر بالواجهة)' : 'Confidential Student Info (Private to Admin)'}</span>
                   </h4>
                   <div className="grid-3" style={{ gap: '1rem' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
@@ -1237,7 +1239,7 @@ const saveLocalDonation = (newItem) => {
             </div>
           )}
 
-          {/* Student Requests Cards Grid */}
+          {/* Student Need Cards (Requirement 2 Redesign) */}
           {studentRequests.length === 0 ? (
             <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
               <HelpCircle size={48} color="var(--text-muted)" style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
@@ -1245,192 +1247,246 @@ const saveLocalDonation = (newItem) => {
             </div>
           ) : (
             <div className="grid-2" style={{ gap: '1.25rem' }}>
-              {studentRequests.map(req => (
-                <div key={req.id} className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'relative' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--primary)' }}>
-                      {req.item_title}
-                    </h3>
-                    <span style={{
-                      padding: '0.25rem 0.65rem',
-                      borderRadius: 'var(--radius-full)',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      backgroundColor: req.status === 'fulfilled' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                      color: req.status === 'fulfilled' ? 'var(--success)' : '#F59E0B'
-                    }}>
-                      {req.status === 'fulfilled' ? (t('donations.status_fulfilled') || 'تم التوفير بنجاح 🎉') : (t('donations.status_searching') || 'جاري البحث عن متبرع 🔍')}
-                    </span>
-                  </div>
+              {studentRequests.map(req => {
+                const isFulfilled = req.status === 'fulfilled';
+                return (
+                  <div 
+                    key={req.id} 
+                    className="card" 
+                    style={{ 
+                      padding: '1.25rem', 
+                      backgroundColor: 'var(--surface-color)',
+                      border: '1px solid rgba(0,0,0,0.08)',
+                      borderRadius: 'var(--radius-lg)',
+                      boxShadow: 'var(--shadow-sm)',
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      gap: '0.85rem',
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                    }}
+                  >
+                    {/* Header Row: Title + Pill Badge */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--primary)', lineHeight: '1.4' }}>
+                        {req.item_title}
+                      </h3>
 
-                  {req.description && (
-                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: 0, lineHeight: '1.5' }}>
-                      {req.description}
-                    </p>
-                  )}
-
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--text-muted)', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--primary)', fontWeight: 600 }}>
-                      <Lock size={14} />
-                      <span>{isRtl ? 'الهوية سرية ومحمية 🔒' : 'Confidential Student Request 🔒'}</span>
+                      {/* Status Pill Badge */}
+                      <span style={{
+                        padding: '0.35rem 0.75rem',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        backgroundColor: isFulfilled ? '#D1FAE5' : '#FEF3C7',
+                        color: isFulfilled ? '#059669' : '#D97706'
+                      }}>
+                        {isFulfilled ? <CheckCircle2 size={13} /> : <Clock size={13} />}
+                        <span>{isFulfilled ? (t('donations.status_fulfilled') || 'تم التوفير بنجاح') : (t('donations.status_searching') || 'جاري البحث')}</span>
+                      </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                      <Calendar size={14} />
-                      <span>{new Date(req.created_at).toLocaleDateString(lang)}</span>
-                    </div>
-                  </div>
 
-                  {req.status !== 'fulfilled' && (
-                    <button
-                      onClick={() => {
-                        setActiveTab('donate');
-                        setFormData(prev => ({ ...prev, title: req.item_title }));
-                        window.scrollTo({ top: 300, behavior: 'smooth' });
-                      }}
-                      className="btn btn-secondary"
-                      style={{ marginTop: '0.5rem', width: '100%', padding: '0.6rem', fontSize: '0.85rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
-                    >
-                      <HeartHandshake size={16} />
-                      {isRtl ? 'أنا أملك هذه الأداة وأود التبرع بها 🎁' : 'I have this tool & want to donate 🎁'}
-                    </button>
-                  )}
-                </div>
-              ))}
+                    {/* Description */}
+                    {req.description && (
+                      <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: 0, lineHeight: '1.55' }}>
+                        {req.description}
+                      </p>
+                    )}
+
+                    {/* Footer Row: Confidentiality Badge & Date */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', marginTop: '0.25rem', fontSize: '0.8rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                        <Lock size={13} color="var(--text-muted)" />
+                        <span>{isRtl ? 'الهوية سرية ومحمية' : 'Identity Confidential'}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                        <Calendar size={13} />
+                        <span>{new Date(req.created_at).toLocaleDateString(lang)}</span>
+                      </div>
+                    </div>
+
+                    {/* Action Button: Opens WhatsApp & Telegram Contact Modal */}
+                    {!isFulfilled && (
+                      <button
+                        onClick={() => setFulfillModalItem(req)}
+                        className="btn btn-primary"
+                        style={{
+                          marginTop: '0.5rem',
+                          width: '100%',
+                          padding: '0.75rem 1rem',
+                          fontSize: '0.88rem',
+                          fontWeight: 700,
+                          borderRadius: 'var(--radius-md)',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <HeartHandshake size={18} />
+                        <span>{isRtl ? 'أنا أملك هذه الأداة وأود التبرع بها' : 'I have this tool & want to donate'}</span>
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
         </div>
       )}
 
-      {/* Tab Content: Balance Donation */}
+      {/* Tab Content: Balance Donation (Requirement 4: Coming Soon State) */}
       {activeTab === 'balance' && (
-        <div className="section animate-fade-in" style={{ maxWidth: '850px', margin: '0 auto' }}>
+        <div className="section animate-fade-in" style={{ maxWidth: '750px', margin: '0 auto' }}>
           
-          <div className="card" style={{ padding: '2.5rem 2rem', marginBottom: '2rem', textAlign: 'center' }}>
-            <div style={{ textAlign: 'center', maxWidth: '650px', margin: '0 auto 2rem' }}>
-              <div style={{ backgroundColor: 'var(--accent)', padding: '1.2rem', borderRadius: '50%', width: 'fit-content', margin: '0 auto 1rem', color: 'var(--secondary)' }}>
-                <Smartphone size={40} />
-              </div>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '0.5rem' }}>
-                {t('donations.balance_title') || 'دعم بنك الأدوات عبر رصيد الهاتف 📱'}
-              </h2>
-              <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
-                {t('donations.balance_desc') || 'مساهمتك ولو برصيد بسيط تساعد الكلية في شراء وتوفير المستلزمات والملازم للطلاب المحتاجين.'}
-              </p>
+          <div className="card" style={{ 
+            padding: '3.5rem 2rem', 
+            textAlign: 'center', 
+            backgroundColor: 'var(--surface-color)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--border-color)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '1.25rem',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <div style={{ 
+              backgroundColor: 'rgba(13, 148, 136, 0.1)', 
+              padding: '1.5rem', 
+              borderRadius: '50%', 
+              color: 'var(--primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Clock size={48} />
             </div>
 
-            {/* Numbers Row */}
-            <div className="grid-2" style={{ gap: '1.5rem', marginBottom: '2.5rem' }}>
-              
-              {/* Libyana Card */}
-              <div style={{ padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '2px solid #ef4444', backgroundColor: 'rgba(239, 68, 68, 0.04)', display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: '#ef4444', fontWeight: 800, fontSize: '1.1rem' }}>
-                  <span>🇱🇾 ليبيانا Libyana</span>
-                </div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, fontFamily: 'monospace', letterSpacing: '0.05em', color: 'var(--text-main)' }}>
-                  091-1234567
-                </div>
-                <button
-                  className="btn"
-                  onClick={() => {
-                    navigator.clipboard.writeText('0911234567');
-                    setCopiedNumber('libyana');
-                    setTimeout(() => setCopiedNumber(''), 2000);
-                  }}
-                  style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '0.5rem', fontSize: '0.85rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem' }}
-                >
-                  <Copy size={16} />
-                  {copiedNumber === 'libyana' ? (isRtl ? 'تم نسخ الرقم! ✓' : 'Copied!') : (isRtl ? 'نسخ رقم تحويل ليبيانا 📋' : 'Copy Libyana Number')}
-                </button>
-              </div>
+            <span style={{ 
+              padding: '0.4rem 1.25rem', 
+              backgroundColor: 'rgba(245, 158, 11, 0.15)', 
+              color: '#D97706', 
+              fontWeight: 800, 
+              borderRadius: 'var(--radius-full)', 
+              fontSize: '0.85rem' 
+            }}>
+              {isRtl ? 'قريباً — Coming Soon' : 'Coming Soon'}
+            </span>
 
-              {/* Madar Card */}
-              <div style={{ padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '2px solid #0284c7', backgroundColor: 'rgba(2, 132, 199, 0.04)', display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: '#0284c7', fontWeight: 800, fontSize: '1.1rem' }}>
-                  <span>📱 مدار Madar</span>
-                </div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, fontFamily: 'monospace', letterSpacing: '0.05em', color: 'var(--text-main)' }}>
-                  092-1234567
-                </div>
-                <button
-                  className="btn"
-                  onClick={() => {
-                    navigator.clipboard.writeText('0921234567');
-                    setCopiedNumber('madar');
-                    setTimeout(() => setCopiedNumber(''), 2000);
-                  }}
-                  style={{ backgroundColor: '#0284c7', color: 'white', border: 'none', padding: '0.5rem', fontSize: '0.85rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem' }}
-                >
-                  <Copy size={16} />
-                  {copiedNumber === 'madar' ? (isRtl ? 'تم نسخ الرقم! ✓' : 'Copied!') : (isRtl ? 'نسخ رقم تحويل مدار 📋' : 'Copy Madar Number')}
-                </button>
-              </div>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--primary)', margin: 0 }}>
+              {t('donations.balance_tab') || 'التبرع بالرصيد والتحويل المصرفي'}
+            </h2>
 
-            </div>
-
-            {/* Scratch Card Code Instant Submission Form */}
-            <div style={{ padding: '1.75rem', backgroundColor: 'var(--bg)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-                <Send size={20} />
-                {isRtl ? 'إرسال كرت تعبئة مباشر عبر الواتساب' : 'Send Scratch Card Code via WhatsApp'}
-              </h3>
-              
-              <form onSubmit={handleSendScratchCard} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '500px', margin: '0 auto' }}>
-                <div className="grid-2" style={{ gap: '1rem' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">{isRtl ? 'الشبكة' : 'Network'}</label>
-                    <select
-                      className="form-input"
-                      value={scratchCard.network}
-                      onChange={(e) => setScratchCard({ ...scratchCard, network: e.target.value })}
-                    >
-                      <option value="libyana">ليبيانا Libyana</option>
-                      <option value="madar">مدار Madar</option>
-                    </select>
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">{isRtl ? 'قيمة الكرت (د.ل)' : 'Amount (LYD)'}</label>
-                    <select
-                      className="form-input"
-                      value={scratchCard.amount}
-                      onChange={(e) => setScratchCard({ ...scratchCard, amount: e.target.value })}
-                    >
-                      <option value="5">5 د.ل</option>
-                      <option value="10">10 د.ل</option>
-                      <option value="20">20 د.ل</option>
-                      <option value="50">50 د.ل</option>
-                      <option value="100">100 د.ل</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">{isRtl ? 'كود الكرت (رقم التعبئة)' : 'Scratch Card Code'} *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={scratchCard.code}
-                    onChange={(e) => setScratchCard({ ...scratchCard, code: e.target.value })}
-                    required
-                    placeholder="XXXX-XXXX-XXXX-XXXX"
-                    style={{ direction: 'ltr', textAlign: 'center', letterSpacing: '0.1em', fontWeight: 700 }}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn"
-                  style={{ backgroundColor: '#25D366', color: 'white', padding: '0.75rem', fontSize: '0.95rem', fontWeight: 700, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}
-                >
-                  <MessageCircle size={20} />
-                  {isRtl ? 'إرسال الكرت عبر الواتساب للمشرف 💬' : 'Send Scratch Card Code on WhatsApp 💬'}
-                </button>
-              </form>
-            </div>
-
+            <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', maxWidth: '520px', lineHeight: '1.6', margin: 0 }}>
+              {isRtl
+                ? 'ستتاح ميزة التبرع المالي عبر كروت شحن (ليبيانا / مدار) والتحويلات المصرفية المباشرة قريباً لدعم بنك الأدوات والملازم والطلاب المحتاجين.'
+                : 'Mobile balance transfers (Libyana / Madar) and direct bank transfer options will be available soon to support the dental student tool bank.'
+              }
+            </p>
           </div>
 
         </div>
+      )}
+
+      {/* Requirement 3 Modal: Direct Contact via WhatsApp or Telegram */}
+      {fulfillModalItem && createPortal(
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, padding: '1rem'
+        }}>
+          <div className="card animate-fade-in" style={{
+            width: '100%', maxWidth: '480px', backgroundColor: 'var(--surface-color)',
+            padding: '2rem 1.5rem', borderRadius: 'var(--radius-lg)', display: 'flex',
+            flexDirection: 'column', gap: '1.25rem', boxShadow: 'var(--shadow-lg)'
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary)', margin: 0 }}>
+                  {isRtl ? 'التواصل مع الإدارة لتوفير الطلب' : 'Contact Admin to Fulfill Request'}
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem', fontWeight: 600 }}>
+                  {fulfillModalItem.item_title}
+                </p>
+              </div>
+              <button onClick={() => setFulfillModalItem(null)} className="action-btn" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Instruction Body */}
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-main)', lineHeight: '1.6', margin: 0 }}>
+              {isRtl ? 'تسعدنا مبادرتك الكريمة لتوفير هذه الأداة لزميلك الطالب. يرجى اختيار الوسيلة المناسبة للتواصل مع إدارة المنصة للتنسيق:' : 'Thank you for offering to provide this tool! Please choose how you would like to contact administration:'}
+            </p>
+
+            {/* Options */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              
+              {/* WhatsApp Link Card */}
+              <a
+                href={`https://wa.me/21895813109?text=${encodeURIComponent('السلام عليكم، أود توفير الطلب: ' + fulfillModalItem.item_title)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'rgba(37, 211, 102, 0.08)', border: '1px solid rgba(37, 211, 102, 0.3)',
+                  color: '#128C7E', textDecoration: 'none', transition: 'transform 0.15s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#25D366', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <MessageCircle size={22} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{isRtl ? 'التواصل عبر الواتساب (WhatsApp)' : 'Contact via WhatsApp'}</div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.85, direction: 'ltr', textAlign: isRtl ? 'right' : 'left' }}>+218 95 813 109</div>
+                  </div>
+                </div>
+                <ChevronRight size={20} style={{ transform: isRtl ? 'rotate(180deg)' : 'none' }} />
+              </a>
+
+              {/* Telegram Link Card */}
+              <a
+                href={`https://t.me/zik0d?text=${encodeURIComponent('السلام عليكم، أود توفير الطلب: ' + fulfillModalItem.item_title)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'rgba(0, 136, 204, 0.08)', border: '1px solid rgba(0, 136, 204, 0.3)',
+                  color: '#0088cc', textDecoration: 'none', transition: 'transform 0.15s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#0088cc', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Send size={20} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{isRtl ? 'التواصل عبر تليجرام (Telegram)' : 'Contact via Telegram'}</div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.85, direction: 'ltr', textAlign: isRtl ? 'right' : 'left' }}>@zik0d</div>
+                  </div>
+                </div>
+                <ChevronRight size={20} style={{ transform: isRtl ? 'rotate(180deg)' : 'none' }} />
+              </a>
+
+            </div>
+
+            {/* Footer Close Button */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border-color)', paddingTop: '0.85rem', marginTop: '0.5rem' }}>
+              <button onClick={() => setFulfillModalItem(null)} className="btn btn-outline" style={{ fontSize: '0.85rem' }}>
+                {isRtl ? 'إغلاق' : 'Close'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
       
     </div>
