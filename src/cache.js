@@ -28,6 +28,17 @@ export function clearStaleCache() {
       if (k && (k.startsWith('mock_') || k === 'mock_user_session')) lsKeys.push(k);
     }
     lsKeys.forEach(k => localStorage.removeItem(k));
+
+    // Sanitize any stored donations or student requests in localStorage to replace "ملازم" with "شيتات"
+    ['ad_donations', 'ad_student_requests'].forEach(lsKey => {
+      const raw = localStorage.getItem(lsKey);
+      if (raw && raw.includes('ملازم')) {
+        const cleaned = raw.replace(/ملازم ومذكرات/g, 'شيتات ومذكرات')
+                           .replace(/الملازم/g, 'الشيتات')
+                           .replace(/ملازم/g, 'شيتات');
+        localStorage.setItem(lsKey, cleaned);
+      }
+    });
   } catch (_) {}
 }
 
