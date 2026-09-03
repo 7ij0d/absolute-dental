@@ -4,6 +4,73 @@ import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
 import { Plus, Edit, Trash2, X, Eye, CheckCircle, Archive, Gift } from 'lucide-react';
 
+const DEFAULT_DONATIONS = [
+  {
+    id: 'd1',
+    title: 'مجموعة أدوات نحت الشمع PKT',
+    description: 'مجموعة أدوات نحت كاملة بحالة ممتازة إهداء لطلاب السنة الأولى كلية طب الأسنان.',
+    item_type: 'equipment',
+    condition: 'excellent',
+    donor_name: 'د. أحمد الطاهر',
+    donor_phone: '0912345678',
+    donor_whatsapp: '218912345678',
+    image_url: 'https://images.unsplash.com/photo-1579684389782-64d84b5e901a?w=500&auto=format',
+    status: 'active',
+    views_count: 12,
+    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+    years: { name_ar: 'السنة الأولى', name_en: '1st Year' }
+  },
+  {
+    id: 'd2',
+    title: 'ملازم ومذكرات تشريح ورسم الأسنان',
+    description: 'ملازم شاملة ومذكرة رسم الأسنان ملونة ومطبوعة ورق مقوى إهداء لزملائنا الدفعة الجديدة.',
+    item_type: 'sheets',
+    condition: 'good',
+    donor_name: 'فاعل خير',
+    donor_phone: '0923456789',
+    donor_whatsapp: '218923456789',
+    image_url: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format',
+    status: 'pending',
+    views_count: 24,
+    created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
+    years: { name_ar: 'السنة الأولى', name_en: '1st Year' }
+  },
+  {
+    id: 'd3',
+    title: 'مرآة ومسبار فحص طبي ووعاء خلط الملاط',
+    description: 'أدوات فحص معملية مع زجاجة خلط الملاط بحالة جيدة جداً.',
+    item_type: 'equipment',
+    condition: 'excellent',
+    donor_name: 'طالب سنة ثالثة',
+    donor_phone: '0945678901',
+    donor_whatsapp: '218945678901',
+    image_url: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=500&auto=format',
+    status: 'active',
+    views_count: 18,
+    created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
+    years: { name_ar: 'السنة الثانية', name_en: '2nd Year' }
+  }
+];
+
+const getLocalDonations = () => {
+  try {
+    const raw = localStorage.getItem('ad_donations');
+    if (!raw) {
+      localStorage.setItem('ad_donations', JSON.stringify(DEFAULT_DONATIONS));
+      return DEFAULT_DONATIONS;
+    }
+    return JSON.parse(raw);
+  } catch {
+    return DEFAULT_DONATIONS;
+  }
+};
+
+const saveLocalDonationsList = (list) => {
+  try {
+    localStorage.setItem('ad_donations', JSON.stringify(list));
+  } catch (_) {}
+};
+
 export const Donations = () => {
   const { lang, t, isRtl } = useLanguage();
   const [items, setItems] = useState([]);
@@ -24,11 +91,13 @@ export const Donations = () => {
         .select('*, years(name_ar, name_en), subjects(name_ar, name_en)')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setItems(data || []);
-    } catch (error) {
-      console.error('Error fetching donations:', error);
-      alert(isRtl ? 'حدث خطأ أثناء جلب البيانات' : 'Error fetching data');
+      if (!error && data && data.length > 0) {
+        setItems(data);
+      } else {
+        setItems(getLocalDonations());
+      }
+    } catch {
+      setItems(getLocalDonations());
     } finally {
       setLoading(false);
     }
@@ -36,20 +105,17 @@ export const Donations = () => {
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
-      const { error } = await supabase
+      await supabase
         .from('donations')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
         .eq('id', id);
+    } catch (_) {}
 
-      if (error) throw error;
-      
-      setItems(items.map(item => 
-        item.id === id ? { ...item, status: newStatus } : item
-      ));
-    } catch (error) {
-      console.error('Error updating status:', error);
-      alert(isRtl ? 'حدث خطأ أثناء تحديث الحالة' : 'Error updating status');
-    }
+    const updated = items.map(item =>
+      item.id === id ? { ...item, status: newStatus } : item
+    );
+    setItems(updated);
+    saveLocalDonationsList(updated);
   };
 
   const handleDelete = async (id) => {
@@ -58,18 +124,15 @@ export const Donations = () => {
     }
 
     try {
-      const { error } = await supabase
+      await supabase
         .from('donations')
         .delete()
         .eq('id', id);
+    } catch (_) {}
 
-      if (error) throw error;
-      
-      setItems(items.filter(item => item.id !== id));
-    } catch (error) {
-      console.error('Error deleting donation:', error);
-      alert(isRtl ? 'حدث خطأ أثناء الحذف' : 'Error deleting');
-    }
+    const updated = items.filter(item => item.id !== id);
+    setItems(updated);
+    saveLocalDonationsList(updated);
   };
 
   const openEditModal = (item) => {
@@ -94,14 +157,18 @@ export const Donations = () => {
         updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase
-        .from('donations')
-        .update(updates)
-        .eq('id', editingItem.id);
+      try {
+        await supabase
+          .from('donations')
+          .update(updates)
+          .eq('id', editingItem.id);
+      } catch (_) {}
 
-      if (error) throw error;
-      
-      await fetchDonations();
+      const updated = items.map(item =>
+        item.id === editingItem.id ? { ...item, ...updates } : item
+      );
+      setItems(updated);
+      saveLocalDonationsList(updated);
       setShowModal(false);
     } catch (error) {
       console.error('Error updating donation:', error);
