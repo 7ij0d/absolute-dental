@@ -266,12 +266,18 @@ export const Orders = () => {
               {filteredList.map((ord) => (
                 <tr key={ord.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1rem 0.75rem', fontWeight: 700 }}>
-                    <span style={{ fontFamily: 'monospace', letterSpacing: '0.04em' }}>
-                      {ord.order_number?.replace(/-/g, '').slice(0, 8)}
+                    <span style={{ fontFamily: 'monospace', letterSpacing: '0.04em', fontSize: '0.95rem', color: 'var(--primary)' }}>
+                      {ord.order_number?.replace(/\D/g, '') || ord.order_number}
                     </span>
                     {ord.order_items?.length > 0 && (
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem', maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {ord.order_items.map(i => i.products?.name_en || i.name_en).join(' • ')}
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-main)', marginTop: '0.35rem', lineHeight: '1.4' }}>
+                        {ord.order_items.map((i, idx) => (
+                          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <span style={{ color: 'var(--secondary)', fontWeight: 800 }}>•</span>
+                            <span>{i.products?.name_ar || i.products?.name_en || i.name_ar || i.name_en || 'منتج'}</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>(×{i.quantity})</span>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </td>

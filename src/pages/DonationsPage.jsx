@@ -26,12 +26,19 @@ const compressImage = (file, maxWidth = 800, quality = 0.8) => {
   });
 };
 
+const FALLBACK_YEARS = [
+  { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى',  name_en: '1st Year', slug: '1st-year' },
+  { id: '20000000-0000-0000-0000-000000000002', name_ar: 'السنة الثانية', name_en: '2nd Year', slug: '2nd-year' },
+  { id: '30000000-0000-0000-0000-000000000003', name_ar: 'السنة الثالثة', name_en: '3rd Year', slug: '3rd-year' },
+  { id: '40000000-0000-0000-0000-000000000004', name_ar: 'السنة الرابعة', name_en: '4th Year', slug: '4th-year' },
+];
+
 export default function DonationsPage() {
   const { t, isRtl, lang } = useLanguage();
   const [activeTab, setActiveTab] = useState('browse'); // 'donate' or 'browse'
   
   // Data state
-  const [years, setYears] = useState([]);
+  const [years, setYears] = useState(FALLBACK_YEARS);
   const [subjects, setSubjects] = useState([]);
   const [donations, setDonations] = useState([]);
   
@@ -39,7 +46,7 @@ export default function DonationsPage() {
   const [filterType, setFilterType] = useState('');
   const [filterYear, setFilterYear] = useState('');
   
-  // Form state
+  // Form state (donor_name removed per user preference)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -47,7 +54,6 @@ export default function DonationsPage() {
     year_id: '',
     subject_id: '',
     condition: 'good',
-    donor_name: '',
     donor_phone: '',
     donor_whatsapp: ''
   });
@@ -70,11 +76,16 @@ export default function DonationsPage() {
           .select('*')
           .order('order_index', { ascending: true });
         
-        if (!yearsError && yearsData) setYears(yearsData);
+        if (!yearsError && yearsData && yearsData.length > 0) {
+          setYears(yearsData);
+        } else {
+          setYears(FALLBACK_YEARS);
+        }
         
         await fetchDonations();
       } catch (err) {
         console.error('Error fetching initial data:', err);
+        setYears(FALLBACK_YEARS);
       } finally {
         setIsLoading(false);
       }
@@ -200,17 +211,29 @@ const saveLocalDonation = (newItem) => {
       if (!error && data && data.length > 0) {
         setDonations(data);
       } else {
-        // Fallback to local storage
+        // Fallback to local storage with resilient year matching
         let localData = getLocalDonations().filter(d => d.status === 'active');
         if (filterType) localData = localData.filter(d => d.item_type === filterType);
-        if (filterYear) localData = localData.filter(d => d.year_id === filterYear);
+        if (filterYear) {
+          localData = localData.filter(d => 
+            String(d.year_id) === String(filterYear) || 
+            d.years?.slug === filterYear || 
+            d.year_id === filterYear
+          );
+        }
         setDonations(localData);
       }
     } catch (err) {
       console.warn('Supabase fetch issue, using local donations:', err);
       let localData = getLocalDonations().filter(d => d.status === 'active');
       if (filterType) localData = localData.filter(d => d.item_type === filterType);
-      if (filterYear) localData = localData.filter(d => d.year_id === filterYear);
+      if (filterYear) {
+        localData = localData.filter(d => 
+          String(d.year_id) === String(filterYear) || 
+          d.years?.slug === filterYear || 
+          d.year_id === filterYear
+        );
+      }
       setDonations(localData);
     }
   };
@@ -244,7 +267,6 @@ const saveLocalDonation = (newItem) => {
       year_id: '',
       subject_id: '',
       condition: 'good',
-      donor_name: '',
       donor_phone: '',
       donor_whatsapp: ''
     });
@@ -283,6 +305,8 @@ const saveLocalDonation = (newItem) => {
         imageUrl = publicUrlData.publicUrl;
       }
 
+      const defaultDonorName = 'فاعل/فاعلة خير';
+
       const newDonationObj = {
         id: 'd_' + Date.now(),
         title: formData.title,
@@ -291,7 +315,7 @@ const saveLocalDonation = (newItem) => {
         year_id: formData.year_id || null,
         subject_id: formData.subject_id || null,
         condition: formData.condition,
-        donor_name: formData.donor_name,
+        donor_name: defaultDonorName,
         donor_phone: formData.donor_phone,
         donor_whatsapp: formData.donor_whatsapp || null,
         image_url: imageUrl || imagePreview || null,
@@ -311,7 +335,7 @@ const saveLocalDonation = (newItem) => {
             year_id: formData.year_id || null,
             subject_id: formData.subject_id || null,
             condition: formData.condition,
-            donor_name: formData.donor_name,
+            donor_name: defaultDonorName,
             donor_phone: formData.donor_phone,
             donor_whatsapp: formData.donor_whatsapp || null,
             image_url: imageUrl,
@@ -330,7 +354,7 @@ const saveLocalDonation = (newItem) => {
       try {
         await supabase.from('notifications').insert([{
           title: 'New Donation Pending',
-          message: `New donation offer: ${formData.title} by ${formData.donor_name}`,
+          message: `New donation offer: ${formData.title}`,
           type: 'donation',
           is_read: false
         }]);
@@ -349,7 +373,7 @@ const saveLocalDonation = (newItem) => {
         year_id: formData.year_id || null,
         subject_id: formData.subject_id || null,
         condition: formData.condition,
-        donor_name: formData.donor_name,
+        donor_name: 'فاعل/فاعلة خير',
         donor_phone: formData.donor_phone,
         donor_whatsapp: formData.donor_whatsapp || null,
         image_url: imagePreview || null,
@@ -483,29 +507,29 @@ const saveLocalDonation = (newItem) => {
             <div className="form-group" style={{ marginBottom: 0, minWidth: '200px' }}>
               <label className="form-label">
                 <Filter size={16} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'text-bottom' }} />
-                Filter by Type
+                {isRtl ? 'تصفية حسب النوع' : 'Filter by Type'}
               </label>
               <select 
                 className="form-input" 
                 value={filterType} 
                 onChange={(e) => setFilterType(e.target.value)}
               >
-                <option value="">All Types</option>
+                <option value="">{isRtl ? 'جميع الأنواع' : 'All Types'}</option>
                 <option value="sheets">{t('donations.type_sheets') || 'Sheets/Notes'}</option>
                 <option value="equipment">{t('donations.type_equipment') || 'Equipment'}</option>
                 <option value="other">{t('donations.type_other') || 'Other'}</option>
               </select>
             </div>
             <div className="form-group" style={{ marginBottom: 0, minWidth: '200px' }}>
-              <label className="form-label">Filter by Year</label>
+              <label className="form-label">{isRtl ? 'تصفية حسب السنة' : 'Filter by Year'}</label>
               <select 
                 className="form-input" 
                 value={filterYear} 
                 onChange={(e) => setFilterYear(e.target.value)}
               >
-                <option value="">All Years</option>
+                <option value="">{isRtl ? 'جميع السنوات الدراسية' : 'All Academic Years'}</option>
                 {years.map(y => (
-                  <option key={y.id} value={y.id}>{y[`name_${lang}`] || y.name_en}</option>
+                  <option key={y.id} value={y.id}>{y[`name_${lang}`] || y.name_ar || y.name_en}</option>
                 ))}
               </select>
             </div>
@@ -515,7 +539,7 @@ const saveLocalDonation = (newItem) => {
                 onClick={() => { setFilterType(''); setFilterYear(''); }}
                 style={{ padding: '0.6rem 1rem' }}
               >
-                Clear Filters
+                {isRtl ? 'مسح التصفية' : 'Clear Filters'}
               </button>
             )}
           </div>
@@ -590,8 +614,8 @@ const saveLocalDonation = (newItem) => {
                     </p>
                     
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <span style={{ fontWeight: 'bold' }}>{donation.donor_name.split(' ')[0]}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--primary)', fontWeight: 'bold' }}>
+                        <span>{isRtl ? 'إهداء مجاني 🎁' : 'Free Gift 🎁'}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                         <Calendar size={14} />
@@ -686,7 +710,7 @@ const saveLocalDonation = (newItem) => {
             <form onSubmit={handleSubmit}>
               <div className="grid-2" style={{ gap: '1.5rem', marginBottom: '1.5rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">{t('donations.item_name') || 'Item Name'} *</label>
+                  <label className="form-label">{t('donations.item_name') || 'اسم الأداة / المستلزم'} *</label>
                   <input
                     type="text"
                     className="form-input"
@@ -694,55 +718,55 @@ const saveLocalDonation = (newItem) => {
                     value={formData.title}
                     onChange={handleInputChange}
                     required
-                    placeholder="e.g. Articulator, Dental Chair..."
+                    placeholder={t('donations.item_name_placeholder') || (isRtl ? 'مثال: دنتال واكس، شيتات فارما، أدوات عملي...' : 'e.g. Dental Wax, Pharma Sheets, Carving tools...')}
                   />
                 </div>
                 
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">{t('donations.category') || 'Category'}</label>
+                  <label className="form-label">{t('donations.category') || 'نوع التبرع'}</label>
                   <select
                     className="form-input"
                     name="item_type"
                     value={formData.item_type}
                     onChange={handleInputChange}
                   >
-                    <option value="equipment">{t('donations.type_equipment') || 'Equipment'}</option>
-                    <option value="sheets">{t('donations.type_sheets') || 'Sheets/Notes'}</option>
-                    <option value="other">{t('donations.type_other') || 'Other'}</option>
+                    <option value="equipment">{t('donations.type_equipment') || 'أدوات ومعدات'}</option>
+                    <option value="sheets">{t('donations.type_sheets') || 'ملازم ومذكرات'}</option>
+                    <option value="other">{t('donations.type_other') || 'أخرى'}</option>
                   </select>
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">{t('donations.description') || 'Description'}</label>
+                <label className="form-label">{t('donations.description') || 'وصف إضافي عن الأداة'}</label>
                 <textarea
                   className="form-input"
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   rows="3"
-                  placeholder="Details about the item..."
+                  placeholder={isRtl ? 'حالة الأداة بالتفصيل، مكان التسليم، أية تفاصيل أخرى...' : 'Item details, hand-off preference...'}
                 ></textarea>
               </div>
 
               <div className="grid-2" style={{ gap: '1.5rem', marginBottom: '1.5rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Related Year (Optional)</label>
+                  <label className="form-label">{isRtl ? 'السنة الدراسية (اختياري)' : 'Academic Year (Optional)'}</label>
                   <select
                     className="form-input"
                     name="year_id"
                     value={formData.year_id}
                     onChange={handleInputChange}
                   >
-                    <option value="">-- None --</option>
+                    <option value="">{isRtl ? '-- اختيار السنة --' : '-- Select Year --'}</option>
                     {years.map(y => (
-                      <option key={y.id} value={y.id}>{y[`name_${lang}`] || y.name_en}</option>
+                      <option key={y.id} value={y.id}>{y[`name_${lang}`] || y.name_ar || y.name_en}</option>
                     ))}
                   </select>
                 </div>
                 
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Related Subject (Optional)</label>
+                  <label className="form-label">{isRtl ? 'المادة (اختياري)' : 'Subject (Optional)'}</label>
                   <select
                     className="form-input"
                     name="subject_id"
@@ -750,16 +774,16 @@ const saveLocalDonation = (newItem) => {
                     onChange={handleInputChange}
                     disabled={!formData.year_id || subjects.length === 0}
                   >
-                    <option value="">-- None --</option>
+                    <option value="">{isRtl ? '-- اختيار المادة --' : '-- Select Subject --'}</option>
                     {subjects.map(s => (
-                      <option key={s.id} value={s.id}>{s[`name_${lang}`] || s.name_en}</option>
+                      <option key={s.id} value={s.id}>{s[`name_${lang}`] || s.name_ar || s.name_en}</option>
                     ))}
                   </select>
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">{t('donations.condition') || 'Condition'}</label>
+                <label className="form-label">{t('donations.condition') || 'حالة الأداة'}</label>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                   {['excellent', 'good', 'fair'].map(cond => (
                     <label key={cond} style={{
@@ -797,20 +821,9 @@ const saveLocalDonation = (newItem) => {
                 </div>
               </div>
 
-              <div className="grid-3" style={{ gap: '1.5rem', marginBottom: '1.5rem' }}>
+              <div className="grid-2" style={{ gap: '1.5rem', marginBottom: '1.5rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">{t('donations.donor_name') || 'Your Name'} *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    name="donor_name"
-                    value={formData.donor_name}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">{t('donations.phone') || 'Phone'} *</label>
+                  <label className="form-label">{t('donations.phone') || 'رقم الهاتف'} *</label>
                   <input
                     type="tel"
                     className="form-input"
@@ -818,16 +831,18 @@ const saveLocalDonation = (newItem) => {
                     value={formData.donor_phone}
                     onChange={handleInputChange}
                     required
+                    placeholder="0912345678"
                   />
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">{t('donations.whatsapp') || 'WhatsApp'} (Optional)</label>
+                  <label className="form-label">{t('donations.whatsapp') || 'رقم واتساب'} ({isRtl ? 'اختياري' : 'Optional'})</label>
                   <input
                     type="tel"
                     className="form-input"
                     name="donor_whatsapp"
                     value={formData.donor_whatsapp}
                     onChange={handleInputChange}
+                    placeholder="218912345678"
                   />
                 </div>
               </div>

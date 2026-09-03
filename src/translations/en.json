@@ -205,10 +205,11 @@
   },
   "donations": {
     "title": "Free Student Donations & Tool Exchange",
-    "subtitle": "Donate your used tools to fellow students or browse available donated items",
+    "subtitle": "Donate your items to fellow students or browse available donations",
     "donate_tab": "Donate a Tool",
     "browse_tab": "Available Donations",
     "item_name": "Tool / Instrument Name",
+    "item_name_placeholder": "e.g. Dental Wax, Pharma Sheets, Carving tools...",
     "description": "Additional description about the tool",
     "category": "Subject / Speciality",
     "condition": "Tool Condition",
@@ -237,8 +238,7 @@
     "contact_donor": "Contact Donor",
     "filter_all": "All",
     "hero_title": "Dental Tool Donation Bank",
-    "hero_subtitle": "Help fellow students with tools you no longer need, or find the support you're looking for",
+    "hero_subtitle": "Donate your items to fellow students or browse available donations",
     "views": "views"
   }
 }
-

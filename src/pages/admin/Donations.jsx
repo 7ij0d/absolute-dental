@@ -150,7 +150,7 @@ export const Donations = () => {
         title: e.target.title.value,
         description: e.target.description.value,
         item_type: e.target.item_type.value,
-        donor_name: e.target.donor_name.value,
+        donor_name: editingItem?.donor_name || 'فاعل/فاعلة خير',
         donor_phone: e.target.donor_phone.value,
         donor_whatsapp: e.target.donor_whatsapp.value,
         status: e.target.status.value,
@@ -234,7 +234,6 @@ export const Donations = () => {
               <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الصورة' : 'Image'}</th>
               <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'العنوان' : 'Title'}</th>
               <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'النوع' : 'Type'}</th>
-              <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'المتبرع' : 'Donor'}</th>
               <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الهاتف' : 'Phone'}</th>
               <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'السنة الدراسية / المادة' : 'Year / Subject'}</th>
               <th style={{ padding: '1rem 0.75rem', textAlign: 'start' }}>{isRtl ? 'الحالة' : 'Status'}</th>
@@ -262,7 +261,6 @@ export const Donations = () => {
                       {item.item_type}
                     </span>
                   </td>
-                  <td style={{ padding: '1rem 0.75rem' }}>{item.donor_name}</td>
                   <td style={{ padding: '1rem 0.75rem', direction: 'ltr' }}>{item.donor_phone || '-'}</td>
                   <td style={{ padding: '1rem 0.75rem' }}>
                     <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{item.years ? (isRtl ? item.years.name_ar : item.years.name_en) : '-'}</div>
@@ -384,17 +382,6 @@ export const Donations = () => {
                     <option value="archived">{isRtl ? 'مؤرشف' : 'Archived'}</option>
                   </select>
                 </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{isRtl ? 'المتبرع' : 'Donor Name'}</label>
-                <input 
-                  type="text" 
-                  name="donor_name"
-                  className="form-input" 
-                  defaultValue={editingItem?.donor_name || ''}
-                  required 
-                />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>

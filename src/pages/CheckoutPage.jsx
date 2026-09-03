@@ -135,29 +135,20 @@ export const CheckoutPage = () => {
     setSubmitting(true);
     setErrorMsg('');
 
-    // Validation for home delivery
-    if (shippingOption !== 'faculty') {
-      if (!latitude || !longitude) {
-        setErrorMsg(lang === 'ar' ? 'يرجى تحديد موقعك على الخريطة للتوصيل المنزلي.' : 'Please select your location on the map for home delivery.');
-        setSubmitting(false);
-        return;
-      }
-    }
-
-    // Generate Order number: e.g. SD-98234-5819
-    const orderNum = `SD-${Math.floor(10000 + Math.random() * 90000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+    // Generate Order number (numbers only, e.g. 84930219)
+    const orderNum = Math.floor(10000000 + Math.random() * 90000000).toString();
 
     try {
-      // Format final notes with street and location link (coordinates link is automatically created)
+      // Format final notes with street and location link if available
       let combinedNotes = notes || '';
       if (shippingOption !== 'faculty') {
-        const locationLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        const locationLink = (latitude && longitude) ? `https://www.google.com/maps?q=${latitude},${longitude}` : null;
         const streetLabel = lang === 'ar' ? 'الشارع/المنطقة' : 'Street/Area';
         const locationLabel = lang === 'ar' ? 'خرائط جوجل' : 'Google Maps';
         const notesLabel = lang === 'ar' ? 'ملاحظات' : 'Notes';
         
-        combinedNotes = `[${streetLabel}: ${addressText || 'محدد على الخريطة'}]` + 
-          ` [${locationLabel}: ${locationLink}]` + 
+        combinedNotes = `[${streetLabel}: ${addressText || 'لم يحدد'}]` + 
+          (locationLink ? ` [${locationLabel}: ${locationLink}]` : '') + 
           (notes ? ` \n[${notesLabel}: ${notes}]` : '');
       }
 

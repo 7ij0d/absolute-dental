@@ -53,7 +53,8 @@ export const OrderTracking = () => {
 
     try {
       if (oNum && oNum.trim()) {
-        // Mode 1: Track specific order
+        // Mode 1: Track specific order (flexible numeric match)
+        const cleanNum = oNum.trim().replace(/\D/g, '');
         const { data, error } = await supabase
           .from('orders')
           .select(`
@@ -63,12 +64,11 @@ export const OrderTracking = () => {
               products (*)
             )
           `)
-          .eq('order_number', oNum.trim())
-          .eq('customer_phone', oPhone.trim())
-          .single();
+          .or(`order_number.eq.${oNum.trim()}${cleanNum ? `,order_number.ilike.%${cleanNum}%` : ''}`)
+          .eq('customer_phone', oPhone.trim());
         
-        if (data) {
-          setOrder(data);
+        if (data && data.length > 0) {
+          setOrder(data[0]);
         }
         setSearchMode('single');
       } else {

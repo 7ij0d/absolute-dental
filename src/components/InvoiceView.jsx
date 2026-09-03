@@ -72,7 +72,9 @@ export const InvoiceView = ({ order }) => {
             >
               {order.status ? t(`tracking.status_${order.status}`) : ''}
             </span>
-            <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>{order.order_number?.replace(/-/g,'').slice(0,8)}</p>
+            <p style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'monospace', color: '#0a335c' }}>
+              {order.order_number?.replace(/\D/g, '') || order.order_number}
+            </p>
             <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.2rem' }}>{formatDate(order.created_at)}</p>
           </div>
 
