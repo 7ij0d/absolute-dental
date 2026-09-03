@@ -31,6 +31,7 @@ import Settings from './pages/admin/Settings';
 import Messages from './pages/admin/Messages';
 import Users from './pages/admin/Users';
 import AdminDonations from './pages/admin/AdminDonations';
+import AdminRequests from './pages/admin/Requests';
 import { runPrefetch } from './prefetch';
 import { clearStaleCache } from './cache';
 
@@ -92,7 +93,8 @@ export const App = () => {
         <Route path="settings" element={<Settings />} />
         <Route path="messages" element={<Messages />} />
         <Route path="users" element={<Users />} />
-        <Route path="donations" element={<AdminDonations />} />      </Route>
+        <Route path="donations" element={<AdminDonations />} />
+        <Route path="requests" element={<AdminRequests />} />      </Route>
 
     </Routes>
   );

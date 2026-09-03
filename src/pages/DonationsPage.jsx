@@ -250,15 +250,18 @@ export default function DonationsPage() {
       const { data, error } = await supabase
         .from('student_requests')
         .select('*, years(name_ar, name_en)')
+        .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
       if (!error && data && data.length > 0) {
         setStudentRequests(data);
       } else {
-        setStudentRequests(getLocalStudentRequests());
+        const localApproved = getLocalStudentRequests().filter(r => r.status === 'approved');
+        setStudentRequests(localApproved);
       }
     } catch {
-      setStudentRequests(getLocalStudentRequests());
+      const localApproved = getLocalStudentRequests().filter(r => r.status === 'approved');
+      setStudentRequests(localApproved);
     }
   };
 
@@ -480,7 +483,7 @@ export default function DonationsPage() {
       student_real_name: requestForm.student_real_name,
       student_phone: requestForm.student_phone,
       student_telegram: requestForm.student_telegram || null,
-      status: 'searching',
+      status: 'pending',
       created_at: new Date().toISOString()
     };
 
@@ -495,13 +498,12 @@ export default function DonationsPage() {
           student_real_name: requestForm.student_real_name,
           student_phone: requestForm.student_phone,
           student_telegram: requestForm.student_telegram || null,
-          status: 'searching'
+          status: 'pending'
         }]);
     } catch (_) {}
 
     saveLocalStudentRequest(newReq);
-    setStudentRequests(prev => [newReq, ...prev]);
-    setRequestSuccessMsg(t('donations.request_success') || 'تم تسجيل طلب احتياجك بنجاح. يسعى المشرفون لتوفيره وسيتم التواصل معك فور توفره.');
+    setRequestSuccessMsg('تم إرسال طلبك بنجاح! سيتم مراجعة الطلب من قبل الإدارة والموافقة عليه قبل نشره على المنصة.');
     setRequestForm({
       item_title: '',
       description: '',
