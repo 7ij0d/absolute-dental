@@ -30,7 +30,8 @@ import Banners from './pages/admin/Banners';
 import Settings from './pages/admin/Settings';
 import Messages from './pages/admin/Messages';
 import Users from './pages/admin/Users';
-import AdminDonations from './pages/admin/Donations';import { runPrefetch } from './prefetch';
+import AdminDonations from './pages/admin/Donations';
+import { runPrefetch } from './prefetch';
 import { clearStaleCache } from './cache';
 
 

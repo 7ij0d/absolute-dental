@@ -138,13 +138,14 @@ export const Donations = () => {
         .select('*, years(name_ar, name_en), subjects(name_ar, name_en)')
         .order('created_at', { ascending: false });
 
-      if (!error && data && data.length > 0) {
+      if (!error && data && Array.isArray(data) && data.length > 0) {
         setItems(data);
       } else {
-        setItems(getLocalDonations());
+        setItems(getLocalDonations() || []);
       }
-    } catch {
-      setItems(getLocalDonations());
+    } catch (err) {
+      console.error("Error loading admin donations:", err);
+      setItems(getLocalDonations() || []);
     } finally {
       setLoading(false);
     }
@@ -157,13 +158,14 @@ export const Donations = () => {
         .select('*, years(name_ar, name_en), subjects(name_ar, name_en)')
         .order('created_at', { ascending: false });
 
-      if (!error && data && data.length > 0) {
+      if (!error && data && Array.isArray(data) && data.length > 0) {
         setRequests(data);
       } else {
-        setRequests(getLocalStudentRequestsList());
+        setRequests(getLocalStudentRequestsList() || []);
       }
-    } catch {
-      setRequests(getLocalStudentRequestsList());
+    } catch (err) {
+      console.error("Error loading student requests:", err);
+      setRequests(getLocalStudentRequestsList() || []);
     }
   };
 
@@ -175,7 +177,7 @@ export const Donations = () => {
         .eq('id', id);
     } catch (_) {}
 
-    const updated = requests.map(item =>
+    const updated = (requests || []).map(item =>
       item.id === id ? { ...item, status: newStatus } : item
     );
     setRequests(updated);
@@ -189,7 +191,7 @@ export const Donations = () => {
       await supabase.from('student_requests').delete().eq('id', id);
     } catch (_) {}
 
-    const updated = requests.filter(item => item.id !== id);
+    const updated = (requests || []).filter(item => item.id !== id);
     setRequests(updated);
     saveLocalStudentRequestsList(updated);
   };
@@ -202,7 +204,7 @@ export const Donations = () => {
         .eq('id', id);
     } catch (_) {}
 
-    const updated = items.map(item =>
+    const updated = (items || []).map(item =>
       item.id === id ? { ...item, status: newStatus } : item
     );
     setItems(updated);
@@ -221,7 +223,7 @@ export const Donations = () => {
         .eq('id', id);
     } catch (_) {}
 
-    const updated = items.filter(item => item.id !== id);
+    const updated = (items || []).filter(item => item.id !== id);
     setItems(updated);
     saveLocalDonationsList(updated);
   };
@@ -255,7 +257,7 @@ export const Donations = () => {
           .eq('id', editingItem.id);
       } catch (_) {}
 
-      const updated = items.map(item =>
+      const updated = (items || []).map(item =>
         item.id === editingItem.id ? { ...item, ...updates } : item
       );
       setItems(updated);
@@ -279,7 +281,10 @@ export const Donations = () => {
     }
   };
 
-  if (loading && items.length === 0) {
+  const safeItems = Array.isArray(items) ? items : [];
+  const safeRequests = Array.isArray(requests) ? requests : [];
+
+  if (loading && safeItems.length === 0) {
     return (
       <div className="container section">
         <div className="skeleton" style={{ height: '100px', marginBottom: '1.5rem' }}></div>
@@ -306,10 +311,10 @@ export const Donations = () => {
       {/* Stats Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         {[
-          { label: isRtl ? 'إجمالي التبرعات' : 'Total', value: items.length, color: 'var(--primary)' },
-          { label: isRtl ? 'نشط' : 'Active', value: items.filter(i => i.status === 'active').length, color: 'var(--success)' },
-          { label: isRtl ? 'محجوز' : 'Claimed', value: items.filter(i => i.status === 'claimed').length, color: '#3B82F6' },
-          { label: isRtl ? 'معلق' : 'Pending', value: items.filter(i => i.status === 'pending').length, color: '#F59E0B' },
+          { label: isRtl ? 'إجمالي التبرعات' : 'Total', value: safeItems.length, color: 'var(--primary)' },
+          { label: isRtl ? 'نشط' : 'Active', value: safeItems.filter(i => i?.status === 'active').length, color: 'var(--success)' },
+          { label: isRtl ? 'محجوز' : 'Claimed', value: safeItems.filter(i => i?.status === 'claimed').length, color: '#3B82F6' },
+          { label: isRtl ? 'معلق' : 'Pending', value: safeItems.filter(i => i?.status === 'pending').length, color: '#F59E0B' },
         ].map((stat, i) => (
           <div key={i} className="card" style={{ padding: '1rem', textAlign: 'center' }}>
             <div style={{ fontSize: '1.5rem', fontWeight: 800, color: stat.color }}>{stat.value}</div>
@@ -326,7 +331,7 @@ export const Donations = () => {
           style={{ padding: '0.5rem 1.25rem', borderRadius: 'var(--radius-full)', fontSize: '0.85rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
         >
           <Gift size={16} />
-          <span>{isRtl ? `الأدوات المتبرع بها (${items.length})` : `Donated Items (${items.length})`}</span>
+          <span>{isRtl ? `الأدوات المتبرع بها (${safeItems.length})` : `Donated Items (${safeItems.length})`}</span>
         </button>
         <button
           onClick={() => setAdminTab('requests')}
@@ -334,7 +339,7 @@ export const Donations = () => {
           style={{ padding: '0.5rem 1.25rem', borderRadius: 'var(--radius-full)', fontSize: '0.85rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem', borderColor: adminTab === 'requests' ? undefined : 'var(--primary)' }}
         >
           <Lock size={16} />
-          <span>{isRtl ? `طلبات الاحتياج السرية (${requests.length})` : `Secret Need Requests (${requests.length})`}</span>
+          <span>{isRtl ? `طلبات الاحتياج السرية (${safeRequests.length})` : `Secret Need Requests (${safeRequests.length})`}</span>
         </button>
       </div>
 
@@ -356,33 +361,37 @@ export const Donations = () => {
                 </tr>
               </thead>
               <tbody>
-                {items.map(item => {
-                  const statusColor = getStatusColor(item.status);
+                {safeItems.map(item => {
+                  const statusColor = getStatusColor(item?.status);
                   return (
-                    <tr key={item.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <tr key={item?.id || Math.random()} style={{ borderBottom: '1px solid var(--border-color)' }}>
                       <td style={{ padding: '1rem 0.75rem' }}>
-                        {item.image_url ? (
-                          <img src={item.image_url} alt={item.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
+                        {item?.image_url ? (
+                          <img src={item.image_url} alt={item.title || ''} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
                         ) : (
                           <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--border-color)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Gift size={20} color="var(--text-muted)" />
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: '1rem 0.75rem', fontWeight: 600 }}>{item.title}</td>
+                      <td style={{ padding: '1rem 0.75rem', fontWeight: 600 }}>{item?.title || '-'}</td>
                       <td style={{ padding: '1rem 0.75rem' }}>
                         <span style={{ padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg)', border: '1px solid var(--border-color)', fontSize: '0.75rem' }}>
-                          {item.item_type}
+                          {item?.item_type || 'equipment'}
                         </span>
                       </td>
-                      <td style={{ padding: '1rem 0.75rem', direction: 'ltr' }}>{item.donor_phone || '-'}</td>
+                      <td style={{ padding: '1rem 0.75rem', direction: 'ltr' }}>{item?.donor_phone || '-'}</td>
                       <td style={{ padding: '1rem 0.75rem' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{item.years ? (isRtl ? item.years.name_ar : item.years.name_en) : '-'}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.subjects ? (isRtl ? item.subjects.name_ar : item.subjects.name_en) : '-'}</div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                          {item?.years ? (isRtl ? (item.years?.name_ar || 'غير محدد') : (item.years?.name_en || 'Not specified')) : (isRtl ? 'غير محدد' : 'Not specified')}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {item?.subjects ? (isRtl ? (item.subjects?.name_ar || 'غير محدد') : (item.subjects?.name_en || 'Not specified')) : '-'}
+                        </div>
                       </td>
                       <td style={{ padding: '1rem 0.75rem' }}>
                         <select 
-                          value={item.status} 
+                          value={item?.status || 'pending'} 
                           onChange={(e) => handleUpdateStatus(item.id, e.target.value)}
                           style={{ 
                             padding: '0.25rem 0.5rem', 
@@ -403,7 +412,7 @@ export const Donations = () => {
                         </select>
                       </td>
                       <td style={{ padding: '1rem 0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        {new Date(item.created_at).toLocaleDateString(lang)}
+                        {item?.created_at ? new Date(item.created_at).toLocaleDateString(lang) : '-'}
                       </td>
                       <td style={{ padding: '1rem 0.75rem', textAlign: 'end' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
@@ -418,7 +427,7 @@ export const Donations = () => {
                     </tr>
                   );
                 })}
-                {items.length === 0 && (
+                {safeItems.length === 0 && (
                   <tr>
                     <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                       {isRtl ? 'لا توجد تبرعات' : 'No donations found'}
@@ -446,16 +455,16 @@ export const Donations = () => {
                 </tr>
               </thead>
               <tbody>
-                {requests.map(req => {
+                {safeRequests.map(req => {
                   let reqColor = { bg: '#FEF3C7', text: '#D97706' }; // searching
-                  if (req.status === 'fulfilled') reqColor = { bg: '#D1FAE5', text: '#059669' };
-                  if (req.status === 'cancelled') reqColor = { bg: '#FEE2E2', text: '#DC2626' };
+                  if (req?.status === 'fulfilled') reqColor = { bg: '#D1FAE5', text: '#059669' };
+                  if (req?.status === 'cancelled') reqColor = { bg: '#FEE2E2', text: '#DC2626' };
 
                   return (
-                    <tr key={req.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <tr key={req?.id || Math.random()} style={{ borderBottom: '1px solid var(--border-color)' }}>
                       <td style={{ padding: '1rem 0.75rem' }}>
-                        <div style={{ fontWeight: 700, color: 'var(--primary)' }}>{req.item_title}</div>
-                        {req.description && (
+                        <div style={{ fontWeight: 700, color: 'var(--primary)' }}>{req?.item_title || '-'}</div>
+                        {req?.description && (
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem', maxWidth: '280px' }}>
                             {req.description}
                           </div>
@@ -464,26 +473,30 @@ export const Donations = () => {
                       <td style={{ padding: '1rem 0.75rem', fontWeight: 600 }}>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--secondary)' }}>
                           <Lock size={14} />
-                          <span>{req.student_real_name || (isRtl ? 'طالب غير مسمى' : 'Anonymous')}</span>
+                          <span>{req?.student_real_name || (isRtl ? 'طالب غير مسمى' : 'Anonymous')}</span>
                         </span>
                       </td>
                       <td style={{ padding: '1rem 0.75rem' }}>
                         <div style={{ direction: 'ltr', textAlign: isRtl ? 'right' : 'left', fontWeight: 600 }}>
-                          {req.student_phone || '-'}
+                          {req?.student_phone || '-'}
                         </div>
-                        {req.student_telegram && (
+                        {req?.student_telegram && (
                           <div style={{ fontSize: '0.75rem', color: '#0088cc', direction: 'ltr', textAlign: isRtl ? 'right' : 'left' }}>
                             {req.student_telegram}
                           </div>
                         )}
                       </td>
                       <td style={{ padding: '1rem 0.75rem' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{req.years ? (isRtl ? req.years.name_ar : req.years.name_en) : '-'}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{req.subjects ? (isRtl ? req.subjects.name_ar : req.subjects.name_en) : '-'}</div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                          {req?.years ? (isRtl ? (req.years?.name_ar || 'غير محدد') : (req.years?.name_en || 'Not specified')) : (isRtl ? 'غير محدد' : 'Not specified')}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {req?.subjects ? (isRtl ? (req.subjects?.name_ar || 'غير محدد') : (req.subjects?.name_en || 'Not specified')) : '-'}
+                        </div>
                       </td>
                       <td style={{ padding: '1rem 0.75rem' }}>
                         <select 
-                          value={req.status} 
+                          value={req?.status || 'searching'} 
                           onChange={(e) => handleUpdateReqStatus(req.id, e.target.value)}
                           style={{ 
                             padding: '0.25rem 0.5rem', 
@@ -503,7 +516,7 @@ export const Donations = () => {
                         </select>
                       </td>
                       <td style={{ padding: '1rem 0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        {new Date(req.created_at).toLocaleDateString(lang)}
+                        {req?.created_at ? new Date(req.created_at).toLocaleDateString(lang) : '-'}
                       </td>
                       <td style={{ padding: '1rem 0.75rem', textAlign: 'end' }}>
                         <button onClick={() => handleDeleteRequest(req.id)} className="action-btn" title={isRtl ? 'حذف' : 'Delete'}>
@@ -513,7 +526,7 @@ export const Donations = () => {
                     </tr>
                   );
                 })}
-                {requests.length === 0 && (
+                {safeRequests.length === 0 && (
                   <tr>
                     <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                       {isRtl ? 'لا توجد طلبات احتياج' : 'No student requests found'}
