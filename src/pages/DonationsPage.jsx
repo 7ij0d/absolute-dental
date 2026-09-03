@@ -504,7 +504,7 @@ const saveLocalDonation = (newItem) => {
     };
 
     try {
-      const { error } = await supabase
+      await supabase
         .from('student_requests')
         .insert([{
           item_title: requestForm.item_title,
@@ -516,12 +516,9 @@ const saveLocalDonation = (newItem) => {
           student_telegram: requestForm.student_telegram || null,
           status: 'searching'
         }]);
+    } catch (_) {}
 
-      if (error) saveLocalStudentRequest(newReq);
-    } catch {
-      saveLocalStudentRequest(newReq);
-    }
-
+    saveLocalStudentRequest(newReq);
     setStudentRequests(prev => [newReq, ...prev]);
     setRequestSuccessMsg(t('donations.request_success') || 'تم تسجيل طلب احتياجك بنجاح! يسعى المشرفون لتوفيره وسيتم التواصل معك فور توفره 🎉');
     setRequestForm({
