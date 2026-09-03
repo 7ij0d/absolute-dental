@@ -528,7 +528,7 @@ export const CheckoutPage = () => {
                 <Truck size={20} style={{ color: 'var(--secondary)' }} />
                 <div>
                   <p style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('checkout.delivery_tripoli_center')}</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lang === 'ar' ? 'سيتم تأكيد سعر التوصيل عبر الواتساب' : 'Delivery fee will be confirmed via WhatsApp'}</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lang === 'ar' ? 'يتم تحديده عبر الواتساب بناءً على عنوانك 📲' : 'Determined via WhatsApp based on your address 📲'}</p>
                 </div>
               </label>
 
@@ -559,7 +559,7 @@ export const CheckoutPage = () => {
                 <Truck size={20} style={{ color: 'var(--secondary)' }} />
                 <div>
                   <p style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('checkout.delivery_tripoli_suburbs')}</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lang === 'ar' ? 'سيتم تأكيد سعر التوصيل عبر الواتساب' : 'Delivery fee will be confirmed via WhatsApp'}</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lang === 'ar' ? 'يتم تحديده عبر الواتساب بناءً على عنوانك 📲' : 'Determined via WhatsApp based on your address 📲'}</p>
                 </div>
               </label>
 
@@ -681,20 +681,22 @@ export const CheckoutPage = () => {
                   <span style={{ fontWeight: 600 }}>-{totalDiscount.toFixed(2)} {t('cart.currency')}</span>
                 </div>
               )}
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>{t('cart.shipping')}:</span>
                 <span style={{ fontWeight: 600, color: 'var(--secondary)', fontSize: '0.8rem' }}>
                   {shippingOption === 'faculty'
-                    ? (lang === 'ar' ? 'مجاني' : 'Free')
-                    : (lang === 'ar' ? 'يتم تأكيده عبر الواتساب  ⁦💬' : 'Confirmed via WhatsApp 💬')}
+                    ? (lang === 'ar' ? 'مجاني بالكلية' : 'Free at Faculty')
+                    : (lang === 'ar' ? 'يتم تحديده عبر الواتساب بناءً على عنوانك 📲' : 'Determined via WhatsApp based on your address 📲')}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid var(--secondary)', paddingTop: '0.6rem', fontSize: '1.15rem', color: 'var(--primary)', fontWeight: 800 }}>
                 <span>{t('cart.total')}:</span>
                 <span>{subtotal.toFixed(2)} {t('cart.currency')}</span>
               </div>
-              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                {lang === 'ar' ? '* سعر التوصيل يُضاف بعد التأكيد عبر الواتساب' : '* Delivery fee added after WhatsApp confirmation'}
+              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.35rem', lineHeight: 1.4 }}>
+                {lang === 'ar'
+                  ? '*(ملاحظة: تكلفة التوصيل تُضاف وتُحدد عبر الواتساب عند تأكيد الطلب).*'
+                  : '*(Note: Delivery fee is determined and added via WhatsApp upon order confirmation).*'}
               </p>
             </div>
 

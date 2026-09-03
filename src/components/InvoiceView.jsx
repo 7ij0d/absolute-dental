@@ -173,19 +173,27 @@ export const InvoiceView = ({ order }) => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>{t('cart.shipping')}:</span>
-              <span style={{ fontWeight: 600 }}>
-                {order.address_text
-                  ? (lang === 'ar' ? 'يتم تحديده عبر الواتساب 💬' : 'Via WhatsApp 💬')
-                  : (order.shipping_fee === 0 ? t('cart.tripoli_free') : `${order.shipping_fee} ${t('cart.currency')}`)}
+              <span style={{ fontWeight: 600, color: '#00a896' }}>
+                {order.shipping_fee > 0
+                  ? `${order.shipping_fee} ${t('cart.currency')}`
+                  : (order.address_text || order.shipping_fee === 0
+                      ? (lang === 'ar' ? 'يتم تحديده عبر الواتساب' : 'Determined via WhatsApp')
+                      : (lang === 'ar' ? 'مجاني بالكلية' : 'Free at Faculty'))}
               </span>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #00a896', paddingTop: '0.6rem', fontSize: '1.1rem', color: '#0a335c', fontWeight: 800 }}>
               <span>{t('cart.total')}:</span>
               <span>
-                {parseFloat(order.total_price).toFixed(2)} {t('cart.currency')}
+                {(parseFloat(order.total_price) - parseFloat(order.shipping_fee || 0)).toFixed(2)} {t('cart.currency')}
               </span>
             </div>
+
+            <p style={{ fontSize: '0.72rem', color: '#666', marginTop: '0.4rem', lineHeight: 1.4 }}>
+              {lang === 'ar'
+                ? '*(ملاحظة: تكلفة التوصيل تُضاف وتُحدد عبر الواتساب عند تأكيد الطلب).*'
+                : '*(Note: Delivery fee is determined and added via WhatsApp upon order confirmation).*'}
+            </p>
 
           </div>
         </div>
