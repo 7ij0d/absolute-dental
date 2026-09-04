@@ -127,7 +127,7 @@ export const AdminRequests = () => {
         <div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Lock size={22} color="var(--primary)" />
-            <span>{isRtl ? 'إدارة ومراجعة طلبات الاحتياج الطلابية' : 'Student Need Requests Management'}</span>
+            <span>{isRtl ? 'إدارة نواقص الطلاب' : 'Student Needs Management'}</span>
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
             {isRtl ? 'مراجعة بيانات الطلاب السرية والموافقة على نشر طلباتهم أو رفضها' : 'Review confidential student submissions and approve/reject before publishing'}

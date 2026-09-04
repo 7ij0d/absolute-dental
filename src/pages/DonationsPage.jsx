@@ -1106,7 +1106,7 @@ export default function DonationsPage() {
               <div>
                 <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <FileText size={22} color="var(--primary)" />
-                  <span>{t('donations.requests_tab') || 'طلبات الاحتياج الطلابية'}</span>
+                  <span>{isRtl ? 'سجل نواقص الطلاب' : 'Student Need Requests Log'}</span>
                 </h2>
                 <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
                   {isRtl ? 'قائمة بالأدوات والشيتات المطلوبة من الطلاب لظروف دراسية أو طارئة' : 'List of tools & notes needed by students'}
@@ -1118,7 +1118,7 @@ export default function DonationsPage() {
                 style={{ padding: '0.65rem 1.25rem', gap: '0.5rem' }}
               >
                 <Plus size={18} />
-                <span>{t('donations.request_tool_btn') || 'تقديم طلب احتياج جديد'}</span>
+                <span>{isRtl ? 'إضافة نقص جديد +' : 'Add New Need +'}</span>
               </button>
             </div>
 
@@ -1328,7 +1328,7 @@ export default function DonationsPage() {
                         }}
                       >
                         <HeartHandshake size={18} />
-                        <span>{isRtl ? 'أنا أملك هذه الأداة وأود التبرع بها' : 'I have this tool & want to donate'}</span>
+                        <span>{isRtl ? 'أنا أملك هذه الأداة (توفير النقص)' : 'I have this tool (Fulfill need)'}</span>
                       </button>
                     )}
                   </div>

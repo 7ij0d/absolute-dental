@@ -232,7 +232,30 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* ── 5. WHY US ── */}
+      {/* ── 5. DONATIONS & NEED REQUESTS BANNER ── */}
+      <section className="section" style={{ background: 'var(--accent)', padding: '3.5rem 0', marginTop: '2rem' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🎁</div>
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '0.75rem' }}>
+            {lang === 'ar' ? 'ركن التبرعات ونواقص الطلاب 🎁' : 'Donations & Need Requests 🎁'}
+          </h2>
+          <p style={{ color: 'var(--text-muted)', maxWidth: '650px', margin: '0 auto 2rem', fontSize: '1rem', lineHeight: 1.6 }}>
+            {lang === 'ar'
+              ? 'تصفح الأدوات والشيتات المتاحة مجاناً، أو أدرج ما ينقصك من أدوات بسرية وسنوفرها لك!'
+              : 'Browse available free tools and sheets, or confidentially request what you need and we will fulfill it!'}
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/donations" className="btn btn-primary" style={{ padding: '0.85rem 1.75rem', fontSize: '0.95rem', gap: '0.5rem' }}>
+              🎁 {lang === 'ar' ? 'تصفح التبرعات المتاحة' : 'Browse Available Donations'}
+            </Link>
+            <Link to="/donations" className="btn btn-outline" style={{ padding: '0.85rem 1.75rem', fontSize: '0.95rem', gap: '0.5rem', borderColor: 'var(--primary)', color: 'var(--primary)' }}>
+              🤝 {lang === 'ar' ? 'نواقص الطلاب' : 'Student Need Requests'}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6. WHY US ── */}
       <section className="section section-dark">
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>

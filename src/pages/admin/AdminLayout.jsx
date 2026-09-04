@@ -136,7 +136,7 @@ export const AdminLayout = () => {
     { path: '/admin/banners', label: isRtl ? 'البانرات' : 'Banners', icon: Image },
     { path: '/admin/messages', label: isRtl ? 'الرسائل' : 'Messages', icon: Inbox },
     { path: '/admin/donations', label: isRtl ? 'التبرعات' : 'Donations', icon: Gift },
-    { path: '/admin/requests', label: isRtl ? 'طلبات الاحتياج' : 'Need Requests', icon: Lock },
+    { path: '/admin/requests', label: isRtl ? 'نواقص الطلاب' : 'Student Needs', icon: Lock },
     { path: '/admin/settings', label: isRtl ? 'الإعدادات' : 'Settings', icon: Settings }
   ];
 

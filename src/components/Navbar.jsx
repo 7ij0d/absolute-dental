@@ -193,7 +193,7 @@ export const Navbar = () => {
               {lang === 'ar' ? 'تواصل معنا' : 'Contact'}
             </Link>
             <Link to="/donations" className={`nav-link ${location.pathname === '/donations' ? 'active' : ''}`}>
-              {lang === 'ar' ? 'ركن التبرعات' : 'Donations'}
+              {lang === 'ar' ? 'التبرعات ونواقص الطلاب' : 'Donations & Need Requests'}
             </Link>
           </nav>
 
@@ -371,7 +371,7 @@ export const Navbar = () => {
                 💬 {lang === 'ar' ? 'تواصل معنا' : 'Contact'}
               </Link>
               <Link to="/donations" className="mobile-nav-link">
-                🎁 {lang === 'ar' ? 'ركن التبرعات' : 'Donations'}
+                🎁 {lang === 'ar' ? 'التبرعات ونواقص الطلاب' : 'Donations & Need Requests'}
               </Link>
             </div>
 

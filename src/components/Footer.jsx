@@ -18,6 +18,7 @@ export const Footer = () => {
         { label: 'السنة الثانية',      to: '/year/2nd-year' },
         { label: 'السنة الثالثة',     to: '/year/3rd-year' },
         { label: 'السنة الرابعة',      to: '/year/4th-year' },
+        { label: 'التبرعات ونواقص الطلاب', to: '/donations' },
         { label: 'تتبع طلبك',          to: '/track' },
       ]
     : [
@@ -26,6 +27,7 @@ export const Footer = () => {
         { label: '2nd Year',       to: '/year/2nd-year' },
         { label: '3rd Year',       to: '/year/3rd-year' },
         { label: '4th Year',       to: '/year/4th-year' },
+        { label: 'Donations & Need Requests', to: '/donations' },
         { label: 'Track Order',    to: '/track' },
       ];
 
