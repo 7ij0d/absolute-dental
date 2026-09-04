@@ -3,41 +3,15 @@ import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
 import { CheckCircle2, XCircle, Trash2, Lock, Clock, Check, X, ShieldAlert, Sparkles, Filter } from 'lucide-react';
 
-const DEFAULT_STUDENT_REQUESTS = [
-  {
-    id: 'req_1',
-    item_title: 'شيتات ومذكرات رسم وتشريح الأسنان ملونة',
-    description: 'محتاج شيتات ومذكرة رسم الأسنان ملونة لدخول امتحان العملي الطارئ، لعدم توفر ميزانية الشراء حالياً.',
-    student_real_name: 'محمد الصادق علي',
-    student_phone: '0912345678',
-    student_telegram: '@dental_std1',
-    status: 'pending',
-    created_at: new Date(Date.now() - 86400000 * 1).toISOString(),
-    years: { name_ar: 'السنة الأولى', name_en: '1st Year' }
-  },
-  {
-    id: 'req_2',
-    item_title: 'أدوات نحت الشمع PKT ووعاء الخلط معمل الفانتوم',
-    description: 'طالب محتاج طقم أدوات نحت شمع كامل لدخول معمل الفانتوم لعدم القدرة على شراء طقم جديد.',
-    student_real_name: 'فاطمة محمود التاورغي',
-    student_phone: '0923456789',
-    student_telegram: '@fatima_dent',
-    status: 'approved',
-    created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
-    years: { name_ar: 'السنة الثانية', name_en: '2nd Year' }
-  }
-];
+const DEFAULT_STUDENT_REQUESTS = [];
 
 const getLocalStudentRequestsList = () => {
   try {
     const raw = localStorage.getItem('ad_student_requests');
-    if (!raw) {
-      localStorage.setItem('ad_student_requests', JSON.stringify(DEFAULT_STUDENT_REQUESTS));
-      return DEFAULT_STUDENT_REQUESTS;
-    }
+    if (!raw) return [];
     return JSON.parse(raw);
   } catch {
-    return DEFAULT_STUDENT_REQUESTS;
+    return [];
   }
 };
 

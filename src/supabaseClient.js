@@ -809,9 +809,10 @@ const mockStorage = {
   })
 };
 
-// -------------------------------------------------------------
-// 4. CLIENT EXPORT (SUPABASE / MOCK DETECTOR)
-// -------------------------------------------------------------
+// ✅ إفراغ البيانات التجريبية كلياً من الكود
+export let mockDonations = [];
+export let mockStudentRequests = [];
+
 export const supabase = useMock
   ? {
       from: (table) => new MockQueryBuilder(table),

@@ -4,89 +4,16 @@ import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
 import { Plus, Edit, Trash2, X, Eye, CheckCircle, Archive, Gift } from 'lucide-react';
 
-const DEFAULT_DONATIONS = [
-  {
-    id: 'd1',
-    title: 'مجموعة أدوات نحت الشمع PKT',
-    description: 'مجموعة أدوات نحت كاملة بحالة ممتازة إهداء لطلاب السنة الأولى كلية طب الأسنان.',
-    item_type: 'equipment',
-    condition: 'excellent',
-    donor_name: 'د. أحمد الطاهر',
-    donor_phone: '0912345678',
-    donor_whatsapp: '218912345678',
-    image_url: 'https://images.unsplash.com/photo-1579684389782-64d84b5e901a?w=500&auto=format',
-    status: 'active',
-    views_count: 12,
-    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-    years: { name_ar: 'السنة الأولى', name_en: '1st Year' }
-  },
-  {
-    id: 'd2',
-    title: 'شيتات ومذكرات تشريح ورسم الأسنان',
-    description: 'شيتات شاملة ومذكرة رسم الأسنان ملونة ومطبوعة ورق مقوى إهداء لزملائنا الدفعة الجديدة.',
-    item_type: 'sheets',
-    condition: 'good',
-    donor_name: 'فاعل خير',
-    donor_phone: '0923456789',
-    donor_whatsapp: '218923456789',
-    image_url: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format',
-    status: 'pending',
-    views_count: 24,
-    created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
-    years: { name_ar: 'السنة الأولى', name_en: '1st Year' }
-  },
-  {
-    id: 'd3',
-    title: 'مرآة ومسبار فحص طبي ووعاء خلط الملاط',
-    description: 'أدوات فحص معملية مع زجاجة خلط الملاط بحالة جيدة جداً.',
-    item_type: 'equipment',
-    condition: 'excellent',
-    donor_name: 'طالب سنة ثالثة',
-    donor_phone: '0945678901',
-    donor_whatsapp: '218945678901',
-    image_url: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=500&auto=format',
-    status: 'active',
-    views_count: 18,
-    created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-    years: { name_ar: 'السنة الثانية', name_en: '2nd Year' }
-  }
-];
-
-const DEFAULT_STUDENT_REQUESTS = [
-  {
-    id: 'req_1',
-    item_title: 'شيتات ومذكرات رسم وتشريح الأسنان ملونة',
-    description: 'محتاج شيتات ومذكرة رسم الأسنان ملونة لدخول امتحان العملي الطارئ، لعدم توفر ميزانية الشراء حالياً.',
-    student_real_name: 'محمد الصادق علي',
-    student_phone: '0912345678',
-    student_telegram: '@dental_std1',
-    status: 'searching',
-    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-    years: { name_ar: 'السنة الأولى', name_en: '1st Year' }
-  },
-  {
-    id: 'req_2',
-    item_title: 'أدوات نحت الشمع PKT ووعاء الخلط معمل الفانتوم',
-    description: 'طالب محتاج طقم أدوات نحت شمع كامل لدخول معمل الفانتوم لعدم القدرة على شراء طقم جديد.',
-    student_real_name: 'فاطمة محمود التاورغي',
-    student_phone: '0923456789',
-    student_telegram: null,
-    status: 'searching',
-    created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
-    years: { name_ar: 'السنة الثانية', name_en: '2nd Year' }
-  }
-];
+const DEFAULT_DONATIONS = [];
+const DEFAULT_STUDENT_REQUESTS = [];
 
 const getLocalDonations = () => {
   try {
     const raw = localStorage.getItem('ad_donations');
-    if (!raw) {
-      localStorage.setItem('ad_donations', JSON.stringify(DEFAULT_DONATIONS));
-      return DEFAULT_DONATIONS;
-    }
+    if (!raw) return [];
     return JSON.parse(raw);
   } catch {
-    return DEFAULT_DONATIONS;
+    return [];
   }
 };
 
@@ -99,13 +26,10 @@ const saveLocalDonationsList = (list) => {
 const getLocalStudentRequestsList = () => {
   try {
     const raw = localStorage.getItem('ad_student_requests');
-    if (!raw) {
-      localStorage.setItem('ad_student_requests', JSON.stringify(DEFAULT_STUDENT_REQUESTS));
-      return DEFAULT_STUDENT_REQUESTS;
-    }
+    if (!raw) return [];
     return JSON.parse(raw);
   } catch {
-    return DEFAULT_STUDENT_REQUESTS;
+    return [];
   }
 };
 
