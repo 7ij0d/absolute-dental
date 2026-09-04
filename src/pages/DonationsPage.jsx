@@ -514,17 +514,43 @@ export default function DonationsPage() {
   };
 
   const handleCardClick = async (donation) => {
-    try {
-      await supabase
-        .from('donations')
-        .update({ views_count: (donation.views_count || 0) + 1 })
-        .eq('id', donation.id);
-        
-      setDonations(prev => prev.map(d => 
-        d.id === donation.id ? { ...d, views_count: (d.views_count || 0) + 1 } : d
+    const sessionKey = `viewed_donation_${donation.id}`;
+    if (!sessionStorage.getItem(sessionKey)) {
+      sessionStorage.setItem(sessionKey, 'true');
+      const newCount = (donation.views_count || 0) + 1;
+      try {
+        await supabase
+          .from('donations')
+          .update({ views_count: newCount })
+          .eq('id', donation.id);
+      } catch (e) {
+        console.error('Error updating donation views:', e);
+      }
+
+      setDonations(prev => prev.map(d =>
+        d.id === donation.id ? { ...d, views_count: newCount } : d
       ));
-    } catch (e) {
-      console.error(e);
+    }
+  };
+
+  const handleViewStudentRequest = async (req) => {
+    setFulfillModalItem(req);
+    const sessionKey = `viewed_request_${req.id}`;
+    if (!sessionStorage.getItem(sessionKey)) {
+      sessionStorage.setItem(sessionKey, 'true');
+      const newCount = (req.views_count || 0) + 1;
+      try {
+        await supabase
+          .from('student_requests')
+          .update({ views_count: newCount })
+          .eq('id', req.id);
+      } catch (e) {
+        console.error('Error updating request views:', e);
+      }
+
+      setStudentRequests(prev => prev.map(r =>
+        r.id === req.id ? { ...r, views_count: newCount } : r
+      ));
     }
   };
 
@@ -1294,22 +1320,28 @@ export default function DonationsPage() {
                       </p>
                     )}
 
-                    {/* Footer Row: Confidentiality Badge & Date */}
+                    {/* Footer Row: Confidentiality Badge, Views & Date */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', marginTop: '0.25rem', fontSize: '0.8rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
                         <Lock size={13} color="var(--text-muted)" />
                         <span>{isRtl ? 'الهوية سرية ومحمية' : 'Identity Confidential'}</span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-                        <Calendar size={13} />
-                        <span>{new Date(req.created_at).toLocaleDateString(lang)}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Eye size={13} />
+                          <span>{req.views_count || 0}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <Calendar size={13} />
+                          <span>{new Date(req.created_at).toLocaleDateString(lang)}</span>
+                        </div>
                       </div>
                     </div>
 
                     {/* Action Button: Opens WhatsApp & Telegram Contact Modal */}
                     {!isFulfilled && (
                       <button
-                        onClick={() => setFulfillModalItem(req)}
+                        onClick={() => handleViewStudentRequest(req)}
                         className="btn btn-primary"
                         style={{
                           marginTop: '0.5rem',
