@@ -1,11 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_SECRET_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://vqrpodmnzubpcsvqohwj.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_SECRET_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_bISG70YeoKP4mu8BKlgsuQ_xPprjcc1';
 const supabaseAnonKey = supabaseKey;
 
-// Use Mock ONLY when real credentials are absent
-// Once you add your Supabase URL + ANON KEY to .env, this switches to live data automatically
+// Use Mock ONLY if credentials are explicitly missing
 const useMock = (
   !supabaseUrl ||
   !supabaseAnonKey ||
