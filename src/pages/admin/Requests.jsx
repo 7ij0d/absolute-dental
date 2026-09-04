@@ -62,14 +62,18 @@ export const AdminRequests = () => {
         .select('*, years(name_ar, name_en), subjects(name_ar, name_en)')
         .order('created_at', { ascending: false });
 
-      if (!error && data && Array.isArray(data) && data.length > 0) {
-        setRequests(data);
+      let localReqs = getLocalStudentRequestsList() || [];
+      if (!error && Array.isArray(data)) {
+        const existingIds = new Set(data.map(item => item.id));
+        const extraLocal = localReqs.filter(item => !existingIds.has(item.id));
+        const merged = [...data, ...extraLocal].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        setRequests(merged);
       } else {
-        setRequests(getLocalStudentRequestsList());
+        setRequests(localReqs);
       }
     } catch (err) {
       console.error('Error fetching admin requests:', err);
-      setRequests(getLocalStudentRequestsList());
+      setRequests(getLocalStudentRequestsList() || []);
     } finally {
       setLoading(false);
     }

@@ -416,7 +416,7 @@ export default function DonationsPage() {
       };
 
       try {
-        const { error: insertError } = await supabase
+        await supabase
           .from('donations')
           .insert([{
             title: formData.title,
@@ -432,14 +432,11 @@ export default function DonationsPage() {
             status: 'pending',
             views_count: 0
           }]);
-
-        if (insertError) {
-          saveLocalDonation(newDonationObj);
-        }
-      } catch {
-        saveLocalDonation(newDonationObj);
+      } catch (err) {
+        console.warn('Supabase insert warning:', err);
       }
 
+      saveLocalDonation(newDonationObj);
       setSuccessMsg(t('donations.success_msg') || 'تم تسجيل تبرعك بنجاح! سيتم مراجعته ونشره قريباً.');
       clearForm();
       

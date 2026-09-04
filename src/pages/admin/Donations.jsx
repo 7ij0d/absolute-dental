@@ -138,10 +138,14 @@ export const Donations = () => {
         .select('*, years(name_ar, name_en), subjects(name_ar, name_en)')
         .order('created_at', { ascending: false });
 
-      if (!error && data && Array.isArray(data) && data.length > 0) {
-        setItems(data);
+      let localItems = getLocalDonations() || [];
+      if (!error && Array.isArray(data)) {
+        const existingIds = new Set(data.map(d => d.id));
+        const extraLocal = localItems.filter(d => !existingIds.has(d.id));
+        const merged = [...data, ...extraLocal].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        setItems(merged);
       } else {
-        setItems(getLocalDonations() || []);
+        setItems(localItems);
       }
     } catch (err) {
       console.error("Error loading admin donations:", err);
@@ -158,10 +162,14 @@ export const Donations = () => {
         .select('*, years(name_ar, name_en), subjects(name_ar, name_en)')
         .order('created_at', { ascending: false });
 
-      if (!error && data && Array.isArray(data) && data.length > 0) {
-        setRequests(data);
+      let localReqs = getLocalStudentRequestsList() || [];
+      if (!error && Array.isArray(data)) {
+        const existingIds = new Set(data.map(r => r.id));
+        const extraLocal = localReqs.filter(r => !existingIds.has(r.id));
+        const merged = [...data, ...extraLocal].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        setRequests(merged);
       } else {
-        setRequests(getLocalStudentRequestsList() || []);
+        setRequests(localReqs);
       }
     } catch (err) {
       console.error("Error loading student requests:", err);
