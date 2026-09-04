@@ -29,14 +29,22 @@ export function clearStaleCache() {
     }
     lsKeys.forEach(k => localStorage.removeItem(k));
 
-    // Sanitize any stored donations or student requests in localStorage to replace "ملازم" with "شيتات"
+    // Purge legacy dummy test items (d1, d2, d3, req_1, req_2) from localStorage
     ['ad_donations', 'ad_student_requests'].forEach(lsKey => {
       const raw = localStorage.getItem(lsKey);
-      if (raw && raw.includes('ملازم')) {
-        const cleaned = raw.replace(/ملازم ومذكرات/g, 'شيتات ومذكرات')
-                           .replace(/الملازم/g, 'الشيتات')
-                           .replace(/ملازم/g, 'شيتات');
-        localStorage.setItem(lsKey, cleaned);
+      if (raw) {
+        try {
+          const items = JSON.parse(raw);
+          if (Array.isArray(items)) {
+            const cleaned = items.filter(item => 
+              item.id !== 'd1' && item.id !== 'd2' && item.id !== 'd3' && 
+              item.id !== 'req_1' && item.id !== 'req_2'
+            );
+            localStorage.setItem(lsKey, JSON.stringify(cleaned));
+          }
+        } catch (_) {
+          localStorage.removeItem(lsKey);
+        }
       }
     });
   } catch (_) {}
