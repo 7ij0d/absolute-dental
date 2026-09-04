@@ -630,7 +630,7 @@ export default function DonationsPage() {
           }}
         >
           <Gift size={18} />
-          <span>{t('donations.donate_tab') || 'تبرع بأداة'}</span>
+          <span>{t('donations.donate_tab') || 'إضافة تبرع'}</span>
         </button>
 
         <button
@@ -858,7 +858,7 @@ export default function DonationsPage() {
             <div style={{ marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
               <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', margin: 0 }}>
                 <HeartHandshake />
-                {t('donations.donate_tab') || 'Submit a Donation'}
+                {t('donations.donate_form_title') || 'تقديم تبرع جديد'}
               </h2>
             </div>
 
@@ -931,14 +931,14 @@ export default function DonationsPage() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">{t('donations.description') || 'وصف إضافي عن الأداة'}</label>
+                <label className="form-label">{t('donations.description') || 'تفاصيل عن التبرع (أداة أو شيت)'}</label>
                 <textarea
                   className="form-input"
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   rows="3"
-                  placeholder={isRtl ? 'حالة الأداة بالتفصيل، مكان التسليم، أية تفاصيل أخرى...' : 'Item details, hand-off preference...'}
+                  placeholder={isRtl ? 'تفاصيل الأداة أو الشيت بالتفصيل، مكان التسليم، أية ملاحظات...' : 'Item or sheet details, hand-off preference...'}
                 ></textarea>
               </div>
 
