@@ -265,7 +265,7 @@ export const Products = () => {
     setLoading(true);
     try {
       // Load products (all, including archived and inactive)
-      const { data: prods } = await supabase
+      const { data: prods, error: prodErr } = await supabase
         .from('products')
         .select(`
           *,
@@ -277,7 +277,18 @@ export const Products = () => {
           )
         `)
         .order('created_at', { ascending: false });
-      if (prods) setProducts(prods);
+
+      if (!prodErr && prods && Array.isArray(prods) && prods.length > 0) {
+        setProducts(prods);
+      } else {
+        // Fallback query if relational embedding fails
+        const { data: fallbackProds } = await supabase
+          .from('products')
+          .select('*, years(*), subjects(*)')
+          .order('created_at', { ascending: false });
+
+        if (fallbackProds) setProducts(fallbackProds);
+      }
 
       // Load years and subjects for form dropdown selectors
       const { data: yrs } = await supabase.from('years').select('*');
@@ -288,6 +299,10 @@ export const Products = () => {
 
     } catch (err) {
       console.error('Error fetching admin product catalog', err);
+      try {
+        const { data: fallbackProds } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+        if (fallbackProds) setProducts(fallbackProds);
+      } catch (_) {}
     } finally {
       setLoading(false);
     }
