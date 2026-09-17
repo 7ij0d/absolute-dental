@@ -507,6 +507,40 @@ class MockQueryBuilder {
       else if (table === 'pages_content') {
         this.data = Object.entries(defaultPagesContent).map(([key, val]) => ({ key, ...val }));
       }
+      else if (table === 'accessory_categories') {
+        this.data = [
+          { id: 'cat-1', name_ar: 'بوكسات الأسنان', name_en: 'Dental Boxes', slug: 'dental-boxes', description_ar: 'بوكسات تخزين وتنظيم الأدوات الطبية بأحجام وألوان متنوعة', description_en: 'Professional storage & organizer boxes in various sizes & colors', sort_order: 1 }
+        ];
+      }
+      else if (table === 'accessory_products') {
+        this.data = [
+          { id: 'p16', category_id: 'cat-1', size: '16 inch', name_ar: '16" Dental Tool Box', name_en: '16" Dental Tool Box', desc_ar: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space.', desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space.', features_ar: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'], features_en: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'], main_image: '/absolute-dental/accessories/box16-colors.png', inside_image: '/absolute-dental/accessories/box16-inside1.jpg', price: 0, sort_order: 1 },
+          { id: 'p16_5', category_id: 'cat-1', size: '16.5 inch', name_ar: '16.5" Organizer Box', name_en: '16.5" Organizer Box', desc_ar: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for small accessories.', desc_en: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for small accessories.', features_ar: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'], features_en: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'], main_image: '/absolute-dental/accessories/box16_5-colors.png', inside_image: '/absolute-dental/accessories/box16_5-inside.png', price: 0, sort_order: 2 },
+          { id: 'p17', category_id: 'cat-1', size: '17 inch', name_ar: '17" Professional Box — GT-MAX', name_en: '17" Professional Box — GT-MAX', desc_ar: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a 4-compartment clear organizer.', desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a 4-compartment clear organizer.', features_ar: ['4-compartment clear lid organizer', 'Wide main storage space', 'Two side + one front latch', 'Strong & Durable plastic'], features_en: ['4-compartment clear lid organizer', 'Wide main storage space', 'Two side + one front latch', 'Strong & Durable plastic'], main_image: '/absolute-dental/accessories/box17-colors.png', inside_image: '/absolute-dental/accessories/box17-inside.png', price: 0, sort_order: 3 }
+        ];
+      }
+      else if (table === 'accessory_product_colors') {
+        this.data = [
+          { id: 'c1', product_id: 'p16', color_id: 'yellow', label_ar: 'Yellow', label_en: 'Yellow', hex_code: '#F5C518', image_url: '/absolute-dental/accessories/box16-colors.png', sort_order: 1 },
+          { id: 'c2', product_id: 'p16', color_id: 'maroon', label_ar: 'Maroon', label_en: 'Maroon', hex_code: '#8B1A1A', image_url: '/absolute-dental/accessories/box16-colors.png', sort_order: 2 },
+          { id: 'c3', product_id: 'p16', color_id: 'red', label_ar: 'Red', label_en: 'Red', hex_code: '#E02020', image_url: '/absolute-dental/accessories/box16-colors.png', sort_order: 3 },
+          { id: 'c4', product_id: 'p16', color_id: 'purple', label_ar: 'Purple', label_en: 'Purple', hex_code: '#7B3FE4', image_url: '/absolute-dental/accessories/box16-colors.png', sort_order: 4 },
+          { id: 'c5', product_id: 'p16', color_id: 'blue', label_ar: 'Blue', label_en: 'Blue', hex_code: '#1565C0', image_url: '/absolute-dental/accessories/box16-colors.png', sort_order: 5 },
+          { id: 'c6', product_id: 'p16_5', color_id: 'red', label_ar: 'Red', label_en: 'Red', hex_code: '#D32F2F', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 1 },
+          { id: 'c7', product_id: 'p16_5', color_id: 'orange', label_ar: 'Orange', label_en: 'Orange', hex_code: '#F57C00', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 2 },
+          { id: 'c8', product_id: 'p16_5', color_id: 'teal', label_ar: 'Teal', label_en: 'Teal', hex_code: '#00ACC1', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 3 },
+          { id: 'c9', product_id: 'p16_5', color_id: 'navy', label_ar: 'Navy Blue', label_en: 'Navy Blue', hex_code: '#1565C0', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 4 },
+          { id: 'c10', product_id: 'p16_5', color_id: 'blue', label_ar: 'Light Blue', label_en: 'Light Blue', hex_code: '#42A5F5', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 5 },
+          { id: 'c11', product_id: 'p16_5', color_id: 'green', label_ar: 'Green', label_en: 'Green', hex_code: '#43A047', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 6 },
+          { id: 'c12', product_id: 'p17', color_id: 'beige', label_ar: 'Beige', label_en: 'Beige', hex_code: '#C8A882', image_url: '/absolute-dental/accessories/box17-colors.png', sort_order: 1 },
+          { id: 'c13', product_id: 'p17', color_id: 'teal', label_ar: 'Teal', label_en: 'Teal', hex_code: '#00897B', image_url: '/absolute-dental/accessories/box17-colors.png', sort_order: 2 },
+          { id: 'c14', product_id: 'p17', color_id: 'pink', label_ar: 'Pink', label_en: 'Pink', hex_code: '#E91E8C', image_url: '/absolute-dental/accessories/box17-colors.png', sort_order: 3 },
+          { id: 'c15', product_id: 'p17', color_id: 'blue', label_ar: 'Light Blue', label_en: 'Light Blue', hex_code: '#42A5F5', image_url: '/absolute-dental/accessories/box17-group.jpg', sort_order: 4 },
+          { id: 'c16', product_id: 'p17', color_id: 'red', label_ar: 'Red', label_en: 'Red', hex_code: '#E02020', image_url: '/absolute-dental/accessories/box17-group.jpg', sort_order: 5 },
+          { id: 'c17', product_id: 'p17', color_id: 'lime', label_ar: 'Lime Green', label_en: 'Lime Green', hex_code: '#7CB342', image_url: '/absolute-dental/accessories/box17-colors.png', sort_order: 6 },
+          { id: 'c18', product_id: 'p17', color_id: 'purple', label_ar: 'Purple', label_en: 'Purple', hex_code: '#7B3FE4', image_url: '/absolute-dental/accessories/box17-colors.png', sort_order: 7 }
+        ];
+      }
       else {
         this.data = [];
       }
