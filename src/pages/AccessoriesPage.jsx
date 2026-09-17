@@ -5,6 +5,8 @@ import supabase from '../supabaseClient';
 import { Package, ChevronRight, ChevronLeft, MessageCircle, CheckCircle2, Info } from 'lucide-react';
 
 /* ─── PRODUCT DATA ─────────────────────────────────────── */
+const BASE = import.meta.env.BASE_URL; // '/absolute-dental/' on production, '/' on dev
+
 const BOXES = [
   {
     id: 'box-16',
@@ -15,15 +17,14 @@ const BOXES = [
     desc_en: 'Durable plastic toolbox with a coloured lid, removable inner tray for organising tools, and wide storage space at the bottom.',
     features_ar: ['صينية قابلة للإزالة', 'قفلان جانبيان', 'مساحة إضافية أسفل الصينية', 'مقبض مريح للحمل'],
     features_en: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
-    /* main image shown before a colour is picked */
-    mainImage: '/accessories/box16-colors.png',
-    insideImage: '/accessories/box16-inside1.jpg',
+    mainImage: `${BASE}accessories/box16-colors.png`,
+    insideImage: `${BASE}accessories/box16-inside1.jpg`,
     colors: [
-      { id: 'yellow',   hex: '#F5C518', label_ar: 'أصفر',        label_en: 'Yellow',     image: '/accessories/box16-colors.png' },
-      { id: 'maroon',   hex: '#8B1A1A', label_ar: 'بردو',         label_en: 'Maroon',     image: '/accessories/box16-colors.png' },
-      { id: 'red',      hex: '#E02020', label_ar: 'أحمر',         label_en: 'Red',        image: '/accessories/box16-colors.png' },
-      { id: 'purple',   hex: '#7B3FE4', label_ar: 'بنفسجي',      label_en: 'Purple',     image: '/accessories/box16-colors.png' },
-      { id: 'blue',     hex: '#1565C0', label_ar: 'أزرق',         label_en: 'Blue',       image: '/accessories/box16-colors.png' },
+      { id: 'yellow', hex: '#F5C518', label_ar: 'أصفر',      label_en: 'Yellow',     image: `${BASE}accessories/box16-colors.png` },
+      { id: 'maroon', hex: '#8B1A1A', label_ar: 'بردو',       label_en: 'Maroon',     image: `${BASE}accessories/box16-colors.png` },
+      { id: 'red',    hex: '#E02020', label_ar: 'أحمر',       label_en: 'Red',        image: `${BASE}accessories/box16-colors.png` },
+      { id: 'purple', hex: '#7B3FE4', label_ar: 'بنفسجي',    label_en: 'Purple',     image: `${BASE}accessories/box16-colors.png` },
+      { id: 'blue',   hex: '#1565C0', label_ar: 'أزرق',       label_en: 'Blue',       image: `${BASE}accessories/box16-colors.png` },
     ],
   },
   {
@@ -35,15 +36,15 @@ const BOXES = [
     desc_en: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organising small accessories, threads, and materials.',
     features_ar: ['غطاء شفاف بالكامل', '3 طبقات تنظيم شفافة', 'قفل أمامي واحد', 'تقسيمات داخلية دقيقة'],
     features_en: ['Fully transparent lid', '3 clear organiser layers', 'Single front latch', 'Fine internal dividers'],
-    mainImage: '/accessories/box16_5-colors.png',
-    insideImage: '/accessories/box16_5-inside.png',
+    mainImage: `${BASE}accessories/box16_5-colors.png`,
+    insideImage: `${BASE}accessories/box16_5-inside.png`,
     colors: [
-      { id: 'red',      hex: '#D32F2F', label_ar: 'أحمر',         label_en: 'Red',        image: '/accessories/box16_5-colors.png' },
-      { id: 'orange',   hex: '#F57C00', label_ar: 'برتقالي',      label_en: 'Orange',     image: '/accessories/box16_5-colors.png' },
-      { id: 'teal',     hex: '#00ACC1', label_ar: 'تركواز',       label_en: 'Teal',       image: '/accessories/box16_5-colors.png' },
-      { id: 'navy',     hex: '#1565C0', label_ar: 'أزرق غامق',   label_en: 'Navy Blue',  image: '/accessories/box16_5-colors.png' },
-      { id: 'blue',     hex: '#42A5F5', label_ar: 'أزرق فاتح',   label_en: 'Light Blue', image: '/accessories/box16_5-colors.png' },
-      { id: 'green',    hex: '#43A047', label_ar: 'أخضر',         label_en: 'Green',      image: '/accessories/box16_5-colors.png' },
+      { id: 'red',    hex: '#D32F2F', label_ar: 'أحمر',       label_en: 'Red',        image: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'orange', hex: '#F57C00', label_ar: 'برتقالي',    label_en: 'Orange',     image: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'teal',   hex: '#00ACC1', label_ar: 'تركواز',     label_en: 'Teal',       image: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'navy',   hex: '#1565C0', label_ar: 'أزرق غامق', label_en: 'Navy Blue',  image: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'blue',   hex: '#42A5F5', label_ar: 'أزرق فاتح', label_en: 'Light Blue', image: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'green',  hex: '#43A047', label_ar: 'أخضر',       label_en: 'Green',      image: `${BASE}accessories/box16_5-colors.png` },
     ],
   },
   {
@@ -55,16 +56,16 @@ const BOXES = [
     desc_en: 'Professional GT-MAX/BADC toolbox with a coloured lid featuring a 4-compartment clear organiser and wide main storage space. Made from high-quality plastic for professional use.',
     features_ar: ['منظم شفاف 4 خانات في الغطاء', 'مساحة تخزين رئيسية واسعة', 'قفلان جانبيان + مشبك أمامي', 'بلاستيك متين — Strong & Durable'],
     features_en: ['4-compartment clear lid organiser', 'Wide main storage space', 'Two side + one front latch', 'Strong & Durable high-quality plastic'],
-    mainImage: '/accessories/box17-colors.png',
-    insideImage: '/accessories/box17-inside.png',
+    mainImage: `${BASE}accessories/box17-colors.png`,
+    insideImage: `${BASE}accessories/box17-inside.png`,
     colors: [
-      { id: 'beige',    hex: '#C8A882', label_ar: 'بيج',           label_en: 'Beige',      image: '/accessories/box17-colors.png' },
-      { id: 'teal',     hex: '#00897B', label_ar: 'تركواز',        label_en: 'Teal',       image: '/accessories/box17-colors.png' },
-      { id: 'pink',     hex: '#E91E8C', label_ar: 'وردي',          label_en: 'Pink',       image: '/accessories/box17-colors.png' },
-      { id: 'blue',     hex: '#42A5F5', label_ar: 'أزرق فاتح',    label_en: 'Light Blue', image: '/accessories/box17-group.jpg'  },
-      { id: 'red',      hex: '#E02020', label_ar: 'أحمر',          label_en: 'Red',        image: '/accessories/box17-group.jpg'  },
-      { id: 'lime',     hex: '#7CB342', label_ar: 'أخضر ليموني',   label_en: 'Lime Green', image: '/accessories/box17-colors.png' },
-      { id: 'purple',   hex: '#7B3FE4', label_ar: 'بنفسجي',       label_en: 'Purple',     image: '/accessories/box17-colors.png' },
+      { id: 'beige',  hex: '#C8A882', label_ar: 'بيج',         label_en: 'Beige',      image: `${BASE}accessories/box17-colors.png` },
+      { id: 'teal',   hex: '#00897B', label_ar: 'تركواز',      label_en: 'Teal',       image: `${BASE}accessories/box17-colors.png` },
+      { id: 'pink',   hex: '#E91E8C', label_ar: 'وردي',        label_en: 'Pink',       image: `${BASE}accessories/box17-colors.png` },
+      { id: 'blue',   hex: '#42A5F5', label_ar: 'أزرق فاتح',  label_en: 'Light Blue', image: `${BASE}accessories/box17-group.jpg`  },
+      { id: 'red',    hex: '#E02020', label_ar: 'أحمر',        label_en: 'Red',        image: `${BASE}accessories/box17-group.jpg`  },
+      { id: 'lime',   hex: '#7CB342', label_ar: 'أخضر ليموني', label_en: 'Lime Green', image: `${BASE}accessories/box17-colors.png` },
+      { id: 'purple', hex: '#7B3FE4', label_ar: 'بنفسجي',     label_en: 'Purple',     image: `${BASE}accessories/box17-colors.png` },
     ],
   },
 ];
