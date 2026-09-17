@@ -189,6 +189,9 @@ export const Navbar = () => {
             <Link to="/track" className={`nav-link ${location.pathname === '/track' ? 'active' : ''}`}>
               {lang === 'ar' ? 'تتبع الطلب' : 'Track Order'}
             </Link>
+            <Link to="/accessories" className={`nav-link ${location.pathname === '/accessories' ? 'active' : ''}`}>
+              {lang === 'ar' ? 'اكسسوارات' : 'Accessories'}
+            </Link>
             <Link to="/contact" className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}>
               {lang === 'ar' ? 'تواصل معنا' : 'Contact'}
             </Link>
@@ -366,6 +369,9 @@ export const Navbar = () => {
               </Link>
               <Link to="/track" className="mobile-nav-link">
                 📦 {lang === 'ar' ? 'تتبع الطلب' : 'Track Order'}
+              </Link>
+              <Link to="/accessories" className="mobile-nav-link">
+                🧰 {lang === 'ar' ? 'اكسسوارات الأسنان' : 'Dental Accessories'}
               </Link>
               <Link to="/contact" className="mobile-nav-link">
                 💬 {lang === 'ar' ? 'تواصل معنا' : 'Contact'}

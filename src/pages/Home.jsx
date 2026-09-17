@@ -182,6 +182,68 @@ export const Home = () => {
         </div>
       </section>
 
+      {/* ── 3.5. ACCESSORIES TEASER ── */}
+      <section style={{
+        background: 'linear-gradient(135deg, var(--brand-brown) 0%, #2a1f14 100%)',
+        padding: '3rem 0',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+      }}>
+        <div className="container">
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '2rem', justifyContent: 'space-between' }}>
+            {/* Text side */}
+            <div style={{ flex: '1 1 260px' }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🧰</div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff', marginBottom: '0.5rem' }}>
+                {lang === 'ar' ? 'اكسسوارات الأسنان' : 'Dental Accessories'}
+              </h2>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', lineHeight: 1.7, maxWidth: 400 }}>
+                {lang === 'ar'
+                  ? 'بوكسات تخزين احترافية بألوان متعددة — اختر لونك المفضل واطلب مباشرة عبر واتساب'
+                  : 'Professional storage boxes in multiple colours — pick your favourite colour and order via WhatsApp'}
+              </p>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                {['#F5C518','#E02020','#7B3FE4','#1565C0','#00ACC1','#43A047','#F57C00'].map(c => (
+                  <span key={c} style={{ width: 18, height: 18, borderRadius: '50%', background: c, display: 'inline-block', border: '2px solid rgba(255,255,255,0.25)' }} />
+                ))}
+                <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', alignSelf: 'center' }}>
+                  {lang === 'ar' ? '+ ألوان أخرى' : '+ more colours'}
+                </span>
+              </div>
+            </div>
+            {/* CTA side */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                {['16"', '16.5"', '17"'].map(size => (
+                  <span key={size} style={{
+                    background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(6px)',
+                    color: '#CDBFA6', borderRadius: '999px',
+                    padding: '0.3rem 0.85rem', fontSize: '0.8rem', fontWeight: 800,
+                    border: '1px solid rgba(255,255,255,0.15)',
+                  }}>
+                    {size}
+                  </span>
+                ))}
+              </div>
+              <Link
+                to="/accessories"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  background: 'var(--secondary)', color: '#fff',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.8rem 1.75rem',
+                  fontWeight: 800, fontSize: '0.95rem',
+                  textDecoration: 'none',
+                }}
+              >
+                🧰 {lang === 'ar' ? 'تصفح الاكسسوارات' : 'Browse Accessories'}
+                <ChevronIcon size={16} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── 4. FEATURED PRODUCTS ── */}
       <section className="section section-purple">
         <div className="container">

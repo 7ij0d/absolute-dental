@@ -20,6 +20,7 @@ import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
 import InvoicePage from './pages/InvoicePage';
 import DonationsPage from './pages/DonationsPage';
+import AccessoriesPage from './pages/AccessoriesPage';
 // Admin Pages
 import AdminLayout from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
@@ -77,6 +78,7 @@ export const App = () => {
         <Route path="search" element={<SearchPage />} />
         <Route path="invoice/:id" element={<InvoicePage />} />
         <Route path="donations" element={<DonationsPage />} />
+        <Route path="accessories" element={<AccessoriesPage />} />
         {/* Policy & Static Pages */}
         <Route path="about" element={<StaticPages pageKey="about_us" />} />
         <Route path="faq" element={<StaticPages pageKey="faq" />} />
