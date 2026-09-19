@@ -181,6 +181,23 @@ export const Navbar = () => {
                         </div>
                       </Link>
                     ))}
+
+                    {/* Accessories Mega Menu Card */}
+                    <Link
+                      to="/accessories"
+                      className="mega-menu-year"
+                      style={{ borderInlineStart: '3px solid var(--secondary)', background: 'rgba(205,191,166,0.06)' }}
+                      onClick={() => setMegaOpen(false)}
+                    >
+                      <div className="mega-menu-year-name" style={{ color: '#CDBFA6', fontWeight: 900 }}>
+                        🧰 {lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories'}
+                      </div>
+                      <div className="mega-menu-subjects">
+                        <span className="mega-menu-subject-tag" style={{ color: '#ffffff' }}>
+                          {lang === 'ar' ? 'بوكسات أدوات، حقائب، مستلزمات عامة' : 'Tool boxes, bags & general gear'}
+                        </span>
+                      </div>
+                    </Link>
                   </div>
                 </div>
               )}
@@ -188,9 +205,6 @@ export const Navbar = () => {
 
             <Link to="/track" className={`nav-link ${location.pathname === '/track' ? 'active' : ''}`}>
               {lang === 'ar' ? 'تتبع الطلب' : 'Track Order'}
-            </Link>
-            <Link to="/accessories" className={`nav-link ${location.pathname === '/accessories' ? 'active' : ''}`}>
-              {lang === 'ar' ? 'اكسسوارات' : 'Accessories'}
             </Link>
             <Link to="/contact" className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}>
               {lang === 'ar' ? 'تواصل معنا' : 'Contact'}

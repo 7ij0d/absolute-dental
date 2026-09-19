@@ -138,43 +138,66 @@ export const Home = () => {
             </Link>
           </div>
 
-          <div className="grid-4">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
             {years.length > 0
-              ? years.map((year, idx) => (
-                  <Link key={year.id} to={`/year/${year.slug}`} className="year-card" style={year.is_coming_soon ? { opacity: 0.72, position: 'relative' } : {}}>
-                    <img
-                      src={year.image_url || YEAR_IMAGES[idx % YEAR_IMAGES.length]}
-                      alt={lang === 'ar' ? year.name_ar : year.name_en}
-                      onError={e => { e.target.src = YEAR_IMAGES[idx % YEAR_IMAGES.length]; }}
-                    />
-                    {year.is_coming_soon && (
-                      <div style={{
-                        position: 'absolute', top: '0.6rem', right: '0.6rem',
-                        background: 'rgba(139,92,246,0.9)', backdropFilter: 'blur(6px)',
-                        color: '#fff', fontSize: '0.65rem', fontWeight: 800,
-                        padding: '0.2rem 0.55rem', borderRadius: '999px', letterSpacing: '0.03em'
-                      }}>
-                        🕐 {lang === 'ar' ? 'قريباً' : 'Coming Soon'}
-                      </div>
-                    )}
-                    <div className="year-card-body">
-                      <div className="year-card-title">{lang === 'ar' ? year.name_ar : year.name_en}</div>
-                      <div className="year-card-subtitle">
-                        {year.is_coming_soon
-                          ? (lang === 'ar' ? 'سيتوفر قريباً' : 'Coming soon')
-                          : (lang === 'ar' ? 'اضغط للتصفح' : 'Browse products')
-                        }
-                      </div>
-                      {!year.is_coming_soon && (
-                        <div className="year-card-arrow">
-                          {lang === 'ar' ? 'تسوق الآن' : 'Shop Now'}
-                          <ChevronIcon size={13} />
+              ? <>
+                  {years.map((year, idx) => (
+                    <Link key={year.id} to={`/year/${year.slug}`} className="year-card" style={year.is_coming_soon ? { opacity: 0.72, position: 'relative' } : {}}>
+                      <img
+                        src={year.image_url || YEAR_IMAGES[idx % YEAR_IMAGES.length]}
+                        alt={lang === 'ar' ? year.name_ar : year.name_en}
+                        onError={e => { e.target.src = YEAR_IMAGES[idx % YEAR_IMAGES.length]; }}
+                      />
+                      {year.is_coming_soon && (
+                        <div style={{
+                          position: 'absolute', top: '0.6rem', right: '0.6rem',
+                          background: 'rgba(139,92,246,0.9)', backdropFilter: 'blur(6px)',
+                          color: '#fff', fontSize: '0.65rem', fontWeight: 800,
+                          padding: '0.2rem 0.55rem', borderRadius: '999px', letterSpacing: '0.03em'
+                        }}>
+                          🕐 {lang === 'ar' ? 'قريباً' : 'Coming Soon'}
                         </div>
                       )}
+                      <div className="year-card-body">
+                        <div className="year-card-title">{lang === 'ar' ? year.name_ar : year.name_en}</div>
+                        <div className="year-card-subtitle">
+                          {year.is_coming_soon
+                            ? (lang === 'ar' ? 'سيتوفر قريباً' : 'Coming soon')
+                            : (lang === 'ar' ? 'اضغط للتصفح' : 'Browse products')
+                          }
+                        </div>
+                        {!year.is_coming_soon && (
+                          <div className="year-card-arrow">
+                            {lang === 'ar' ? 'تسوق الآن' : 'Shop Now'}
+                            <ChevronIcon size={13} />
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+
+                  {/* Dental Accessories Card */}
+                  <Link to="/accessories" className="year-card" style={{ border: '2px solid var(--secondary)' }}>
+                    <img
+                      src="/absolute-dental/accessories/box17-colors.png"
+                      alt={lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories'}
+                      onError={e => { e.target.src = 'https://images.unsplash.com/photo-1579684389782-64d84b5e901a?w=500&auto=format'; }}
+                    />
+                    <div className="year-card-body">
+                      <div className="year-card-title" style={{ color: 'var(--secondary)', fontWeight: 900 }}>
+                        🧰 {lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories'}
+                      </div>
+                      <div className="year-card-subtitle">
+                        {lang === 'ar' ? 'بوكسات أدوات وحقائب تخزين لجميع السنوات' : 'Tool boxes & storage gear for all years'}
+                      </div>
+                      <div className="year-card-arrow">
+                        {lang === 'ar' ? 'استكشف الإكسسوارات' : 'Explore Accessories'}
+                        <ChevronIcon size={13} />
+                      </div>
                     </div>
                   </Link>
-                ))
-              : Array.from({ length: 4 }).map((_, i) => (
+                </>
+              : Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="skeleton" style={{ aspectRatio: '4/3', borderRadius: 'var(--radius-lg)' }} />
                 ))
             }

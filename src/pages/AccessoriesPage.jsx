@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useCart } from '../context/CartContext';
 import supabase from '../supabaseClient';
 import {
   Package,
@@ -11,12 +12,53 @@ import {
   Info,
   ArrowLeft,
   ArrowRight,
-  Layers,
-  Sparkles,
-  Box
+  Box,
+  ShoppingCart,
+  Maximize2,
+  X,
+  Check
 } from 'lucide-react';
 
 const BASE = import.meta.env.BASE_URL || '/';
+
+/* ─── WATERMARK OVERLAY COMPONENT ──────────────────────── */
+const WatermarkOverlay = () => (
+  <div
+    style={{
+      position: 'absolute',
+      bottom: '10px',
+      right: '10px',
+      zIndex: 10,
+      background: 'rgba(15, 23, 42, 0.65)',
+      backdropFilter: 'blur(6px)',
+      border: '1px solid rgba(255, 255, 255, 0.15)',
+      borderRadius: 'var(--radius-sm)',
+      padding: '3px 8px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '5px',
+      pointerEvents: 'none',
+      userSelect: 'none',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+    }}
+  >
+    <img
+      src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
+      alt="Absolute Dental"
+      style={{ width: 14, height: 14, objectFit: 'contain' }}
+    />
+    <span style={{
+      color: '#ffffff',
+      fontSize: '0.68rem',
+      fontWeight: 900,
+      fontFamily: "'Cairo', sans-serif",
+      letterSpacing: '0.04em',
+      textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+    }}>
+      Absolute Dental
+    </span>
+  </div>
+);
 
 /* ─── HARDCODED FALLBACKS (Used only if DB returns 0 rows) ─── */
 const FALLBACK_CATEGORIES = [
@@ -37,6 +79,7 @@ const FALLBACK_BOXES = [
     size: '16 inch',
     name_ar: '16" Dental Tool Box',
     name_en: '16" Dental Tool Box',
+    price: 45,
     desc_ar: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
     desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
     features_ar: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
@@ -56,6 +99,7 @@ const FALLBACK_BOXES = [
     size: '16.5 inch',
     name_ar: '16.5" Organizer Box',
     name_en: '16.5" Organizer Box',
+    price: 55,
     desc_ar: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
     desc_en: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
     features_ar: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
@@ -76,6 +120,7 @@ const FALLBACK_BOXES = [
     size: '17 inch',
     name_ar: '17" Professional Box — GT-MAX',
     name_en: '17" Professional Box — GT-MAX',
+    price: 65,
     desc_ar: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a 4-compartment clear organizer and wide main storage.',
     desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a 4-compartment clear organizer and wide main storage.',
     features_ar: ['4-compartment clear lid organizer', 'Wide main storage space', 'Two side + one front latch', 'Strong & Durable plastic'],
@@ -95,7 +140,9 @@ const FALLBACK_BOXES = [
 ];
 
 /* ─── SINGLE DENTAL BOX PRODUCT CARD ────────────────────── */
-const BoxProductCard = ({ box, whatsappNumber }) => {
+const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
+  const { addToCart } = useCart();
+  const { lang } = useLanguage();
   const colorsList = box.colors && box.colors.length > 0
     ? box.colors
     : [{ id: 'default', hex_code: '#CDBFA6', label_en: 'Standard', image_url: box.main_image || box.image_url }];
@@ -103,8 +150,8 @@ const BoxProductCard = ({ box, whatsappNumber }) => {
   const [selectedColor, setSelectedColor] = useState(colorsList[0]);
   const [showInside, setShowInside] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(true);
+  const [addedNotice, setAddedNotice] = useState(false);
 
-  // Synchronize when box changes
   useEffect(() => {
     if (box.colors && box.colors.length > 0) {
       setSelectedColor(box.colors[0]);
@@ -115,10 +162,27 @@ const BoxProductCard = ({ box, whatsappNumber }) => {
     ? (box.inside_image || box.main_image)
     : (selectedColor.image_url || box.main_image || `${BASE}accessories/box17-colors.png`);
 
+  const handleAddToCart = () => {
+    const colorLabel = selectedColor.label_en || selectedColor.label_ar || 'Standard';
+    const productName = `${box.name_en || box.name_ar || 'Dental Box'} (${box.size}) — ${colorLabel}`;
+    
+    addToCart({
+      id: `${box.id}-${selectedColor.id || 'std'}`,
+      name_ar: productName,
+      name_en: productName,
+      price: parseFloat(box.price || 0),
+      image_url: activeImage,
+      stock_quantity: 100
+    }, 1);
+
+    setAddedNotice(true);
+    setTimeout(() => setAddedNotice(false), 2500);
+  };
+
   const buildWhatsappUrl = () => {
     const colorLabel = selectedColor.label_en || selectedColor.label_ar || 'Standard';
     const productName = box.name_en || box.name_ar || `Dental Box ${box.size}`;
-    const msg = `Hi, I'd like to order: ${productName} (${box.size}) — Color: ${colorLabel} 🎨`;
+    const msg = `Hi, I'd like to inquire about: ${productName} (${box.size}) — Color: ${colorLabel} 🎨`;
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
   };
 
@@ -140,8 +204,8 @@ const BoxProductCard = ({ box, whatsappNumber }) => {
         transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
     >
-      {/* ── IMAGE WRAPPER ── */}
-      <div style={{ position: 'relative', background: 'var(--accent)', aspectRatio: '4/3', overflow: 'hidden' }}>
+      {/* ── IMAGE WRAPPER WITH WATERMARK ── */}
+      <div style={{ position: 'relative', background: 'var(--accent)', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer' }} onClick={() => onZoomImage(activeImage, box.name_en || box.size)}>
         <img
           key={activeImage}
           src={activeImage}
@@ -155,6 +219,26 @@ const BoxProductCard = ({ box, whatsappNumber }) => {
             opacity: imgLoaded ? 1 : 0.4
           }}
         />
+
+        {/* Watermark */}
+        <WatermarkOverlay />
+
+        {/* Zoom Hint */}
+        <div style={{
+          position: 'absolute',
+          top: '0.85rem',
+          left: '0.85rem',
+          background: 'rgba(0,0,0,0.55)',
+          color: '#ffffff',
+          borderRadius: '50%',
+          width: 32,
+          height: 32,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <Maximize2 size={15} />
+        </div>
 
         {/* Size Badge */}
         <div style={{
@@ -177,12 +261,12 @@ const BoxProductCard = ({ box, whatsappNumber }) => {
         {box.inside_image && (
           <button
             type="button"
-            onClick={() => { setShowInside(v => !v); setImgLoaded(false); }}
+            onClick={(e) => { e.stopPropagation(); setShowInside(v => !v); setImgLoaded(false); }}
             style={{
               position: 'absolute',
               bottom: '0.85rem',
               left: '0.85rem',
-              background: 'rgba(0,0,0,0.65)',
+              background: 'rgba(0,0,0,0.75)',
               backdropFilter: 'blur(8px)',
               color: '#ffffff',
               border: 'none',
@@ -194,30 +278,14 @@ const BoxProductCard = ({ box, whatsappNumber }) => {
               display: 'flex',
               alignItems: 'center',
               gap: '0.4rem',
-              minHeight: '36px'
+              minHeight: '36px',
+              zIndex: 11
             }}
           >
             <Info size={14} />
             {showInside ? 'Outside View' : 'Inside View'}
           </button>
         )}
-
-        {/* Selected Color Badge */}
-        <div style={{
-          position: 'absolute',
-          bottom: '0.85rem',
-          right: '0.85rem',
-          background: (selectedColor.hex_code || '#333') + 'dd',
-          backdropFilter: 'blur(8px)',
-          color: '#ffffff',
-          borderRadius: '999px',
-          padding: '0.35rem 0.85rem',
-          fontSize: '0.75rem',
-          fontWeight: 800,
-          textShadow: '0 1px 3px rgba(0,0,0,0.6)'
-        }}>
-          {selectedColor.label_en || selectedColor.label_ar || 'Default'}
-        </div>
       </div>
 
       {/* ── CARD CONTENT BODY ── */}
@@ -230,7 +298,7 @@ const BoxProductCard = ({ box, whatsappNumber }) => {
               {box.size}
             </h3>
             {box.price > 0 && (
-              <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--secondary)' }}>
+              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--secondary)' }}>
                 {box.price} LYD
               </span>
             )}
@@ -308,35 +376,66 @@ const BoxProductCard = ({ box, whatsappNumber }) => {
           </ul>
         )}
 
-        {/* ── WHATSAPP ORDER BUTTON ── */}
-        <a
-          href={buildWhatsappUrl()}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justify: 'center',
-            gap: '0.6rem',
-            background: '#25D366',
-            color: '#ffffff',
-            borderRadius: 'var(--radius-md)',
-            padding: '0.85rem 1.25rem',
-            fontWeight: 800,
-            fontSize: '0.92rem',
-            textDecoration: 'none',
-            marginTop: 'auto',
-            boxShadow: '0 4px 12px rgba(37,211,102,0.25)',
-            transition: 'transform 0.2s ease, opacity 0.2s ease',
-            minHeight: '44px'
-          }}
-          onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-        >
-          <MessageCircle size={19} />
-          <span>Order via WhatsApp</span>
-          <ChevronRight size={16} />
-        </a>
+        {/* ── ORDER BUTTONS (DIRECT SITE CHECKOUT + WHATSAPP) ── */}
+        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          
+          {/* Direct Add to Cart */}
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            className="btn btn-secondary"
+            style={{
+              width: '100%',
+              padding: '0.85rem',
+              fontWeight: 800,
+              fontSize: '0.92rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.6rem',
+              minHeight: '44px'
+            }}
+          >
+            {addedNotice ? (
+              <>
+                <Check size={18} />
+                <span>{lang === 'ar' ? 'تمت الإضافة للسلة!' : 'Added to Cart!'}</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart size={18} />
+                <span>{lang === 'ar' ? 'إضافة إلى السلة والطلب مباشرة' : 'Add to Cart / Order'}</span>
+              </>
+            )}
+          </button>
+
+          {/* Optional WhatsApp Inquiry */}
+          <a
+            href={buildWhatsappUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justify: 'center',
+              gap: '0.5rem',
+              background: 'transparent',
+              color: '#25D366',
+              border: '1px solid #25D366',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.6rem 1rem',
+              fontWeight: 700,
+              fontSize: '0.82rem',
+              textDecoration: 'none',
+              transition: 'background 0.2s ease'
+            }}
+          >
+            <MessageCircle size={16} />
+            <span>{lang === 'ar' ? 'استفسار عبر واتساب' : 'Inquire via WhatsApp'}</span>
+          </a>
+
+        </div>
+
       </div>
     </div>
   );
@@ -353,10 +452,12 @@ export const AccessoriesPage = () => {
   const [accessoriesBg, setAccessoriesBg] = useState('');
   const [dentalBoxesBg, setDentalBoxesBg] = useState('');
 
+  // Lightbox Zoom Modal State
+  const [lightboxImg, setLightboxImg] = useState(null);
+
   const ChevronFwd = isRtl ? ChevronLeft : ChevronRight;
   const BackArrow = isRtl ? ArrowRight : ArrowLeft;
 
-  // 1. Fetch categories, products, color variants & page settings
   useEffect(() => {
     let isMounted = true;
 
@@ -364,7 +465,6 @@ export const AccessoriesPage = () => {
       setLoading(true);
 
       try {
-        // Fetch WhatsApp contact from settings
         const { data: contactSetting } = await supabase
           .from('settings')
           .select('value')
@@ -376,7 +476,6 @@ export const AccessoriesPage = () => {
           if (match && isMounted) setWhatsappNumber(match[0]);
         }
 
-        // Fetch Background Images settings
         const { data: bgSetting } = await supabase
           .from('settings')
           .select('value')
@@ -388,7 +487,6 @@ export const AccessoriesPage = () => {
           if (bgSetting.value.dental_boxes_page_bg) setDentalBoxesBg(bgSetting.value.dental_boxes_page_bg);
         }
 
-        // Fetch Categories
         const { data: catData, error: catErr } = await supabase
           .from('accessory_categories')
           .select('*')
@@ -401,7 +499,6 @@ export const AccessoriesPage = () => {
           setCategories(FALLBACK_CATEGORIES);
         }
 
-        // Fetch Dental Boxes Products + Colors
         const { data: prodData, error: prodErr } = await supabase
           .from('accessory_products')
           .select('*')
@@ -409,7 +506,6 @@ export const AccessoriesPage = () => {
           .order('sort_order', { ascending: true });
 
         if (!prodErr && prodData && prodData.length > 0 && isMounted) {
-          // Fetch color variants for each product
           const prodsWithColors = await Promise.all(
             prodData.map(async (prod) => {
               const { data: colorsData } = await supabase
@@ -471,6 +567,10 @@ export const AccessoriesPage = () => {
               {lang === 'ar' ? 'الرئيسية' : 'Home'}
             </Link>
             <ChevronFwd size={14} />
+            <span style={{ color: 'rgba(255,255,255,0.6)' }}>
+              {lang === 'ar' ? 'السنوات الدراسية' : 'Academic Years'}
+            </span>
+            <ChevronFwd size={14} />
             
             {selectedCategory ? (
               <>
@@ -479,7 +579,7 @@ export const AccessoriesPage = () => {
                   onClick={() => setSelectedCategory(null)}
                   style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', padding: 0, font: 'inherit' }}
                 >
-                  {lang === 'ar' ? 'اكسسوارات الأسنان' : 'Accessories'}
+                  {lang === 'ar' ? 'إكسسوارات الأسنان' : 'Accessories'}
                 </button>
                 <ChevronFwd size={14} />
                 <span style={{ color: '#CDBFA6', fontWeight: 800 }}>
@@ -488,7 +588,7 @@ export const AccessoriesPage = () => {
               </>
             ) : (
               <span style={{ color: '#CDBFA6', fontWeight: 800 }}>
-                {lang === 'ar' ? 'اكسسوارات الأسنان' : 'Accessories'}
+                {lang === 'ar' ? 'إكسسوارات الأسنان' : 'Accessories'}
               </span>
             )}
           </div>
@@ -537,14 +637,14 @@ export const AccessoriesPage = () => {
               <h1 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.5rem)', fontWeight: 900, color: '#ffffff', margin: 0, lineHeight: 1.2 }}>
                 {selectedCategory
                   ? (selectedCategory.name_en || selectedCategory.name_ar)
-                  : (lang === 'ar' ? 'اكسسوارات الأسنان' : 'Dental Accessories')}
+                  : (lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories')}
               </h1>
               <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 'clamp(0.85rem, 1.8vw, 1.05rem)', margin: '0.35rem 0 0 0', maxWidth: 620 }}>
                 {selectedCategory
                   ? (selectedCategory.description_en || selectedCategory.description_ar || 'Professional dental equipment boxes in multiple sizes and colors.')
                   : (lang === 'ar'
-                      ? 'تصفح أقسام المستلزمات والبوكسات الاحترافية بالأحجام والألوان المخصصة'
-                      : 'Explore specialized categories, boxes, and accessories engineered for dental students')}
+                      ? 'قسم الإكسسوارات الشامل لجميع السنوات الدراسية — بوكسات وحقائب أدوات احترافية'
+                      : 'Comprehensive accessories section covering all academic years — professional tool boxes & gear')}
               </p>
             </div>
           </div>
@@ -610,6 +710,7 @@ export const AccessoriesPage = () => {
                       alt={cat.name_en || cat.name_ar}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
+                    <WatermarkOverlay />
                     <div style={{
                       position: 'absolute',
                       inset: 0,
@@ -691,33 +792,88 @@ export const AccessoriesPage = () => {
                   key={box.id}
                   box={box}
                   whatsappNumber={whatsappNumber}
+                  onZoomImage={(url, title) => setLightboxImg({ url, title })}
                 />
               ))}
-            </div>
-
-            {/* Bottom Info Note */}
-            <div style={{
-              marginTop: '3rem',
-              background: 'var(--accent)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '1.35rem 1.6rem',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '0.85rem'
-            }}>
-              <Package size={22} style={{ color: 'var(--secondary)', flexShrink: 0, marginTop: '0.1rem' }} />
-              <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
-                {lang === 'ar'
-                  ? 'جميع البوكسات متوفرة للبيع المباشر — اختر اللون والحجم المناسب واطلب مباشرة عبر واتساب لتأكيد التوفر والتوصيل المجاني إلى كلية طب الأسنان.'
-                  : 'All boxes are available for direct student orders — select your preferred size and color, then click Order via WhatsApp for instant confirmation.'}
-              </p>
             </div>
 
           </div>
         )}
 
       </div>
+
+      {/* ── LIGHTBOX ZOOM MODAL WITH WATERMARK ── */}
+      {lightboxImg && (
+        <div
+          onClick={() => setLightboxImg(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '1.5rem'
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              maxWidth: '90vw',
+              maxHeight: '85vh',
+              background: 'var(--surface-color)',
+              borderRadius: 'var(--radius-lg)',
+              overflow: 'hidden',
+              boxShadow: 'var(--shadow-lg)'
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setLightboxImg(null)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'rgba(0,0,0,0.7)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 20
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <img
+              src={lightboxImg.url}
+              alt={lightboxImg.title}
+              style={{
+                width: '100%',
+                maxHeight: '75vh',
+                objectFit: 'contain',
+                display: 'block'
+              }}
+            />
+
+            {/* Watermark inside modal */}
+            <WatermarkOverlay />
+
+            <div style={{ padding: '0.85rem 1.25rem', background: 'var(--accent)', color: 'var(--text-main)', fontWeight: 800, fontSize: '0.9rem', textAlign: 'center' }}>
+              {lightboxImg.title} — Absolute Dental ©
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
