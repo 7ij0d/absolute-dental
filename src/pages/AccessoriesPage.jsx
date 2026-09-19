@@ -107,12 +107,12 @@ const FALLBACK_BOXES = [
     main_image: `${BASE}accessories/box16_5-colors.png`,
     inside_image: `${BASE}accessories/box16_5-inside.png`,
     colors: [
-      { id: 'blue',   hex_code: '#1E88E5', label_ar: 'Blue',        label_en: 'Blue',       image_url: `${BASE}accessories/box16_5-blue.jpg` },
-      { id: 'green',  hex_code: '#7CB342', label_ar: 'Green',       label_en: 'Lime Green', image_url: `${BASE}accessories/box16_5-green.jpg` },
-      { id: 'teal',   hex_code: '#00ACC1', label_ar: 'Teal',        label_en: 'Teal',       image_url: `${BASE}accessories/box16_5-teal.jpg` },
-      { id: 'red',    hex_code: '#D32F2F', label_ar: 'Red',         label_en: 'Red',        image_url: `${BASE}accessories/box16_5-red.jpg` },
-      { id: 'orange', hex_code: '#F57C00', label_ar: 'Orange',      label_en: 'Orange',     image_url: `${BASE}accessories/box16_5-orange.jpg` },
-      { id: 'navy',   hex_code: '#1565C0', label_ar: 'Navy Blue',   label_en: 'Navy Blue',  image_url: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'blue',   hex_code: '#1E88E5', label_ar: 'Blue',        label_en: 'Blue',       image_url: `${BASE}accessories/box16_5-blue.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
+      { id: 'green',  hex_code: '#7CB342', label_ar: 'Green',       label_en: 'Lime Green', image_url: `${BASE}accessories/box16_5-green.jpg`,  inside_image_url: `${BASE}accessories/box16_5-inside-green.jpg` },
+      { id: 'teal',   hex_code: '#00ACC1', label_ar: 'Teal',        label_en: 'Teal',       image_url: `${BASE}accessories/box16_5-teal.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-teal.jpg` },
+      { id: 'red',    hex_code: '#D32F2F', label_ar: 'Red',         label_en: 'Red',        image_url: `${BASE}accessories/box16_5-red.jpg`,    inside_image_url: `${BASE}accessories/box16_5-inside-red.jpg` },
+      { id: 'orange', hex_code: '#F57C00', label_ar: 'Orange',      label_en: 'Orange',     image_url: `${BASE}accessories/box16_5-orange.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-orange.jpg` },
+      { id: 'navy',   hex_code: '#1565C0', label_ar: 'Navy Blue',   label_en: 'Navy Blue',  image_url: `${BASE}accessories/box16_5-blue.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
     ]
   },
   {
@@ -158,9 +158,21 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
     }
   }, [box]);
 
+  const getInsideImage = () => {
+    if (selectedColor?.inside_image_url) return selectedColor.inside_image_url;
+
+    const colorId = selectedColor?.color_id || selectedColor?.id;
+    if (box.size === '16.5 inch' || (box.name_en && box.name_en.includes('16.5'))) {
+      if (colorId && ['blue', 'green', 'orange', 'red', 'teal'].includes(colorId.toLowerCase())) {
+        return `${BASE}accessories/box16_5-inside-${colorId.toLowerCase()}.jpg`;
+      }
+    }
+    return box.inside_image || box.main_image;
+  };
+
   const activeImage = showInside
-    ? (box.inside_image || box.main_image)
-    : (selectedColor.image_url || box.main_image || `${BASE}accessories/box17-colors.png`);
+    ? getInsideImage()
+    : (selectedColor?.image_url || box.main_image || `${BASE}accessories/box17-colors.png`);
 
   const handleAddToCart = () => {
     const colorLabel = selectedColor.label_en || selectedColor.label_ar || 'Standard';
