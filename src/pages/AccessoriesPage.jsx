@@ -53,7 +53,7 @@ const FALLBACK_BOXES = [
       { id: 'maroon', hex_code: '#800020', label_ar: 'خمري / عنابي', label_en: 'Maroon', image_url: `${BASE}accessories/box16-maroon.jpg`, inside_image_url: `${BASE}accessories/box16-inside-maroon.jpg`, base_image_url: `${BASE}accessories/box16-base-maroon.jpg` },
       { id: 'yellow', hex_code: '#F5C518', label_ar: 'أصفر', label_en: 'Yellow', image_url: `${BASE}accessories/box16-yellow.jpg`, inside_image_url: `${BASE}accessories/box16-inside-yellow.jpg`, base_image_url: `${BASE}accessories/box16-base-yellow.jpg` },
       { id: 'red',    hex_code: '#E02020', label_ar: 'Red',    label_en: 'Red',    image_url: `${BASE}accessories/box16-colors.png` },
-      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'Purple', label_en: 'Purple', image_url: `${BASE}accessories/box16-colors.png` },
+      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي', label_en: 'Purple', image_url: `${BASE}accessories/box16-purple.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
       { id: 'blue',   hex_code: '#1565C0', label_ar: 'Blue',   label_en: 'Blue',   image_url: `${BASE}accessories/box16-colors.png` },
     ]
   },
