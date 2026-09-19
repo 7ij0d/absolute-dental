@@ -110,7 +110,7 @@ const FALLBACK_BOXES = [
       { id: 'blue',   hex_code: '#1E88E5', label_ar: 'Blue',        label_en: 'Blue',       image_url: `${BASE}accessories/box16_5-blue.png` },
       { id: 'green',  hex_code: '#7CB342', label_ar: 'Green',       label_en: 'Lime Green', image_url: `${BASE}accessories/box16_5-green.jpg` },
       { id: 'teal',   hex_code: '#00ACC1', label_ar: 'Teal',        label_en: 'Teal',       image_url: `${BASE}accessories/box16_5-teal.jpg` },
-      { id: 'red',    hex_code: '#D32F2F', label_ar: 'Red',         label_en: 'Red',        image_url: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'red',    hex_code: '#D32F2F', label_ar: 'Red',         label_en: 'Red',        image_url: `${BASE}accessories/box16_5-red.jpg` },
       { id: 'orange', hex_code: '#F57C00', label_ar: 'Orange',      label_en: 'Orange',     image_url: `${BASE}accessories/box16_5-colors.png` },
       { id: 'navy',   hex_code: '#1565C0', label_ar: 'Navy Blue',   label_en: 'Navy Blue',  image_url: `${BASE}accessories/box16_5-colors.png` },
     ]
