@@ -263,28 +263,28 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
       </div>
 
       {/* ── CARD CONTENT BODY ── */}
-      <div style={{ padding: '1.4rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+      <div style={{ padding: 'clamp(1rem, 3vw, 1.4rem)', flex: 1, display: 'flex', flexDirection: 'column', gap: '1.1rem', minWidth: 0 }}>
         
         {/* Title & Size */}
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
               {box.size}
             </h3>
             {box.price > 0 && (
-              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--secondary)' }}>
+              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--secondary)', flexShrink: 0 }}>
                 {box.price} LYD
               </span>
             )}
           </div>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
             {box.desc_en || box.desc_ar}
           </p>
         </div>
 
         {/* ── COLOR SELECTOR ── */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.4rem' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               Colors:
             </span>
@@ -342,9 +342,9 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
         {features.length > 0 && (
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             {features.map((feat, idx) => (
-              <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                <span style={{ color: 'var(--secondary)', fontWeight: 900, flexShrink: 0 }}>✓</span>
-                <span>{feat}</span>
+              <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.55rem', fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+                <span style={{ color: 'var(--secondary)', fontWeight: 900, flexShrink: 0, marginTop: '2px' }}>✓</span>
+                <span style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>{feat}</span>
               </li>
             ))}
           </ul>
@@ -648,7 +648,6 @@ export const AccessoriesPage = () => {
                       alt={cat.name_en || cat.name_ar}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
-                    <WatermarkOverlay />
                     <div style={{
                       position: 'absolute',
                       inset: 0,
@@ -802,11 +801,8 @@ export const AccessoriesPage = () => {
               }}
             />
 
-            {/* Watermark inside modal */}
-            <WatermarkOverlay />
-
             <div style={{ padding: '0.85rem 1.25rem', background: 'var(--accent)', color: 'var(--text-main)', fontWeight: 800, fontSize: '0.9rem', textAlign: 'center' }}>
-              {lightboxImg.title} — Absolute Dental ©
+              {lightboxImg.title}
             </div>
           </div>
         </div>
