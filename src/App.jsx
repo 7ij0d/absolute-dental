@@ -38,6 +38,8 @@ import { runPrefetch } from './prefetch';
 import { clearStaleCache } from './cache';
 
 
+import FloatingCart from './components/FloatingCart';
+
 // Public Layout Wrapper
 const PublicLayout = () => {
   return (
@@ -48,6 +50,7 @@ const PublicLayout = () => {
         <Outlet />
       </main>
       <Footer />
+      <FloatingCart />
     </div>
   );
 };

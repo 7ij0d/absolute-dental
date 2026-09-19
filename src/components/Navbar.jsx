@@ -265,9 +265,34 @@ export const Navbar = () => {
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="nav-icon-btn" title={lang === 'ar' ? 'السلة' : 'Cart'}>
+            <Link
+              to="/cart"
+              className="nav-icon-btn"
+              title={lang === 'ar' ? 'السلة' : 'Cart'}
+              style={{
+                background: cartCount > 0 ? 'var(--secondary)' : 'rgba(255,255,255,0.15)',
+                color: '#ffffff',
+                borderRadius: '999px',
+                padding: '0.4rem 0.85rem',
+                width: 'auto',
+                height: 'auto',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                textDecoration: 'none',
+                boxShadow: cartCount > 0 ? '0 4px 12px rgba(205,191,166,0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
               <ShoppingCart size={18} />
-              {cartCount > 0 && <span className="nav-cart-badge">{cartCount}</span>}
+              <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>
+                {lang === 'ar' ? 'السلة' : 'Cart'}
+              </span>
+              {cartCount > 0 && (
+                <span className="nav-cart-badge" style={{ position: 'static', background: '#E53935', fontSize: '0.7rem', width: 18, height: 18 }}>
+                  {cartCount}
+                </span>
+              )}
             </Link>
 
             {/* Profile Dropdown */}
