@@ -99,7 +99,7 @@ const FALLBACK_BOXES = [
     size: '16.5 inch',
     name_ar: '16.5" Organizer Box',
     name_en: '16.5" Organizer Box',
-    price: 55,
+    price: 75,
     desc_ar: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
     desc_en: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
     features_ar: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
@@ -107,12 +107,12 @@ const FALLBACK_BOXES = [
     main_image: `${BASE}accessories/box16_5-colors.png`,
     inside_image: `${BASE}accessories/box16_5-inside.png`,
     colors: [
-      { id: 'red',    hex_code: '#D32F2F', label_ar: 'Red',        label_en: 'Red',        image_url: `${BASE}accessories/box16_5-colors.png` },
-      { id: 'orange', hex_code: '#F57C00', label_ar: 'Orange',     label_en: 'Orange',     image_url: `${BASE}accessories/box16_5-colors.png` },
-      { id: 'teal',   hex_code: '#00ACC1', label_ar: 'Teal',       label_en: 'Teal',       image_url: `${BASE}accessories/box16_5-colors.png` },
-      { id: 'navy',   hex_code: '#1565C0', label_ar: 'Navy Blue',  label_en: 'Navy Blue',  image_url: `${BASE}accessories/box16_5-colors.png` },
-      { id: 'blue',   hex_code: '#42A5F5', label_ar: 'Light Blue', label_en: 'Light Blue', image_url: `${BASE}accessories/box16_5-colors.png` },
-      { id: 'green',  hex_code: '#43A047', label_ar: 'Green',      label_en: 'Green',      image_url: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'blue',   hex_code: '#1E88E5', label_ar: 'Blue',        label_en: 'Blue',       image_url: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'red',    hex_code: '#D32F2F', label_ar: 'Red',         label_en: 'Red',        image_url: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'orange', hex_code: '#F57C00', label_ar: 'Orange',      label_en: 'Orange',     image_url: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'teal',   hex_code: '#00ACC1', label_ar: 'Teal',        label_en: 'Teal',       image_url: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'navy',   hex_code: '#1565C0', label_ar: 'Navy Blue',   label_en: 'Navy Blue',  image_url: `${BASE}accessories/box16_5-colors.png` },
+      { id: 'green',  hex_code: '#43A047', label_ar: 'Green',       label_en: 'Green',      image_url: `${BASE}accessories/box16_5-colors.png` },
     ]
   },
   {
