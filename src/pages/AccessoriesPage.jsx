@@ -42,16 +42,16 @@ const FALLBACK_BOXES = [
     size: '16 inch',
     name_ar: '16" Dental Tool Box',
     name_en: '16" Dental Tool Box',
-    price: 45,
+    price: 65,
     desc_ar: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
     desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
     features_ar: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
     features_en: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
-    main_image: `${BASE}accessories/box16-colors.png`,
-    inside_image: `${BASE}accessories/box16-inside1.jpg`,
+    main_image: `${BASE}accessories/box16-maroon.jpg`,
+    inside_image: `${BASE}accessories/box16-inside-maroon.jpg`,
     colors: [
+      { id: 'maroon', hex_code: '#800020', label_ar: 'خمري / عنابي', label_en: 'Maroon', image_url: `${BASE}accessories/box16-maroon.jpg`, inside_image_url: `${BASE}accessories/box16-inside-maroon.jpg`, base_image_url: `${BASE}accessories/box16-base-maroon.jpg` },
       { id: 'yellow', hex_code: '#F5C518', label_ar: 'Yellow', label_en: 'Yellow', image_url: `${BASE}accessories/box16-colors.png` },
-      { id: 'maroon', hex_code: '#8B1A1A', label_ar: 'Maroon', label_en: 'Maroon', image_url: `${BASE}accessories/box16-colors.png` },
       { id: 'red',    hex_code: '#E02020', label_ar: 'Red',    label_en: 'Red',    image_url: `${BASE}accessories/box16-colors.png` },
       { id: 'purple', hex_code: '#7B3FE4', label_ar: 'Purple', label_en: 'Purple', image_url: `${BASE}accessories/box16-colors.png` },
       { id: 'blue',   hex_code: '#1565C0', label_ar: 'Blue',   label_en: 'Blue',   image_url: `${BASE}accessories/box16-colors.png` },
@@ -111,7 +111,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
     : [{ id: 'default', hex_code: '#CDBFA6', label_en: 'Standard', image_url: box.main_image || box.image_url }];
 
   const [selectedColor, setSelectedColor] = useState(colorsList[0]);
-  const [showInside, setShowInside] = useState(false);
+  const [viewMode, setViewMode] = useState('outside'); // 'outside', 'inside', 'base'
   const [imgLoaded, setImgLoaded] = useState(true);
   const [addedNotice, setAddedNotice] = useState(false);
 
@@ -121,21 +121,32 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
     }
   }, [box]);
 
-  const getInsideImage = () => {
-    if (selectedColor?.inside_image_url) return selectedColor.inside_image_url;
+  const getActiveViewImage = () => {
+    const colorId = (selectedColor?.color_id || selectedColor?.id || 'maroon').toLowerCase();
 
-    const colorId = selectedColor?.color_id || selectedColor?.id;
-    if (box.size === '16.5 inch' || (box.name_en && box.name_en.includes('16.5'))) {
-      if (colorId && ['blue', 'green', 'orange', 'red', 'teal'].includes(colorId.toLowerCase())) {
-        return `${BASE}accessories/box16_5-inside-${colorId.toLowerCase()}.jpg`;
+    if (viewMode === 'base') {
+      if (selectedColor?.base_image_url) return selectedColor.base_image_url;
+      if (box.size === '16 inch' || (box.name_en && box.name_en.includes('16'))) {
+        return `${BASE}accessories/box16-base-${colorId}.jpg`;
       }
+      return box.inside_image || box.main_image;
     }
-    return box.inside_image || box.main_image;
+
+    if (viewMode === 'inside') {
+      if (selectedColor?.inside_image_url) return selectedColor.inside_image_url;
+      if (box.size === '16.5 inch' || (box.name_en && box.name_en.includes('16.5'))) {
+        return `${BASE}accessories/box16_5-inside-${colorId}.jpg`;
+      }
+      if (box.size === '16 inch' || (box.name_en && box.name_en.includes('16'))) {
+        return `${BASE}accessories/box16-inside-${colorId}.jpg`;
+      }
+      return box.inside_image || box.main_image;
+    }
+
+    return selectedColor?.image_url || box.main_image || `${BASE}accessories/box17-colors.png`;
   };
 
-  const activeImage = showInside
-    ? getInsideImage()
-    : (selectedColor?.image_url || box.main_image || `${BASE}accessories/box17-colors.png`);
+  const activeImage = getActiveViewImage();
 
   const handleAddToCart = () => {
     const colorLabel = selectedColor.label_en || selectedColor.label_ar || 'Standard';
@@ -179,7 +190,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
         transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
     >
-      {/* ── IMAGE WRAPPER WITH WATERMARK ── */}
+      {/* ── IMAGE WRAPPER WITH 3-VIEW SELECTOR ── */}
       <div style={{ position: 'relative', background: 'var(--accent)', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer' }} onClick={() => onZoomImage(activeImage, box.name_en || box.size)}>
         <img
           key={activeImage}
@@ -194,8 +205,6 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
             opacity: imgLoaded ? 1 : 0.4
           }}
         />
-
-
 
         {/* Zoom Hint */}
         <div style={{
@@ -231,35 +240,87 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
           {box.size}
         </div>
 
-        {/* Inside / Outside View Toggle Button */}
-        {box.inside_image && (
+        {/* Multi-View Selector Bar */}
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: 'absolute',
+            bottom: '0.65rem',
+            left: '0.65rem',
+            right: '0.65rem',
+            display: 'flex',
+            gap: '0.3rem',
+            background: 'rgba(15, 23, 42, 0.78)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: '999px',
+            padding: '3px',
+            zIndex: 11,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.35)',
+            border: '1px solid rgba(255,255,255,0.15)'
+          }}
+        >
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); setShowInside(v => !v); setImgLoaded(false); }}
+            onClick={() => { setViewMode('outside'); setImgLoaded(false); }}
             style={{
-              position: 'absolute',
-              bottom: '0.85rem',
-              left: '0.85rem',
-              background: 'rgba(0,0,0,0.75)',
-              backdropFilter: 'blur(8px)',
-              color: '#ffffff',
+              flex: 1,
+              padding: '0.35rem 0.4rem',
+              fontSize: '0.72rem',
+              fontWeight: 800,
               border: 'none',
               borderRadius: '999px',
-              padding: '0.4rem 0.85rem',
-              fontSize: '0.75rem',
-              fontWeight: 700,
+              background: viewMode === 'outside' ? 'var(--secondary)' : 'transparent',
+              color: viewMode === 'outside' ? '#ffffff' : 'rgba(255,255,255,0.75)',
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              minHeight: '36px',
-              zIndex: 11
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
             }}
           >
-            <Info size={14} />
-            {showInside ? 'Outside View' : 'Inside View'}
+            {lang === 'ar' ? '📦 مغلق' : '📦 Closed'}
           </button>
-        )}
+
+          <button
+            type="button"
+            onClick={() => { setViewMode('inside'); setImgLoaded(false); }}
+            style={{
+              flex: 1,
+              padding: '0.35rem 0.4rem',
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              border: 'none',
+              borderRadius: '999px',
+              background: viewMode === 'inside' ? 'var(--secondary)' : 'transparent',
+              color: viewMode === 'inside' ? '#ffffff' : 'rgba(255,255,255,0.75)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {lang === 'ar' ? '📥 الرف الداخلي' : '📥 Tray View'}
+          </button>
+
+          {(box.size === '16 inch' || box.name_en?.includes('16"')) && (
+            <button
+              type="button"
+              onClick={() => { setViewMode('base'); setImgLoaded(false); }}
+              style={{
+                flex: 1,
+                padding: '0.35rem 0.4rem',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                border: 'none',
+                borderRadius: '999px',
+                background: viewMode === 'base' ? 'var(--secondary)' : 'transparent',
+                color: viewMode === 'base' ? '#ffffff' : 'rgba(255,255,255,0.75)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {lang === 'ar' ? '🗃️ بدون رف' : '🗃️ Base'}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── CARD CONTENT BODY ── */}
