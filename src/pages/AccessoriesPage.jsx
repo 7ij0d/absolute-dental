@@ -456,10 +456,10 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
 /* ─── MAIN ACCESSORIES PAGE COMPONENT ─────────────────────── */
 export const AccessoriesPage = () => {
   const { lang, isRtl } = useLanguage();
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(FALLBACK_CATEGORIES);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [boxesProducts, setBoxesProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [boxesProducts, setBoxesProducts] = useState(FALLBACK_BOXES);
+  const [loading, setLoading] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState('218911234567');
   const [accessoriesBg, setAccessoriesBg] = useState('');
   const [dentalBoxesBg, setDentalBoxesBg] = useState('');
@@ -474,75 +474,39 @@ export const AccessoriesPage = () => {
     let isMounted = true;
 
     const fetchData = async () => {
-      setLoading(true);
-
       try {
-        const { data: contactSetting } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'contact_links')
-          .single();
+        const [contactRes, bgRes, catRes, prodRes] = await Promise.all([
+          supabase.from('settings').select('value').eq('key', 'contact_links').single(),
+          supabase.from('settings').select('value').eq('key', 'accessories_bgs').single(),
+          supabase.from('accessory_categories').select('*').eq('is_active', true).order('sort_order', { ascending: true }),
+          supabase.from('accessory_products').select('*, colors:accessory_product_colors(*)').eq('is_active', true).order('sort_order', { ascending: true })
+        ]);
 
-        if (contactSetting?.value?.whatsapp) {
-          const match = String(contactSetting.value.whatsapp).match(/\d+/);
-          if (match && isMounted) setWhatsappNumber(match[0]);
+        if (!isMounted) return;
+
+        if (contactRes.data?.value?.whatsapp) {
+          const match = String(contactRes.data.value.whatsapp).match(/\d+/);
+          if (match) setWhatsappNumber(match[0]);
         }
 
-        const { data: bgSetting } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'accessories_bgs')
-          .single();
-
-        if (bgSetting?.value && isMounted) {
-          if (bgSetting.value.accessories_page_bg) setAccessoriesBg(bgSetting.value.accessories_page_bg);
-          if (bgSetting.value.dental_boxes_page_bg) setDentalBoxesBg(bgSetting.value.dental_boxes_page_bg);
+        if (bgRes.data?.value) {
+          if (bgRes.data.value.accessories_page_bg) setAccessoriesBg(bgRes.data.value.accessories_page_bg);
+          if (bgRes.data.value.dental_boxes_page_bg) setDentalBoxesBg(bgRes.data.value.dental_boxes_page_bg);
         }
 
-        const { data: catData, error: catErr } = await supabase
-          .from('accessory_categories')
-          .select('*')
-          .eq('is_active', true)
-          .order('sort_order', { ascending: true });
-
-        if (!catErr && catData && catData.length > 0 && isMounted) {
-          setCategories(catData);
-        } else if (isMounted) {
-          setCategories(FALLBACK_CATEGORIES);
+        if (!catRes.error && catRes.data && catRes.data.length > 0) {
+          setCategories(catRes.data);
         }
 
-        const { data: prodData, error: prodErr } = await supabase
-          .from('accessory_products')
-          .select('*')
-          .eq('is_active', true)
-          .order('sort_order', { ascending: true });
-
-        if (!prodErr && prodData && prodData.length > 0 && isMounted) {
-          const prodsWithColors = await Promise.all(
-            prodData.map(async (prod) => {
-              const { data: colorsData } = await supabase
-                .from('accessory_product_colors')
-                .select('*')
-                .eq('product_id', prod.id)
-                .order('sort_order', { ascending: true });
-              return {
-                ...prod,
-                colors: colorsData || []
-              };
-            })
-          );
+        if (!prodRes.error && prodRes.data && prodRes.data.length > 0) {
+          const prodsWithColors = prodRes.data.map(prod => ({
+            ...prod,
+            colors: (prod.colors && prod.colors.length > 0) ? prod.colors : []
+          }));
           setBoxesProducts(prodsWithColors);
-        } else if (isMounted) {
-          setBoxesProducts(FALLBACK_BOXES);
         }
       } catch (err) {
-        console.warn('Using fallback accessories data:', err);
-        if (isMounted) {
-          setCategories(FALLBACK_CATEGORIES);
-          setBoxesProducts(FALLBACK_BOXES);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
+        console.warn('Background accessories sync fallback active:', err);
       }
     };
 
