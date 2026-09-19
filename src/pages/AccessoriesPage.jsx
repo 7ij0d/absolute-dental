@@ -112,7 +112,6 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
 
   const [selectedColor, setSelectedColor] = useState(colorsList[0]);
   const [viewMode, setViewMode] = useState('outside'); // 'outside', 'inside', 'base'
-  const [imgLoaded, setImgLoaded] = useState(true);
   const [addedNotice, setAddedNotice] = useState(false);
 
   useEffect(() => {
@@ -120,6 +119,24 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
       setSelectedColor(box.colors[0]);
     }
   }, [box]);
+
+  // ── Preload all color variant images silently into memory for 0ms instant switching ──
+  useEffect(() => {
+    colorsList.forEach(color => {
+      const colorId = (color.color_id || color.id || 'maroon').toLowerCase();
+      const urls = [
+        color.image_url,
+        color.inside_image_url || (box.size?.includes('17') ? `${BASE}accessories/box17-inside-${colorId}.jpg` : box.size?.includes('16.5') ? `${BASE}accessories/box16_5-inside-${colorId}.jpg` : `${BASE}accessories/box16-inside-${colorId}.jpg`),
+        color.base_image_url || `${BASE}accessories/box16-base-${colorId}.jpg`
+      ];
+      urls.forEach(url => {
+        if (url) {
+          const img = new Image();
+          img.src = url;
+        }
+      });
+    });
+  }, [box, colorsList]);
 
   const getActiveViewImage = () => {
     const colorId = (selectedColor?.color_id || selectedColor?.id || 'maroon').toLowerCase();
@@ -196,16 +213,13 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
       {/* ── IMAGE WRAPPER WITH 3-VIEW SELECTOR ── */}
       <div style={{ position: 'relative', background: 'var(--accent)', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer' }} onClick={() => onZoomImage(activeImage, box.name_en || box.size)}>
         <img
-          key={activeImage}
           src={activeImage}
           alt={box.name_en || box.size}
-          onLoad={() => setImgLoaded(true)}
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            transition: 'opacity 0.35s ease',
-            opacity: imgLoaded ? 1 : 0.4
+            opacity: 1
           }}
         />
 
@@ -264,7 +278,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
         >
           <button
             type="button"
-            onClick={() => { setViewMode('outside'); setImgLoaded(false); }}
+            onClick={() => setViewMode('outside')}
             style={{
               flex: 1,
               padding: '0.35rem 0.4rem',
@@ -284,7 +298,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
 
           <button
             type="button"
-            onClick={() => { setViewMode('inside'); setImgLoaded(false); }}
+            onClick={() => setViewMode('inside')}
             style={{
               flex: 1,
               padding: '0.35rem 0.4rem',
@@ -305,7 +319,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
           {(box.size === '16 inch' || box.name_en?.includes('16"')) && (
             <button
               type="button"
-              onClick={() => { setViewMode('base'); setImgLoaded(false); }}
+              onClick={() => setViewMode('base')}
               style={{
                 flex: 1,
                 padding: '0.35rem 0.4rem',
@@ -365,11 +379,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
                   key={color.id || color.color_id}
                   type="button"
                   title={color.label_en || color.label_ar}
-                  onClick={() => {
-                    setSelectedColor(color);
-                    setShowInside(false);
-                    setImgLoaded(false);
-                  }}
+                  onClick={() => setSelectedColor(color)}
                   style={{
                     width: 36,
                     height: 36,
