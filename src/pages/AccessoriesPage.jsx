@@ -94,9 +94,9 @@ const FALLBACK_BOXES = [
       { id: 'purple', hex_code: '#A880C8', label_ar: 'بنفسجي',     label_en: 'Purple',     image_url: `${BASE}accessories/box17-purple.jpg`, inside_image_url: `${BASE}accessories/box17-inside-purple.jpg` },
       { id: 'blue',   hex_code: '#1565C0', label_ar: 'أزرق',       label_en: 'Blue',       image_url: `${BASE}accessories/box17-blue.jpg`, inside_image_url: `${BASE}accessories/box17-inside-blue.jpg` },
       { id: 'red',    hex_code: '#E02020', label_ar: 'أحمر',        label_en: 'Red',        image_url: `${BASE}accessories/box17-red.jpg`, inside_image_url: `${BASE}accessories/box17-inside-red.jpg` },
+      { id: 'pink',   hex_code: '#F48FB1', label_ar: 'وردي',        label_en: 'Pink',       image_url: `${BASE}accessories/box17-pink.jpg`, inside_image_url: `${BASE}accessories/box17-inside-pink.jpg` },
       { id: 'beige',  hex_code: '#C8A882', label_ar: 'بيج',        label_en: 'Beige',      image_url: `${BASE}accessories/box17-beige.jpg`, inside_image_url: `${BASE}accessories/box17-inside-beige.jpg` },
       { id: 'teal',   hex_code: '#00897B', label_ar: 'تركوازي',     label_en: 'Teal',       image_url: `${BASE}accessories/box17-colors.png` },
-      { id: 'pink',   hex_code: '#E91E8C', label_ar: 'وردي',        label_en: 'Pink',       image_url: `${BASE}accessories/box17-colors.png` },
       { id: 'lime',   hex_code: '#7CB342', label_ar: 'أخضر فسفوري', label_en: 'Lime Green', image_url: `${BASE}accessories/box17-colors.png` },
     ]
   }
