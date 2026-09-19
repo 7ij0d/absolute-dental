@@ -15,6 +15,25 @@ const SUBJECT_IMAGES = [
   'https://images.unsplash.com/photo-1631563019676-dade0dbdb8fc?w=400&auto=format',
 ];
 
+const DEFAULT_YEARS = [
+  { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى',  name_en: '1st Year', slug: '1st-year', sort_order: 1, image_url: 'https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/year-images/1st-year.jpg' },
+  { id: '20000000-0000-0000-0000-000000000002', name_ar: 'السنة الثانية', name_en: '2nd Year', slug: '2nd-year', sort_order: 2, image_url: 'https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/year-images/2nd-year.jpg' },
+  { id: '30000000-0000-0000-0000-000000000003', name_ar: 'السنة الثالثة', name_en: '3rd Year', slug: '3rd-year', sort_order: 3, image_url: 'https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/year-images/3rd-year.jpg' },
+  { id: '40000000-0000-0000-0000-000000000004', name_ar: 'السنة الرابعة', name_en: '4th Year', slug: '4th-year', sort_order: 4, image_url: 'https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/year-images/4th-year.jpg' },
+];
+
+const DEFAULT_SUBJECTS = [
+  { id: '11', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'تشريح الأسنان', name_en: 'Dental Anatomy', description_ar: 'دراسة تشريح الأسنان الطبيعي وأشكالها ورسمها ونحتها.', description_en: 'Study of tooth morphology, carving, and anatomical features.', slug: 'dental-anatomy' },
+  { id: '12', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'مواد طب الأسنان', name_en: 'Dental Materials', description_ar: 'التعرف على المواد المستخدمة في عيادات ومعامل الأسنان وكيفية خلطها.', description_en: 'Introduction to materials used in clinical and lab setups.', slug: 'dental-materials' },
+  { id: '21', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'علاج الأسنان التحفظي', name_en: 'Restorative Dentistry', description_ar: 'العمل العملي في المعمل على الرؤوس الوهمية وتجهيز الحفر السنية.', description_en: 'Pre-clinical practice on phantom heads and cavity preparations.', slug: 'restorative-dentistry' },
+  { id: '22', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان المتحركة', name_en: 'Removable Prosthodontics', description_ar: 'معمل الأطقم الكاملة والجزئية وكيفية صف الأسنان وتشميعها.', description_en: 'Complete and partial dentures, tooth arrangement, and waxing steps.', slug: 'removable-prosthodontics' },
+  { id: '23', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان الثابتة', name_en: 'Fixed Prosthodontics', description_ar: 'تجهيز الأسنان للتيجان والجسور السنية وصنع القوالب المؤقتة.', description_en: 'Crown and bridge preparation, temporary restorations, and impressions.', slug: 'fixed-prosthodontics' },
+  { id: '31', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'علاج الجذور', name_en: 'Endodontics', description_ar: 'تنظيف وحشو قنوات الجذور لأسنان أحادية ومتعددة الجذور عمليًا.', description_en: 'Root canal treatment, cleaning, shaping, and obturation training.', slug: 'endodontics' },
+  { id: '32', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'أمراض وجراحة اللثة', name_en: 'Periodontics', description_ar: 'أدوات تقليح الجير وتنعيم الجذور والتعامل مع النسج الداعمة.', description_en: 'Scaling and root planing instruments, periodontium health tools.', slug: 'periodontics' },
+  { id: '41', year_id: '40000000-0000-0000-0000-000000000004', name_ar: 'جراحة الفم والتخدير', name_en: 'Oral Surgery & Anesthesia', description_ar: 'أدوات خلع الأسنان والمحاقن وحقن التخدير الموضعي.', description_en: 'Exodontia instruments, forceps, elevators, and local anesthesia tools.', slug: 'oral-surgery' },
+  { id: '42', year_id: '40000000-0000-0000-0000-000000000004', name_ar: 'تقويم الأسنان', name_en: 'Orthodontics', description_ar: 'صنع الأجهزة المتحركة للتقويم وثني الأسلاك المعدنية.', description_en: 'Removable orthodontic appliance construction and wire bending.', slug: 'orthodontics' }
+];
+
 export const YearPage = () => {
   const { slug } = useParams();
   const { lang, t, isRtl } = useLanguage();
@@ -22,7 +41,7 @@ export const YearPage = () => {
   const [yearData, setYearData] = useState(null);
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [allYears, setAllYears] = useState([]);
+  const [allYears, setAllYears] = useState(DEFAULT_YEARS);
 
   useEffect(() => {
     const CACHE_KEY = `year:${slug}`;
@@ -30,29 +49,46 @@ export const YearPage = () => {
     const applyData = ({ year, subs, yrs }) => {
       setYearData(year);
       setSubjects(subs || []);
-      setAllYears(yrs || []);
+      setAllYears(yrs || DEFAULT_YEARS);
     };
 
     const fetchAndCache = async (showLoader) => {
       if (showLoader) setLoading(true);
       try {
-        // Fetch year first (need id for subjects)
-        const { data: year } = await supabase
+        // Fetch year first
+        const { data: yearRes } = await supabase
           .from('years').select('*').eq('slug', slug).single();
 
-        if (!year) { setLoading(false); return; }
+        const year = yearRes || DEFAULT_YEARS.find(y => y.slug === slug);
+
+        if (!year) {
+          setLoading(false);
+          return;
+        }
 
         // Fetch subjects + all years IN PARALLEL
-        const [{ data: subs }, { data: yrs }] = await Promise.all([
+        const [{ data: subsRes }, { data: yrsRes }] = await Promise.all([
           supabase.from('subjects').select('*').eq('year_id', year.id),
-          supabase.from('years').select('*').order('slug', { ascending: true })
+          supabase.from('years').select('*').order('sort_order', { ascending: true })
         ]);
 
-        const bundle = { year, subs: subs || [], yrs: yrs || [] };
+        const matchedSubs = (subsRes && subsRes.length > 0)
+          ? subsRes
+          : DEFAULT_SUBJECTS.filter(s => String(s.year_id) === String(year.id) || String(year.slug).includes(s.slug.split('-')[0]));
+
+        const bundle = {
+          year,
+          subs: matchedSubs.length > 0 ? matchedSubs : DEFAULT_SUBJECTS.filter(s => s.slug.includes(slug.split('-')[0])),
+          yrs: (yrsRes && yrsRes.length > 0) ? yrsRes : DEFAULT_YEARS
+        };
+
         cacheSet(CACHE_KEY, bundle, 5 * 60);
         applyData(bundle);
       } catch (err) {
-        console.error('YearPage fetch error', err);
+        console.warn('YearPage fetch warning, using defaults:', err);
+        const fallbackYear = DEFAULT_YEARS.find(y => y.slug === slug) || DEFAULT_YEARS[0];
+        const fallbackSubs = DEFAULT_SUBJECTS.filter(s => String(s.year_id) === String(fallbackYear.id));
+        applyData({ year: fallbackYear, subs: fallbackSubs, yrs: DEFAULT_YEARS });
       } finally {
         setLoading(false);
       }

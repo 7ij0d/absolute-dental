@@ -10,8 +10,27 @@ import {
 } from 'lucide-react';
 import supabase from '../supabaseClient';
 
+const DEFAULT_NAV_YEARS = [
+  { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى',  name_en: '1st Year', slug: '1st-year', sort_order: 1 },
+  { id: '20000000-0000-0000-0000-000000000002', name_ar: 'السنة الثانية', name_en: '2nd Year', slug: '2nd-year', sort_order: 2 },
+  { id: '30000000-0000-0000-0000-000000000003', name_ar: 'السنة الثالثة', name_en: '3rd Year', slug: '3rd-year', sort_order: 3 },
+  { id: '40000000-0000-0000-0000-000000000004', name_ar: 'السنة الرابعة', name_en: '4th Year', slug: '4th-year', sort_order: 4 },
+];
+
+const DEFAULT_NAV_SUBJECTS = [
+  { id: '11', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'تشريح الأسنان', name_en: 'Dental Anatomy', slug: 'dental-anatomy' },
+  { id: '12', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'مواد طب الأسنان', name_en: 'Dental Materials', slug: 'dental-materials' },
+  { id: '21', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'علاج الأسنان التحفظي', name_en: 'Restorative Dentistry', slug: 'restorative-dentistry' },
+  { id: '22', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان المتحركة', name_en: 'Removable Prosthodontics', slug: 'removable-prosthodontics' },
+  { id: '23', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان الثابتة', name_en: 'Fixed Prosthodontics', slug: 'fixed-prosthodontics' },
+  { id: '31', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'علاج الجذور', name_en: 'Endodontics', slug: 'endodontics' },
+  { id: '32', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'أمراض وجراحة اللثة', name_en: 'Periodontics', slug: 'periodontics' },
+  { id: '41', year_id: '40000000-0000-0000-0000-000000000004', name_ar: 'جراحة الفم والتخدير', name_en: 'Oral Surgery', slug: 'oral-surgery' },
+  { id: '42', year_id: '40000000-0000-0000-0000-000000000004', name_ar: 'تقويم الأسنان', name_en: 'Orthodontics', slug: 'orthodontics' }
+];
+
 export const Navbar = () => {
-  const { lang, toggleLanguage, t, isRtl } = useLanguage();
+  const { lang, t, toggleLanguage, isRtl } = useLanguage();
   const { cartCount } = useCart();
   const { user, profile, isAdmin, signOut } = useAuth();
 
@@ -20,8 +39,8 @@ export const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
-  const [years, setYears] = useState([]);
-  const [subjects, setSubjects] = useState([]);
+  const [years, setYears] = useState(DEFAULT_NAV_YEARS);
+  const [subjects, setSubjects] = useState(DEFAULT_NAV_SUBJECTS);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,10 +61,14 @@ export const Navbar = () => {
 
   useEffect(() => {
     const loadNavData = async () => {
-      const { data: yrs } = await supabase.from('years').select('*').order('slug', { ascending: true });
-      if (yrs) setYears(yrs);
-      const { data: subs } = await supabase.from('subjects').select('id, name_ar, name_en, year_id, slug');
-      if (subs) setSubjects(subs);
+      try {
+        const { data: yrs } = await supabase.from('years').select('*').order('sort_order', { ascending: true });
+        if (yrs && yrs.length > 0) setYears(yrs);
+        const { data: subs } = await supabase.from('subjects').select('id, name_ar, name_en, year_id, slug');
+        if (subs && subs.length > 0) setSubjects(subs);
+      } catch (err) {
+        console.warn('Using fallback navbar data:', err);
+      }
     };
     loadNavData();
   }, []);

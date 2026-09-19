@@ -33,31 +33,56 @@ export const SubjectPage = () => {
       }
     };
 
+const DEFAULT_YEARS = [
+  { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى',  name_en: '1st Year', slug: '1st-year' },
+  { id: '20000000-0000-0000-0000-000000000002', name_ar: 'السنة الثانية', name_en: '2nd Year', slug: '2nd-year' },
+  { id: '30000000-0000-0000-0000-000000000003', name_ar: 'السنة الثالثة', name_en: '3rd Year', slug: '3rd-year' },
+  { id: '40000000-0000-0000-0000-000000000004', name_ar: 'السنة الرابعة', name_en: '4th Year', slug: '4th-year' }
+];
+
+const DEFAULT_SUBJECTS = [
+  { id: '11', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'تشريح الأسنان', name_en: 'Dental Anatomy', description_ar: 'دراسة تشريح الأسنان الطبيعي وأشكالها ورسمها ونحتها.', slug: 'dental-anatomy' },
+  { id: '12', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'مواد طب الأسنان', name_en: 'Dental Materials', description_ar: 'التعرف على المواد المستخدمة في عيادات ومعامل الأسنان.', slug: 'dental-materials' },
+  { id: '21', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'علاج الأسنان التحفظي', name_en: 'Restorative Dentistry', description_ar: 'العمل العملي في المعمل على الرؤوس الوهمية.', slug: 'restorative-dentistry' },
+  { id: '22', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان المتحركة', name_en: 'Removable Prosthodontics', description_ar: 'معمل الأطقم الكاملة والجزئية.', slug: 'removable-prosthodontics' },
+  { id: '23', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان الثابتة', name_en: 'Fixed Prosthodontics', description_ar: 'تجهيز الأسنان للتيجان والجسور السنية.', slug: 'fixed-prosthodontics' },
+  { id: '31', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'علاج الجذور', name_en: 'Endodontics', description_ar: 'تنظيف وحشو قنوات الجذور عمليًا.', slug: 'endodontics' },
+  { id: '32', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'أمراض وجراحة اللثة', name_en: 'Periodontics', description_ar: 'أدوات تقليح الجير وتنعيم الجذور.', slug: 'periodontics' },
+  { id: '41', year_id: '40000000-0000-0000-0000-000000000004', name_ar: 'جراحة الفم والتخدير', name_en: 'Oral Surgery & Anesthesia', description_ar: 'أدوات خلع الأسنان والمحاقن وحقن التخدير الموضعي.', slug: 'oral-surgery' },
+  { id: '42', year_id: '40000000-0000-0000-0000-000000000004', name_ar: 'تقويم الأسنان', name_en: 'Orthodontics', description_ar: 'صنع الأجهزة المتحركة للتقويم وثني الأسلاك.', slug: 'orthodontics' }
+];
+
+const DEFAULT_PRODUCTS = [
+  { id: 'p1', subject_id: '11', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'أداة نحت الشمع PKT 1-5', name_en: 'PKT Waxing Instruments Set (1-5)', price: 45, availability: 'available', is_active: true, is_archived: false, image_url: 'https://images.unsplash.com/photo-1579684389782-64d84b5e901a?w=500&auto=format' },
+  { id: 'p2', subject_id: '11', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'شمع نحت الأسنان أزرق/أحمر', name_en: 'Dental Carving Wax Blocks', price: 15, availability: 'available', is_active: true, is_archived: false, image_url: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=500&auto=format' },
+  { id: 'p3', subject_id: '21', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'قبضة التوربين للأسنان', name_en: 'Dental High Speed Turbine Handpiece', price: 280, availability: 'available', is_active: true, is_archived: false, image_url: 'https://images.unsplash.com/photo-1512223792601-592a9809eed4?w=500&auto=format' },
+];
+
     const fetchAndCache = async (showLoader) => {
       if (showLoader) setLoading(true);
       try {
-        const { data: subject } = await supabase
+        const { data: subjectRes } = await supabase
           .from('subjects').select('*').eq('slug', slug).single();
-        if (!subject) { setLoading(false); return; }
+
+        const subject = subjectRes || DEFAULT_SUBJECTS.find(s => s.slug === slug) || DEFAULT_SUBJECTS[0];
 
         // Fetch year + primary products + junction products IN PARALLEL
-        const [{ data: year }, { data: primaryProds }, { data: junctionLinks }] = await Promise.all([
+        const [{ data: yearRes }, { data: primaryProds }, { data: junctionLinks }] = await Promise.all([
           supabase.from('years').select('*').eq('id', subject.year_id).single(),
-          // Products where subject_id = this subject (primary)
           supabase.from('products').select('*')
             .eq('is_active', true).eq('is_archived', false)
             .eq('subject_id', subject.id),
-          // Products linked via product_subjects junction table
           supabase.from('product_subjects').select('product_id').eq('subject_id', subject.id)
         ]);
 
-        // Get extra product IDs from junction table (exclude already fetched)
+        const year = yearRes || DEFAULT_YEARS.find(y => String(y.id) === String(subject.year_id)) || DEFAULT_YEARS[0];
+
+        // Get extra product IDs from junction table
         const primaryIds = new Set((primaryProds || []).map(p => p.id));
         const extraIds = (junctionLinks || [])
           .map(r => r.product_id)
           .filter(id => !primaryIds.has(id));
 
-        // Fetch extra products if any
         let extraProds = [];
         if (extraIds.length > 0) {
           const { data: ep } = await supabase.from('products').select('*')
@@ -66,14 +91,20 @@ export const SubjectPage = () => {
           extraProds = ep || [];
         }
 
-        // Merge + deduplicate
-        const allProds = [...(primaryProds || []), ...extraProds];
+        const dbProds = [...(primaryProds || []), ...extraProds];
+        const allProds = dbProds.length > 0
+          ? dbProds
+          : DEFAULT_PRODUCTS.filter(p => String(p.subject_id) === String(subject.id));
 
         const bundle = { subject, year: year || null, prods: allProds };
-        cacheSet(CACHE_KEY, bundle, 60); // 60 sec TTL — products update fast
+        cacheSet(CACHE_KEY, bundle, 60);
         applyData(bundle);
       } catch (err) {
-        console.error('SubjectPage fetch error', err);
+        console.warn('SubjectPage fetch error, using defaults', err);
+        const fallbackSub = DEFAULT_SUBJECTS.find(s => s.slug === slug) || DEFAULT_SUBJECTS[0];
+        const fallbackYear = DEFAULT_YEARS.find(y => String(y.id) === String(fallbackSub.year_id)) || DEFAULT_YEARS[0];
+        const fallbackProds = DEFAULT_PRODUCTS.filter(p => String(p.subject_id) === String(fallbackSub.id));
+        applyData({ subject: fallbackSub, year: fallbackYear, prods: fallbackProds });
       } finally {
         setLoading(false);
       }
