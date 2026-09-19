@@ -7,32 +7,6 @@ import SkeletonLoader from '../components/SkeletonLoader';
 import { cacheGet, cacheSet } from '../cache';
 import { SlidersHorizontal, ChevronLeft, ChevronRight, Package, X } from 'lucide-react';
 
-export const SubjectPage = () => {
-  const { slug } = useParams();
-  const { lang, t, isRtl } = useLanguage();
-
-  const [subjectData, setSubjectData] = useState(null);
-  const [yearData, setYearData] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const [maxPrice, setMaxPrice] = useState(1000);
-  const [selectedStock, setSelectedStock] = useState('all');
-  const [sortBy, setSortBy] = useState('recent');
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
-
-  useEffect(() => {
-    const CACHE_KEY = `subject:${slug}`;
-
-    const applyData = ({ subject, year, prods }) => {
-      setSubjectData(subject);
-      setYearData(year);
-      setProducts(prods || []);
-      if (prods && prods.length > 0) {
-        setMaxPrice(Math.ceil(Math.max(...prods.map(p => p.price))));
-      }
-    };
-
 const DEFAULT_YEARS = [
   { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى',  name_en: '1st Year', slug: '1st-year' },
   { id: '20000000-0000-0000-0000-000000000002', name_ar: 'السنة الثانية', name_en: '2nd Year', slug: '2nd-year' },
@@ -58,8 +32,34 @@ const DEFAULT_PRODUCTS = [
   { id: 'p3', subject_id: '21', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'قبضة التوربين للأسنان', name_en: 'Dental High Speed Turbine Handpiece', price: 280, availability: 'available', is_active: true, is_archived: false, image_url: 'https://images.unsplash.com/photo-1512223792601-592a9809eed4?w=500&auto=format' },
 ];
 
+export const SubjectPage = () => {
+  const { slug } = useParams();
+  const { lang, t, isRtl } = useLanguage();
+
+  const [subjectData, setSubjectData] = useState(() => DEFAULT_SUBJECTS.find(s => s.slug === slug) || DEFAULT_SUBJECTS[0]);
+  const [yearData, setYearData] = useState(() => DEFAULT_YEARS[0]);
+  const [products, setProducts] = useState(DEFAULT_PRODUCTS);
+  const [loading, setLoading] = useState(false);
+
+  const [maxPrice, setMaxPrice] = useState(1000);
+  const [selectedStock, setSelectedStock] = useState('all');
+  const [sortBy, setSortBy] = useState('recent');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  useEffect(() => {
+    const CACHE_KEY = `subject:${slug}`;
+
+    const applyData = ({ subject, year, prods }) => {
+      setSubjectData(subject);
+      setYearData(year);
+      setProducts(prods || []);
+      if (prods && prods.length > 0) {
+        setMaxPrice(Math.ceil(Math.max(...prods.map(p => p.price))));
+      }
+    };
+
     const fetchAndCache = async (showLoader) => {
-      if (showLoader) setLoading(true);
+      if (showLoader) setLoading(false);
       try {
         const { data: subjectRes } = await supabase
           .from('subjects').select('*').eq('slug', slug).single();

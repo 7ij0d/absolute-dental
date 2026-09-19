@@ -54,34 +54,7 @@ export const ProductCard = ({ product }) => {
           onError={e => { e.target.src = 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format'; }}
         />
 
-        {/* Absolute Dental Watermark Badge */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '8px',
-            right: '8px',
-            zIndex: 3,
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRadius: '4px',
-            padding: '2px 6px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            pointerEvents: 'none',
-            userSelect: 'none'
-          }}
-        >
-          <img
-            src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
-            alt="Absolute Dental"
-            style={{ width: 12, height: 12, objectFit: 'contain' }}
-          />
-          <span style={{ color: '#ffffff', fontSize: '0.62rem', fontWeight: 900, fontFamily: "'Cairo', sans-serif" }}>
-            Absolute Dental
-          </span>
-        </div>
+
 
         {/* Badges */}
         <div className="product-card-badge">

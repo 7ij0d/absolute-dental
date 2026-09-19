@@ -38,9 +38,9 @@ export const YearPage = () => {
   const { slug } = useParams();
   const { lang, t, isRtl } = useLanguage();
 
-  const [yearData, setYearData] = useState(null);
-  const [subjects, setSubjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [yearData, setYearData] = useState(() => DEFAULT_YEARS.find(y => y.slug === slug) || DEFAULT_YEARS[0]);
+  const [subjects, setSubjects] = useState(() => DEFAULT_SUBJECTS.filter(s => String(s.year_id) === String(DEFAULT_YEARS.find(y => y.slug === slug)?.id || '10000000-0000-0000-0000-000000000001')));
+  const [loading, setLoading] = useState(false);
   const [allYears, setAllYears] = useState(DEFAULT_YEARS);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export const YearPage = () => {
     };
 
     const fetchAndCache = async (showLoader) => {
-      if (showLoader) setLoading(true);
+      if (showLoader) setLoading(false);
       try {
         // Fetch year first
         const { data: yearRes } = await supabase

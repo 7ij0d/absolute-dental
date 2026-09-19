@@ -21,44 +21,7 @@ import {
 
 const BASE = import.meta.env.BASE_URL || '/';
 
-/* ─── WATERMARK OVERLAY COMPONENT ──────────────────────── */
-const WatermarkOverlay = () => (
-  <div
-    style={{
-      position: 'absolute',
-      bottom: '10px',
-      right: '10px',
-      zIndex: 10,
-      background: 'rgba(15, 23, 42, 0.65)',
-      backdropFilter: 'blur(6px)',
-      border: '1px solid rgba(255, 255, 255, 0.15)',
-      borderRadius: 'var(--radius-sm)',
-      padding: '3px 8px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '5px',
-      pointerEvents: 'none',
-      userSelect: 'none',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-    }}
-  >
-    <img
-      src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
-      alt="Absolute Dental"
-      style={{ width: 14, height: 14, objectFit: 'contain' }}
-    />
-    <span style={{
-      color: '#ffffff',
-      fontSize: '0.68rem',
-      fontWeight: 900,
-      fontFamily: "'Cairo', sans-serif",
-      letterSpacing: '0.04em',
-      textShadow: '0 1px 2px rgba(0,0,0,0.8)'
-    }}>
-      Absolute Dental
-    </span>
-  </div>
-);
+
 
 /* ─── HARDCODED FALLBACKS (Used only if DB returns 0 rows) ─── */
 const FALLBACK_CATEGORIES = [
@@ -232,8 +195,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
           }}
         />
 
-        {/* Watermark */}
-        <WatermarkOverlay />
+
 
         {/* Zoom Hint */}
         <div style={{
