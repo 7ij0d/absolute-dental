@@ -14,7 +14,9 @@ export const ContactPage = () => {
   const [errorMsg, setErrorMsg] = useState('');
   
   const [contacts, setContacts] = useState({
-    whatsapp: 'https://wa.me/218911234567',
+    whatsapp: 'https://wa.me/218946859163',
+    phone_primary: '0946859163',
+    phone_secondary: '0925813109',
     telegram: 'https://t.me/smylodent_libya',
     instagram: 'https://instagram.com/smylodent',
     facebook: 'https://facebook.com/smylodent'
@@ -159,16 +161,24 @@ export const ContactPage = () => {
             <h3 style={{ fontSize: '1.05rem', fontWeight: 700 }}>معلومات الاتصال المباشر</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.9rem' }}>
               
-              <a href={contacts.whatsapp} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }} className="contact-link-row">
-                <div style={{ color: 'var(--secondary)' }}><Phone size={20} /></div>
+              <a href={contacts.whatsapp || 'https://wa.me/218946859163'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }} className="contact-link-row">
+                <div style={{ color: '#25D366' }}><Phone size={20} /></div>
                 <div>
-                  <p style={{ fontWeight: 700, color: 'var(--text-main)' }}>واتساب / WhatsApp</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>محادثة مباشرة لطلبات الكليات والجملة</p>
+                  <p style={{ fontWeight: 700, color: 'var(--text-main)' }}>واتساب وهاتف أساسي: 0946859163</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>محادثة واتساب مباشرة واتصال تلفوني للطلبات والاستفسارات</p>
                 </div>
               </a>
 
-              <a href={contacts.telegram} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }} className="contact-link-row">
-                <div style={{ color: 'var(--secondary)' }}><Send size={20} /></div>
+              <a href={`tel:${contacts.phone_secondary || '0925813109'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }} className="contact-link-row">
+                <div style={{ color: 'var(--secondary)' }}><Phone size={20} /></div>
+                <div>
+                  <p style={{ fontWeight: 700, color: 'var(--text-main)' }}>رقم هاتف احتياطي: 0925813109</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>خط اتصال هاتفي إضافي للدعم والمتابعة</p>
+                </div>
+              </a>
+
+              <a href={contacts.telegram || 'https://t.me/smylodent_libya'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }} className="contact-link-row">
+                <div style={{ color: '#0088cc' }}><Send size={20} /></div>
                 <div>
                   <p style={{ fontWeight: 700, color: 'var(--text-main)' }}>تيليجرام / Telegram</p>
                   <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>مجموعات وقنوات الدفعة والتواصل مع الطلبة</p>

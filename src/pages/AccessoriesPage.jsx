@@ -496,7 +496,7 @@ export const AccessoriesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [boxesProducts, setBoxesProducts] = useState(FALLBACK_BOXES);
   const [loading, setLoading] = useState(false);
-  const [whatsappNumber, setWhatsappNumber] = useState('218911234567');
+  const [whatsappNumber, setWhatsappNumber] = useState('218946859163');
   const [accessoriesBg, setAccessoriesBg] = useState('');
   const [dentalBoxesBg, setDentalBoxesBg] = useState('');
 

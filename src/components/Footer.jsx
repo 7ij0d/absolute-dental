@@ -71,14 +71,22 @@ export const Footer = () => {
             {/* Contact Info */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '1.25rem' }}>
               <a
-                href="https://wa.me/218911234567"
+                href="https://wa.me/218946859163"
                 target="_blank"
                 rel="noreferrer"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem', transition: 'color 0.15s' }}
                 onMouseEnter={e => e.currentTarget.style.color = '#25D366'}
                 onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
               >
-                <Phone size={14} /> 218-91-1234567+
+                <Phone size={14} /> 094-6859163 (واتساب وهاتف)
+              </a>
+              <a
+                href="tel:0925813109"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem', transition: 'color 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#CDBFA6'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
+              >
+                <Phone size={14} /> 092-5813109 (احتياطي)
               </a>
               <a
                 href="mailto:absolutedental.ly@gmail.com"
@@ -95,7 +103,7 @@ export const Footer = () => {
 
             {/* Social Icons */}
             <div className="footer-social">
-              <a href="https://wa.me/218911234567" target="_blank" rel="noreferrer" className="social-btn" title="WhatsApp"
+              <a href="https://wa.me/218946859163" target="_blank" rel="noreferrer" className="social-btn" title="WhatsApp"
                 style={{ color: 'var(--text-dim)' }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#25D366'; e.currentTarget.style.borderColor = '#25D366'; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
