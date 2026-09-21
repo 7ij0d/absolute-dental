@@ -288,6 +288,28 @@ export const AdminAccessories = () => {
     }
   };
 
+  const handleQuickStatusChange = async (colorItem, newStatus) => {
+    try {
+      const cleanAr = (colorItem.label_ar || colorItem.label_en || '').replace(/\[out_of_stock\]|\[coming_soon\]|\[in_stock\]/g, '').trim();
+      const cleanEn = (colorItem.label_en || colorItem.label_ar || '').replace(/\[out_of_stock\]|\[coming_soon\]|\[in_stock\]/g, '').trim();
+      let statusSuffix = '';
+      if (newStatus === 'out_of_stock') statusSuffix = ' [out_of_stock]';
+      else if (newStatus === 'coming_soon') statusSuffix = ' [coming_soon]';
+
+      const payload = {
+        label_ar: cleanAr + statusSuffix,
+        label_en: cleanEn + statusSuffix
+      };
+
+      const { error } = await supabase.from('accessory_product_colors').update(payload).eq('id', colorItem.id);
+      if (error) throw error;
+      showMsg('success', isRtl ? 'تم تحديث حالة التوفر بنجاح' : 'Status updated successfully');
+      loadAllData();
+    } catch (err) {
+      showMsg('error', err.message);
+    }
+  };
+
   /* ── BACKGROUNDS SAVE ── */
   const handleSaveBackgrounds = async (e) => {
     e.preventDefault();
@@ -636,13 +658,24 @@ export const AdminAccessories = () => {
                         </td>
                         <td style={{ padding: '1rem', fontWeight: 800 }}>{cleanLabel}</td>
                         <td style={{ padding: '1rem' }}>
-                          {st === 'out_of_stock' ? (
-                            <span style={{ color: '#EF4444', fontWeight: 800, background: 'rgba(239,68,68,0.1)', padding: '0.3rem 0.6rem', borderRadius: 'var(--radius-sm)' }}>🔴 {isRtl ? 'نفذت الكمية' : 'Out of Stock'}</span>
-                          ) : st === 'coming_soon' ? (
-                            <span style={{ color: '#F59E0B', fontWeight: 800, background: 'rgba(245,158,11,0.1)', padding: '0.3rem 0.6rem', borderRadius: 'var(--radius-sm)' }}>🟧 {isRtl ? 'قريباً' : 'Coming Soon'}</span>
-                          ) : (
-                            <span style={{ color: '#10B981', fontWeight: 800, background: 'rgba(16,185,129,0.1)', padding: '0.3rem 0.6rem', borderRadius: 'var(--radius-sm)' }}>🟢 {isRtl ? 'متوفر' : 'In Stock'}</span>
-                          )}
+                          <select
+                            value={st}
+                            onChange={(e) => handleQuickStatusChange(c, e.target.value)}
+                            style={{
+                              padding: '0.4rem 0.75rem',
+                              borderRadius: 'var(--radius-sm)',
+                              fontSize: '0.82rem',
+                              fontWeight: 800,
+                              border: '1px solid var(--border-color)',
+                              background: st === 'out_of_stock' ? 'rgba(239,68,68,0.12)' : st === 'coming_soon' ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.12)',
+                              color: st === 'out_of_stock' ? '#EF4444' : st === 'coming_soon' ? '#F59E0B' : '#10B981',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value="in_stock">🟢 {isRtl ? 'متوفر' : 'In Stock'}</option>
+                            <option value="out_of_stock">🔴 {isRtl ? 'نفذت الكمية' : 'Out of Stock'}</option>
+                            <option value="coming_soon">🟧 {isRtl ? 'قريباً' : 'Coming Soon'}</option>
+                          </select>
                         </td>
                         <td style={{ padding: '1rem' }}>
                           {c.image_url ? (

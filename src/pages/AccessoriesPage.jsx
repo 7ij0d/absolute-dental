@@ -70,9 +70,9 @@ const FALLBACK_BOXES = [
     main_image: `${BASE}accessories/box16_5-colors.png`,
     inside_image: `${BASE}accessories/box16_5-inside.png`,
     colors: [
-      { id: 'red',    hex_code: '#D32F2F', label_ar: 'أحمر [out_of_stock]',        label_en: 'Red [out_of_stock]',        status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-red.jpg`,    inside_image_url: `${BASE}accessories/box16_5-inside-red.jpg` },
-      { id: 'blue',   hex_code: '#2196F3', label_ar: 'أزرق فاتح [out_of_stock]',   label_en: 'Light Blue [out_of_stock]', status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-blue.png`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
-      { id: 'navy',   hex_code: '#0D47A1', label_ar: 'أزرق داكن [out_of_stock]',   label_en: 'Navy Blue [out_of_stock]',  status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-blue.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
+      { id: 'red',    hex_code: '#D32F2F', label_ar: 'أحمر',              label_en: 'Red',                 status: 'in_stock',     image_url: `${BASE}accessories/box16_5-red.jpg`,    inside_image_url: `${BASE}accessories/box16_5-inside-red.jpg` },
+      { id: 'blue',   hex_code: '#2196F3', label_ar: 'أزرق فاتح',         label_en: 'Light Blue',          status: 'in_stock',     image_url: `${BASE}accessories/box16_5-blue.png`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
+      { id: 'navy',   hex_code: '#0D47A1', label_ar: 'أزرق داكن',         label_en: 'Dark Navy Blue',      status: 'in_stock',     image_url: `${BASE}accessories/box16_5-blue.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
       { id: 'teal',   hex_code: '#00ACC1', label_ar: 'تركوازي [out_of_stock]',     label_en: 'Teal [out_of_stock]',       status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-teal.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-teal.jpg` },
       { id: 'green',  hex_code: '#7CB342', label_ar: 'أخضر [out_of_stock]',        label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-green.jpg`,  inside_image_url: `${BASE}accessories/box16_5-inside-green.jpg` },
       { id: 'orange', hex_code: '#F57C00', label_ar: 'برتقالي [out_of_stock]',     label_en: 'Orange [out_of_stock]',     status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-orange.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-orange.jpg` },
