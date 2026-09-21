@@ -798,34 +798,32 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 
   /* ── NAVBAR ─────────────────────────────────────── */
   .navbar-inner {
-    height: 49px !important;
-    gap: 0;
+    height: 64px !important;
+    gap: 0.5rem;
     overflow: visible;  /* MUST be visible — overflow:hidden clips the mega menu */
-    padding: 0 8px;
+    padding: 0 12px;
+    justify-content: space-between;
   }
 
-  /* Logo image — mobile custom values */
+  /* Logo image — mobile clean values */
   .navbar-logo > img {
-    width: 50px !important;
-    height: 130px !important;
-    transform: translate(-7px, 2px) !important;
+    height: 36px !important;
+    width: auto !important;
+    max-height: 36px !important;
+    transform: none !important;
   }
 
-  /* Brand text — mobile custom values */
-  .navbar-logo > span > span:first-child {
-    font-size: 18px !important;
-    letter-spacing: 0.03em !important;
-    transform: translateX(-13px) !important;
-    margin-right: 1px !important;
-  }
+  /* Brand text — mobile clean values */
+  .navbar-logo > span > span:first-child,
   .navbar-logo > span > span:last-child {
-    font-size: 18px !important;
-    letter-spacing: 0.03em !important;
-    transform: translateX(-11px) !important;
+    font-size: 1.15rem !important;
+    letter-spacing: 0.02em !important;
+    transform: none !important;
+    margin-right: 0 !important;
   }
 
   /* Logo link gap */
-  .navbar-logo { gap: 0px !important; }
+  .navbar-logo { gap: 6px !important; }
 
   /* Hide desktop nav + search on mobile */
   #desktop-nav    { display: none !important; }
@@ -835,7 +833,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   #mobile-menu-btn { display: flex !important; }
 
   /* Action icons: tighter */
-  .navbar-actions { gap: 0.1rem; }
+  .navbar-actions { gap: 0.35rem; }
   .nav-icon-btn { width: 32px; height: 32px; }
   .nav-cart-badge { width: 14px; height: 14px; font-size: 0.5rem; top: 2px; right: 2px; }
 

@@ -102,6 +102,21 @@ const FALLBACK_BOXES = [
   }
 ];
 
+const getColorStatus = (c) => {
+  if (!c) return 'in_stock';
+  if (c.status) return c.status;
+  const label = `${c.label_ar || ''} ${c.label_en || ''}`;
+  if (label.includes('[out_of_stock]') || label.includes('نفذت الكمية')) return 'out_of_stock';
+  if (label.includes('[coming_soon]') || label.includes('قريبا')) return 'coming_soon';
+  return 'in_stock';
+};
+
+const getCleanLabel = (c, lang) => {
+  if (!c) return '';
+  const text = lang === 'ar' ? (c.label_ar || c.label_en || '') : (c.label_en || c.label_ar || '');
+  return text.replace(/\[out_of_stock\]|\[coming_soon\]|\[in_stock\]/g, '').trim();
+};
+
 /* ─── SINGLE DENTAL BOX PRODUCT CARD ────────────────────── */
 const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
   const { addToCart } = useCart();
@@ -364,21 +379,35 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.4rem' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Colors:
+              {lang === 'ar' ? 'الألوان:' : 'Colors:'}
             </span>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary)' }}>
-              {selectedColor.label_en || selectedColor.label_ar}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--primary)' }}>
+                {getCleanLabel(selectedColor, lang)}
+              </span>
+              {getColorStatus(selectedColor) === 'out_of_stock' && (
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#EF4444', background: 'rgba(239,68,68,0.12)', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
+                  🔴 {lang === 'ar' ? 'نفذت الكمية' : 'Out of Stock'}
+                </span>
+              )}
+              {getColorStatus(selectedColor) === 'coming_soon' && (
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#F59E0B', background: 'rgba(245,158,11,0.12)', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
+                  🟧 {lang === 'ar' ? 'قريباً' : 'Coming Soon'}
+                </span>
+              )}
+            </div>
           </div>
 
           <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
             {colorsList.map(color => {
-              const isSelected = selectedColor.id === color.id;
+              const isSelected = selectedColor.id === color.id || selectedColor.color_id === color.color_id;
+              const colorSt = getColorStatus(color);
+              const cleanName = getCleanLabel(color, lang);
               return (
                 <button
                   key={color.id || color.color_id}
                   type="button"
-                  title={color.label_en || color.label_ar}
+                  title={`${cleanName} ${colorSt === 'out_of_stock' ? '(Out of Stock)' : colorSt === 'coming_soon' ? '(Coming Soon)' : ''}`}
                   onClick={() => setSelectedColor(color)}
                   style={{
                     width: 36,
@@ -394,7 +423,8 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    opacity: colorSt === 'out_of_stock' ? 0.65 : 1
                   }}
                 >
                   {isSelected && (
@@ -405,6 +435,12 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
                         filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))'
                       }}
                     />
+                  )}
+                  {colorSt === 'out_of_stock' && !isSelected && (
+                    <span style={{ position: 'absolute', top: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: '#EF4444', border: '1.5px solid #fff' }} />
+                  )}
+                  {colorSt === 'coming_soon' && !isSelected && (
+                    <span style={{ position: 'absolute', top: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: '#F59E0B', border: '1.5px solid #fff' }} />
                   )}
                 </button>
               );
@@ -428,34 +464,84 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           
           {/* Direct Add to Cart */}
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            className="btn btn-secondary"
-            style={{
-              width: '100%',
-              padding: '0.85rem',
-              fontWeight: 800,
-              fontSize: '0.92rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.6rem',
-              minHeight: '44px'
-            }}
-          >
-            {addedNotice ? (
-              <>
-                <Check size={18} />
-                <span>{lang === 'ar' ? 'تمت الإضافة للسلة!' : 'Added to Cart!'}</span>
-              </>
-            ) : (
-              <>
-                <ShoppingCart size={18} />
-                <span>{lang === 'ar' ? 'إضافة إلى السلة والطلب مباشرة' : 'Add to Cart / Order'}</span>
-              </>
-            )}
-          </button>
+          {getColorStatus(selectedColor) === 'out_of_stock' ? (
+            <button
+              type="button"
+              disabled
+              style={{
+                width: '100%',
+                padding: '0.85rem',
+                fontWeight: 800,
+                fontSize: '0.92rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.6rem',
+                minHeight: '44px',
+                borderRadius: 'var(--radius-md)',
+                backgroundColor: 'rgba(239,68,68,0.12)',
+                color: '#EF4444',
+                border: '1px solid rgba(239,68,68,0.3)',
+                cursor: 'not-allowed'
+              }}
+            >
+              <X size={18} />
+              <span>{lang === 'ar' ? 'نفذت الكمية لهذا اللون' : 'Out of Stock for this Color'}</span>
+            </button>
+          ) : getColorStatus(selectedColor) === 'coming_soon' ? (
+            <button
+              type="button"
+              disabled
+              style={{
+                width: '100%',
+                padding: '0.85rem',
+                fontWeight: 800,
+                fontSize: '0.92rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.6rem',
+                minHeight: '44px',
+                borderRadius: 'var(--radius-md)',
+                backgroundColor: 'rgba(245,158,11,0.12)',
+                color: '#F59E0B',
+                border: '1px solid rgba(245,158,11,0.3)',
+                cursor: 'not-allowed'
+              }}
+            >
+              <Info size={18} />
+              <span>{lang === 'ar' ? 'قريباً جداً' : 'Coming Soon'}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="btn btn-secondary"
+              style={{
+                width: '100%',
+                padding: '0.85rem',
+                fontWeight: 800,
+                fontSize: '0.92rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.6rem',
+                minHeight: '44px'
+              }}
+            >
+              {addedNotice ? (
+                <>
+                  <Check size={18} />
+                  <span>{lang === 'ar' ? 'تمت الإضافة للسلة!' : 'Added to Cart!'}</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart size={18} />
+                  <span>{lang === 'ar' ? 'إضافة إلى السلة والطلب مباشرة' : 'Add to Cart / Order'}</span>
+                </>
+              )}
+            </button>
+          )}
 
           {/* Optional WhatsApp Inquiry */}
           <a
