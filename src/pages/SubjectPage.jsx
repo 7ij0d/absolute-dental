@@ -26,11 +26,7 @@ const DEFAULT_SUBJECTS = [
   { id: '42', year_id: '40000000-0000-0000-0000-000000000004', name_ar: 'تقويم الأسنان', name_en: 'Orthodontics', description_ar: 'صنع الأجهزة المتحركة للتقويم وثني الأسلاك.', slug: 'orthodontics' }
 ];
 
-const DEFAULT_PRODUCTS = [
-  { id: 'p1', subject_id: '11', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'أداة نحت الشمع PKT 1-5', name_en: 'PKT Waxing Instruments Set (1-5)', price: 45, availability: 'available', is_active: true, is_archived: false, image_url: 'https://images.unsplash.com/photo-1579684389782-64d84b5e901a?w=500&auto=format' },
-  { id: 'p2', subject_id: '11', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'شمع نحت الأسنان أزرق/أحمر', name_en: 'Dental Carving Wax Blocks', price: 15, availability: 'available', is_active: true, is_archived: false, image_url: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=500&auto=format' },
-  { id: 'p3', subject_id: '21', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'قبضة التوربين للأسنان', name_en: 'Dental High Speed Turbine Handpiece', price: 280, availability: 'available', is_active: true, is_archived: false, image_url: 'https://images.unsplash.com/photo-1512223792601-592a9809eed4?w=500&auto=format' },
-];
+const DEFAULT_PRODUCTS = [];
 
 export const SubjectPage = () => {
   const { slug } = useParams();
@@ -38,8 +34,8 @@ export const SubjectPage = () => {
 
   const [subjectData, setSubjectData] = useState(() => DEFAULT_SUBJECTS.find(s => s.slug === slug) || DEFAULT_SUBJECTS[0]);
   const [yearData, setYearData] = useState(() => DEFAULT_YEARS[0]);
-  const [products, setProducts] = useState(DEFAULT_PRODUCTS);
-  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [maxPrice, setMaxPrice] = useState(1000);
   const [selectedStock, setSelectedStock] = useState('all');
@@ -54,12 +50,12 @@ export const SubjectPage = () => {
       setYearData(year);
       setProducts(prods || []);
       if (prods && prods.length > 0) {
-        setMaxPrice(Math.ceil(Math.max(...prods.map(p => p.price))));
+        setMaxPrice(Math.ceil(Math.max(...prods.map(p => p.price || 0))));
       }
     };
 
     const fetchAndCache = async (showLoader) => {
-      if (showLoader) setLoading(false);
+      if (showLoader) setLoading(true);
       try {
         const { data: subjectRes } = await supabase
           .from('subjects').select('*').eq('slug', slug).single();
@@ -92,19 +88,16 @@ export const SubjectPage = () => {
         }
 
         const dbProds = [...(primaryProds || []), ...extraProds];
-        const allProds = dbProds.length > 0
-          ? dbProds
-          : DEFAULT_PRODUCTS.filter(p => String(p.subject_id) === String(subject.id));
+        const allProds = dbProds;
 
         const bundle = { subject, year: year || null, prods: allProds };
         cacheSet(CACHE_KEY, bundle, 60);
         applyData(bundle);
       } catch (err) {
-        console.warn('SubjectPage fetch error, using defaults', err);
+        console.warn('SubjectPage fetch error:', err);
         const fallbackSub = DEFAULT_SUBJECTS.find(s => s.slug === slug) || DEFAULT_SUBJECTS[0];
         const fallbackYear = DEFAULT_YEARS.find(y => String(y.id) === String(fallbackSub.year_id)) || DEFAULT_YEARS[0];
-        const fallbackProds = DEFAULT_PRODUCTS.filter(p => String(p.subject_id) === String(fallbackSub.id));
-        applyData({ subject: fallbackSub, year: fallbackYear, prods: fallbackProds });
+        applyData({ subject: fallbackSub, year: fallbackYear, prods: [] });
       } finally {
         setLoading(false);
       }

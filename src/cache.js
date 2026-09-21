@@ -4,24 +4,29 @@
  * instantly invalidates ALL old cached data from the previous branding.
  */
 
-const CACHE_PREFIX = 'ad:';
+const CACHE_PREFIX = 'ad4:';
 const memCache = new Map();
 
 /**
- * Called once on app startup — purges any stale keys from the old 'smyl:' prefix
- * and any old mock_ localStorage entries from the Smylodent era.
+ * Called once on app startup — purges any stale keys from previous cache prefixes
+ * and old mock_ products entries from localStorage.
  */
 export function clearStaleCache() {
   try {
-    // Remove old sessionStorage keys with 'smyl:' prefix
+    // Remove old sessionStorage keys with legacy prefixes
     const keysToDelete = [];
     for (let i = 0; i < sessionStorage.length; i++) {
       const k = sessionStorage.key(i);
-      if (k && k.startsWith('smyl:')) keysToDelete.push(k);
+      if (k && (k.startsWith('smyl:') || k.startsWith('ad:') || k.startsWith('ad2:') || k.startsWith('ad3:'))) {
+        keysToDelete.push(k);
+      }
     }
     keysToDelete.forEach(k => sessionStorage.removeItem(k));
 
-    // Remove old mock_ localStorage keys (Smylodent era)
+    // Remove mock_products from localStorage
+    localStorage.removeItem('mock_products');
+
+    // Remove old mock_ localStorage keys
     const lsKeys = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
