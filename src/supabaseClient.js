@@ -521,24 +521,26 @@ class MockQueryBuilder {
       }
       else if (table === 'accessory_product_colors') {
         this.data = [
-          { id: 'c1', product_id: 'p16', color_id: 'yellow', label_ar: 'Yellow', label_en: 'Yellow', hex_code: '#F5C518', image_url: '/absolute-dental/accessories/box16-colors.png', sort_order: 1 },
-          { id: 'c2', product_id: 'p16', color_id: 'maroon', label_ar: 'Maroon', label_en: 'Maroon', hex_code: '#8B1A1A', image_url: '/absolute-dental/accessories/box16-colors.png', sort_order: 2 },
-          { id: 'c3', product_id: 'p16', color_id: 'red', label_ar: 'Red', label_en: 'Red', hex_code: '#E02020', image_url: '/absolute-dental/accessories/box16-colors.png', sort_order: 3 },
-          { id: 'c4', product_id: 'p16', color_id: 'purple', label_ar: 'Purple', label_en: 'Purple', hex_code: '#7B3FE4', image_url: '/absolute-dental/accessories/box16-colors.png', sort_order: 4 },
-          { id: 'c5', product_id: 'p16', color_id: 'blue', label_ar: 'Blue', label_en: 'Blue', hex_code: '#1565C0', image_url: '/absolute-dental/accessories/box16-colors.png', sort_order: 5 },
-          { id: 'c6', product_id: 'p16_5', color_id: 'red', label_ar: 'Red', label_en: 'Red', hex_code: '#D32F2F', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 1 },
-          { id: 'c7', product_id: 'p16_5', color_id: 'orange', label_ar: 'Orange', label_en: 'Orange', hex_code: '#F57C00', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 2 },
-          { id: 'c8', product_id: 'p16_5', color_id: 'teal', label_ar: 'Teal', label_en: 'Teal', hex_code: '#00ACC1', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 3 },
-          { id: 'c9', product_id: 'p16_5', color_id: 'navy', label_ar: 'Navy Blue', label_en: 'Navy Blue', hex_code: '#1565C0', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 4 },
-          { id: 'c10', product_id: 'p16_5', color_id: 'blue', label_ar: 'Light Blue', label_en: 'Light Blue', hex_code: '#42A5F5', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 5 },
-          { id: 'c11', product_id: 'p16_5', color_id: 'green', label_ar: 'Green', label_en: 'Green', hex_code: '#43A047', image_url: '/absolute-dental/accessories/box16_5-colors.png', sort_order: 6 },
-          { id: 'c12', product_id: 'p17', color_id: 'beige', label_ar: 'Beige', label_en: 'Beige', hex_code: '#C8A882', image_url: '/absolute-dental/accessories/box17-colors.png', sort_order: 1 },
-          { id: 'c13', product_id: 'p17', color_id: 'teal', label_ar: 'Teal', label_en: 'Teal', hex_code: '#00897B', image_url: '/absolute-dental/accessories/box17-colors.png', sort_order: 2 },
-          { id: 'c14', product_id: 'p17', color_id: 'pink', label_ar: 'Pink', label_en: 'Pink', hex_code: '#E91E8C', image_url: '/absolute-dental/accessories/box17-colors.png', sort_order: 3 },
-          { id: 'c15', product_id: 'p17', color_id: 'blue', label_ar: 'Light Blue', label_en: 'Light Blue', hex_code: '#42A5F5', image_url: '/absolute-dental/accessories/box17-group.jpg', sort_order: 4 },
-          { id: 'c16', product_id: 'p17', color_id: 'red', label_ar: 'Red', label_en: 'Red', hex_code: '#E02020', image_url: '/absolute-dental/accessories/box17-group.jpg', sort_order: 5 },
-          { id: 'c17', product_id: 'p17', color_id: 'lime', label_ar: 'Lime Green', label_en: 'Lime Green', hex_code: '#7CB342', image_url: '/absolute-dental/accessories/box17-colors.png', sort_order: 6 },
-          { id: 'c18', product_id: 'p17', color_id: 'purple', label_ar: 'Purple', label_en: 'Purple', hex_code: '#7B3FE4', image_url: '/absolute-dental/accessories/box17-colors.png', sort_order: 7 }
+          { id: 'c1', product_id: 'p16', color_id: 'blue', label_ar: 'Blue', label_en: 'Blue', status: 'in_stock', hex_code: '#1565C0', image_url: '/absolute-dental/accessories/box16-blue.jpg', sort_order: 1 },
+          { id: 'c2', product_id: 'p16', color_id: 'red', label_ar: 'Red', label_en: 'Red', status: 'in_stock', hex_code: '#E02020', image_url: '/absolute-dental/accessories/box16-red.jpg', sort_order: 2 },
+          { id: 'c3', product_id: 'p16', color_id: 'purple', label_ar: 'Purple', label_en: 'Purple', status: 'in_stock', hex_code: '#7B3FE4', image_url: '/absolute-dental/accessories/box16-purple.jpg', sort_order: 3 },
+          { id: 'c4', product_id: 'p16', color_id: 'yellow', label_ar: 'Yellow [out_of_stock]', label_en: 'Yellow [out_of_stock]', status: 'out_of_stock', hex_code: '#F5C518', image_url: '/absolute-dental/accessories/box16-yellow.jpg', sort_order: 4 },
+          { id: 'c5', product_id: 'p16', color_id: 'maroon', label_ar: 'Maroon [out_of_stock]', label_en: 'Maroon [out_of_stock]', status: 'out_of_stock', hex_code: '#8B1A1A', image_url: '/absolute-dental/accessories/box16-maroon.jpg', sort_order: 5 },
+          
+          { id: 'c6', product_id: 'p16_5', color_id: 'red', label_ar: 'Red [out_of_stock]', label_en: 'Red [out_of_stock]', status: 'out_of_stock', hex_code: '#D32F2F', image_url: '/absolute-dental/accessories/box16_5-red.jpg', sort_order: 1 },
+          { id: 'c7', product_id: 'p16_5', color_id: 'blue', label_ar: 'Light Blue [out_of_stock]', label_en: 'Light Blue [out_of_stock]', status: 'out_of_stock', hex_code: '#42A5F5', image_url: '/absolute-dental/accessories/box16_5-blue.png', sort_order: 2 },
+          { id: 'c8', product_id: 'p16_5', color_id: 'navy', label_ar: 'Navy Blue [out_of_stock]', label_en: 'Navy Blue [out_of_stock]', status: 'out_of_stock', hex_code: '#1565C0', image_url: '/absolute-dental/accessories/box16_5-blue.jpg', sort_order: 3 },
+          { id: 'c9', product_id: 'p16_5', color_id: 'teal', label_ar: 'Teal [out_of_stock]', label_en: 'Teal [out_of_stock]', status: 'out_of_stock', hex_code: '#00ACC1', image_url: '/absolute-dental/accessories/box16_5-teal.jpg', sort_order: 4 },
+          { id: 'c10', product_id: 'p16_5', color_id: 'green', label_ar: 'Green [out_of_stock]', label_en: 'Green [out_of_stock]', status: 'out_of_stock', hex_code: '#43A047', image_url: '/absolute-dental/accessories/box16_5-green.jpg', sort_order: 5 },
+          { id: 'c11', product_id: 'p16_5', color_id: 'orange', label_ar: 'Orange [out_of_stock]', label_en: 'Orange [out_of_stock]', status: 'out_of_stock', hex_code: '#F57C00', image_url: '/absolute-dental/accessories/box16_5-orange.jpg', sort_order: 6 },
+          
+          { id: 'c12', product_id: 'p17', color_id: 'black', label_ar: 'Black', label_en: 'Black', status: 'in_stock', hex_code: '#111111', image_url: '/absolute-dental/accessories/box17-black.jpg', sort_order: 1 },
+          { id: 'c13', product_id: 'p17', color_id: 'purple', label_ar: 'Purple', label_en: 'Purple', status: 'in_stock', hex_code: '#7B3FE4', image_url: '/absolute-dental/accessories/box17-purple.jpg', sort_order: 2 },
+          { id: 'c14', product_id: 'p17', color_id: 'beige', label_ar: 'Beige [out_of_stock]', label_en: 'Beige [out_of_stock]', status: 'out_of_stock', hex_code: '#C8A882', image_url: '/absolute-dental/accessories/box17-beige.jpg', sort_order: 3 },
+          { id: 'c15', product_id: 'p17', color_id: 'blue', label_ar: 'Blue [out_of_stock]', label_en: 'Blue [out_of_stock]', status: 'out_of_stock', hex_code: '#1565C0', image_url: '/absolute-dental/accessories/box17-blue.jpg', sort_order: 4 },
+          { id: 'c16', product_id: 'p17', color_id: 'red', label_ar: 'Red [out_of_stock]', label_en: 'Red [out_of_stock]', status: 'out_of_stock', hex_code: '#E02020', image_url: '/absolute-dental/accessories/box17-red.jpg', sort_order: 5 },
+          { id: 'c17', product_id: 'p17', color_id: 'pink', label_ar: 'Pink [out_of_stock]', label_en: 'Pink [out_of_stock]', status: 'out_of_stock', hex_code: '#E91E8C', image_url: '/absolute-dental/accessories/box17-pink.jpg', sort_order: 6 },
+          { id: 'c18', product_id: 'p17', color_id: 'teal', label_ar: 'Teal [out_of_stock]', label_en: 'Teal [out_of_stock]', status: 'out_of_stock', hex_code: '#00897B', image_url: '/absolute-dental/accessories/box17-colors.png', sort_order: 7 }
         ];
       }
       else {

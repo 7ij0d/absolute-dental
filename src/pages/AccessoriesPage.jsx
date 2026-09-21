@@ -47,14 +47,14 @@ const FALLBACK_BOXES = [
     desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
     features_ar: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
     features_en: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
-    main_image: `${BASE}accessories/box16-maroon.jpg`,
-    inside_image: `${BASE}accessories/box16-inside-maroon.jpg`,
+    main_image: `${BASE}accessories/box16-blue.jpg`,
+    inside_image: `${BASE}accessories/box16-inside-blue.jpg`,
     colors: [
-      { id: 'maroon', hex_code: '#800020', label_ar: 'خمري / عنابي', label_en: 'Maroon', image_url: `${BASE}accessories/box16-maroon.jpg`, inside_image_url: `${BASE}accessories/box16-inside-maroon.jpg`, base_image_url: `${BASE}accessories/box16-base-maroon.jpg` },
-      { id: 'yellow', hex_code: '#F5C518', label_ar: 'أصفر', label_en: 'Yellow', image_url: `${BASE}accessories/box16-yellow.jpg`, inside_image_url: `${BASE}accessories/box16-inside-yellow.jpg`, base_image_url: `${BASE}accessories/box16-base-yellow.jpg` },
-      { id: 'red',    hex_code: '#E02020', label_ar: 'أحمر', label_en: 'Red', image_url: `${BASE}accessories/box16-red.jpg`, inside_image_url: `${BASE}accessories/box16-inside-red.jpg`, base_image_url: `${BASE}accessories/box16-base-red.jpg` },
-      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي', label_en: 'Purple', image_url: `${BASE}accessories/box16-purple.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
-      { id: 'blue',   hex_code: '#1565C0', label_ar: 'أزرق', label_en: 'Blue', image_url: `${BASE}accessories/box16-blue.jpg`, inside_image_url: `${BASE}accessories/box16-inside-blue.jpg`, base_image_url: `${BASE}accessories/box16-base-blue.jpg` },
+      { id: 'blue',   hex_code: '#1565C0', label_ar: 'أزرق', label_en: 'Blue', status: 'in_stock', image_url: `${BASE}accessories/box16-blue.jpg`, inside_image_url: `${BASE}accessories/box16-inside-blue.jpg`, base_image_url: `${BASE}accessories/box16-base-blue.jpg` },
+      { id: 'red',    hex_code: '#E02020', label_ar: 'أحمر', label_en: 'Red', status: 'in_stock', image_url: `${BASE}accessories/box16-red.jpg`, inside_image_url: `${BASE}accessories/box16-inside-red.jpg`, base_image_url: `${BASE}accessories/box16-base-red.jpg` },
+      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', image_url: `${BASE}accessories/box16-purple.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
+      { id: 'yellow', hex_code: '#F5C518', label_ar: 'أصفر [out_of_stock]', label_en: 'Yellow [out_of_stock]', status: 'out_of_stock', image_url: `${BASE}accessories/box16-yellow.jpg`, inside_image_url: `${BASE}accessories/box16-inside-yellow.jpg`, base_image_url: `${BASE}accessories/box16-base-yellow.jpg` },
+      { id: 'maroon', hex_code: '#800020', label_ar: 'خمري / عنابي [out_of_stock]', label_en: 'Maroon [out_of_stock]', status: 'out_of_stock', image_url: `${BASE}accessories/box16-maroon.jpg`, inside_image_url: `${BASE}accessories/box16-inside-maroon.jpg`, base_image_url: `${BASE}accessories/box16-base-maroon.jpg` },
     ]
   },
   {
@@ -70,12 +70,12 @@ const FALLBACK_BOXES = [
     main_image: `${BASE}accessories/box16_5-colors.png`,
     inside_image: `${BASE}accessories/box16_5-inside.png`,
     colors: [
-      { id: 'blue',   hex_code: '#2196F3', label_ar: 'أزرق فاتح',   label_en: 'Light Blue', image_url: `${BASE}accessories/box16_5-blue.png`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
-      { id: 'green',  hex_code: '#7CB342', label_ar: 'أخضر',        label_en: 'Lime Green', image_url: `${BASE}accessories/box16_5-green.jpg`,  inside_image_url: `${BASE}accessories/box16_5-inside-green.jpg` },
-      { id: 'teal',   hex_code: '#00ACC1', label_ar: 'تركوازي',     label_en: 'Teal',       image_url: `${BASE}accessories/box16_5-teal.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-teal.jpg` },
-      { id: 'red',    hex_code: '#D32F2F', label_ar: 'أحمر',        label_en: 'Red',        image_url: `${BASE}accessories/box16_5-red.jpg`,    inside_image_url: `${BASE}accessories/box16_5-inside-red.jpg` },
-      { id: 'orange', hex_code: '#F57C00', label_ar: 'برتقالي',     label_en: 'Orange',     image_url: `${BASE}accessories/box16_5-orange.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-orange.jpg` },
-      { id: 'navy',   hex_code: '#0D47A1', label_ar: 'أزرق داكن',   label_en: 'Navy Blue',  image_url: `${BASE}accessories/box16_5-blue.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
+      { id: 'red',    hex_code: '#D32F2F', label_ar: 'أحمر [out_of_stock]',        label_en: 'Red [out_of_stock]',        status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-red.jpg`,    inside_image_url: `${BASE}accessories/box16_5-inside-red.jpg` },
+      { id: 'blue',   hex_code: '#2196F3', label_ar: 'أزرق فاتح [out_of_stock]',   label_en: 'Light Blue [out_of_stock]', status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-blue.png`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
+      { id: 'navy',   hex_code: '#0D47A1', label_ar: 'أزرق داكن [out_of_stock]',   label_en: 'Navy Blue [out_of_stock]',  status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-blue.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
+      { id: 'teal',   hex_code: '#00ACC1', label_ar: 'تركوازي [out_of_stock]',     label_en: 'Teal [out_of_stock]',       status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-teal.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-teal.jpg` },
+      { id: 'green',  hex_code: '#7CB342', label_ar: 'أخضر [out_of_stock]',        label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-green.jpg`,  inside_image_url: `${BASE}accessories/box16_5-inside-green.jpg` },
+      { id: 'orange', hex_code: '#F57C00', label_ar: 'برتقالي [out_of_stock]',     label_en: 'Orange [out_of_stock]',     status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-orange.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-orange.jpg` },
     ]
   },
   {
@@ -88,16 +88,17 @@ const FALLBACK_BOXES = [
     desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a 4-compartment clear organizer and wide main storage.',
     features_ar: ['4-compartment clear lid organizer', 'Wide main storage space', 'Two side + one front latch', 'Strong & Durable plastic'],
     features_en: ['4-compartment clear lid organizer', 'Wide main storage space', 'Two side + one front latch', 'Strong & Durable plastic'],
-    main_image: `${BASE}accessories/box17-purple.jpg`,
-    inside_image: `${BASE}accessories/box17-inside-purple.jpg`,
+    main_image: `${BASE}accessories/box17-black.jpg`,
+    inside_image: `${BASE}accessories/box17-inside-black.jpg`,
     colors: [
-      { id: 'purple', hex_code: '#A880C8', label_ar: 'بنفسجي',     label_en: 'Purple',     image_url: `${BASE}accessories/box17-purple.jpg`, inside_image_url: `${BASE}accessories/box17-inside-purple.jpg` },
-      { id: 'blue',   hex_code: '#1565C0', label_ar: 'أزرق',       label_en: 'Blue',       image_url: `${BASE}accessories/box17-blue.jpg`, inside_image_url: `${BASE}accessories/box17-inside-blue.jpg` },
-      { id: 'red',    hex_code: '#E02020', label_ar: 'أحمر',        label_en: 'Red',        image_url: `${BASE}accessories/box17-red.jpg`, inside_image_url: `${BASE}accessories/box17-inside-red.jpg` },
-      { id: 'pink',   hex_code: '#F48FB1', label_ar: 'وردي',        label_en: 'Pink',       image_url: `${BASE}accessories/box17-pink.jpg`, inside_image_url: `${BASE}accessories/box17-inside-pink.jpg` },
-      { id: 'beige',  hex_code: '#C8A882', label_ar: 'بيج',        label_en: 'Beige',      image_url: `${BASE}accessories/box17-beige.jpg`, inside_image_url: `${BASE}accessories/box17-inside-beige.jpg` },
-      { id: 'teal',   hex_code: '#00897B', label_ar: 'تركوازي',     label_en: 'Teal',       image_url: `${BASE}accessories/box17-colors.png` },
-      { id: 'lime',   hex_code: '#7CB342', label_ar: 'أخضر فسفوري', label_en: 'Lime Green', image_url: `${BASE}accessories/box17-colors.png` },
+      { id: 'black',  hex_code: '#111111', label_ar: 'أسود',       label_en: 'Black',      status: 'in_stock',     image_url: `${BASE}accessories/box17-black.jpg`, inside_image_url: `${BASE}accessories/box17-inside-black.jpg` },
+      { id: 'purple', hex_code: '#A880C8', label_ar: 'بنفسجي',     label_en: 'Purple',     status: 'in_stock',     image_url: `${BASE}accessories/box17-purple.jpg`, inside_image_url: `${BASE}accessories/box17-inside-purple.jpg` },
+      { id: 'blue',   hex_code: '#1565C0', label_ar: 'أزرق [out_of_stock]',       label_en: 'Blue [out_of_stock]',       status: 'out_of_stock', image_url: `${BASE}accessories/box17-blue.jpg`, inside_image_url: `${BASE}accessories/box17-inside-blue.jpg` },
+      { id: 'red',    hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]',        label_en: 'Red [out_of_stock]',        status: 'out_of_stock', image_url: `${BASE}accessories/box17-red.jpg`, inside_image_url: `${BASE}accessories/box17-inside-red.jpg` },
+      { id: 'pink',   hex_code: '#F48FB1', label_ar: 'وردي [out_of_stock]',        label_en: 'Pink [out_of_stock]',       status: 'out_of_stock', image_url: `${BASE}accessories/box17-pink.jpg`, inside_image_url: `${BASE}accessories/box17-inside-pink.jpg` },
+      { id: 'beige',  hex_code: '#C8A882', label_ar: 'بيج [out_of_stock]',        label_en: 'Beige [out_of_stock]',      status: 'out_of_stock', image_url: `${BASE}accessories/box17-beige.jpg`, inside_image_url: `${BASE}accessories/box17-inside-beige.jpg` },
+      { id: 'teal',   hex_code: '#00897B', label_ar: 'تركوازي [out_of_stock]',     label_en: 'Teal [out_of_stock]',       status: 'out_of_stock', image_url: `${BASE}accessories/box17-colors.png` },
+      { id: 'lime',   hex_code: '#7CB342', label_ar: 'أخضر فسفوري [out_of_stock]', label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', image_url: `${BASE}accessories/box17-colors.png` },
     ]
   }
 ];
