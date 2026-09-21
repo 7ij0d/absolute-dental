@@ -104,37 +104,44 @@ export const Navbar = () => {
             textDecoration: 'none',
             alignItems: 'center',
             display: 'flex',
-            gap: '8px',
+            gap: '14px',
             flexShrink: 0,
           }}>
+            {/* LOGO — 200×200 offset x:-40 y:10 */}
             <img
               src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
               alt="Absolute Dental"
               style={{
-                height: '42px',
-                width: 'auto',
-                maxHeight: '42px',
+                width: 200, height: 200,
                 objectFit: 'contain',
                 flexShrink: 0,
+                transform: 'translate(-40px, 10px)',
               }}
             />
             {/* BRAND TEXT */}
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ display: 'flex', alignItems: 'baseline' }}>
+              {/* ABSOLUTE — Cairo 900 40px white x:-100 */}
               <span style={{
                 fontFamily: "'Cairo', sans-serif",
-                fontSize: '1.4rem',
+                fontSize: '40px',
                 fontWeight: 900,
-                letterSpacing: '0.04em',
+                fontStyle: 'normal',
+                letterSpacing: '0.06em',
                 color: '#ffffff',
+                transform: 'translateX(-100px)',
                 display: 'inline-block',
+                marginRight: '4px',
                 whiteSpace: 'nowrap',
               }}>Absolute</span>
+              {/* DENTAL — Cairo 900 40px white x:-95 */}
               <span style={{
                 fontFamily: "'Cairo', sans-serif",
-                fontSize: '1.4rem',
+                fontSize: '40px',
                 fontWeight: 900,
-                letterSpacing: '0.04em',
-                color: 'var(--brand-gold)',
+                fontStyle: 'normal',
+                letterSpacing: '0.06em',
+                color: '#ffffff',
+                transform: 'translateX(-95px)',
                 display: 'inline-block',
                 whiteSpace: 'nowrap',
               }}>Dental</span>
@@ -354,18 +361,19 @@ export const Navbar = () => {
         </div>
 
         <style>{`
-          @media (min-width: 1200px) {
+          @media (min-width: 900px) {
             #desktop-nav { display: flex !important; }
             #desktop-search { display: flex !important; }
             #mobile-menu-btn { display: none !important; }
             .navbar-actions { gap: 0.4rem; }
           }
-          @media (max-width: 1199px) {
-            #desktop-nav { display: none !important; }
-            #desktop-search { display: none !important; }
-            #mobile-menu-btn { display: flex !important; }
+          /* Tablet only: hide globe + favorites to prevent overflow — they're in ☰ menu */
+          @media (min-width: 600px) and (max-width: 899px) {
             .nav-icon-desktop-only { display: none !important; }
-            .navbar-actions { gap: 0.35rem; flex-shrink: 0; }
+          }
+          /* All mobile/tablet: compact gap */
+          @media (max-width: 899px) {
+            .navbar-actions { gap: 0.25rem; flex-shrink: 0; }
           }
         `}</style>
       </header>
