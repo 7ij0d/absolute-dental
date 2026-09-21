@@ -256,7 +256,6 @@ export const AdminAccessories = () => {
         color_id: colorForm.color_id || cleanEn.toLowerCase().replace(/\s+/g, '-'),
         label_ar: cleanAr + statusSuffix,
         label_en: cleanEn + statusSuffix,
-        status: colorForm.status || 'in_stock',
         hex_code: colorForm.hex_code,
         image_url: colorForm.image_url,
         sort_order: parseInt(colorForm.sort_order || 0)

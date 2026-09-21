@@ -105,11 +105,27 @@ const FALLBACK_BOXES = [
 
 const getColorStatus = (c) => {
   if (!c) return 'in_stock';
-  if (c.status) return c.status;
   const label = `${c.label_ar || ''} ${c.label_en || ''}`;
   if (label.includes('[out_of_stock]') || label.includes('نفذت الكمية')) return 'out_of_stock';
   if (label.includes('[coming_soon]') || label.includes('قريبا')) return 'coming_soon';
+  if (c.status) return c.status;
   return 'in_stock';
+};
+
+const sortColorsByAvailability = (colors) => {
+  if (!colors || !Array.isArray(colors)) return [];
+  const statusRank = (c) => {
+    const st = getColorStatus(c);
+    if (st === 'in_stock') return 0;
+    if (st === 'coming_soon') return 1;
+    return 2;
+  };
+  return [...colors].sort((a, b) => {
+    const rankA = statusRank(a);
+    const rankB = statusRank(b);
+    if (rankA !== rankB) return rankA - rankB;
+    return (a.sort_order || 0) - (b.sort_order || 0);
+  });
 };
 
 const getCleanLabel = (c, lang) => {
@@ -122,17 +138,18 @@ const getCleanLabel = (c, lang) => {
 const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
   const { addToCart } = useCart();
   const { lang } = useLanguage();
-  const colorsList = box.colors && box.colors.length > 0
+  const rawColors = box.colors && box.colors.length > 0
     ? box.colors
     : [{ id: 'default', hex_code: '#CDBFA6', label_en: 'Standard', image_url: box.main_image || box.image_url }];
+  const colorsList = sortColorsByAvailability(rawColors);
 
   const [selectedColor, setSelectedColor] = useState(colorsList[0]);
   const [viewMode, setViewMode] = useState('outside'); // 'outside', 'inside', 'base'
   const [addedNotice, setAddedNotice] = useState(false);
 
   useEffect(() => {
-    if (box.colors && box.colors.length > 0) {
-      setSelectedColor(box.colors[0]);
+    if (colorsList && colorsList.length > 0) {
+      setSelectedColor(colorsList[0]);
     }
   }, [box]);
 
@@ -624,7 +641,7 @@ export const AccessoriesPage = () => {
         if (!prodRes.error && prodRes.data && prodRes.data.length > 0) {
           const prodsWithColors = prodRes.data.map(prod => ({
             ...prod,
-            colors: (prod.colors && prod.colors.length > 0) ? prod.colors : []
+            colors: (prod.colors && prod.colors.length > 0) ? sortColorsByAvailability(prod.colors) : []
           }));
           setBoxesProducts(prodsWithColors);
         }
