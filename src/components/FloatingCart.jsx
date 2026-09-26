@@ -9,8 +9,8 @@ export const FloatingCart = () => {
   const { lang, isRtl } = useLanguage();
   const location = useLocation();
 
-  // Don't show on /cart or /checkout pages to avoid duplicate CTA
-  if (location.pathname === '/cart' || location.pathname === '/checkout' || location.pathname.startsWith('/admin')) {
+  // Don't show on home '/', /cart or /checkout pages to avoid duplicate CTA
+  if (location.pathname === '/' || location.pathname === '/cart' || location.pathname === '/checkout' || location.pathname.startsWith('/admin')) {
     return null;
   }
 
@@ -18,6 +18,7 @@ export const FloatingCart = () => {
 
   return (
     <div
+      className="floating-cart-wrapper"
       style={{
         position: 'fixed',
         bottom: '1.5rem',

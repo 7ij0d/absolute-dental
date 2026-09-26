@@ -97,54 +97,36 @@ export const Navbar = () => {
     <>
       {/* ── NAVBAR ── */}
       <header className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-        <div className="container navbar-inner" style={{ direction: 'ltr' }}>
+        <div className="container navbar-inner" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
 
           {/* Logo + Brand */}
           <Link to="/" className="navbar-logo" style={{
             textDecoration: 'none',
             alignItems: 'center',
             display: 'flex',
-            gap: '14px',
+            gap: '10px',
             flexShrink: 0,
           }}>
-            {/* LOGO — 200×200 offset x:-40 y:10 */}
             <img
-              src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
+              src="/images/brand-logo-trimmed.png"
               alt="Absolute Dental"
               style={{
-                width: 200, height: 200,
+                width: 38,
+                height: 38,
                 objectFit: 'contain',
                 flexShrink: 0,
-                transform: 'translate(-40px, 10px)',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
               }}
             />
-            {/* BRAND TEXT */}
-            <span style={{ display: 'flex', alignItems: 'baseline' }}>
-              {/* ABSOLUTE — Cairo 900 40px white x:-100 */}
-              <span style={{
-                fontFamily: "'Cairo', sans-serif",
-                fontSize: '40px',
-                fontWeight: 900,
-                fontStyle: 'normal',
-                letterSpacing: '0.06em',
-                color: '#ffffff',
-                transform: 'translateX(-100px)',
-                display: 'inline-block',
-                marginRight: '4px',
-                whiteSpace: 'nowrap',
-              }}>Absolute</span>
-              {/* DENTAL — Cairo 900 40px white x:-95 */}
-              <span style={{
-                fontFamily: "'Cairo', sans-serif",
-                fontSize: '40px',
-                fontWeight: 900,
-                fontStyle: 'normal',
-                letterSpacing: '0.06em',
-                color: '#ffffff',
-                transform: 'translateX(-95px)',
-                display: 'inline-block',
-                whiteSpace: 'nowrap',
-              }}>Dental</span>
+            <span style={{
+              fontFamily: "'Cairo', sans-serif",
+              fontSize: '1.25rem',
+              fontWeight: 900,
+              letterSpacing: '0.03em',
+              color: '#ffffff',
+              whiteSpace: 'nowrap',
+            }}>
+              Absolute Dental
             </span>
           </Link>
 
@@ -267,36 +249,51 @@ export const Navbar = () => {
             {/* Cart */}
             <Link
               to="/cart"
-              className="nav-icon-btn"
+              className="nav-icon-btn nav-cart-btn"
               title={lang === 'ar' ? 'السلة' : 'Cart'}
               style={{
-                background: cartCount > 0 ? 'var(--secondary)' : 'rgba(255,255,255,0.15)',
+                background: 'transparent',
                 color: '#ffffff',
                 borderRadius: '999px',
-                padding: '0.4rem 0.85rem',
-                width: 'auto',
-                height: 'auto',
-                display: 'flex',
+                padding: '0.35rem 0.5rem',
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.45rem',
+                gap: '0.4rem',
                 textDecoration: 'none',
-                boxShadow: cartCount > 0 ? '0 4px 12px rgba(205,191,166,0.4)' : 'none',
-                transition: 'all 0.2s ease'
+                position: 'relative',
+                transition: 'all 0.2s ease',
               }}
             >
-              <ShoppingCart size={18} />
-              <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>
-                {lang === 'ar' ? 'السلة' : 'Cart'}
-              </span>
-              {cartCount > 0 && (
-                <span className="nav-cart-badge" style={{ position: 'static', background: '#E53935', fontSize: '0.7rem', width: 18, height: 18 }}>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShoppingCart size={22} />
+                <span className="nav-cart-badge-circle" style={{
+                  position: 'absolute',
+                  top: '-6px',
+                  right: '-7px',
+                  backgroundColor: '#FFFFFF',
+                  color: '#231810',
+                  fontSize: '0.65rem',
+                  fontWeight: 900,
+                  minWidth: '16px',
+                  height: '16px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0 2px',
+                  lineHeight: 1,
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.3)'
+                }}>
                   {cartCount}
                 </span>
-              )}
+              </div>
+              <span className="nav-cart-label" style={{ fontSize: '0.82rem', fontWeight: 800 }}>
+                {lang === 'ar' ? 'السلة' : 'Cart'}
+              </span>
             </Link>
 
             {/* Profile Dropdown */}
-            <div ref={profileRef} style={{ position: 'relative' }}>
+            <div ref={profileRef} className="nav-icon-desktop-only" style={{ position: 'relative' }}>
               <button className="nav-icon-btn" onClick={() => setProfileOpen(!profileOpen)}>
                 <User size={18} />
               </button>
@@ -367,12 +364,10 @@ export const Navbar = () => {
             #mobile-menu-btn { display: none !important; }
             .navbar-actions { gap: 0.4rem; }
           }
-          /* Tablet only: hide globe + favorites to prevent overflow — they're in ☰ menu */
-          @media (min-width: 600px) and (max-width: 899px) {
-            .nav-icon-desktop-only { display: none !important; }
-          }
-          /* All mobile/tablet: compact gap */
+          /* All mobile & tablet under 900px: hide desktop-only icons and cart text label */
           @media (max-width: 899px) {
+            .nav-icon-desktop-only { display: none !important; }
+            .nav-cart-label { display: none !important; }
             .navbar-actions { gap: 0.25rem; flex-shrink: 0; }
           }
         `}</style>

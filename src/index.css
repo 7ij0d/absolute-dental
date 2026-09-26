@@ -1602,3 +1602,287 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 .section-dark { background: #3A3530; }
 .section-purple { background: var(--brand-brown); }
 
+/* ==========================================================================
+   HOMEPAGE GATEWAY — ABSOLUTE DENTAL (LINEAR / APPLE GRADE CRAFTSMANSHIP)
+   ========================================================================== */
+.home-gateway-page {
+  background-color: #FAF7F2;
+  min-height: calc(100vh - 72px);
+  padding: 2.5rem 0 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.home-gateway-container {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding-inline: 1.25rem;
+}
+
+/* ── 1. Minimal Hero ── */
+.home-hero {
+  text-align: center;
+  margin-bottom: 2.25rem;
+  padding-top: 0.5rem;
+}
+
+.home-hero-title {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 2.15rem;
+  font-weight: 900;
+  color: #1E140E;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.home-hero-subtitle {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #7A6E65;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── 2. Gateway Cards Grid ── */
+.home-gateway-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem;
+  width: 100%;
+}
+
+.gateway-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+  background-color: #FFFFFF;
+  border: 1px solid #ECE7DF;
+  border-radius: 24px;
+  overflow: hidden;
+  text-decoration: none;
+  min-height: 250px;
+  box-shadow: 0 4px 20px rgba(35, 24, 16, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gateway-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(35, 24, 16, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1);
+  border-color: #DDD4C6;
+}
+
+.gateway-card:active {
+  transform: scale(0.985);
+}
+
+/* Left / Text Side of the Card */
+.gateway-card-content {
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.85rem 1.75rem;
+  z-index: 2;
+  text-align: start;
+}
+
+.gateway-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.gateway-card-title {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #1E140E;
+  margin: 0;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.gateway-card-desc {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #7A6E65;
+  margin: 0;
+  line-height: 1.55;
+  max-width: 290px;
+}
+
+/* Action button with circular arrow */
+.gateway-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  user-select: none;
+}
+
+.gateway-circle-btn {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  background-color: #38281D;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(56, 40, 29, 0.28);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.gateway-card:hover .gateway-circle-btn {
+  transform: scale(1.06) translateX(2px);
+  background-color: #231810;
+  box-shadow: 0 5px 14px rgba(35, 24, 16, 0.38);
+}
+
+.gateway-cta-text {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1E140E;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease;
+}
+
+.gateway-card:hover .gateway-cta-text {
+  color: #000000;
+}
+
+/* Right / Artwork Side of the Card */
+.gateway-card-artwork {
+  flex: 1 1 50%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.gateway-art-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.gateway-card:hover .gateway-art-img {
+  transform: scale(1.035);
+}
+
+/* ── Responsive Adaptations ── */
+@media (min-width: 769px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+
+@media (max-width: 899px) {
+  .home-gateway-page {
+    padding: 1.5rem 0 2.5rem;
+  }
+  .home-hero-title {
+    font-size: 1.7rem;
+  }
+  .home-hero-subtitle {
+    font-size: 0.92rem;
+  }
+  .home-gateway-grid {
+    grid-template-columns: 1fr;
+    gap: 1.15rem;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .gateway-card {
+    min-height: 195px;
+    border-radius: 20px;
+  }
+  .gateway-card-content {
+    padding: 1.25rem 1.15rem;
+    flex: 1 1 54%;
+  }
+  .gateway-card-artwork {
+    flex: 1 1 46%;
+  }
+  .gateway-card-title {
+    font-size: 1.18rem;
+  }
+  .gateway-card-desc {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    max-width: 220px;
+  }
+  .gateway-circle-btn {
+    width: 33px;
+    height: 33px;
+    min-width: 33px;
+  }
+  .gateway-cta-text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: block !important;
+  }
+  .floating-cart-wrapper {
+    display: none !important;
+  }
+  body {
+    padding-bottom: calc(env(safe-area-inset-bottom, 12px) + 68px) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-gateway-page {
+    padding: 1.1rem 0 2rem;
+  }
+  .home-hero {
+    margin-bottom: 1.5rem;
+  }
+  .home-hero-title {
+    font-size: 1.55rem;
+  }
+  .home-hero-subtitle {
+    font-size: 0.88rem;
+  }
+  .gateway-card {
+    min-height: 180px;
+  }
+  .gateway-card-content {
+    padding: 1.1rem 0.95rem;
+  }
+  .gateway-card-desc {
+    font-size: 0.74rem;
+    line-height: 1.4;
+  }
+  .gateway-circle-btn {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+  }
+}
+
+

@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Outlet } from 'react-router-dom';
+import { Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AnnouncementBar from './components/AnnouncementBar';
+import BottomNav from './components/BottomNav';
 
 // Public Storefront Pages
 import Home from './pages/Home';
@@ -42,15 +43,19 @@ import FloatingCart from './components/FloatingCart';
 
 // Public Layout Wrapper
 const PublicLayout = () => {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AnnouncementBar />
+      {!isHomePage && <AnnouncementBar />}
       <Navbar />
       <main style={{ flexGrow: 1 }}>
         <Outlet />
       </main>
       <Footer />
       <FloatingCart />
+      <BottomNav />
     </div>
   );
 };
