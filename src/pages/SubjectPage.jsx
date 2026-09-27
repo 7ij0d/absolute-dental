@@ -1,81 +1,142 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import supabase from '../supabaseClient';
 import ProductCard from '../components/ProductCard';
-import SkeletonLoader from '../components/SkeletonLoader';
 import { cacheGet, cacheSet } from '../cache';
-import { SlidersHorizontal, ChevronLeft, ChevronRight, Package, X } from 'lucide-react';
+import defaultProductsList from '../defaultProducts.json';
+import {
+  SlidersHorizontal, ChevronLeft, ChevronRight,
+  Package, Search, X, RotateCcw
+} from 'lucide-react';
 
 const DEFAULT_YEARS = [
-  { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى',  name_en: '1st Year', slug: '1st-year' },
+  { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى', name_en: '1st Year', slug: '1st-year' },
   { id: '20000000-0000-0000-0000-000000000002', name_ar: 'السنة الثانية', name_en: '2nd Year', slug: '2nd-year' },
   { id: '30000000-0000-0000-0000-000000000003', name_ar: 'السنة الثالثة', name_en: '3rd Year', slug: '3rd-year' },
   { id: '40000000-0000-0000-0000-000000000004', name_ar: 'السنة الرابعة', name_en: '4th Year', slug: '4th-year' }
 ];
 
 const DEFAULT_SUBJECTS = [
-  { id: '11', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'تشريح الأسنان', name_en: 'Dental Anatomy', description_ar: 'دراسة تشريح الأسنان الطبيعي وأشكالها ورسمها ونحتها.', slug: 'dental-anatomy' },
-  { id: '12', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'مواد طب الأسنان', name_en: 'Dental Materials', description_ar: 'التعرف على المواد المستخدمة في عيادات ومعامل الأسنان.', slug: 'dental-materials' },
-  { id: '21', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'علاج الأسنان التحفظي', name_en: 'Operative Dentistry', description_ar: 'العمل العملي في المعمل على الرؤوس الوهمية.', slug: 'restorative-dentistry' },
-  { id: '21b', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'علاج الأسنان التحفظي', name_en: 'Operative Dentistry', description_ar: 'العمل العملي في المعمل على الرؤوس الوهمية.', slug: 'operative-dentistry' },
-  { id: '22', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان المتحركة', name_en: 'Removable Prosthodontics', description_ar: 'معمل الأطقم الكاملة والجزئية.', slug: 'removable-prosthodontics' },
-  { id: '23', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان الثابتة', name_en: 'Fixed Prosthodontics', description_ar: 'تجهيز الأسنان للتيجان والجسور السنية.', slug: 'fixed-prosthodontics' },
-  { id: '31', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'علاج الجذور', name_en: 'Endodontics', description_ar: 'تنظيف وحشو قنوات الجذور عمليًا.', slug: 'endodontics' },
-  { id: '32', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'أمراض وجراحة اللثة', name_en: 'Periodontics', description_ar: 'أدوات تقليح الجير وتنعيم الجذور.', slug: 'periodontics' },
-  { id: '41', year_id: '40000000-0000-0000-0000-000000000004', name_ar: 'جراحة الفم والتخدير', name_en: 'Oral Surgery & Anesthesia', description_ar: 'أدوات خلع الأسنان والمحاقن وحقن التخدير الموضعي.', slug: 'oral-surgery' },
-  { id: '42', year_id: '40000000-0000-0000-0000-000000000004', name_ar: 'تقويم الأسنان', name_en: 'Orthodontics', description_ar: 'صنع الأجهزة المتحركة للتقويم وثني الأسلاك.', slug: 'orthodontics' }
+  {
+    id: '11000000-0000-0000-0000-000000000011',
+    year_id: '10000000-0000-0000-0000-000000000001',
+    name_ar: 'تشريح الأسنان',
+    name_en: 'Dental Anatomy',
+    description_ar: 'الأدوات والمواد المطلوبة للمادة',
+    description_en: 'Required tools and materials for Dental Anatomy',
+    slug: 'dental-anatomy',
+  },
+  {
+    id: '11000000-0000-0000-0000-000000000012',
+    year_id: '10000000-0000-0000-0000-000000000001',
+    name_ar: 'مواد طب الأسنان',
+    name_en: 'Dental Materials',
+    description_ar: 'الأدوات والمواد المطلوبة للمادة',
+    description_en: 'Required tools and supplies for Dental Materials',
+    slug: 'dental-materials',
+  },
+  {
+    id: '22000000-0000-0000-0000-000000000021',
+    year_id: '20000000-0000-0000-0000-000000000002',
+    name_ar: 'علاج الأسنان التحفظي',
+    name_en: 'Operative Dentistry',
+    description_ar: 'الأدوات والمواد المطلوبة للمادة',
+    description_en: 'Required tools and instruments for Operative Dentistry',
+    slug: 'restorative-dentistry',
+  },
+  {
+    id: '22000000-0000-0000-0000-000000000021-alt',
+    year_id: '20000000-0000-0000-0000-000000000002',
+    name_ar: 'علاج الأسنان التحفظي',
+    name_en: 'Operative Dentistry',
+    description_ar: 'الأدوات والمواد المطلوبة للمادة',
+    description_en: 'Required tools and instruments for Operative Dentistry',
+    slug: 'operative-dentistry',
+  },
+  {
+    id: '22000000-0000-0000-0000-000000000022',
+    year_id: '20000000-0000-0000-0000-000000000002',
+    name_ar: 'صناعة الأسنان المتحركة',
+    name_en: 'Removable Prosthodontics',
+    description_ar: 'الأدوات والمواد المطلوبة للمادة',
+    description_en: 'Required tools and gear for Removable Prosthodontics',
+    slug: 'removable-prosthodontics',
+  },
+  {
+    id: '22000000-0000-0000-0000-000000000023',
+    year_id: '20000000-0000-0000-0000-000000000002',
+    name_ar: 'صناعة الأسنان الثابتة',
+    name_en: 'Fixed Prosthodontics',
+    description_ar: 'الأدوات والمواد المطلوبة للمادة',
+    description_en: 'Required tools and burs for Fixed Prosthodontics',
+    slug: 'fixed-prosthodontics',
+  },
 ];
-
-const DEFAULT_PRODUCTS = [];
 
 export const SubjectPage = () => {
   const { slug } = useParams();
-  const { lang, t, isRtl } = useLanguage();
+  const { lang, isRtl } = useLanguage();
 
-  const [subjectData, setSubjectData] = useState(() => DEFAULT_SUBJECTS.find(s => s.slug === slug) || DEFAULT_SUBJECTS[0]);
+  const lookupSlug = slug === 'operative-dentistry' ? 'restorative-dentistry' : slug;
+
+  const [subjectData, setSubjectData] = useState(() =>
+    DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) || DEFAULT_SUBJECTS[0]
+  );
   const [yearData, setYearData] = useState(() => DEFAULT_YEARS[0]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [maxPrice, setMaxPrice] = useState(1000);
+  // In-page search, sorting & filtering states
+  const [inPageSearch, setInPageSearch] = useState('');
+  const [dynamicMaxPrice, setDynamicMaxPrice] = useState(250);
+  const [maxPrice, setMaxPrice] = useState(250);
   const [selectedStock, setSelectedStock] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const CACHE_KEY = `subject:${slug}`;
+    const CACHE_KEY = `subject_v3:${slug}`;
 
     const applyData = ({ subject, year, prods }) => {
       setSubjectData(subject);
       setYearData(year);
       setProducts(prods || []);
       if (prods && prods.length > 0) {
-        setMaxPrice(Math.ceil(Math.max(...prods.map(p => p.price || 0))));
+        const highest = Math.ceil(Math.max(...prods.map(p => Number(p.price) || 0), 20));
+        setDynamicMaxPrice(highest);
+        setMaxPrice(highest);
       }
     };
 
     const fetchAndCache = async (showLoader) => {
       if (showLoader) setLoading(true);
       try {
-        const lookupSlug = slug === 'operative-dentistry' ? 'restorative-dentistry' : slug;
+        // 1. Fetch Subject
         const { data: subjectRes } = await supabase
-          .from('subjects').select('*').or(`slug.eq.${slug},slug.eq.${lookupSlug}`).maybeSingle();
+          .from('subjects')
+          .select('*')
+          .or(`slug.eq.${slug},slug.eq.${lookupSlug}`)
+          .maybeSingle();
 
-        const subject = subjectRes || DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) || DEFAULT_SUBJECTS[0];
+        const subject = subjectRes ||
+          DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) ||
+          DEFAULT_SUBJECTS[0];
 
-        // Fetch year + primary products + junction products IN PARALLEL
+        // 2. Fetch Year + Primary Products + Junction Products
         const [{ data: yearRes }, { data: primaryProds }, { data: junctionLinks }] = await Promise.all([
-          supabase.from('years').select('*').eq('id', subject.year_id).single(),
+          supabase.from('years').select('*').eq('id', subject.year_id).maybeSingle(),
           supabase.from('products').select('*')
             .eq('is_active', true).eq('is_archived', false)
             .eq('subject_id', subject.id),
           supabase.from('product_subjects').select('product_id').eq('subject_id', subject.id)
         ]);
 
-        const year = yearRes || DEFAULT_YEARS.find(y => String(y.id) === String(subject.year_id)) || DEFAULT_YEARS[0];
+        const year = yearRes ||
+          DEFAULT_YEARS.find(y => String(y.id) === String(subject.year_id)) ||
+          DEFAULT_YEARS[0];
 
-        // Get extra product IDs from junction table
+        // 3. Extra products linked through junction table
         const primaryIds = new Set((primaryProds || []).map(p => p.id));
         const extraIds = (junctionLinks || [])
           .map(r => r.product_id)
@@ -89,298 +150,387 @@ export const SubjectPage = () => {
           extraProds = ep || [];
         }
 
-        const dbProds = [...(primaryProds || []), ...extraProds];
-        const allProds = dbProds;
+        let allProds = [...(primaryProds || []), ...extraProds];
+
+        // If database query returned 0 products, fall back to seeded default products
+        if (allProds.length === 0) {
+          allProds = defaultProductsList.filter(p => p.subject_id === subject.id);
+        }
 
         const bundle = { subject, year: year || null, prods: allProds };
         cacheSet(CACHE_KEY, bundle, 60);
         applyData(bundle);
       } catch (err) {
-        console.warn('SubjectPage fetch error:', err);
-        const fallbackSub = DEFAULT_SUBJECTS.find(s => s.slug === slug) || DEFAULT_SUBJECTS[0];
+        console.warn('SubjectPage fetch fallback:', err);
+        const fallbackSub = DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) || DEFAULT_SUBJECTS[0];
         const fallbackYear = DEFAULT_YEARS.find(y => String(y.id) === String(fallbackSub.year_id)) || DEFAULT_YEARS[0];
-        applyData({ subject: fallbackSub, year: fallbackYear, prods: [] });
+        const fallbackProds = defaultProductsList.filter(p => p.subject_id === fallbackSub.id);
+        applyData({ subject: fallbackSub, year: fallbackYear, prods: fallbackProds });
       } finally {
         setLoading(false);
       }
     };
 
-    // Show cached data instantly, refresh silently in background
     const cached = cacheGet(CACHE_KEY);
     if (cached) {
       applyData(cached);
       setLoading(false);
-      fetchAndCache(false); // background refresh
+      fetchAndCache(false);
     } else {
       fetchAndCache(true);
     }
-  }, [slug]);
+  }, [slug, lookupSlug]);
 
+  // Real-time filtering and sorting calculation
+  const filteredList = useMemo(() => {
+    let list = [...products];
 
-  const getFiltered = () => {
-    let list = [...products].filter(p => p.price <= maxPrice);
-    if (selectedStock !== 'all') {
-      if (selectedStock === 'discount') list = list.filter(p => p.compare_at_price !== null);
-      else list = list.filter(p => p.availability === selectedStock);
+    // Live search filter
+    if (inPageSearch.trim()) {
+      const q = inPageSearch.trim().toLowerCase();
+      list = list.filter(p =>
+        (p.name_en && p.name_en.toLowerCase().includes(q)) ||
+        (p.name_ar && p.name_ar.toLowerCase().includes(q))
+      );
     }
-    if (sortBy === 'recent')     list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    if (sortBy === 'price_asc')  list.sort((a, b) => a.price - b.price);
-    if (sortBy === 'price_desc') list.sort((a, b) => b.price - a.price);
-    if (sortBy === 'popular')    list.sort((a, b) => (b.sort_order || 0) - (a.sort_order || 0));
+
+    // Dynamic price slider filter
+    list = list.filter(p => Number(p.price) <= maxPrice);
+
+    // Stock availability filter
+    if (selectedStock !== 'all') {
+      if (selectedStock === 'discount') {
+        list = list.filter(p => p.compare_at_price && p.compare_at_price > p.price);
+      } else {
+        list = list.filter(p => p.availability === selectedStock);
+      }
+    }
+
+    // Sorting
+    if (sortBy === 'recent') {
+      list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    } else if (sortBy === 'popular') {
+      list.sort((a, b) => (b.sort_order || 0) - (a.sort_order || 0));
+    } else if (sortBy === 'price_asc') {
+      list.sort((a, b) => Number(a.price) - Number(b.price));
+    } else if (sortBy === 'price_desc') {
+      list.sort((a, b) => Number(b.price) - Number(a.price));
+    }
+
     return list;
+  }, [products, inPageSearch, maxPrice, selectedStock, sortBy]);
+
+  const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
+
+  const filterOptions = [
+    { key: 'all', label_ar: 'الكل', label_en: 'All' },
+    { key: 'available', label_ar: 'متوفر', label_en: 'Available' },
+    { key: 'limited_quantity', label_ar: 'كمية محدودة', label_en: 'Limited Qty' },
+    { key: 'coming_soon', label_ar: 'قريباً', label_en: 'Coming Soon' },
+    { key: 'discount', label_ar: 'عليه خصم', label_en: 'On Sale' },
+  ];
+
+  const sortOptions = [
+    { key: 'recent', label_ar: 'الأحدث', label_en: 'Newest' },
+    { key: 'popular', label_ar: 'الأكثر طلباً', label_en: 'Most Popular' },
+    { key: 'price_asc', label_ar: 'السعر: من الأقل للأعلى', label_en: 'Price: Low to High' },
+    { key: 'price_desc', label_ar: 'السعر: من الأعلى للأقل', label_en: 'Price: High to Low' },
+  ];
+
+  const resetAllFilters = () => {
+    setInPageSearch('');
+    setMaxPrice(dynamicMaxPrice);
+    setSelectedStock('all');
+    setSortBy('recent');
   };
 
-  const ChevronFwd = isRtl ? ChevronLeft : ChevronRight;
+  const isFiltered = inPageSearch.trim() !== '' || maxPrice < dynamicMaxPrice || selectedStock !== 'all' || sortBy !== 'recent';
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: '80vh' }}>
-        <div className="skeleton" style={{ height: '180px', borderRadius: 0 }} />
-        <div className="container" style={{ padding: '3rem 0' }}>
-          <div className="browse-layout">
-            <div className="skeleton" style={{ height: '400px', borderRadius: 'var(--radius-lg)' }} />
-            <div className="grid-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="skeleton" style={{ height: '280px', borderRadius: 'var(--radius-lg)' }} />
-              ))}
-            </div>
-          </div>
+  // Shared Sidebar / Drawer Content
+  const FilterControls = () => (
+    <div className="filter-controls-inner">
+      <div className="filter-header-title">
+        <SlidersHorizontal size={16} />
+        <span>{lang === 'ar' ? 'التصفية والترتيب' : 'Filter & Sort'}</span>
+      </div>
+
+      {/* Sorting */}
+      <div className="filter-group">
+        <label className="filter-group-label">{lang === 'ar' ? 'الترتيب حسب' : 'Sort By'}</label>
+        <div className="filter-options-stack">
+          {sortOptions.map(opt => (
+            <button
+              key={opt.key}
+              type="button"
+              className={`filter-pill-btn ${sortBy === opt.key ? 'active' : ''}`}
+              onClick={() => setSortBy(opt.key)}
+            >
+              <span className="filter-radio-dot" />
+              <span>{lang === 'ar' ? opt.label_ar : opt.label_en}</span>
+            </button>
+          ))}
         </div>
-      </div>
-    );
-  }
-
-  if (!subjectData) {
-    return (
-      <div className="container" style={{ padding: '5rem 0', textAlign: 'center' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>😕</div>
-        <h2 style={{ fontWeight: 800, marginBottom: '0.5rem' }}>المادة المطلوبة غير موجودة</h2>
-        <Link to="/" className="btn btn-primary" style={{ marginTop: '1.5rem' }}>
-          {lang === 'ar' ? 'الرئيسية' : 'Go Home'}
-        </Link>
-      </div>
-    );
-  }
-
-  const filteredList = getFiltered();
-
-  const filterOptions = lang === 'ar'
-    ? [
-        { key: 'all',            label: 'الكل' },
-        { key: 'available',      label: 'متوفر' },
-        { key: 'limited_quantity', label: 'كمية محدودة' },
-        { key: 'coming_soon',   label: 'قريباً' },
-        { key: 'discount',       label: 'عليه خصم' },
-      ]
-    : [
-        { key: 'all',            label: 'All' },
-        { key: 'available',      label: 'Available' },
-        { key: 'limited_quantity', label: 'Limited Qty' },
-        { key: 'coming_soon',   label: 'Coming Soon' },
-        { key: 'discount',       label: 'On Sale' },
-      ];
-
-  const sortOptions = lang === 'ar'
-    ? [
-        { key: 'recent',     label: 'الأحدث' },
-        { key: 'popular',    label: 'الأكثر طلباً' },
-        { key: 'price_asc',  label: 'السعر: الأقل' },
-        { key: 'price_desc', label: 'السعر: الأعلى' },
-      ]
-    : [
-        { key: 'recent',     label: 'Newest' },
-        { key: 'popular',    label: 'Most Popular' },
-        { key: 'price_asc',  label: 'Price: Low to High' },
-        { key: 'price_desc', label: 'Price: High to Low' },
-      ];
-
-  const SidebarContent = () => (
-    <>
-      <div className="filter-title">
-        <SlidersHorizontal size={16} style={{ display: 'inline', marginInlineEnd: '0.4rem' }} />
-        {lang === 'ar' ? 'التصفية والترتيب' : 'Filter & Sort'}
-      </div>
-
-      {/* Sort */}
-      <div className="filter-section">
-        <div className="filter-section-label">{lang === 'ar' ? 'الترتيب' : 'Sort By'}</div>
-        {sortOptions.map(opt => (
-          <div
-            key={opt.key}
-            className={`filter-option ${sortBy === opt.key ? 'selected' : ''}`}
-            onClick={() => setSortBy(opt.key)}
-          >
-            <span className="filter-dot" />
-            {opt.label}
-          </div>
-        ))}
       </div>
 
       {/* Availability */}
-      <div className="filter-section">
-        <div className="filter-section-label">{lang === 'ar' ? 'التوفر' : 'Availability'}</div>
-        {filterOptions.map(opt => (
-          <div
-            key={opt.key}
-            className={`filter-option ${selectedStock === opt.key ? 'selected' : ''}`}
-            onClick={() => setSelectedStock(opt.key)}
-          >
-            <span className="filter-dot" />
-            {opt.label}
-          </div>
-        ))}
+      <div className="filter-group">
+        <label className="filter-group-label">{lang === 'ar' ? 'حالة التوفر' : 'Availability'}</label>
+        <div className="filter-options-stack">
+          {filterOptions.map(opt => (
+            <button
+              key={opt.key}
+              type="button"
+              className={`filter-pill-btn ${selectedStock === opt.key ? 'active' : ''}`}
+              onClick={() => setSelectedStock(opt.key)}
+            >
+              <span className="filter-radio-dot" />
+              <span>{lang === 'ar' ? opt.label_ar : opt.label_en}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Price Range */}
-      <div className="filter-section">
-        <div className="filter-section-label">{lang === 'ar' ? 'نطاق السعر' : 'Price Range'}</div>
-        <input
-          type="range" min="0" max="1000" step="10"
-          value={maxPrice}
-          onChange={e => setMaxPrice(Number(e.target.value))}
-          style={{ width: '100%', accentColor: 'var(--secondary)', marginBottom: '0.5rem' }}
-        />
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-          <span>0</span>
-          <span style={{ fontWeight: 700, color: 'var(--secondary)' }}>
+      {/* Price Slider */}
+      <div className="filter-group">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+          <label className="filter-group-label" style={{ margin: 0 }}>{lang === 'ar' ? 'أعلى سعر' : 'Max Price'}</label>
+          <span style={{ fontWeight: 800, color: '#684835', fontSize: '0.88rem' }}>
             {maxPrice} {lang === 'ar' ? 'د.ل' : 'LYD'}
           </span>
         </div>
+        <input
+          type="range"
+          min="0"
+          max={dynamicMaxPrice}
+          step="1"
+          value={maxPrice}
+          onChange={e => setMaxPrice(Number(e.target.value))}
+          className="subject-price-slider"
+        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#8C7E72', marginTop: '0.35rem' }}>
+          <span>0 د.ل</span>
+          <span>{dynamicMaxPrice} د.ل</span>
+        </div>
       </div>
 
-      {/* Reset Button */}
-      <button
-        className="btn btn-outline"
-        style={{ width: '100%', marginTop: '0.5rem', fontSize: '0.82rem' }}
-        onClick={() => { setMaxPrice(1000); setSelectedStock('all'); setSortBy('recent'); }}
-      >
-        {lang === 'ar' ? 'إعادة الضبط' : 'Reset Filters'}
-      </button>
-    </>
+      {/* Reset button */}
+      {isFiltered && (
+        <button
+          type="button"
+          onClick={resetAllFilters}
+          className="filter-reset-btn"
+        >
+          <RotateCcw size={14} />
+          <span>{lang === 'ar' ? 'إعادة ضبط الفلاتر' : 'Reset Filters'}</span>
+        </button>
+      )}
+    </div>
   );
 
-  return (
-    <div>
-      {/* ── SUBJECT HERO ── */}
-      <div style={{
-        background: 'var(--gradient-dark)',
-        padding: '2.5rem 0',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 70% at 50% 40%, rgba(205,191,166,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 120% 100% at 50% 100%, rgba(30,25,20,0.45) 0%, transparent 60%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(86,79,69,0.15) 0%, transparent 50%, rgba(40,34,28,0.18) 100%)', pointerEvents: 'none' }} />
-        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          {/* Breadcrumb */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', marginBottom: '1rem', color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap' }}>
-            <Link to="/" style={{ color: 'inherit' }}>{lang === 'ar' ? 'الرئيسية' : 'Home'}</Link>
-            <ChevronFwd size={13} />
-            {yearData && (
-              <>
-                <Link to={`/year/${yearData.slug}`} style={{ color: 'inherit' }}>
-                  {lang === 'ar' ? yearData.name_ar : yearData.name_en}
-                </Link>
-                <ChevronFwd size={13} />
-              </>
-            )}
-            <span style={{ color: '#CDBFA6', fontWeight: 700 }}>
-              {lang === 'ar' ? subjectData.name_ar : subjectData.name_en}
-            </span>
-          </div>
-
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', marginBottom: '0.4rem' }}>
-            {lang === 'ar' ? subjectData.name_ar : subjectData.name_en}
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
-            {lang === 'ar' ? subjectData.description_ar : subjectData.description_en}
-          </p>
-
-          {/* Product Count + Mobile Filter Button */}
-          <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
-              {filteredList.length} {lang === 'ar' ? 'منتج' : 'products'}
-            </span>
-            <button
-              className="btn btn-ghost"
-              style={{ fontSize: '0.85rem' }}
-              onClick={() => setShowMobileFilters(true)}
-              id="mobile-filter-btn"
-            >
-              <SlidersHorizontal size={15} />
-              {lang === 'ar' ? 'تصفية وترتيب' : 'Filter & Sort'}
-            </button>
+  if (loading) {
+    return (
+      <div className="subject-listing-page" style={{ padding: '2rem 0 4rem' }}>
+        <div className="container" style={{ maxWidth: '1180px' }}>
+          <div className="skeleton" style={{ height: '30px', width: '220px', borderRadius: '8px', marginBottom: '1.5rem' }} />
+          <div className="skeleton" style={{ height: '140px', borderRadius: '18px', marginBottom: '2rem' }} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="skeleton" style={{ height: '300px', borderRadius: '16px' }} />
+            ))}
           </div>
         </div>
-        <style>{`@media(min-width:900px){#mobile-filter-btn{display:none!important;}}`}</style>
       </div>
+    );
+  }
 
-      {/* ── CONTENT ── */}
-      <div className="container" style={{ padding: '2.5rem 0' }}>
-        <div className="browse-layout">
+  const yearDisplayName = lang === 'ar'
+    ? (yearData?.name_ar || 'السنة الدراسية')
+    : (yearData?.name_en || 'Academic Year');
 
-          {/* Desktop Sidebar */}
-          <aside className="filter-sidebar" style={{ display: 'none' }} id="desktop-sidebar">
-            <SidebarContent />
+  const subjectTitleAr = subjectData?.name_ar || 'المادة الدراسية';
+  const subjectTitleEn = subjectData?.name_en || 'Subject Tools';
+
+  return (
+    <div className="subject-listing-page">
+      <div className="container" style={{ maxWidth: '1180px', paddingInline: '1.25rem' }}>
+
+        {/* ── 1. DYNAMIC BREADCRUMB (Calm, RTL-Balanced) ── */}
+        <nav aria-label="breadcrumb" className="subject-breadcrumb" style={{ direction: isRtl ? 'rtl' : 'ltr', marginTop: '1.25rem' }}>
+          <Link to="/" className="breadcrumb-link">
+            {lang === 'ar' ? 'الرئيسية' : 'Home'}
+          </Link>
+          <ChevronSep size={13} className="breadcrumb-separator" />
+          <Link to={`/year/${yearData?.slug || '1st-year'}`} className="breadcrumb-link">
+            {lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}
+          </Link>
+          <ChevronSep size={13} className="breadcrumb-separator" />
+          <Link to={`/year/${yearData?.slug || '1st-year'}`} className="breadcrumb-link" style={{ color: '#8C7E72' }}>
+            {yearDisplayName}
+          </Link>
+          <ChevronSep size={13} className="breadcrumb-separator" />
+          <span className="breadcrumb-current" style={{ direction: 'ltr', display: 'inline-block' }}>
+            {subjectTitleEn}
+          </span>
+        </nav>
+
+        {/* ── 2. PAGE HEADER SECTION ── */}
+        <header className="subject-header-card" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+          <div className="subject-header-info">
+            {/* Arabic Name (Large & Bold) */}
+            <h1 className="subject-title-arabic">{subjectTitleAr}</h1>
+
+            {/* English Name */}
+            <h2 className="subject-title-english">{subjectTitleEn}</h2>
+
+            {/* Subtitle */}
+            <p className="subject-header-subtitle">
+              {lang === 'ar'
+                ? 'الأدوات والمواد المطلوبة للمادة'
+                : `Required tools and supplies for ${subjectTitleEn}`}
+            </p>
+          </div>
+
+          <div className="subject-header-meta">
+            {/* Dynamic Product Count */}
+            <div className="subject-count-pill">
+              <Package size={15} />
+              <span>
+                {filteredList.length}{' '}
+                {lang === 'ar' ? 'منتج' : (filteredList.length === 1 ? 'product' : 'products')}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {/* ── 3. IN-PAGE LIVE SEARCH & MOBILE CONTROLS BAR ── */}
+        <div className="subject-tools-toolbar" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+          {/* In-page live search */}
+          <div className="subject-search-container">
+            <Search size={16} className="subject-search-icon" />
+            <input
+              type="text"
+              value={inPageSearch}
+              onChange={(e) => setInPageSearch(e.target.value)}
+              placeholder={lang === 'ar' ? `ابحث في أدوات ${subjectTitleEn}... (مثال: Wax, Carver, Spatula)` : `Search in ${subjectTitleEn}...`}
+              className="subject-search-input"
+            />
+            {inPageSearch && (
+              <button
+                type="button"
+                onClick={() => setInPageSearch('')}
+                className="subject-search-clear"
+                aria-label="Clear search"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* Mobile Filter Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setShowMobileFilters(true)}
+            className="subject-mobile-filter-trigger"
+          >
+            <SlidersHorizontal size={16} />
+            <span>{lang === 'ar' ? 'التصفية والترتيب' : 'Filter & Sort'}</span>
+            {isFiltered && <span className="filter-active-indicator" />}
+          </button>
+        </div>
+
+        {/* ── 4. MAIN BROWSE LAYOUT (SIDEBAR + GRID) ── */}
+        <div className="subject-browse-layout" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+
+          {/* Desktop Filter Sidebar (RTL start) */}
+          <aside className="subject-desktop-sidebar">
+            <FilterControls />
           </aside>
-          <style>{`@media(min-width:900px){#desktop-sidebar{display:block!important;}}`}</style>
 
-          {/* Products Grid */}
-          <div>
+          {/* Product Grid Area */}
+          <main className="subject-products-container">
             {filteredList.length === 0 ? (
-              <div style={{
-                textAlign: 'center', padding: '5rem 2rem',
-                border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-lg)',
-                color: 'var(--text-muted)',
-              }}>
-                <Package size={48} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
-                <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>
-                  {lang === 'ar' ? 'لا توجد منتجات تطابق هذه الفلاتر' : 'No products match these filters'}
-                </p>
-                <button
-                  className="btn btn-outline"
-                  style={{ marginTop: '1rem' }}
-                  onClick={() => { setMaxPrice(1000); setSelectedStock('all'); setSortBy('recent'); }}
-                >
-                  {lang === 'ar' ? 'إعادة الضبط' : 'Reset Filters'}
-                </button>
+              <div className="subject-empty-state">
+                {products.length === 0 ? (
+                  <>
+                    <Package size={52} strokeWidth={1.5} className="subject-empty-icon" />
+                    <h3 className="subject-empty-title">
+                      {lang === 'ar' ? 'لا توجد أدوات متاحة حالياً لهذه المادة.' : 'No tools available for this subject currently.'}
+                    </h3>
+                    <p className="subject-empty-desc">
+                      {lang === 'ar' ? 'سيتم تزويد وفهرسة كافة الأدوات المطلوبة لهذه المادة قريباً.' : 'All required tools for this subject will be stocked soon.'}
+                    </p>
+                    <Link to={`/year/${yearData?.slug || '1st-year'}`} className="btn btn-secondary" style={{ marginTop: '1rem' }}>
+                      {lang === 'ar' ? 'العودة للمواد' : 'Back to Subjects'}
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Search size={44} strokeWidth={1.5} className="subject-empty-icon" />
+                    <h3 className="subject-empty-title">
+                      {lang === 'ar' ? 'لا توجد أدوات تطابق البحث أو الفلاتر المحددة' : 'No tools match your search or filters'}
+                    </h3>
+                    <p className="subject-empty-desc">
+                      {lang === 'ar' ? 'جرب البحث باسم أداة أخرى أو قم بإعادة ضبط نطاق السعر والتوفر.' : 'Try searching for another tool or reset price and stock filters.'}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={resetAllFilters}
+                      className="btn btn-outline"
+                      style={{ marginTop: '1rem' }}
+                    >
+                      {lang === 'ar' ? 'إعادة ضبط الفلاتر' : 'Reset Filters'}
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
-              <div className="grid-4">
-                {filteredList.map(product => (
+              <div className="subject-products-grid" aria-label="Products Grid">
+                {filteredList.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             )}
-          </div>
+          </main>
+
         </div>
+
       </div>
 
-      {/* Mobile Filters Drawer */}
+      {/* ── 5. MOBILE FILTERS DRAWER / BOTTOM SHEET ── */}
       {showMobileFilters && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9000, display: 'flex' }}>
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
-            onClick={() => setShowMobileFilters(false)} />
-          <div style={{
-            position: 'relative',
-            width: 300, maxWidth: '90vw', height: '100%',
-            background: 'var(--surface-color)',
-            padding: '1.5rem',
-            overflowY: 'auto',
-            marginLeft: isRtl ? 'auto' : 0,
-            marginRight: isRtl ? 0 : 'auto',
-            boxShadow: 'var(--shadow-lg)',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ fontWeight: 800, fontSize: '1rem' }}>
+        <div className="mobile-filter-drawer-portal">
+          <div
+            className="mobile-filter-backdrop"
+            onClick={() => setShowMobileFilters(false)}
+          />
+          <div className="mobile-filter-panel" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+            <div className="mobile-filter-topbar">
+              <h3 className="mobile-filter-title">
                 {lang === 'ar' ? 'التصفية والترتيب' : 'Filter & Sort'}
               </h3>
-              <button className="icon-btn" onClick={() => setShowMobileFilters(false)}>
-                <X size={18} />
+              <button
+                type="button"
+                onClick={() => setShowMobileFilters(false)}
+                className="mobile-filter-close"
+              >
+                <X size={20} />
               </button>
             </div>
-            <SidebarContent />
+
+            <div className="mobile-filter-scroll-body">
+              <FilterControls />
+            </div>
+
+            <div className="mobile-filter-footer">
+              <button
+                type="button"
+                onClick={() => setShowMobileFilters(false)}
+                className="btn btn-secondary"
+                style={{ width: '100%', padding: '0.75rem', fontWeight: 800 }}
+              >
+                {lang === 'ar' ? `عرض النتائج (${filteredList.length})` : `Show Results (${filteredList.length})`}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -389,4 +539,3 @@ export const SubjectPage = () => {
 };
 
 export default SubjectPage;
-

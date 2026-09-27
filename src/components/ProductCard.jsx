@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, Eye, Heart } from 'lucide-react';
-import supabase from '../supabaseClient';
+import { ShoppingCart, Check, Heart } from 'lucide-react';
 
 export const ProductCard = ({ product }) => {
   const { lang, t, isRtl } = useLanguage();
@@ -11,129 +10,141 @@ export const ProductCard = ({ product }) => {
   const navigate = useNavigate();
 
   const [isFav, setIsFav] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
 
   useEffect(() => {
-    const favs = JSON.parse(localStorage.getItem('smylodent_favs') || '[]');
-    setIsFav(favs.includes(product.id));
+    try {
+      const favs = JSON.parse(localStorage.getItem('smylodent_favs') || '[]');
+      setIsFav(favs.includes(product.id));
+    } catch {
+      // ignore
+    }
   }, [product.id]);
 
   const toggleFav = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const favs = JSON.parse(localStorage.getItem('smylodent_favs') || '[]');
-    const updated = isFav ? favs.filter(id => id !== product.id) : [...favs, product.id];
-    localStorage.setItem('smylodent_favs', JSON.stringify(updated));
-    setIsFav(!isFav);
+    try {
+      const favs = JSON.parse(localStorage.getItem('smylodent_favs') || '[]');
+      const updated = isFav ? favs.filter(id => id !== product.id) : [...favs, product.id];
+      localStorage.setItem('smylodent_favs', JSON.stringify(updated));
+      setIsFav(!isFav);
+    } catch {
+      // ignore
+    }
   };
-
-  const handleAddToCart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart({ ...product, quantity: 1 });
-  };
-
-  const discountPercent = product.compare_at_price
-    ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
-    : 0;
 
   const isUnavailable = product.availability === 'unavailable';
   const isLimited = product.availability === 'limited_quantity';
   const isComingSoon = product.availability === 'coming_soon';
 
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isUnavailable || isComingSoon) return;
+    addToCart({ ...product, quantity: 1 });
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1800);
+  };
+
+  const discountPercent = product.compare_at_price && product.compare_at_price > product.price
+    ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
+    : 0;
+
+  // Strict requirement: English name ONLY inside the card
+  const displayName = product.name_en || product.name_ar || 'Dental Tool';
+
   return (
-    <Link
-      to={`/product/${product.id}`}
+    <div
+      onClick={() => navigate(`/product/${product.id}`)}
       className="product-card"
-      style={{ opacity: isUnavailable ? 0.65 : 1 }}
+      style={{
+        opacity: isUnavailable ? 0.72 : 1,
+        cursor: 'pointer',
+      }}
     >
-      {/* Image */}
+      {/* ── IMAGE AREA ── */}
       <div className="product-card-image">
         <img
           src={product.image_url || 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format'}
-          alt={lang === 'ar' ? product.name_ar : product.name_en}
+          alt={displayName}
+          loading="lazy"
           onError={e => { e.target.src = 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format'; }}
         />
 
-
-
-        {/* Badges */}
+        {/* Status Badges */}
         <div className="product-card-badge">
           {discountPercent > 0 && <span className="badge badge-discount">-{discountPercent}%</span>}
-          {isLimited && <span className="badge badge-limited">{lang === 'ar' ? 'محدود' : 'Limited'}</span>}
+          {isLimited && <span className="badge badge-limited">{lang === 'ar' ? 'كمية محدودة' : 'Limited'}</span>}
           {isComingSoon && <span className="badge badge-unavailable">{lang === 'ar' ? 'قريباً' : 'Soon'}</span>}
         </div>
 
-        {/* Fav heart */}
+        {/* Favorite Heart Button */}
         <button
           onClick={toggleFav}
+          aria-label="Favorite"
+          className="product-fav-btn"
           style={{
             position: 'absolute',
             top: '0.6rem',
             left: isRtl ? '0.6rem' : 'auto',
             right: isRtl ? 'auto' : '0.6rem',
-            ...(discountPercent > 0 || isLimited || isComingSoon
-              ? { top: '2.4rem' }
-              : {}),
-            width: 32, height: 32,
+            width: 32,
+            height: 32,
             borderRadius: '50%',
-            background: 'rgba(255,255,255,0.85)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            background: 'rgba(255,255,255,0.92)',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
             color: isFav ? '#EF4444' : '#9CA3AF',
-            transition: 'all 0.2s ease',
+            cursor: 'pointer',
+            zIndex: 3,
+            transition: 'transform 0.15s ease',
           }}
         >
-          <Heart size={14} fill={isFav ? '#EF4444' : 'none'} />
+          <Heart size={15} fill={isFav ? '#EF4444' : 'none'} />
         </button>
-
-        {/* Hover Actions */}
-        {!isUnavailable && !isComingSoon && (
-          <div className="product-card-actions">
-            <button
-              onClick={handleAddToCart}
-              className="btn btn-primary"
-              style={{ flex: 1, padding: '0.55rem', fontSize: '0.8rem', borderRadius: '8px' }}
-            >
-              <ShoppingCart size={14} />
-              {lang === 'ar' ? 'أضف للسلة' : 'Add to Cart'}
-            </button>
-            <button
-              onClick={(e) => { e.preventDefault(); navigate(`/product/${product.id}`); }}
-              style={{
-                width: 38, height: 38, borderRadius: 8,
-                background: 'rgba(255,255,255,0.2)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <Eye size={15} />
-            </button>
-          </div>
-        )}
 
         {isUnavailable && (
           <div style={{
-            position: 'absolute', inset: 0,
-            background: 'rgba(0,0,0,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(255,255,255,0.65)',
+            backdropFilter: 'blur(2px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2,
           }}>
-            <span className="badge badge-unavailable" style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
+            <span className="badge badge-unavailable" style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem', fontWeight: 800 }}>
               {lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}
             </span>
           </div>
         )}
       </div>
 
-      {/* Body */}
+      {/* ── BODY AREA: English Name + Price + Add to Cart ── */}
       <div className="product-card-body">
-        <h3 className="product-card-name">
-          {lang === 'ar' ? product.name_ar : product.name_en}
+        {/* English Name ONLY */}
+        <h3
+          className="product-card-name"
+          style={{
+            direction: 'ltr',
+            textAlign: isRtl ? 'right' : 'left',
+          }}
+        >
+          {displayName}
         </h3>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: 'auto' }}>
+
+        {/* Price Row */}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45rem', marginTop: 'auto', marginBottom: '0.75rem' }}>
           <span className="product-card-price">
-            {product.price} <span style={{ fontSize: '0.7rem', fontWeight: 500, color: 'var(--text-muted)' }}>{t('cart.currency')}</span>
+            {product.price}{' '}
+            <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+              {t('cart.currency') || 'د.ل'}
+            </span>
           </span>
           {product.compare_at_price && (
             <span className="product-card-compare">
@@ -141,8 +152,50 @@ export const ProductCard = ({ product }) => {
             </span>
           )}
         </div>
+
+        {/* Add to Cart Button (Touch-Friendly & Always Accessible) */}
+        <button
+          onClick={handleAddToCart}
+          disabled={isUnavailable || isComingSoon}
+          className={`product-add-cart-btn ${justAdded ? 'added' : ''}`}
+          style={{
+            width: '100%',
+            padding: '0.6rem 0.8rem',
+            borderRadius: '10px',
+            border: 'none',
+            fontSize: '0.84rem',
+            fontWeight: 800,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.45rem',
+            cursor: (isUnavailable || isComingSoon) ? 'not-allowed' : 'pointer',
+            backgroundColor: justAdded
+              ? '#2E7D32'
+              : (isUnavailable || isComingSoon ? '#E5E0D8' : '#684835'),
+            color: (isUnavailable || (isComingSoon && !justAdded)) ? '#8C7E72' : '#FFFFFF',
+            boxShadow: justAdded ? '0 2px 8px rgba(46,125,50,0.3)' : '0 2px 6px rgba(104,72,53,0.2)',
+            transition: 'background-color 0.2s ease, transform 0.15s ease',
+          }}
+        >
+          {justAdded ? (
+            <>
+              <Check size={16} strokeWidth={2.8} />
+              <span>{lang === 'ar' ? 'تمت الإضافة' : 'Added'}</span>
+            </>
+          ) : isUnavailable ? (
+            <span>{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>
+          ) : isComingSoon ? (
+            <span>{lang === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
+          ) : (
+            <>
+              <ShoppingCart size={15} strokeWidth={2.2} />
+              <span>{lang === 'ar' ? 'أضف للسلة' : 'Add to Cart'}</span>
+            </>
+          )}
+        </button>
       </div>
-    </Link>
+    </div>
   );
 };
 
