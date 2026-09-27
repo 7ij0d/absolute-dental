@@ -93,7 +93,7 @@ export const Navbar = () => {
 
   const getSubjectsForYear = (yearId) => subjects.filter(s => s.year_id === yearId);
 
-  const isLightHeader = location.pathname.startsWith('/year') || location.pathname.startsWith('/subject');
+  const isLightHeader = location.pathname.startsWith('/year') || location.pathname.startsWith('/subject') || location.pathname.startsWith('/product');
 
   const renderMobileDrawer = () => {
     if (!mobileOpen) return null;
