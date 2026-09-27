@@ -1885,4 +1885,214 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   }
 }
 
+/* ==========================================================================
+   CHOOSE SUBJECT PAGE (STEP 2) — ABSOLUTE DENTAL (APPLE / LINEAR GRADE)
+   ========================================================================== */
+.choose-subject-page {
+  background-color: #FAF7F2;
+  min-height: calc(100vh - 72px);
+  padding: 1.5rem 0 3.5rem;
+}
+
+.choose-subject-container {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding-inline: 1.25rem;
+}
+
+/* ── Breadcrumb ── */
+.subject-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+  color: #8C7E72;
+  margin-bottom: 1.15rem;
+  user-select: none;
+}
+
+.breadcrumb-link {
+  color: #8C7E72;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.breadcrumb-link:hover {
+  color: #38281D;
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  color: #B5A89B;
+  flex-shrink: 0;
+}
+
+.breadcrumb-current {
+  color: #38281D;
+  font-weight: 700;
+}
+
+/* ── Year Badge Pill ── */
+.subject-year-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background-color: #EFE8DF;
+  border: 1px solid rgba(56, 40, 29, 0.08);
+  color: #38281D;
+  font-size: 0.82rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* ── Hero Heading ── */
+.subject-hero-header {
+  margin-bottom: 2rem;
+}
+
+.subject-page-title {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #1E140E;
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.subject-page-subtitle {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #7A6E65;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Subjects Grid ── */
+.choose-subject-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem;
+  width: 100%;
+}
+
+.subject-card {
+  min-height: 250px;
+}
+
+.subject-card-content {
+  padding: 1.85rem 1.75rem;
+}
+
+.subject-title-ar {
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: #1E140E;
+  margin: 0 0 0.2rem 0;
+  line-height: 1.25;
+}
+
+.subject-title-en {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #7A6E65;
+  letter-spacing: 0.01em;
+  display: inline-block;
+}
+
+/* ── Coming Soon Card ── */
+.coming-soon-card {
+  background-color: #FFFFFF;
+  border: 1px solid #ECE7DF;
+  border-radius: 24px;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  max-width: 580px;
+  margin: 2rem auto;
+  box-shadow: 0 4px 20px rgba(35, 24, 16, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.coming-soon-icon-box {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: #F5EFE6;
+  color: #38281D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coming-soon-title {
+  font-family: 'Cairo', sans-serif;
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: #1E140E;
+  margin: 0;
+}
+
+.coming-soon-desc {
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.95rem;
+  color: #7A6E65;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Responsive Mobile Rules ── */
+@media (max-width: 899px) {
+  .choose-subject-page {
+    padding: 1.15rem 0 2.5rem;
+  }
+  .subject-hero-header {
+    margin-bottom: 1.5rem;
+  }
+  .subject-page-title {
+    font-size: 1.75rem;
+  }
+  .subject-page-subtitle {
+    font-size: 0.92rem;
+  }
+  .choose-subject-grid {
+    grid-template-columns: 1fr;
+    gap: 1.15rem;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .subject-card {
+    min-height: 195px;
+  }
+  .subject-title-ar {
+    font-size: 1.25rem;
+  }
+  .subject-title-en {
+    font-size: 0.92rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .subject-page-title {
+    font-size: 1.6rem;
+  }
+  .subject-title-ar {
+    font-size: 1.18rem;
+  }
+  .subject-title-en {
+    font-size: 0.85rem;
+  }
+  .subject-card {
+    min-height: 180px;
+  }
+}
+
+
 
