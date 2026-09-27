@@ -48,7 +48,7 @@ const PublicLayout = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {!isHomePage && <AnnouncementBar />}
+      {!isHomePage && !location.pathname.startsWith('/year') && <AnnouncementBar />}
       <Navbar />
       <main style={{ flexGrow: 1 }}>
         <Outlet />

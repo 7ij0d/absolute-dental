@@ -17,7 +17,8 @@ const DEFAULT_YEARS = [
 const DEFAULT_SUBJECTS = [
   { id: '11', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'تشريح الأسنان', name_en: 'Dental Anatomy', description_ar: 'دراسة تشريح الأسنان الطبيعي وأشكالها ورسمها ونحتها.', slug: 'dental-anatomy' },
   { id: '12', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'مواد طب الأسنان', name_en: 'Dental Materials', description_ar: 'التعرف على المواد المستخدمة في عيادات ومعامل الأسنان.', slug: 'dental-materials' },
-  { id: '21', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'علاج الأسنان التحفظي', name_en: 'Restorative Dentistry', description_ar: 'العمل العملي في المعمل على الرؤوس الوهمية.', slug: 'restorative-dentistry' },
+  { id: '21', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'علاج الأسنان التحفظي', name_en: 'Operative Dentistry', description_ar: 'العمل العملي في المعمل على الرؤوس الوهمية.', slug: 'restorative-dentistry' },
+  { id: '21b', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'علاج الأسنان التحفظي', name_en: 'Operative Dentistry', description_ar: 'العمل العملي في المعمل على الرؤوس الوهمية.', slug: 'operative-dentistry' },
   { id: '22', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان المتحركة', name_en: 'Removable Prosthodontics', description_ar: 'معمل الأطقم الكاملة والجزئية.', slug: 'removable-prosthodontics' },
   { id: '23', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان الثابتة', name_en: 'Fixed Prosthodontics', description_ar: 'تجهيز الأسنان للتيجان والجسور السنية.', slug: 'fixed-prosthodontics' },
   { id: '31', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'علاج الجذور', name_en: 'Endodontics', description_ar: 'تنظيف وحشو قنوات الجذور عمليًا.', slug: 'endodontics' },
@@ -57,10 +58,11 @@ export const SubjectPage = () => {
     const fetchAndCache = async (showLoader) => {
       if (showLoader) setLoading(true);
       try {
+        const lookupSlug = slug === 'operative-dentistry' ? 'restorative-dentistry' : slug;
         const { data: subjectRes } = await supabase
-          .from('subjects').select('*').eq('slug', slug).single();
+          .from('subjects').select('*').or(`slug.eq.${slug},slug.eq.${lookupSlug}`).maybeSingle();
 
-        const subject = subjectRes || DEFAULT_SUBJECTS.find(s => s.slug === slug) || DEFAULT_SUBJECTS[0];
+        const subject = subjectRes || DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) || DEFAULT_SUBJECTS[0];
 
         // Fetch year + primary products + junction products IN PARALLEL
         const [{ data: yearRes }, { data: primaryProds }, { data: junctionLinks }] = await Promise.all([

@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import supabase from '../supabaseClient';
 import { cacheGet, cacheSet } from '../cache';
-import { GraduationCap, ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, Clock, Lock } from 'lucide-react';
+import { ChevronLeft, ArrowRight, Clock } from 'lucide-react';
 
 const DEFAULT_YEARS = [
   { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى', name_en: '1st Year', slug: '1st-year', sort_order: 1, is_coming_soon: false },
@@ -12,45 +12,55 @@ const DEFAULT_YEARS = [
   { id: '40000000-0000-0000-0000-000000000004', name_ar: 'السنة الرابعة', name_en: '4th Year', slug: '4th-year', sort_order: 4, is_coming_soon: true },
 ];
 
-const SUBJECT_METADATA = {
-  'dental-anatomy': {
-    name_ar: 'تشريح الأسنان',
-    name_en: 'Dental Anatomy',
-    webp: '/images/dental-anatomy-faded.webp',
-    png: '/images/dental-anatomy-faded.png',
-  },
-  'dental-materials': {
-    name_ar: 'مواد طب الأسنان',
-    name_en: 'Dental Materials',
-    webp: '/images/dental-materials-faded.webp',
-    png: '/images/dental-materials-faded.png',
-  },
-  'fixed-prosthodontics': {
-    name_ar: 'صناعة الأسنان الثابتة',
-    name_en: 'Fixed Prosthodontics',
+const YEAR_2_SUBJECTS = [
+  {
+    slug: 'fixed-prosthodontics',
+    title: 'Fixed Prosthodontics',
+    titleLine1: 'Fixed',
+    titleLine2: 'Prosthodontics',
+    href: '/subject/fixed-prosthodontics',
     webp: '/images/fixed-prosthodontics-faded.webp',
     png: '/images/fixed-prosthodontics-faded.png',
   },
-  'removable-prosthodontics': {
-    name_ar: 'صناعة الأسنان المتحركة',
-    name_en: 'Removable Prosthodontics',
+  {
+    slug: 'removable-prosthodontics',
+    title: 'Removable Prosthodontics',
+    titleLine1: 'Removable',
+    titleLine2: 'Prosthodontics',
+    href: '/subject/removable-prosthodontics',
     webp: '/images/removable-prosthodontics-faded.webp',
     png: '/images/removable-prosthodontics-faded.png',
   },
-  'restorative-dentistry': {
-    name_ar: 'علاج الأسنان التحفظي',
-    name_en: 'Operative Dentistry',
+  {
+    slug: 'operative-dentistry',
+    title: 'Operative Dentistry',
+    titleLine1: 'Operative',
+    titleLine2: 'Dentistry',
+    href: '/subject/restorative-dentistry',
     webp: '/images/operative-dentistry-faded.webp',
     png: '/images/operative-dentistry-faded.png',
   },
-};
+];
 
-const DEFAULT_SUBJECTS = [
-  { id: '11', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'تشريح الأسنان', name_en: 'Dental Anatomy', slug: 'dental-anatomy', sort_order: 1 },
-  { id: '12', year_id: '10000000-0000-0000-0000-000000000001', name_ar: 'مواد طب الأسنان', name_en: 'Dental Materials', slug: 'dental-materials', sort_order: 2 },
-  { id: '21', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'علاج الأسنان التحفظي', name_en: 'Operative Dentistry', slug: 'restorative-dentistry', sort_order: 1 },
-  { id: '22', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان المتحركة', name_en: 'Removable Prosthodontics', slug: 'removable-prosthodontics', sort_order: 2 },
-  { id: '23', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان الثابتة', name_en: 'Fixed Prosthodontics', slug: 'fixed-prosthodontics', sort_order: 3 },
+const YEAR_1_SUBJECTS = [
+  {
+    slug: 'dental-anatomy',
+    title: 'Dental Anatomy',
+    titleLine1: 'Dental',
+    titleLine2: 'Anatomy',
+    href: '/subject/dental-anatomy',
+    webp: '/images/dental-anatomy-faded.webp',
+    png: '/images/dental-anatomy-faded.png',
+  },
+  {
+    slug: 'dental-materials',
+    title: 'Dental Materials',
+    titleLine1: 'Dental',
+    titleLine2: 'Materials',
+    href: '/subject/dental-materials',
+    webp: '/images/dental-materials-faded.webp',
+    png: '/images/dental-materials-faded.png',
+  },
 ];
 
 export const YearPage = () => {
@@ -58,77 +68,44 @@ export const YearPage = () => {
   const { lang, isRtl } = useLanguage();
 
   const [yearData, setYearData] = useState(() => DEFAULT_YEARS.find(y => y.slug === slug) || DEFAULT_YEARS[0]);
-  const [subjects, setSubjects] = useState(() => {
-    const yr = DEFAULT_YEARS.find(y => y.slug === slug) || DEFAULT_YEARS[0];
-    return DEFAULT_SUBJECTS.filter(s => s.year_id === yr.id);
-  });
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const CACHE_KEY = `year_v2:${slug}`;
-
-    const applyData = ({ year, subs }) => {
-      if (year) setYearData(year);
-      if (subs && subs.length > 0) {
-        setSubjects(subs);
-      }
-    };
-
-    const fetchAndCache = async () => {
+    const fetchYear = async () => {
       try {
         const { data: yearRes } = await supabase
           .from('years').select('*').eq('slug', slug).single();
-
-        const year = yearRes || DEFAULT_YEARS.find(y => y.slug === slug) || DEFAULT_YEARS[0];
-
-        const { data: subsRes } = await supabase
-          .from('subjects')
-          .select('*')
-          .eq('year_id', year.id)
-          .order('sort_order', { ascending: true });
-
-        const matchedSubs = (subsRes && subsRes.length > 0)
-          ? subsRes
-          : DEFAULT_SUBJECTS.filter(s => s.year_id === year.id);
-
-        const bundle = { year, subs: matchedSubs };
-        cacheSet(CACHE_KEY, bundle, 5 * 60);
-        applyData(bundle);
+        if (yearRes) {
+          setYearData(yearRes);
+          cacheSet(CACHE_KEY, yearRes, 5 * 60);
+        }
       } catch (err) {
         console.warn('YearPage fetch warning, using defaults:', err);
-        const fallbackYear = DEFAULT_YEARS.find(y => y.slug === slug) || DEFAULT_YEARS[0];
-        const fallbackSubs = DEFAULT_SUBJECTS.filter(s => s.year_id === fallbackYear.id);
-        applyData({ year: fallbackYear, subs: fallbackSubs });
-      } finally {
-        setLoading(false);
       }
     };
 
     const cached = cacheGet(CACHE_KEY);
     if (cached) {
-      applyData(cached);
-      fetchAndCache();
+      setYearData(cached);
+      fetchYear();
     } else {
-      fetchAndCache();
+      fetchYear();
     }
   }, [slug]);
 
-  const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
-  const ArrowIcon = ArrowRight; // Always points into the card action like the reference design
-
-  // ── COMING SOON VIEW ──
+  // ── COMING SOON VIEW (Year 3 & 4) ──
   if (yearData.is_coming_soon) {
     return (
       <div className="choose-subject-page">
-        <div className="container choose-subject-container">
+        <div className="container choose-subject-container" style={{ maxWidth: '580px', paddingInline: '1rem' }}>
           {/* Breadcrumb */}
           <nav aria-label="breadcrumb" className="subject-breadcrumb">
-            <Link to="/">{lang === 'ar' ? 'الرئيسية' : 'Home'}</Link>
-            <ChevronSep size={13} className="breadcrumb-separator" />
-            <Link to="/year/1st-year">{lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}</Link>
-            <ChevronSep size={13} className="breadcrumb-separator" />
+            <Link to="/" className="breadcrumb-link">{lang === 'ar' ? 'الرئيسية' : 'Home'}</Link>
+            <ChevronLeft size={13} className="breadcrumb-separator" style={{ transform: isRtl ? 'none' : 'rotate(180deg)' }} />
+            <Link to="/year/2nd-year" className="breadcrumb-link">{lang === 'ar' ? yearData.name_ar : yearData.name_en}</Link>
+            <ChevronLeft size={13} className="breadcrumb-separator" style={{ transform: isRtl ? 'none' : 'rotate(180deg)' }} />
             <span className="breadcrumb-current">
-              {lang === 'ar' ? yearData.name_ar : yearData.name_en}
+              {lang === 'ar' ? 'اختر المادة' : 'Choose Subject'}
             </span>
           </nav>
 
@@ -144,8 +121,8 @@ export const YearPage = () => {
                 ? 'نعمل حالياً على تجهيز وفهرسة كافة الأدوات والمواد المطلوبة لهذه السنة الدراسية.'
                 : 'We are currently preparing and indexing all required tools and supplies for this academic year.'}
             </p>
-            <Link to="/year/1st-year" className="btn btn-secondary">
-              {lang === 'ar' ? 'تصفح السنة الأولى' : 'Browse 1st Year'}
+            <Link to="/year/2nd-year" className="btn btn-secondary">
+              {lang === 'ar' ? 'تصفح السنة الثانية' : 'Browse 2nd Year'}
             </Link>
           </div>
         </div>
@@ -153,33 +130,36 @@ export const YearPage = () => {
     );
   }
 
+  // Choose the dedicated subjects array
+  const currentSubjects = slug === '2nd-year'
+    ? YEAR_2_SUBJECTS
+    : (slug === '1st-year' ? YEAR_1_SUBJECTS : YEAR_2_SUBJECTS);
+
+  const yearDisplayName = lang === 'ar'
+    ? (yearData?.name_ar || (slug === '2nd-year' ? 'السنة الثانية' : 'السنة الأولى'))
+    : (yearData?.name_en || (slug === '2nd-year' ? '2nd Year' : '1st Year'));
+
   return (
     <div className="choose-subject-page">
-      <div className="container choose-subject-container">
+      <div className="container choose-subject-container" style={{ maxWidth: '580px', paddingInline: '1.25rem' }}>
 
-        {/* ── 1. BREADCRUMB (Calm & Subtle) ── */}
-        <nav aria-label="breadcrumb" className="subject-breadcrumb">
+        {/* ── 1. BREADCRUMB (Calm, Subtle & RTL-Balanced) ── */}
+        <nav aria-label="breadcrumb" className="subject-breadcrumb" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
           <Link to="/" className="breadcrumb-link">
             {lang === 'ar' ? 'الرئيسية' : 'Home'}
           </Link>
-          <ChevronSep size={13} className="breadcrumb-separator" />
-          <Link to="/year/1st-year" className="breadcrumb-link">
-            {lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}
+          <ChevronLeft size={13} className="breadcrumb-separator" style={{ transform: isRtl ? 'none' : 'rotate(180deg)' }} />
+          <Link to={`/year/${slug}`} className="breadcrumb-link" style={{ color: '#8C7E72' }}>
+            {yearDisplayName}
           </Link>
-          <ChevronSep size={13} className="breadcrumb-separator" />
+          <ChevronLeft size={13} className="breadcrumb-separator" style={{ transform: isRtl ? 'none' : 'rotate(180deg)' }} />
           <span className="breadcrumb-current">
-            {lang === 'ar' ? yearData.name_ar : yearData.name_en}
+            {lang === 'ar' ? 'اختر المادة' : 'Choose Subject'}
           </span>
         </nav>
 
-        {/* ── 2. YEAR BADGE PILL ── */}
-        <div className="subject-year-badge">
-          <GraduationCap size={15} />
-          <span>{lang === 'ar' ? yearData.name_ar : yearData.name_en}</span>
-        </div>
-
-        {/* ── 3. HERO HEADING ── */}
-        <header className="subject-hero-header">
+        {/* ── 2. HERO HEADING ── */}
+        <header className="subject-hero-header" style={{ textAlign: isRtl ? 'right' : 'left', direction: isRtl ? 'rtl' : 'ltr' }}>
           <h1 className="subject-page-title">
             {lang === 'ar' ? 'اختر المادة' : 'Choose Subject'}
           </h1>
@@ -190,58 +170,40 @@ export const YearPage = () => {
           </p>
         </header>
 
-        {/* ── 4. SUBJECTS GATEWAY CARDS GRID ── */}
-        <section className="choose-subject-grid" aria-label="Subjects List">
-          {subjects.map((sub) => {
-            const meta = SUBJECT_METADATA[sub.slug] || {};
-            const titleAr = meta.name_ar || sub.name_ar || 'المادة الدراسية';
-            const titleEn = meta.name_en || sub.name_en || 'Subject';
-            const artworkWebp = meta.webp || '/images/dental-anatomy-faded.webp';
-            const artworkPng = meta.png || '/images/dental-anatomy-faded.png';
-
-            return (
-              <Link
-                key={sub.id || sub.slug}
-                to={`/subject/${sub.slug}`}
-                className="gateway-card subject-card"
-                aria-label={`${titleAr} - ${titleEn}`}
-              >
-                {/* Content Side (Text & Action Button) */}
-                <div className="gateway-card-content subject-card-content">
-                  <div className="gateway-card-text">
-                    <h2 className="gateway-card-title subject-title-ar">
-                      {lang === 'ar' ? titleAr : titleEn}
-                    </h2>
-                    <span className="subject-title-en">
-                      {lang === 'ar' ? titleEn : titleAr}
-                    </span>
-                  </div>
-
-                  <div className="gateway-card-action">
-                    <div className="gateway-circle-btn" aria-hidden="true">
-                      <ArrowIcon size={17} strokeWidth={2.5} />
-                    </div>
-                    <span className="gateway-cta-text">
-                      {lang === 'ar' ? 'تصفح الآن' : 'Browse Now'}
-                    </span>
-                  </div>
+        {/* ── 3. EXACT SUBJECT CARDS (VERTICAL MOBILE-FIRST CANVASES) ── */}
+        <section className="year2-subject-list" aria-label="Subjects List">
+          {currentSubjects.map((sub) => (
+            <Link
+              key={sub.slug}
+              to={sub.href}
+              className="year2-subject-card"
+              aria-label={sub.title}
+            >
+              {/* Left Side: English Title Only + Solid Brown Circle Button */}
+              <div className="year2-card-left">
+                <h2 className="year2-card-title">
+                  {sub.titleLine1}
+                  <br />
+                  {sub.titleLine2}
+                </h2>
+                <div className="year2-circle-btn" aria-hidden="true">
+                  <ArrowRight size={18} strokeWidth={2.5} />
                 </div>
+              </div>
 
-                {/* Artwork Side (Pruned Studio Photography with Soft Alpha Fade) */}
-                <div className="gateway-card-artwork subject-card-artwork">
-                  <picture>
-                    <source srcSet={artworkWebp} type="image/webp" />
-                    <img
-                      src={artworkPng}
-                      alt={titleAr}
-                      loading="eager"
-                      className="gateway-art-img"
-                    />
-                  </picture>
-                </div>
-              </Link>
-            );
-          })}
+              {/* Right Side: High-Resolution Photographic Artwork with Smooth Alpha Fade */}
+              <div className="year2-card-art">
+                <picture>
+                  <source srcSet={sub.webp} type="image/webp" />
+                  <img
+                    src={sub.png}
+                    alt={sub.title}
+                    loading="eager"
+                  />
+                </picture>
+              </div>
+            </Link>
+          ))}
         </section>
 
       </div>
