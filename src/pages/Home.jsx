@@ -30,7 +30,7 @@ export const Home = () => {
 
           {/* CARD 01: أدوات الدراسة */}
           <Link
-            to="/year/1st-year"
+            to="/study-tools"
             className="gateway-card"
             aria-label={lang === 'ar' ? 'أدوات الدراسة - اختر سنتك الدراسية' : 'Study Tools - Choose your academic year'}
           >

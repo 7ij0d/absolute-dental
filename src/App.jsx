@@ -8,6 +8,7 @@ import BottomNav from './components/BottomNav';
 // Public Storefront Pages
 import Home from './pages/Home';
 import YearPage from './pages/YearPage';
+import StudyToolsPage from './pages/StudyToolsPage';
 import SubjectPage from './pages/SubjectPage';
 import ProductDetails from './pages/ProductDetails';
 import CartPage from './pages/CartPage';
@@ -48,7 +49,7 @@ const PublicLayout = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {!isHomePage && !location.pathname.startsWith('/year') && !location.pathname.startsWith('/subject') && !location.pathname.startsWith('/product') && <AnnouncementBar />}
+      {!isHomePage && !location.pathname.startsWith('/study-tools') && !location.pathname.startsWith('/years') && !location.pathname.startsWith('/year') && !location.pathname.startsWith('/subject') && !location.pathname.startsWith('/product') && <AnnouncementBar />}
       <Navbar />
       <main style={{ flexGrow: 1 }}>
         <Outlet />
@@ -74,6 +75,8 @@ export const App = () => {
       {/* 1. PUBLIC STOREFRONT ROUTES */}
       <Route path="/" element={<PublicLayout />}>
         <Route index element={<Home />} />
+        <Route path="study-tools" element={<StudyToolsPage />} />
+        <Route path="years" element={<StudyToolsPage />} />
         <Route path="year/:slug" element={<YearPage />} />
         <Route path="subject/:slug" element={<SubjectPage />} />
         <Route path="product/:id" element={<ProductDetails />} />

@@ -118,11 +118,9 @@ export const YearPage = () => {
           <nav aria-label="breadcrumb" className="subject-breadcrumb" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
             <Link to="/" className="breadcrumb-link">{lang === 'ar' ? 'الرئيسية' : 'Home'}</Link>
             <ChevronSep size={13} className="breadcrumb-separator" />
-            <Link to="/year/1st-year" className="breadcrumb-link">{lang === 'ar' ? yearData.name_ar : yearData.name_en}</Link>
+            <Link to="/study-tools" className="breadcrumb-link">{lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}</Link>
             <ChevronSep size={13} className="breadcrumb-separator" />
-            <span className="breadcrumb-current">
-              {lang === 'ar' ? 'اختر المادة' : 'Choose Subject'}
-            </span>
+            <span className="breadcrumb-current">{lang === 'ar' ? yearData.name_ar : yearData.name_en}</span>
           </nav>
 
           <div className="coming-soon-card">
@@ -162,12 +160,12 @@ export const YearPage = () => {
             {lang === 'ar' ? 'الرئيسية' : 'Home'}
           </Link>
           <ChevronSep size={13} className="breadcrumb-separator" />
-          <Link to={`/year/${isYear2 ? '2nd-year' : '1st-year'}`} className="breadcrumb-link" style={{ color: '#8C7E72' }}>
-            {yearDisplayName}
+          <Link to="/study-tools" className="breadcrumb-link">
+            {lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}
           </Link>
           <ChevronSep size={13} className="breadcrumb-separator" />
           <span className="breadcrumb-current">
-            {lang === 'ar' ? 'اختر المادة' : 'Choose Subject'}
+            {yearDisplayName}
           </span>
         </nav>
 

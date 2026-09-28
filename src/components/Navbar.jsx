@@ -94,7 +94,7 @@ export const Navbar = () => {
 
   const getSubjectsForYear = (yearId) => subjects.filter(s => s.year_id === yearId);
 
-  const isLightHeader = location.pathname.startsWith('/year') || location.pathname.startsWith('/subject') || location.pathname.startsWith('/product');
+  const isLightHeader = location.pathname.startsWith('/study-tools') || location.pathname.startsWith('/years') || location.pathname.startsWith('/year') || location.pathname.startsWith('/subject') || location.pathname.startsWith('/product');
 
   const renderMobileDrawer = () => {
     if (!mobileOpen) return null;
@@ -136,6 +136,9 @@ export const Navbar = () => {
           <div style={{ flex: 1, overflowY: 'auto' }}>
             <Link to="/" className="mobile-nav-link">
               {lang === 'ar' ? '🏠 الرئيسية' : '🏠 Home'}
+            </Link>
+            <Link to="/study-tools" className="mobile-nav-link">
+              📖 {lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}
             </Link>
             {years.map(year => (
               <Link key={year.id} to={`/year/${year.slug}`} className="mobile-nav-link">
@@ -254,6 +257,9 @@ export const Navbar = () => {
             <nav className="navbar-nav navbar-light-nav" style={{ display: 'none' }} id="desktop-nav-light">
               <Link to="/" className="nav-link nav-light-link">
                 {lang === 'ar' ? 'الرئيسية' : 'Home'}
+              </Link>
+              <Link to="/study-tools" className={`nav-link nav-light-link ${location.pathname.startsWith('/study-tools') || location.pathname.startsWith('/years') ? 'active' : ''}`}>
+                {lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}
               </Link>
               <Link to="/year/1st-year" className={`nav-link nav-light-link ${location.pathname === '/year/1st-year' ? 'active' : ''}`}>
                 {lang === 'ar' ? 'السنة الأولى' : '1st Year'}
