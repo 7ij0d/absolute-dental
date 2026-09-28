@@ -9,6 +9,7 @@ import {
   Heart, ChevronRight, ChevronLeft, BookOpen
 } from 'lucide-react';
 import supabase from '../supabaseClient';
+import brandLogoTrimmed from '../assets/images/brand-logo-trimmed.png';
 
 const DEFAULT_NAV_YEARS = [
   { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى',  name_en: '1st Year', slug: '1st-year', sort_order: 1 },
@@ -225,7 +226,7 @@ export const Navbar = () => {
                 }}
               >
                 <img
-                  src="/images/brand-logo-trimmed.png"
+                  src={brandLogoTrimmed}
                   alt="Absolute Dental"
                   style={{
                     width: 32,
@@ -386,7 +387,7 @@ export const Navbar = () => {
             flexShrink: 0,
           }}>
             <img
-              src="/images/brand-logo-trimmed.png"
+              src={brandLogoTrimmed}
               alt="Absolute Dental"
               style={{
                 width: 38,

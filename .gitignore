@@ -28,7 +28,7 @@ dist-ssr
 # Build output in main branch (should not be tracked)
 dist/
 _gh_deploy/
-assets/
+/assets/
 *.html
 !public/*.html
 favicon.svg

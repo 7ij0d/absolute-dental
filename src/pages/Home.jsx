@@ -3,6 +3,11 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { ArrowRight } from 'lucide-react';
 
+import studyToolsWebp from '../assets/images/study-tools-faded.webp';
+import studyToolsPng from '../assets/images/study-tools-faded.png';
+import dentalBoxesWebp from '../assets/images/dental-boxes-faded.webp';
+import dentalBoxesPng from '../assets/images/dental-boxes-faded.png';
+
 export const Home = () => {
   const { lang } = useLanguage();
 
@@ -53,9 +58,9 @@ export const Home = () => {
 
             <div className="gateway-card-artwork">
               <picture>
-                <source srcSet="/images/study-tools-faded.webp" type="image/webp" />
+                <source srcSet={studyToolsWebp} type="image/webp" />
                 <img
-                  src="/images/study-tools-faded.png"
+                  src={studyToolsPng}
                   alt={lang === 'ar' ? 'أدوات دراسة طب الأسنان' : 'Dental Study Tools'}
                   loading="eager"
                   className="gateway-art-img"
@@ -94,9 +99,9 @@ export const Home = () => {
 
             <div className="gateway-card-artwork">
               <picture>
-                <source srcSet="/images/dental-boxes-faded.webp" type="image/webp" />
+                <source srcSet={dentalBoxesWebp} type="image/webp" />
                 <img
-                  src="/images/dental-boxes-faded.png"
+                  src={dentalBoxesPng}
                   alt={lang === 'ar' ? 'بوكسات وإكسسوارات الأسنان' : 'Dental Boxes and Accessories'}
                   loading="eager"
                   className="gateway-art-img"

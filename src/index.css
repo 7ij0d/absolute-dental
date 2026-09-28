@@ -1896,7 +1896,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 
 .choose-subject-container {
   width: 100%;
-  max-width: 1140px;
+  max-width: 780px;
   margin: 0 auto;
   padding-inline: 1.25rem;
 }
@@ -2146,87 +2146,115 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 }
 
 /* ==========================================================================
-   YEAR 2 SUBJECT SELECTION (PREMIUM MOBILE-FIRST CANVASES)
+   SUBJECT SELECTION (PREMIUM MOBILE-FIRST CANVASES — YEAR 1 & 2)
    ========================================================================== */
+.year-subject-list,
 .year2-subject-list {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  max-width: 540px;
-  margin: 0 auto;
+  gap: 1.5rem;
   width: 100%;
+  max-width: 100%;
+  margin: 0;
 }
 
+.year-subject-card,
 .year2-subject-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: #FFFFFF;
-  border: 1px solid rgba(226, 218, 208, 0.85);
+  border: 1px solid rgba(226, 218, 208, 0.9);
   border-radius: 22px;
-  box-shadow: 0 4px 18px rgba(35, 24, 16, 0.04);
-  min-height: 185px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 4px 22px rgba(35, 24, 16, 0.05);
+  min-height: 235px;
   position: relative;
   overflow: hidden;
   text-decoration: none;
-  direction: ltr; /* Keeps English title on left, artwork on right */
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+  direction: ltr; /* Keeps titles on left, artwork on right */
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
 }
 
+.year-subject-card:hover,
 .year2-subject-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(35, 24, 16, 0.08);
+  transform: translateY(-3px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 10px 30px rgba(35, 24, 16, 0.09);
   border-color: rgba(104, 72, 53, 0.35);
 }
 
+.year-subject-card:active,
 .year2-subject-card:active {
   transform: scale(0.985);
 }
 
+.year-card-left,
 .year2-card-left {
-  padding: 1.6rem 1.4rem;
+  padding: 2.2rem 1.85rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 1.25rem;
+  align-items: flex-start;
+  gap: 1.5rem;
   z-index: 2;
-  min-width: 170px;
+  min-width: 210px;
+  max-width: 52%;
 }
 
-.year2-card-title {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  font-size: 1.45rem;
-  font-weight: 800;
-  line-height: 1.15;
+.year-card-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.year-card-title-ar {
+  font-family: 'Cairo', -apple-system, sans-serif;
+  font-size: 1.65rem;
+  font-weight: 900;
   color: #1A130E;
   margin: 0;
-  letter-spacing: -0.02em;
+  line-height: 1.25;
 }
 
+.year-card-title-en {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #6E5F55;
+  margin: 0;
+  line-height: 1.2;
+  direction: ltr;
+  letter-spacing: -0.01em;
+}
+
+.year-circle-btn,
 .year2-circle-btn {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background-color: #684835;
   color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(104, 72, 53, 0.25);
+  box-shadow: 0 3px 10px rgba(104, 72, 53, 0.28);
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+  flex-shrink: 0;
 }
 
+.year-subject-card:hover .year-circle-btn,
 .year2-subject-card:hover .year2-circle-btn {
   background-color: #533928;
-  transform: translateX(3px);
+  transform: scale(1.06) translateX(2px);
 }
 
+.year-card-art,
 .year2-card-art {
   position: absolute;
   right: 0;
   top: 0;
   bottom: 0;
   width: 62%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -2234,6 +2262,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   overflow: hidden;
 }
 
+.year-card-art img,
 .year2-card-art img {
   width: 100%;
   height: 100%;
@@ -2242,25 +2271,67 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   display: block;
 }
 
-@media (max-width: 480px) {
+/* Responsive rules */
+@media (max-width: 680px) {
+  .choose-subject-container {
+    padding-inline: 1rem;
+  }
+  .year-subject-card,
   .year2-subject-card {
-    min-height: 170px;
+    min-height: 205px;
+    border-radius: 20px;
+  }
+  .year-card-left,
+  .year2-card-left {
+    padding: 1.5rem 1.25rem;
+    min-width: 170px;
+    max-width: 56%;
+    gap: 1.2rem;
+  }
+  .year-card-title-ar {
+    font-size: 1.4rem;
+  }
+  .year-card-title-en {
+    font-size: 1.1rem;
+  }
+  .year-circle-btn,
+  .year2-circle-btn {
+    width: 42px;
+    height: 42px;
+  }
+  .year-card-art,
+  .year2-card-art {
+    width: 65%;
+  }
+}
+
+@media (max-width: 440px) {
+  .year-subject-card,
+  .year2-subject-card {
+    min-height: 190px;
     border-radius: 18px;
   }
+  .year-card-left,
   .year2-card-left {
-    padding: 1.35rem 1.15rem;
+    padding: 1.25rem 1rem;
+    min-width: 150px;
+    max-width: 58%;
     gap: 1rem;
-    min-width: 145px;
   }
-  .year2-card-title {
+  .year-card-title-ar {
     font-size: 1.25rem;
   }
+  .year-card-title-en {
+    font-size: 0.98rem;
+  }
+  .year-circle-btn,
   .year2-circle-btn {
     width: 38px;
     height: 38px;
   }
+  .year-card-art,
   .year2-card-art {
-    width: 64%;
+    width: 68%;
   }
 }
 
