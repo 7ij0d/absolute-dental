@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
+import { uploadProductImageToStorage } from '../../utils/storageImage';
 import { Plus, Edit, Trash2, Archive, Check, X, FileEdit, PlusCircle, Search } from 'lucide-react';
 
 export const Products = () => {
@@ -91,42 +92,11 @@ export const Products = () => {
 
   const uploadFile = async (file) => {
     try {
-      const compressedDataUrl = await compressImage(file);
-      const arr = compressedDataUrl.split(',');
-      const mime = arr[0].match(/:(.*?);/)[1];
-      const bstr = atob(arr[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
-      const blob = new Blob([u8arr], { type: mime });
-
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-      const filePath = `products/${fileName}`;
-
-      const { data, error } = await supabase.storage
-        .from('smylodent-assets')
-        .upload(filePath, blob, { contentType: mime });
-
-      if (error) {
-        console.warn('Storage upload failed, falling back to base64', error);
-        return compressedDataUrl;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('smylodent-assets')
-        .getPublicUrl(filePath);
-
-      return publicUrl;
+      return await uploadProductImageToStorage(file);
     } catch (err) {
-      console.warn('Upload process error, falling back to base64', err);
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (e) => resolve(e.target.result);
-      });
+      console.error('Supabase Storage upload error:', err);
+      alert(lang === 'ar' ? `فشل رفع الصورة إلى السحابة: ${err.message}` : `Failed to upload image to Storage: ${err.message}`);
+      return '';
     }
   };
 

@@ -43,12 +43,14 @@ async function prefetchSubjects() {
   } catch (_) {}
 }
 
+const PRODUCT_LIST_COLUMNS = 'id, name_ar, name_en, price, compare_at_price, image_url, availability, stock_quantity, subject_id, year_id, is_featured, is_active, is_archived, sort_order, created_at';
+
 async function prefetchFeaturedProducts() {
   if (cacheGet('products:featured')) return;
   try {
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select(PRODUCT_LIST_COLUMNS)
       .eq('is_featured', true)
       .eq('is_active', true)
       .eq('is_archived', false)

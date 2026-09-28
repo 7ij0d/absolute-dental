@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import supabase from '../supabaseClient';
+import { cacheGet, cacheSet } from '../cache';
 import ProductCard from '../components/ProductCard';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { Search } from 'lucide-react';
+
+const SEARCH_COLUMNS = 'id, name_ar, name_en, description_ar, description_en, price, compare_at_price, image_url, availability, stock_quantity, subject_id, year_id';
 
 export const SearchPage = () => {
   const { lang, t } = useLanguage();
@@ -28,19 +31,25 @@ export const SearchPage = () => {
       
       setLoading(true);
       try {
-        // Fetch matching products (contains substring in ar or en)
-        const { data } = await supabase
-          .from('products')
-          .select('*')
-          .eq('is_active', true)
-          .eq('is_archived', false);
+        let data = cacheGet('products:search_catalog');
+        if (!data) {
+          const res = await supabase
+            .from('products')
+            .select(SEARCH_COLUMNS)
+            .eq('is_active', true)
+            .eq('is_archived', false);
+          data = res.data;
+          if (data && data.length > 0) {
+            cacheSet('products:search_catalog', data, 600);
+          }
+        }
         
         if (data) {
           const filtered = data.filter((p) => {
             const keyword = q.toLowerCase();
             return (
-              p.name_ar.toLowerCase().includes(keyword) ||
-              p.name_en.toLowerCase().includes(keyword) ||
+              (p.name_ar && p.name_ar.toLowerCase().includes(keyword)) ||
+              (p.name_en && p.name_en.toLowerCase().includes(keyword)) ||
               (p.description_ar && p.description_ar.toLowerCase().includes(keyword)) ||
               (p.description_en && p.description_en.toLowerCase().includes(keyword))
             );

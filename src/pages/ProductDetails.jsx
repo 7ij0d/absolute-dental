@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import supabase from '../supabaseClient';
 import ProductCard from '../components/ProductCard';
+import { useStorageImage } from '../utils/storageImage';
 import defaultProductsList from '../defaultProducts.json';
 import {
   ShoppingCart, Heart, Check, Plus, Minus,
@@ -81,6 +82,10 @@ export const ProductDetails = () => {
   const [isFav, setIsFav] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
   const [effectiveStock, setEffectiveStock] = useState(null);
+  const resolvedActiveImage = useStorageImage(
+    activeImage,
+    'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format'
+  );
 
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
   const BackArrow = isRtl ? ArrowRight : ArrowLeft;
@@ -509,7 +514,7 @@ export const ProductDetails = () => {
 
               {/* Main Image */}
               <img
-                src={activeImage || 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format'}
+                src={resolvedActiveImage}
                 alt={displayName}
                 className="product-image-main"
                 onError={e => {

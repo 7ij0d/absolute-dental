@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
+import { useStorageImage } from '../utils/storageImage';
 import { ShoppingCart, Check, Heart } from 'lucide-react';
 
 export const ProductCard = ({ product }) => {
@@ -11,6 +12,7 @@ export const ProductCard = ({ product }) => {
 
   const [isFav, setIsFav] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
+  const resolvedImageSrc = useStorageImage(product.image_url);
 
   useEffect(() => {
     try {
@@ -66,7 +68,7 @@ export const ProductCard = ({ product }) => {
       {/* ── IMAGE AREA ── */}
       <div className="product-card-image">
         <img
-          src={product.image_url || 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format'}
+          src={resolvedImageSrc}
           alt={displayName}
           loading="lazy"
           onError={e => { e.target.src = 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format'; }}
