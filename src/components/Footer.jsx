@@ -56,7 +56,7 @@ export const Footer = () => {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
               <img
-                src="https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
+                src="https://102-203-202-115.sslip.io/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
                 alt="Absolute Dental Logo"
                 style={{ width: 48, height: 48, objectFit: 'contain', flexShrink: 0 }}
               />
