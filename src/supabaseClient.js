@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://102-203-202-115.sslip.io';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://api.kurofangs.id.ly';
 const supabaseKey = import.meta.env.VITE_SUPABASE_SECRET_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_bISG70YeoKP4mu8BKlgsuQ_xPprjcc1';
 const supabaseAnonKey = supabaseKey;
 
