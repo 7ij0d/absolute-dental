@@ -202,13 +202,17 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
   const activeImage = getActiveViewImage();
 
   const handleAddToCart = () => {
-    const colorLabel = selectedColor.label_en || selectedColor.label_ar || 'Standard';
-    const productName = `${box.name_en || box.name_ar || 'Dental Box'} (${box.size}) — ${colorLabel}`;
+    const cleanColorEn = (selectedColor.label_en || selectedColor.label_ar || 'Standard').replace(/\s*\[(out_of_stock|coming_soon)\]/gi, '').trim();
+    const cleanColorAr = (selectedColor.label_ar || selectedColor.label_en || 'قياسي').replace(/\s*\[(out_of_stock|coming_soon)\]/gi, '').trim();
+    const productNameEn = `${box.name_en || box.name_ar || 'Dental Box'} (${box.size}) — ${cleanColorEn}`;
+    const productNameAr = `${box.name_ar || box.name_en || 'Dental Box'} (${box.size}) — ${cleanColorAr}`;
     
     addToCart({
       id: `${box.id}-${selectedColor.id || 'std'}`,
-      name_ar: productName,
-      name_en: productName,
+      accessory_product_id: box.id,
+      is_accessory: true,
+      name_ar: productNameAr,
+      name_en: productNameEn,
       price: parseFloat(box.price || 0),
       image_url: activeImage,
       stock_quantity: 100

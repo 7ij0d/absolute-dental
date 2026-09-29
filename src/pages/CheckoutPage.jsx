@@ -152,47 +152,24 @@ export const CheckoutPage = () => {
           (notes ? ` \n[${notesLabel}: ${notes}]` : '');
       }
 
-      const orderData = {
-        order_number: orderNum,
-        user_id: user?.id || null,
-        customer_name: fullName,
-        customer_email: customerEmail || null,
-        customer_phone: phone,
-        customer_phone_secondary: phoneSec || null,
-        university,
-        college,
-        notes: combinedNotes || null,
-        address_text: shippingOption === 'faculty' ? null : addressText,
-        latitude: shippingOption === 'faculty' ? null : latitude,
-        longitude: shippingOption === 'faculty' ? null : longitude,
-        status: 'new',
-        total_price: finalTotal,
-        discount_amount: totalDiscount,
-        shipping_fee: getShippingFee(),
-        created_at: new Date().toISOString()
-      };
+      const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const validProductIds = new Set();
 
-      // If registered user requested saving this location as default, update their profile
-      if (user && saveLocationDefault && shippingOption !== 'faculty') {
-        await supabase
-          .from('profiles')
-          .update({
-            address_text: addressText,
-            latitude: latitude,
-            longitude: longitude
-          })
-          .eq('id', user.id);
-      }
-
-      // 0. Pre-flight: validate stock is sufficient for every item
+      // 0. Pre-flight: validate stock is sufficient for every regular product item
       for (const item of cartItems) {
+        if (item.is_accessory || !UUID_REGEX.test(String(item.id || ''))) {
+          continue;
+        }
+
         const { data: prodData } = await supabase
           .from('products')
-          .select('id, name_ar, stock_quantity, shared_inventory_product_id, unit_multiplier')
+          .select('id, name_ar, availability, stock_quantity, shared_inventory_product_id, unit_multiplier')
           .eq('id', item.id)
           .single();
 
         if (!prodData) continue;
+
+        validProductIds.add(item.id);
 
         // Block coming_soon and unavailable products
         if (prodData.availability === 'coming_soon') {
@@ -234,6 +211,47 @@ export const CheckoutPage = () => {
         }
       }
 
+      const orderData = {
+        order_number: orderNum,
+        user_id: user?.id || null,
+        customer_name: fullName,
+        customer_email: customerEmail || null,
+        customer_phone: phone,
+        customer_phone_secondary: phoneSec || null,
+        university,
+        college,
+        notes: combinedNotes || null,
+        address_text: shippingOption === 'faculty' ? null : addressText,
+        latitude: shippingOption === 'faculty' ? null : latitude,
+        longitude: shippingOption === 'faculty' ? null : longitude,
+        status: 'new',
+        total_price: finalTotal,
+        discount_amount: totalDiscount,
+        shipping_fee: getShippingFee(),
+        items: cartItems.map((item) => ({
+          id: item.id,
+          name_ar: item.name_ar,
+          name_en: item.name_en,
+          quantity: item.quantity,
+          price: item.price,
+          image_url: item.image_url,
+          is_accessory: Boolean(item.is_accessory || !validProductIds.has(item.id))
+        })),
+        created_at: new Date().toISOString()
+      };
+
+      // If registered user requested saving this location as default, update their profile
+      if (user && saveLocationDefault && shippingOption !== 'faculty') {
+        await supabase
+          .from('profiles')
+          .update({
+            address_text: addressText,
+            latitude: latitude,
+            longitude: longitude
+          })
+          .eq('id', user.id);
+      }
+
       // 1. Insert order record
       const { data: newOrder, error: orderErr } = await supabase
         .from('orders')
@@ -244,10 +262,10 @@ export const CheckoutPage = () => {
       if (orderErr) throw orderErr;
 
 
-      // 2. Insert items
+      // 2. Insert items (product_id is null for accessory/box items to satisfy FK on products table)
       const orderItemsData = cartItems.map((item) => ({
         order_id: newOrder.id,
-        product_id: item.id,
+        product_id: validProductIds.has(item.id) ? item.id : null,
         quantity: item.quantity,
         price: item.price
       }));
@@ -258,8 +276,10 @@ export const CheckoutPage = () => {
 
       if (itemsErr) throw itemsErr;
 
-      // 3. Update stock levels — works for both real Supabase and Mock
+      // 3. Update stock levels — only for regular products in the products table
       for (const item of cartItems) {
+        if (!validProductIds.has(item.id)) continue;
+
         // Fetch latest product data (shared_inventory_product_id + unit_multiplier)
         const { data: prodData } = await supabase
           .from('products')

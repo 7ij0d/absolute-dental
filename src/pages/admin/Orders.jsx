@@ -610,28 +610,32 @@ export const Orders = () => {
             <div>
               <h4 style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--primary)', marginBottom: '0.6rem' }}>الأدوات والمستلزمات المطلوبة</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {selectedOrder.order_items?.map((item) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      padding: '0.75rem',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: 'var(--radius-sm)',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      fontSize: '0.82rem'
-                    }}
-                  >
-                    <span>
-                      {item.products?.name_en || item.name_en}{' '}
-                      <strong style={{ color: 'var(--secondary)' }}>x{item.quantity}</strong>
-                    </span>
-                    <span style={{ fontWeight: 700 }}>
-                      {item.price} د.ل
-                    </span>
-                  </div>
-                ))}
+                {(selectedOrder.order_items?.length > 0 ? selectedOrder.order_items : (selectedOrder.items || [])).map((item, idx) => {
+                  const snapshotItem = Array.isArray(selectedOrder.items) ? selectedOrder.items[idx] : null;
+                  const itemName = item.products?.name_en || item.products?.name_ar || item.name_en || item.name_ar || snapshotItem?.name_en || snapshotItem?.name_ar || 'Dental Box / إكسسوار';
+                  return (
+                    <div
+                      key={item.id || idx}
+                      style={{
+                        padding: '0.75rem',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 'var(--radius-sm)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        fontSize: '0.82rem'
+                      }}
+                    >
+                      <span>
+                        {itemName}{' '}
+                        <strong style={{ color: 'var(--secondary)' }}>x{item.quantity}</strong>
+                      </span>
+                      <span style={{ fontWeight: 700 }}>
+                        {item.price} د.ل
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

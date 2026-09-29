@@ -128,12 +128,14 @@ export const InvoiceView = ({ order }) => {
               </tr>
             </thead>
             <tbody>
-              {order.order_items?.map((item, index) => {
+              {(order.order_items?.length > 0 ? order.order_items : (order.items || [])).map((item, index) => {
                 const itemTotal = item.price * item.quantity;
+                const snapshotItem = Array.isArray(order.items) ? order.items[index] : null;
+                const itemName = item.products?.name_en || item.products?.name_ar || item.name_en || item.name_ar || snapshotItem?.name_en || snapshotItem?.name_ar || 'Dental Box / إكسسوار';
                 return (
                   <tr key={index} style={{ borderBottom: '1px solid #e2e8f0' }}>
                     <td style={{ padding: '1rem', fontWeight: 500 }}>
-                      {item.products?.name_en || item.name_en}
+                      {itemName}
                     </td>
                     <td style={{ padding: '1rem', textAlign: 'center' }}>
                       {item.price} {t('cart.currency')}
