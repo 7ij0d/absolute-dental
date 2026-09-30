@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { Printer, MapPin, Phone, Building } from 'lucide-react';
+import { Printer, MapPin, Phone, Building, Package } from 'lucide-react';
+import brandLogoTrimmed from '../assets/images/brand-logo-trimmed.png';
 
 export const InvoiceView = ({ order }) => {
   const { lang, t, isRtl } = useLanguage();
@@ -27,7 +28,7 @@ export const InvoiceView = ({ order }) => {
   };
 
   return (
-    <div style={{ maxWidth: '750px', margin: '2rem auto', padding: '1rem' }} className="invoice-container">
+    <div style={{ maxWidth: '780px', margin: '2rem auto', padding: '1rem' }} className="invoice-container">
       
       {/* Print action header */}
       <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
@@ -52,9 +53,20 @@ export const InvoiceView = ({ order }) => {
         {/* Invoice Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #00a896', paddingBottom: '1.5rem', marginBottom: '1.5rem' }} className="invoice-header-row">
           
-          <div style={{ textAlign: isRtl ? 'right' : 'left' }}>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0a335c', marginBottom: '0.3rem' }}>Absolute Dental Equipment</h1>
-            <p style={{ fontSize: '0.8rem', color: '#666' }}>{t('invoice.company')}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', textAlign: isRtl ? 'right' : 'left' }}>
+            <img
+              src={brandLogoTrimmed}
+              alt="Absolute Dental"
+              style={{ width: '48px', height: '48px', objectFit: 'contain', flexShrink: 0 }}
+            />
+            <div>
+              <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0a335c', margin: 0, letterSpacing: '-0.01em' }}>
+                Absolute Dental
+              </h1>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+                {t('invoice.company')}
+              </p>
+            </div>
           </div>
 
           <div style={{ textAlign: isRtl ? 'left' : 'right' }}>
@@ -85,7 +97,7 @@ export const InvoiceView = ({ order }) => {
           
           {/* Company Details */}
           <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: 'var(--radius-sm)', border: '1px solid #e2e8f0' }}>
-            <h4 style={{ color: '#0a335c', fontWeight: 700, marginBottom: '0.6rem' }}>Absolute Dental Equipment</h4>
+            <h4 style={{ color: '#0a335c', fontWeight: 700, marginBottom: '0.6rem' }}>Absolute Dental</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', color: '#555' }}>
               <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <MapPin size={14} style={{ color: '#00a896' }} />
@@ -93,7 +105,7 @@ export const InvoiceView = ({ order }) => {
               </p>
               <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <Phone size={14} style={{ color: '#00a896' }} />
-                <span>+218 91 123 4567</span>
+                <span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>0946859163</span>
               </p>
             </div>
           </div>
@@ -131,19 +143,91 @@ export const InvoiceView = ({ order }) => {
               {(order.order_items?.length > 0 ? order.order_items : (order.items || [])).map((item, index) => {
                 const itemTotal = item.price * item.quantity;
                 const snapshotItem = Array.isArray(order.items) ? order.items[index] : null;
-                const itemName = item.products?.name_en || item.products?.name_ar || item.name_en || item.name_ar || snapshotItem?.name_en || snapshotItem?.name_ar || 'Dental Box / إكسسوار';
+
+                const primaryName = (lang === 'ar'
+                  ? (item.products?.name_ar || item.name_ar || snapshotItem?.name_ar)
+                  : (item.products?.name_en || item.name_en || snapshotItem?.name_en))
+                  || item.products?.name_ar || item.products?.name_en || item.name_ar || item.name_en || snapshotItem?.name_ar || snapshotItem?.name_en || (lang === 'ar' ? 'أداة / مستلزم طب أسنان' : 'Dental Instrument');
+
+                const secondaryName = (lang === 'ar'
+                  ? (item.products?.name_en || item.name_en || snapshotItem?.name_en)
+                  : (item.products?.name_ar || item.name_ar || snapshotItem?.name_ar));
+
+                const itemImg = item.products?.image_url || item.image_url || snapshotItem?.image_url || null;
+
                 return (
                   <tr key={index} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                    <td style={{ padding: '1rem', fontWeight: 500 }}>
-                      {itemName}
+                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                        {/* Product Thumbnail */}
+                        <div
+                          className="invoice-item-thumb-box"
+                          style={{
+                            width: '48px',
+                            height: '48px',
+                            minWidth: '48px',
+                            borderRadius: '8px',
+                            backgroundColor: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            overflow: 'hidden',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}
+                        >
+                          {itemImg ? (
+                            <img
+                              src={itemImg}
+                              alt={primaryName}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                display: 'block'
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                const fb = e.currentTarget.parentElement?.querySelector('.invoice-thumb-fallback');
+                                if (fb) fb.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className="invoice-thumb-fallback"
+                            style={{
+                              display: itemImg ? 'none' : 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '100%',
+                              height: '100%',
+                              color: '#94a3b8'
+                            }}
+                          >
+                            <Package size={20} />
+                          </div>
+                        </div>
+
+                        {/* Product Titles */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                          <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem', lineHeight: 1.35 }}>
+                            {primaryName}
+                          </span>
+                          {secondaryName && secondaryName !== primaryName && (
+                            <span style={{ fontSize: '0.76rem', color: '#64748b' }}>
+                              {secondaryName}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </td>
-                    <td style={{ padding: '1rem', textAlign: 'center' }}>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center', fontWeight: 600, verticalAlign: 'middle' }}>
                       {item.price} {t('cart.currency')}
                     </td>
-                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 600 }}>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center', fontWeight: 700, verticalAlign: 'middle' }}>
                       {item.quantity}
                     </td>
-                    <td style={{ padding: '1rem', textAlign: isRtl ? 'left' : 'right', fontWeight: 600 }}>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: isRtl ? 'left' : 'right', fontWeight: 700, color: '#0a335c', verticalAlign: 'middle' }}>
                       {itemTotal} {t('cart.currency')}
                     </td>
                   </tr>
@@ -209,7 +293,7 @@ export const InvoiceView = ({ order }) => {
         )}
 
         <div style={{ textAlign: 'center', borderTop: '1px dashed #e2e8f0', marginTop: '2rem', paddingTop: '1rem', fontSize: '0.75rem', color: '#888' }}>
-          شكراً لتسوقكم مع معدات طب الأسنان! / Thank you for choosing Absolute Dental Equipment!
+          {lang === 'ar' ? 'شكراً لتسوقكم مع Absolute Dental!' : 'Thank you for choosing Absolute Dental!'}
         </div>
 
       </div>
@@ -217,6 +301,10 @@ export const InvoiceView = ({ order }) => {
       <style>{`
         /* Forces standard print constraints */
         @media print {
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           body * {
             visibility: hidden;
           }
@@ -232,6 +320,9 @@ export const InvoiceView = ({ order }) => {
             box-shadow: none !important;
             padding: 0 !important;
             margin: 0 !important;
+          }
+          .invoice-item-thumb-box {
+            border: 1px solid #cbd5e1 !important;
           }
           .no-print {
             display: none !important;

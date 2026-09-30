@@ -613,11 +613,12 @@ export const Orders = () => {
                 {(selectedOrder.order_items?.length > 0 ? selectedOrder.order_items : (selectedOrder.items || [])).map((item, idx) => {
                   const snapshotItem = Array.isArray(selectedOrder.items) ? selectedOrder.items[idx] : null;
                   const itemName = item.products?.name_en || item.products?.name_ar || item.name_en || item.name_ar || snapshotItem?.name_en || snapshotItem?.name_ar || 'Dental Box / إكسسوار';
+                  const itemImg = item.products?.image_url || item.image_url || snapshotItem?.image_url || null;
                   return (
                     <div
                       key={item.id || idx}
                       style={{
-                        padding: '0.75rem',
+                        padding: '0.6rem 0.75rem',
                         border: '1px solid var(--border-color)',
                         borderRadius: 'var(--radius-sm)',
                         display: 'flex',
@@ -626,10 +627,37 @@ export const Orders = () => {
                         fontSize: '0.82rem'
                       }}
                     >
-                      <span>
-                        {itemName}{' '}
-                        <strong style={{ color: 'var(--secondary)' }}>x{item.quantity}</strong>
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <div
+                          style={{
+                            width: '38px',
+                            height: '38px',
+                            borderRadius: '6px',
+                            overflow: 'hidden',
+                            backgroundColor: 'var(--accent)',
+                            border: '1px solid var(--border-color)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}
+                        >
+                          {itemImg ? (
+                            <img
+                              src={itemImg}
+                              alt=""
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                          ) : (
+                            <ClipboardList size={18} style={{ color: 'var(--text-muted)' }} />
+                          )}
+                        </div>
+                        <span>
+                          {itemName}{' '}
+                          <strong style={{ color: 'var(--secondary)' }}>x{item.quantity}</strong>
+                        </span>
+                      </div>
                       <span style={{ fontWeight: 700 }}>
                         {item.price} د.ل
                       </span>
