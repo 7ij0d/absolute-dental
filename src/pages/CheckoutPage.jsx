@@ -153,60 +153,75 @@ export const CheckoutPage = () => {
       }
 
       const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      const validProductIds = new Set();
+      const productIds = cartItems
+        .filter(item => !item.is_accessory && UUID_REGEX.test(String(item.id || '')))
+        .map(item => item.id);
 
-      // 0. Pre-flight: validate stock is sufficient for every regular product item
-      for (const item of cartItems) {
-        if (item.is_accessory || !UUID_REGEX.test(String(item.id || ''))) {
-          continue;
-        }
+      const dbProductsMap = new Map();
+      const masterMap = new Map();
 
-        const { data: prodData } = await supabase
+      // 0. Batch Pre-flight: validate stock is sufficient in 1 single batch query
+      if (productIds.length > 0) {
+        const { data: dbProducts, error: prodFetchErr } = await supabase
           .from('products')
           .select('id, name_ar, availability, stock_quantity, shared_inventory_product_id, unit_multiplier')
-          .eq('id', item.id)
-          .single();
+          .in('id', productIds);
 
-        if (!prodData) continue;
+        if (prodFetchErr) throw prodFetchErr;
 
-        validProductIds.add(item.id);
-
-        // Block coming_soon and unavailable products
-        if (prodData.availability === 'coming_soon') {
-          throw new Error(`❌ "${prodData.name_ar}" غير متاح للشراء حالياً — سيتوفر قريباً.`);
-        }
-        if (prodData.availability === 'unavailable') {
-          throw new Error(`❌ "${prodData.name_ar}" غير متوفر حالياً.`);
+        if (dbProducts) {
+          dbProducts.forEach(p => dbProductsMap.set(p.id, p));
         }
 
-        if (prodData.shared_inventory_product_id) {
+        // Fetch master linked products if any
+        const masterIds = Array.from(dbProductsMap.values())
+          .map(p => p.shared_inventory_product_id)
+          .filter(Boolean);
 
-          // Linked product — check master stock
-          const { data: master } = await supabase
+        if (masterIds.length > 0) {
+          const { data: masters } = await supabase
             .from('products')
-            .select('stock_quantity, name_ar')
-            .eq('id', prodData.shared_inventory_product_id)
-            .single();
-
-          const mult = prodData.unit_multiplier || 1;
-          const needed = item.quantity * mult;
-          const available = master ? master.stock_quantity : 0;
-
-          if (available < needed) {
-            const availableUnits = Math.floor(available / mult);
-            throw new Error(
-              `❌ "${prodData.name_ar}": الكمية المطلوبة غير متوفرة.\n` +
-              `المتاح: ${availableUnits} وحدة فقط (المخزن: ${available} قطعة، كل وحدة = ${mult} قطع)`
-            );
+            .select('id, stock_quantity, name_ar')
+            .in('id', masterIds);
+          if (masters) {
+            masters.forEach(m => masterMap.set(m.id, m));
           }
-        } else {
-          // Regular product
-          const available = prodData.stock_quantity || 0;
-          if (available < item.quantity) {
-            throw new Error(
-              `❌ "${prodData.name_ar}": الكمية المطلوبة غير متوفرة.\n` +
-              `المتاح: ${available} فقط`
-            );
+        }
+
+        // Validate each item
+        for (const item of cartItems) {
+          const prodData = dbProductsMap.get(item.id);
+          if (!prodData) continue;
+
+          // Block coming_soon and unavailable products
+          if (prodData.availability === 'coming_soon') {
+            throw new Error(`❌ "${prodData.name_ar}" غير متاح للشراء حالياً — سيتوفر قريباً.`);
+          }
+          if (prodData.availability === 'unavailable') {
+            throw new Error(`❌ "${prodData.name_ar}" غير متوفر حالياً.`);
+          }
+
+          if (prodData.shared_inventory_product_id) {
+            const master = masterMap.get(prodData.shared_inventory_product_id);
+            const mult = prodData.unit_multiplier || 1;
+            const needed = item.quantity * mult;
+            const available = master ? (master.stock_quantity || 0) : 0;
+
+            if (available < needed) {
+              const availableUnits = Math.floor(available / mult);
+              throw new Error(
+                `❌ "${prodData.name_ar}": الكمية المطلوبة غير متوفرة.\n` +
+                `المتاح: ${availableUnits} وحدة فقط (المخزن: ${available} قطعة، كل وحدة = ${mult} قطع)`
+              );
+            }
+          } else {
+            const available = prodData.stock_quantity || 0;
+            if (available < item.quantity) {
+              throw new Error(
+                `❌ "${prodData.name_ar}": الكمية المطلوبة غير متوفرة.\n` +
+                `المتاح: ${available} فقط`
+              );
+            }
           }
         }
       }
@@ -235,21 +250,22 @@ export const CheckoutPage = () => {
           quantity: item.quantity,
           price: item.price,
           image_url: item.image_url,
-          is_accessory: Boolean(item.is_accessory || !validProductIds.has(item.id))
+          is_accessory: Boolean(item.is_accessory || !dbProductsMap.has(item.id))
         })),
         created_at: new Date().toISOString()
       };
 
       // If registered user requested saving this location as default, update their profile
       if (user && saveLocationDefault && shippingOption !== 'faculty') {
-        await supabase
+        supabase
           .from('profiles')
           .update({
             address_text: addressText,
             latitude: latitude,
             longitude: longitude
           })
-          .eq('id', user.id);
+          .eq('id', user.id)
+          .catch(console.error);
       }
 
       // 1. Insert order record
@@ -261,11 +277,10 @@ export const CheckoutPage = () => {
 
       if (orderErr) throw orderErr;
 
-
       // 2. Insert items (product_id is null for accessory/box items to satisfy FK on products table)
       const orderItemsData = cartItems.map((item) => ({
         order_id: newOrder.id,
-        product_id: validProductIds.has(item.id) ? item.id : null,
+        product_id: dbProductsMap.has(item.id) ? item.id : null,
         quantity: item.quantity,
         price: item.price
       }));
@@ -276,60 +291,56 @@ export const CheckoutPage = () => {
 
       if (itemsErr) throw itemsErr;
 
-      // 3. Update stock levels — only for regular products in the products table
-      for (const item of cartItems) {
-        if (!validProductIds.has(item.id)) continue;
-
-        // Fetch latest product data (shared_inventory_product_id + unit_multiplier)
-        const { data: prodData } = await supabase
-          .from('products')
-          .select('id, stock_quantity, shared_inventory_product_id, unit_multiplier')
-          .eq('id', item.id)
-          .single();
-
-        if (!prodData) continue;
-
-        if (prodData.shared_inventory_product_id) {
-          // Linked product: deduct from the MASTER stock
-          const { data: master } = await supabase
-            .from('products')
-            .select('id, stock_quantity')
-            .eq('id', prodData.shared_inventory_product_id)
-            .single();
-
-          if (master) {
-            const mult = prodData.unit_multiplier || 1;
-            const deduct = item.quantity * mult;
-            const newMasterQty = Math.max(0, master.stock_quantity - deduct);
-            const availability = newMasterQty === 0 ? 'unavailable'
-              : newMasterQty < 5 * mult ? 'limited_quantity' : 'available';
-            await supabase.from('products').update({
-              stock_quantity: newMasterQty, availability
-            }).eq('id', master.id);
-          }
-        } else {
-          // Regular product: deduct directly
-          const newQty = Math.max(0, (prodData.stock_quantity || 0) - item.quantity);
-          const availability = newQty === 0 ? 'unavailable'
-            : newQty < 5 ? 'limited_quantity' : 'available';
-          await supabase.from('products').update({
-            stock_quantity: newQty, availability
-          }).eq('id', item.id);
-        }
-      }
-
-      // Add notification for Admin in DB
-      await supabase.from('notifications').insert({
-        title_ar: `طلب جديد وارد #${orderNum}`,
-        title_en: `New Order Received #${orderNum}`,
-        message_ar: `طلب جديد من الطالب ${fullName} بقيمة ${finalTotal} د.ل`,
-        message_en: `New order from student ${fullName} for ${finalTotal} LYD`,
-        type: 'order_status'
-      });
-
-      // Clear Shopping Cart & Save placed order reference for rendering
+      // 3. IMMEDIATELY Render Order Success & Clear Cart (< 1 second response time!)
       clearCart();
       setPlacedOrder({ ...newOrder, order_items: cartItems });
+
+      // 4. Background Sync: stock deduction & admin notification (non-blocking)
+      (async () => {
+        try {
+          const syncTasks = [];
+          for (const item of cartItems) {
+            const prodData = dbProductsMap.get(item.id);
+            if (!prodData) continue;
+
+            if (prodData.shared_inventory_product_id) {
+              const master = masterMap.get(prodData.shared_inventory_product_id);
+              if (master) {
+                const mult = prodData.unit_multiplier || 1;
+                const deduct = item.quantity * mult;
+                const newMasterQty = Math.max(0, (master.stock_quantity || 0) - deduct);
+                master.stock_quantity = newMasterQty;
+                const availability = newMasterQty === 0 ? 'unavailable'
+                  : newMasterQty < 5 * mult ? 'limited_quantity' : 'available';
+                syncTasks.push(
+                  supabase.from('products').update({ stock_quantity: newMasterQty, availability }).eq('id', master.id)
+                );
+              }
+            } else {
+              const newQty = Math.max(0, (prodData.stock_quantity || 0) - item.quantity);
+              const availability = newQty === 0 ? 'unavailable'
+                : newQty < 5 ? 'limited_quantity' : 'available';
+              syncTasks.push(
+                supabase.from('products').update({ stock_quantity: newQty, availability }).eq('id', item.id)
+              );
+            }
+          }
+
+          syncTasks.push(
+            supabase.from('notifications').insert({
+              title_ar: `طلب جديد وارد #${orderNum}`,
+              title_en: `New Order Received #${orderNum}`,
+              message_ar: `طلب جديد من الطالب ${fullName} بقيمة ${finalTotal} د.ل`,
+              message_en: `New order from student ${fullName} for ${finalTotal} LYD`,
+              type: 'order_status'
+            })
+          );
+
+          await Promise.allSettled(syncTasks);
+        } catch (bgErr) {
+          console.warn('Background sync completed with non-fatal notice:', bgErr);
+        }
+      })();
 
     } catch (err) {
       console.error('Checkout failed', err);
