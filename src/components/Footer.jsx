@@ -48,7 +48,7 @@ export const Footer = () => {
       ];
 
   return (
-    <footer className="footer">
+    <footer className="footer no-print">
       <div className="container">
         <div className="footer-grid">
 

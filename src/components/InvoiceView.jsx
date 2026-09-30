@@ -221,8 +221,8 @@ export const InvoiceView = ({ order }) => {
         </div>
 
         {/* Invoice Items Table */}
-        <div style={{ overflowX: 'auto', marginBottom: '2rem' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+        <div className="invoice-table-wrapper" style={{ overflowX: 'auto', marginBottom: '2rem' }}>
+          <table className="invoice-items-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
             <thead>
               <tr style={{ backgroundColor: '#f1f5f9', color: '#0a335c', borderBottom: '2px solid #e2e8f0', textAlign: isRtl ? 'right' : 'left' }}>
                 <th style={{ padding: '0.75rem 1rem' }}>{t('invoice.item_name')}</th>
@@ -248,7 +248,7 @@ export const InvoiceView = ({ order }) => {
                 const itemImg = item.products?.image_url || item.image_url || snapshotItem?.image_url || null;
 
                 return (
-                  <tr key={index} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <tr key={index} className="invoice-table-row" style={{ borderBottom: '1px solid #e2e8f0' }}>
                     <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                         {/* Product Thumbnail */}
@@ -330,7 +330,7 @@ export const InvoiceView = ({ order }) => {
         </div>
 
         {/* Total Cost summaries */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <div className="invoice-totals-section" style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <div style={{ width: '100%', maxWidth: '280px', display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
             
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -378,48 +378,183 @@ export const InvoiceView = ({ order }) => {
 
         {/* Notes & Print Footer */}
         {order.notes && (
-          <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '2rem', paddingTop: '1rem', fontSize: '0.8rem', color: '#666' }}>
+          <div className="invoice-notes-section" style={{ borderTop: '1px solid #e2e8f0', marginTop: '2rem', paddingTop: '1rem', fontSize: '0.8rem', color: '#666' }}>
             <h5 style={{ fontWeight: 700, color: '#0a335c', marginBottom: '0.3rem' }}>{t('checkout.notes')}</h5>
             <p>{order.notes}</p>
           </div>
         )}
 
-        <div style={{ textAlign: 'center', borderTop: '1px dashed #e2e8f0', marginTop: '2rem', paddingTop: '1rem', fontSize: '0.75rem', color: '#888' }}>
+        <div className="invoice-footer-thanks" style={{ textAlign: 'center', borderTop: '1px dashed #e2e8f0', marginTop: '2rem', paddingTop: '1rem', fontSize: '0.75rem', color: '#888' }}>
           {lang === 'ar' ? 'شكراً لتسوقكم مع Absolute Dental!' : 'Thank you for choosing Absolute Dental!'}
         </div>
 
       </div>
 
       <style>{`
-        /* Forces standard print constraints */
+        /* ═════════════════════════════════════════════════════════════════════
+           PRINT ENGINE CONSTRAINTS (A4 PORTRAIT / SAVE AS PDF / MULTI-PAGE)
+           ═════════════════════════════════════════════════════════════════════ */
         @media print {
+          @page {
+            size: A4 portrait;
+            margin: 12mm 10mm 15mm 10mm;
+          }
+
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          body * {
-            visibility: hidden;
+
+          /* 1. Global Reset: Remove all screen-only chrome, fixed widgets, footers, & navbars */
+          .no-print,
+          header,
+          footer,
+          nav,
+          .navbar,
+          .mobile-bottom-nav,
+          .floating-cart-wrapper,
+          .announcement-bar,
+          .admin-sidebar-pane,
+          aside {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
           }
-          #invoice-print-sheet, #invoice-print-sheet * {
-            visibility: visible;
+
+          /* 2. Document & Body: Static, pure white, unconstrained height */
+          html, body {
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            color: #1a1a1a !important;
+            overflow: visible !important;
           }
-          #invoice-print-sheet {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
+
+          /* 3. Containers Neutralization: Flatten flex wrappers, remove fixed modal overlays */
+          #root,
+          #app,
+          main,
+          .container,
+          .invoice-container,
+          .invoice-admin-modal-overlay {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            min-height: 0 !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
             border: none !important;
             box-shadow: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
+            overflow: visible !important;
+            inset: auto !important;
+            transform: none !important;
+            z-index: auto !important;
           }
+
+          /* 4. Invoice Sheet Card: Natural document flow, zero margins, no clipping */
+          #invoice-print-sheet {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            color: #1a1a1a !important;
+            overflow: visible !important;
+            transform: none !important;
+            page-break-after: auto !important;
+            break-after: auto !important;
+          }
+
+          /* 5. Table Container: Eliminate overflow scroll container to enable native multi-page pagination */
+          .invoice-table-wrapper {
+            overflow: visible !important;
+            overflow-x: visible !important;
+            overflow-y: visible !important;
+            display: block !important;
+            width: 100% !important;
+            margin-bottom: 1.5rem !important;
+          }
+
+          /* 6. Products Table Pagination & Row Protection */
+          .invoice-items-table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            page-break-inside: auto !important;
+            break-inside: auto !important;
+          }
+
+          .invoice-items-table thead {
+            display: table-header-group !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+
+          .invoice-items-table tbody {
+            display: table-row-group !important;
+            page-break-inside: auto !important;
+            break-inside: auto !important;
+          }
+
+          .invoice-items-table tfoot {
+            display: table-footer-group !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+
+          .invoice-items-table tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            page-break-after: auto !important;
+            break-after: auto !important;
+          }
+
+          .invoice-items-table td,
+          .invoice-items-table th {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+
           .invoice-item-thumb-box {
             border: 1px solid #cbd5e1 !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
-          .no-print {
-            display: none !important;
+
+          .invoice-item-thumb-box img {
+            max-width: 48px !important;
+            max-height: 48px !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+
+          /* 7. Block Integrity: Keep header, customer info, and totals intact without split */
+          .invoice-header-row,
+          .invoice-info-grid,
+          .invoice-totals-section,
+          .invoice-notes-section,
+          .invoice-footer-thanks {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
         }
+
         @media (max-width: 600px) {
           .invoice-header-row, .invoice-info-grid {
             flex-direction: column !important;

@@ -696,6 +696,7 @@ export const Orders = () => {
       {/* Invoice modal overlay specifically for printing */}
       {showInvoicePrint && selectedOrder && createPortal(
         <div
+          className="invoice-admin-modal-overlay"
           style={{
             position: 'fixed',
             top: 0,

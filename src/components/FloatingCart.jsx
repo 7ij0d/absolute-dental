@@ -18,7 +18,7 @@ export const FloatingCart = () => {
 
   return (
     <div
-      className="floating-cart-wrapper"
+      className="floating-cart-wrapper no-print"
       style={{
         position: 'fixed',
         bottom: '1.5rem',

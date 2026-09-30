@@ -48,7 +48,7 @@ export const BottomNav = () => {
 
   return (
     <nav
-      className="mobile-bottom-nav"
+      className="mobile-bottom-nav no-print"
       aria-label="Mobile Navigation"
       style={{
         position: 'fixed',

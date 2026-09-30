@@ -1582,10 +1582,72 @@ select option { background-color: var(--surface-color); color: var(--text-main);
    PRINT STYLES
    ========================================================================== */
 @media print {
-  body { background: white !important; color: black !important; }
-  .no-print { display: none !important; }
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm 15mm 10mm;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  html, body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #1a1a1a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .no-print,
+  header,
+  footer,
+  nav,
+  .navbar,
+  .mobile-bottom-nav,
+  .floating-cart-wrapper,
+  .announcement-bar,
+  .admin-sidebar-pane {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+  }
   .print-only { display: block !important; }
-  .card, .glass { box-shadow: none !important; border: 1px solid #ccc !important; background: transparent !important; }
+  
+  /* Invoice table rules */
+  table {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+  thead {
+    display: table-header-group !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  tfoot {
+    display: table-footer-group !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  td, th {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .card#invoice-print-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 }
 
 /* ==========================================================================

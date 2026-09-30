@@ -26,7 +26,7 @@ const AnnouncementBar = () => {
   const allItems = [...items, ...items];
 
   return (
-    <div className="announcement-bar" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+    <div className="announcement-bar no-print" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
       {/* Marquee Track */}
       <div
         className="marquee-track"

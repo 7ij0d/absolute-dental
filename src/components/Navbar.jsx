@@ -381,7 +381,7 @@ export const Navbar = () => {
   return (
     <>
       {/* ── NAVBAR ── */}
-      <header className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+      <header className={`navbar ${scrolled ? 'scrolled' : ''} no-print`}>
         <div className="container navbar-inner" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
 
           {/* Logo + Brand */}
