@@ -193,35 +193,9 @@ export const CheckoutPage = () => {
           const prodData = dbProductsMap.get(item.id);
           if (!prodData) continue;
 
-          // Block coming_soon and unavailable products
+          // Only block products explicitly marked as coming soon
           if (prodData.availability === 'coming_soon') {
-            throw new Error(`❌ "${prodData.name_ar}" غير متاح للشراء حالياً — سيتوفر قريباً.`);
-          }
-          if (prodData.availability === 'unavailable') {
-            throw new Error(`❌ "${prodData.name_ar}" غير متوفر حالياً.`);
-          }
-
-          if (prodData.shared_inventory_product_id) {
-            const master = masterMap.get(prodData.shared_inventory_product_id);
-            const mult = prodData.unit_multiplier || 1;
-            const needed = item.quantity * mult;
-            const available = master ? (master.stock_quantity || 0) : 0;
-
-            if (available < needed) {
-              const availableUnits = Math.floor(available / mult);
-              throw new Error(
-                `❌ "${prodData.name_ar}": الكمية المطلوبة غير متوفرة.\n` +
-                `المتاح: ${availableUnits} وحدة فقط (المخزن: ${available} قطعة، كل وحدة = ${mult} قطع)`
-              );
-            }
-          } else {
-            const available = prodData.stock_quantity || 0;
-            if (available < item.quantity) {
-              throw new Error(
-                `❌ "${prodData.name_ar}": الكمية المطلوبة غير متوفرة.\n` +
-                `المتاح: ${available} فقط`
-              );
-            }
+            throw new Error(`❌ "${prodData.name_ar || prodData.name_en}" غير متاح للشراء حالياً — سيتوفر قريباً.`);
           }
         }
       }
@@ -310,16 +284,14 @@ export const CheckoutPage = () => {
                 const deduct = item.quantity * mult;
                 const newMasterQty = Math.max(0, (master.stock_quantity || 0) - deduct);
                 master.stock_quantity = newMasterQty;
-                const availability = newMasterQty === 0 ? 'unavailable'
-                  : newMasterQty < 5 * mult ? 'limited_quantity' : 'available';
+                const availability = newMasterQty < 5 * mult ? 'limited_quantity' : 'available';
                 syncTasks.push(
                   supabase.from('products').update({ stock_quantity: newMasterQty, availability }).eq('id', master.id)
                 );
               }
             } else {
               const newQty = Math.max(0, (prodData.stock_quantity || 0) - item.quantity);
-              const availability = newQty === 0 ? 'unavailable'
-                : newQty < 5 ? 'limited_quantity' : 'available';
+              const availability = newQty < 5 ? 'limited_quantity' : 'available';
               syncTasks.push(
                 supabase.from('products').update({ stock_quantity: newQty, availability }).eq('id', item.id)
               );
