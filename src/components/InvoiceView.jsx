@@ -1,15 +1,88 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { Printer, MapPin, Phone, Building, Package } from 'lucide-react';
+import { Printer, MapPin, Phone, Building, Package, Download, Loader2 } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import brandLogoTrimmed from '../assets/images/brand-logo-trimmed.png';
 
 export const InvoiceView = ({ order }) => {
   const { lang, t, isRtl } = useLanguage();
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   if (!order) return null;
 
+  // Extract clean order number
+  const rawOrderNum = order.order_number?.replace(/\D/g, '') || order.order_number || 'Order';
+  const pdfFileName = `Absolute_Dental_Invoice_${rawOrderNum}.pdf`;
+
   const handlePrint = () => {
+    const originalTitle = document.title;
+    document.title = `Absolute_Dental_Invoice_${rawOrderNum}`;
     window.print();
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1500);
+  };
+
+  const handleDownloadPdf = async () => {
+    const sheetElement = document.getElementById('invoice-print-sheet');
+    if (!sheetElement) return;
+
+    setDownloadingPdf(true);
+    const originalTitle = document.title;
+    document.title = `Absolute_Dental_Invoice_${rawOrderNum}`;
+
+    try {
+      // High-res canvas capture (scale: 2 for clean, sharp print rendering)
+      const canvas = await html2canvas(sheetElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        imageTimeout: 5000,
+        ignoreElements: (element) => element.classList?.contains('no-print')
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.96);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
+      const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+      
+      const margin = 10; // 10mm margins
+      const printWidth = pageWidth - (margin * 2);
+      const printHeight = (canvas.height * printWidth) / canvas.width;
+
+      let heightLeft = printHeight;
+      let position = margin;
+
+      // Page 1
+      pdf.addImage(imgData, 'JPEG', margin, position, printWidth, printHeight, undefined, 'FAST');
+      heightLeft -= (pageHeight - (margin * 2));
+
+      // Multi-page pagination if invoice spans beyond A4
+      while (heightLeft > 0) {
+        position = heightLeft - printHeight + margin;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', margin, position, printWidth, printHeight, undefined, 'FAST');
+        heightLeft -= (pageHeight - (margin * 2));
+      }
+
+      pdf.save(pdfFileName);
+    } catch (err) {
+      console.warn('html2canvas/jsPDF export notice, triggering native browser PDF dialog:', err);
+      handlePrint();
+    } finally {
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1500);
+      setDownloadingPdf(false);
+    }
   };
 
   // Safe formatting helpers
@@ -30,11 +103,30 @@ export const InvoiceView = ({ order }) => {
   return (
     <div style={{ maxWidth: '780px', margin: '2rem auto', padding: '1rem' }} className="invoice-container">
       
-      {/* Print action header */}
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-        <button onClick={handlePrint} className="btn btn-secondary" style={{ padding: '0.6rem 1.25rem', gap: '0.5rem' }}>
+      {/* Action buttons header */}
+      <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+        <button
+          onClick={handleDownloadPdf}
+          disabled={downloadingPdf}
+          className="btn btn-secondary"
+          style={{ padding: '0.65rem 1.35rem', gap: '0.5rem', fontWeight: 800, display: 'flex', alignItems: 'center' }}
+          title={lang === 'ar' ? 'حفظ كـ ملف PDF على جهازك' : 'Save PDF to device'}
+        >
+          {downloadingPdf ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+          <span>
+            {downloadingPdf
+              ? (lang === 'ar' ? 'جاري تجهيز PDF...' : 'Generating PDF...')
+              : (lang === 'ar' ? 'حفظ كـ PDF' : 'Save as PDF')}
+          </span>
+        </button>
+
+        <button
+          onClick={handlePrint}
+          className="btn btn-outline"
+          style={{ padding: '0.65rem 1.25rem', gap: '0.5rem', fontWeight: 700, backgroundColor: '#ffffff', display: 'flex', alignItems: 'center' }}
+        >
           <Printer size={16} />
-          {t('invoice.print')}
+          <span>{t('invoice.print')}</span>
         </button>
       </div>
 
