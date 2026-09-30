@@ -93,7 +93,7 @@ export const CheckoutPage = () => {
   // Auto-fill logged-in profile data (excluding admin profile name)
   useEffect(() => {
     if (profile) {
-      if (profile.full_name === 'أدمن سمايلودنت' || profile.role === 'admin') {
+      if (profile.role === 'admin' || profile.full_name?.includes('أدمن') || profile.full_name === 'أدمن سمايلودنت') {
         setFullName('');
       } else {
         setFullName(profile.full_name || '');
@@ -333,7 +333,9 @@ export const CheckoutPage = () => {
 
     } catch (err) {
       console.error('Checkout failed', err);
-      setErrorMsg('حدث خطأ أثناء معالجة الطلب، يرجى المحاولة لاحقاً. / Checkout process failed.');
+      const friendlyMsg = err?.message || err?.error_description || err?.details || (lang === 'ar' ? 'حدث خطأ أثناء معالجة الطلب، يرجى المحاولة لاحقاً.' : 'Checkout process failed, please try again.');
+      setErrorMsg(friendlyMsg);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setSubmitting(false);
     }
@@ -393,7 +395,19 @@ export const CheckoutPage = () => {
       </div>
 
       {errorMsg && (
-        <div style={{ padding: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid var(--danger)', borderRadius: 'var(--radius-sm)', fontSize: '0.9rem' }}>
+        <div
+          style={{
+            padding: '1rem 1.25rem',
+            backgroundColor: 'rgba(239, 68, 68, 0.08)',
+            color: '#dc2626',
+            border: '1px solid rgba(239, 68, 68, 0.35)',
+            borderRadius: 'var(--radius-sm)',
+            fontSize: '0.92rem',
+            fontWeight: 600,
+            lineHeight: 1.6,
+            whiteSpace: 'pre-line'
+          }}
+        >
           {errorMsg}
         </div>
       )}
