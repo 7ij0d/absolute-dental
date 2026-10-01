@@ -25,7 +25,7 @@ export const ContactPage = () => {
   // Load contact links from database settings
   useEffect(() => {
     const fetchContactSettings = async () => {
-      const { data } = await supabase.from('settings').eq('key', 'contact_links').single();
+      const { data } = await supabase.from('settings').select('*').eq('key', 'contact_links').single();
       if (data?.value) {
         setContacts(data.value);
       }

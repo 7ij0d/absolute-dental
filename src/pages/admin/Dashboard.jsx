@@ -190,8 +190,8 @@ export const Dashboard = () => {
                   {recentOrders.map((ord) => (
                     <tr key={ord.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                       <td style={{ padding: '0.8rem 0.6rem', fontWeight: 700 }}>
-                        <Link to={`/admin/orders?q=${ord.order_number}`} style={{ color: 'var(--secondary)' }}>
-                          #{ord.order_number.slice(0, 11)}...
+                        <Link to={`/admin/orders?q=${ord.order_number || ord.id}`} style={{ color: 'var(--secondary)' }}>
+                          #{(ord.order_number || String(ord.id || '')).slice(0, 11)}...
                         </Link>
                       </td>
                       <td style={{ padding: '0.8rem 0.6rem' }}>{ord.customer_name}</td>

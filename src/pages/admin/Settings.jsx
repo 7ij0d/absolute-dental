@@ -27,7 +27,7 @@ export const Settings = () => {
     setLoading(true);
     try {
       // 1. Fetch contact links
-      const { data: contacts } = await supabase.from('settings').eq('key', 'contact_links').single();
+      const { data: contacts } = await supabase.from('settings').select('*').eq('key', 'contact_links').single();
       if (contacts?.value) {
         setWhatsapp(contacts.value.whatsapp || '');
         setTelegram(contacts.value.telegram || '');
@@ -36,7 +36,7 @@ export const Settings = () => {
       }
 
       // 2. Fetch shipping rates
-      const { data: shipping } = await supabase.from('settings').eq('key', 'shipping_rates').single();
+      const { data: shipping } = await supabase.from('settings').select('*').eq('key', 'shipping_rates').single();
       if (shipping?.value) {
         setTripoliFacultyRate(shipping.value.tripoli_dental_college || 0);
         setTripoliHomeRate(shipping.value.tripoli_delivery || 0);

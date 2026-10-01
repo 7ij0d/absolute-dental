@@ -235,6 +235,9 @@ export const Products = () => {
     setLoading(true);
     try {
       // Load products (all, including archived and inactive)
+      let loadedProds = null;
+
+      // 1. Try comprehensive query with properly qualified joins
       const { data: prods, error: prodErr } = await supabase
         .from('products')
         .select(`
@@ -248,23 +251,38 @@ export const Products = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (!prodErr && prods && Array.isArray(prods) && prods.length > 0) {
-        setProducts(prods);
+      if (!prodErr && Array.isArray(prods)) {
+        loadedProds = prods;
       } else {
-        // Fallback query if relational embedding fails
-        const { data: fallbackProds } = await supabase
+        console.warn('Primary products query error, attempting secondary fallback:', prodErr);
+        // 2. Secondary fallback with direct foreign key relations
+        const { data: fallbackProds, error: fbErr } = await supabase
           .from('products')
-          .select('*, years(*), subjects(*)')
+          .select('*, years(*), subjects!products_subject_id_fkey(*)')
           .order('created_at', { ascending: false });
 
-        if (fallbackProds) setProducts(fallbackProds);
+        if (!fbErr && Array.isArray(fallbackProds)) {
+          loadedProds = fallbackProds;
+        } else {
+          console.warn('Secondary fallback error, attempting base select:', fbErr);
+          // 3. Guaranteed base query fallback
+          const { data: baseProds } = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (Array.isArray(baseProds)) loadedProds = baseProds;
+        }
+      }
+
+      if (loadedProds) {
+        setProducts(loadedProds);
       }
 
       // Load years and subjects for form dropdown selectors
-      const { data: yrs } = await supabase.from('years').select('*');
+      const { data: yrs } = await supabase.from('years').select('*').order('slug');
       if (yrs) setYears(yrs);
 
-      const { data: subs } = await supabase.from('subjects').select('*');
+      const { data: subs } = await supabase.from('subjects').select('*').order('slug');
       if (subs) setSubjects(subs);
 
     } catch (err) {

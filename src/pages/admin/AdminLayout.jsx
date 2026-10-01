@@ -24,16 +24,20 @@ export const AdminLayout = () => {
   const { isRtl } = useLanguage();
   const location = useLocation();
 
-  // PIN stored in sessionStorage only — clears when browser closes
-  const [passcode, setPasscode] = useState(() => sessionStorage.getItem('admin_pin') || '');
+  // PIN stored in sessionStorage and localStorage for seamless persistence
+  const [passcode, setPasscode] = useState(() => 
+    sessionStorage.getItem('admin_pin') || 
+    localStorage.getItem('admin_pin') || 
+    localStorage.getItem('admin_passcode') || 
+    ''
+  );
   const [inputCode, setInputCode] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
 
-
-  // Auto sign-in to Supabase when PIN already stored (e.g. page refresh)
+  // Auto sign-in to Supabase as admin when PIN already verified
   useEffect(() => {
-    if (passcode === '9922' && !user && !loading) {
+    if (passcode === '9922' && (!user || user.email !== 'admin@smylodent.com') && !loading) {
       signIn('admin@smylodent.com', 'admin123').catch(() => {});
     }
   }, [passcode, user, loading]);
@@ -45,7 +49,8 @@ export const AdminLayout = () => {
 
     if (inputCode === '9922') {
       sessionStorage.setItem('admin_pin', '9922');
-      localStorage.removeItem('admin_passcode');
+      localStorage.setItem('admin_pin', '9922');
+      localStorage.setItem('admin_passcode', '9922');
       setPasscode('9922');
       // Sign into Supabase so admin DB queries work (RLS requires auth)
       try { await signIn('admin@smylodent.com', 'admin123'); } catch (_) {}
@@ -58,6 +63,7 @@ export const AdminLayout = () => {
 
   const handleLock = async () => {
     sessionStorage.removeItem('admin_pin');
+    localStorage.removeItem('admin_pin');
     localStorage.removeItem('admin_passcode');
     try { await signOut(); } catch (_) {}
     setPasscode('');

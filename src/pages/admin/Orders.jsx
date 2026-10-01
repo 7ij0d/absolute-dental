@@ -39,7 +39,7 @@ export const Orders = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('orders')
         .select(`
           *,
@@ -50,9 +50,25 @@ export const Orders = () => {
         `)
         .order('created_at', { ascending: false });
       
-      if (data) setOrders(data);
+      if (!error && Array.isArray(data)) {
+        setOrders(data);
+      } else {
+        console.warn('Orders relational query error, falling back to direct orders:', error);
+        const { data: directData } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (directData) setOrders(directData);
+      }
     } catch (err) {
       console.error('Error fetching admin order index', err);
+      try {
+        const { data: directData } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (directData) setOrders(directData);
+      } catch (_) {}
     } finally {
       setLoading(false);
     }
@@ -176,9 +192,9 @@ export const Orders = () => {
       const q = searchQuery.toLowerCase();
       list = list.filter(
         (ord) =>
-          ord.order_number.toLowerCase().includes(q) ||
-          ord.customer_name.toLowerCase().includes(q) ||
-          ord.customer_phone.includes(q)
+          (ord.order_number || '').toLowerCase().includes(q) ||
+          (ord.customer_name || '').toLowerCase().includes(q) ||
+          (ord.customer_phone || '').includes(q)
       );
     }
 
