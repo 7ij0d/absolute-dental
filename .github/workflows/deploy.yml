@@ -21,7 +21,7 @@ jobs:
           npm ci
           npm run build
         env:
-          VITE_SUPABASE_URL: https://vqrpodmnzubpcsvqohwj.supabase.co
+          VITE_SUPABASE_URL: https://api.kurofangs.id.ly
           VITE_SUPABASE_ANON_KEY: sb_publishable_bISG70YeoKP4mu8BKlgsuQ_xPprjcc1
 
       - name: Deploy 🚀
