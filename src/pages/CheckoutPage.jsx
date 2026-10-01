@@ -316,7 +316,12 @@ export const CheckoutPage = () => {
 
     } catch (err) {
       console.error('Checkout failed', err);
-      const friendlyMsg = err?.message || err?.error_description || err?.details || (lang === 'ar' ? 'حدث خطأ أثناء معالجة الطلب، يرجى المحاولة لاحقاً.' : 'Checkout process failed, please try again.');
+      let friendlyMsg = err?.message || err?.error_description || err?.details || (lang === 'ar' ? 'حدث خطأ أثناء معالجة الطلب، يرجى المحاولة لاحقاً.' : 'Checkout process failed, please try again.');
+      if (friendlyMsg.includes('exceed_egress_quota') || friendlyMsg.includes('restricted')) {
+        friendlyMsg = lang === 'ar'
+          ? 'تم تحديث خوادم المتجر. يرجى تحديث الصفحة في المتصفح بالضغط على زر التحديث 🔄 والمحاولة مجدداً.'
+          : 'Store servers have been updated. Please refresh the page in your browser and try again.';
+      }
       setErrorMsg(friendlyMsg);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {

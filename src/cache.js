@@ -26,11 +26,13 @@ export function clearStaleCache() {
     // Remove mock_products from localStorage
     localStorage.removeItem('mock_products');
 
-    // Remove old mock_ localStorage keys
+    // Remove old mock_ localStorage keys & legacy Supabase tokens
     const lsKeys = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (k && (k.startsWith('mock_') || k === 'mock_user_session')) lsKeys.push(k);
+      if (k && (k.startsWith('mock_') || k === 'mock_user_session' || k.includes('vqrpodmnzubpcsvqohwj') || k.includes('sb-vqrpodmnzubpcsvqohwj-auth-token'))) {
+        lsKeys.push(k);
+      }
     }
     lsKeys.forEach(k => localStorage.removeItem(k));
 
