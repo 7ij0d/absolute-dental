@@ -1,5 +1,27 @@
 [
   {
+    "id": "prod-coxo-c207-crown",
+    "name_ar": "قبضة توربين أصلية COXO C207 (بنفسجي)",
+    "name_en": "COXO High-Speed Handpiece C207 (Purple)",
+    "price": 225,
+    "compare_at_price": 240,
+    "availability": "available",
+    "subject_id": "22000000-0000-0000-0000-000000000023",
+    "image_url": "/coxo-handpiece-c207.png",
+    "sort_order": 0
+  },
+  {
+    "id": "prod-coxo-c207-cons",
+    "name_ar": "قبضة توربين أصلية COXO C207 (بنفسجي)",
+    "name_en": "COXO High-Speed Handpiece C207 (Purple)",
+    "price": 225,
+    "compare_at_price": 240,
+    "availability": "available",
+    "subject_id": "22000000-0000-0000-0000-000000000021",
+    "image_url": "/coxo-handpiece-c207.png",
+    "sort_order": 0
+  },
+  {
     "id": "0c18deeb-a571-419b-adf2-8060db42d8cf",
     "name_ar": "Student Glass Slab (Mixing Glass Slab)",
     "name_en": "Student Glass Slab (Mixing Glass Slab)",
