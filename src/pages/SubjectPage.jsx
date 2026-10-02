@@ -96,7 +96,7 @@ export const SubjectPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const CACHE_KEY = `subject_v3:${slug}`;
+    const CACHE_KEY = `subject_v4:${slug}`;
 
     const applyData = ({ subject, year, prods }) => {
       setSubjectData(subject);
@@ -152,9 +152,13 @@ export const SubjectPage = () => {
 
         let allProds = [...(primaryProds || []), ...extraProds];
 
-        // If database query returned 0 products, fall back to seeded default products
-        if (allProds.length === 0) {
-          allProds = defaultProductsList.filter(p => p.subject_id === subject.id);
+        // Ensure seeded default products for this subject are merged if not already present
+        const existingIds = new Set(allProds.map(p => p.id));
+        const defaultsForSub = defaultProductsList.filter(p => p.subject_id === subject.id);
+        for (const dp of defaultsForSub) {
+          if (!existingIds.has(dp.id)) {
+            allProds.push(dp);
+          }
         }
 
         const bundle = { subject, year: year || null, prods: allProds };

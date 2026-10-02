@@ -4,7 +4,7 @@
  * instantly invalidates ALL old cached data from the previous branding.
  */
 
-const CACHE_PREFIX = 'ad5:';
+const CACHE_PREFIX = 'ad6:';
 const memCache = new Map();
 
 /**
@@ -17,7 +17,7 @@ export function clearStaleCache() {
     const keysToDelete = [];
     for (let i = 0; i < sessionStorage.length; i++) {
       const k = sessionStorage.key(i);
-      if (k && (k.startsWith('smyl:') || k.startsWith('ad:') || k.startsWith('ad2:') || k.startsWith('ad3:'))) {
+      if (k && ((k.startsWith('smyl:') || k.startsWith('ad')) && !k.startsWith(CACHE_PREFIX))) {
         keysToDelete.push(k);
       }
     }

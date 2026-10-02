@@ -1,24 +1,25 @@
 [
   {
-    "id": "prod-coxo-c207-crown",
+    "id": "66b9ad13-8f4d-4952-8e90-cc72c2b8b1be",
     "name_ar": "قبضة توربين أصلية COXO C207 (بنفسجي)",
     "name_en": "COXO High-Speed Handpiece C207 (Purple)",
     "price": 225,
     "compare_at_price": 240,
     "availability": "available",
     "subject_id": "22000000-0000-0000-0000-000000000023",
-    "image_url": "/coxo-handpiece-c207.png",
+    "shared_inventory_product_id": "8806943f-d3bf-443b-b623-7002b354a355",
+    "image_url": "https://7ij0d.github.io/absolute-dental/coxo-handpiece-c207.png",
     "sort_order": 0
   },
   {
-    "id": "prod-coxo-c207-cons",
+    "id": "8806943f-d3bf-443b-b623-7002b354a355",
     "name_ar": "قبضة توربين أصلية COXO C207 (بنفسجي)",
     "name_en": "COXO High-Speed Handpiece C207 (Purple)",
     "price": 225,
     "compare_at_price": 240,
     "availability": "available",
     "subject_id": "22000000-0000-0000-0000-000000000021",
-    "image_url": "/coxo-handpiece-c207.png",
+    "image_url": "https://7ij0d.github.io/absolute-dental/coxo-handpiece-c207.png",
     "sort_order": 0
   },
   {
