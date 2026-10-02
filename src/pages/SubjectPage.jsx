@@ -96,7 +96,7 @@ export const SubjectPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const CACHE_KEY = `subject_v4:${slug}`;
+    const CACHE_KEY = `subject_v5:${slug}`;
 
     const applyData = ({ subject, year, prods }) => {
       setSubjectData(subject);
@@ -158,8 +158,17 @@ export const SubjectPage = () => {
         for (const dp of defaultsForSub) {
           if (!existingIds.has(dp.id)) {
             allProds.push(dp);
+            existingIds.add(dp.id);
           }
         }
+
+        // Strictly deduplicate by product id
+        const seenIds = new Set();
+        allProds = allProds.filter(p => {
+          if (!p || !p.id || seenIds.has(p.id)) return false;
+          seenIds.add(p.id);
+          return true;
+        });
 
         const bundle = { subject, year: year || null, prods: allProds };
         cacheSet(CACHE_KEY, bundle, 60);
