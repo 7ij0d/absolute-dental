@@ -6,7 +6,17 @@ import { Trash2, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export const CartPage = () => {
   const { t, isRtl } = useLanguage();
-  const { cartItems, updateQuantity, removeFromCart, subtotal, totalComparePrice, totalDiscount } = useCart();
+  const {
+    cartItems,
+    updateQuantity,
+    removeFromCart,
+    subtotal,
+    totalComparePrice,
+    totalDiscount,
+    isEditingOrder,
+    editingOrder,
+    cancelEditingOrder
+  } = useCart();
   const navigate = useNavigate();
 
   if (cartItems.length === 0) {
@@ -36,6 +46,53 @@ export const CartPage = () => {
           {t('cart.title')}
         </h1>
       </div>
+
+      {/* Editing Order Alert Banner */}
+      {isEditingOrder && editingOrder && (
+        <div
+          style={{
+            padding: '1.1rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            backgroundColor: 'rgba(37, 99, 235, 0.08)',
+            border: '1px solid rgba(37, 99, 235, 0.35)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+          className="animate-fade-in"
+        >
+          <div>
+            <p style={{ fontWeight: 800, color: '#2563eb', margin: 0, fontSize: '1rem' }}>
+              ✏️ {isRtl ? 'أنت في وضع تعديل الطلبية' : 'Editing Order Mode'} #{editingOrder.order_number?.replace(/-/g, '').slice(0, 8)}
+            </p>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0.25rem 0 0 0' }}>
+              {isRtl
+                ? 'يمكنك إضافة أدوات جديدة من المتجر، حذف أدوات، أو تعديل الكميات. عند الانتهاء اضغط "مراجعة وإرسال التعديل".'
+                : 'Modify items, adjust quantities, or add new tools. Click "Review & Submit Changes" when finished.'}
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <button
+              onClick={cancelEditingOrder}
+              className="btn btn-outline"
+              style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', color: 'var(--danger)', borderColor: 'var(--danger)' }}
+            >
+              {isRtl ? 'إلغاء التعديل' : 'Cancel Edit'}
+            </button>
+            <Link
+              to="/study-tools"
+              className="btn btn-primary"
+              style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem' }}
+            >
+              {isRtl ? '+ إضافة منتجات أخرى' : '+ Add More Products'}
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '2rem' }} className="cart-grid">
         
@@ -134,9 +191,11 @@ export const CartPage = () => {
             <button
               onClick={() => navigate('/checkout')}
               className="btn btn-secondary"
-              style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}
+              style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem', fontWeight: 800 }}
             >
-              {t('cart.checkout')}
+              {isEditingOrder
+                ? (isRtl ? 'مراجعة وإرسال التعديل ➔' : 'Review & Submit Modified Order ➔')
+                : t('cart.checkout')}
             </button>
 
           </div>

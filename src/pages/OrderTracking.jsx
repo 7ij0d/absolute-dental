@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useCart } from '../context/CartContext';
 import supabase from '../supabaseClient';
 import InvoiceView from '../components/InvoiceView';
-import { Search, MapPin, ClipboardList, CheckCircle2, Clock, Truck, ShieldAlert, ArrowRight, ArrowLeft } from 'lucide-react';
+import OrderEditHistory from '../components/OrderEditHistory';
+import { getOrderStatusMeta } from '../utils/orderEditHelper';
+import { Search, MapPin, ClipboardList, CheckCircle2, Clock, Truck, ShieldAlert, ArrowRight, ArrowLeft, Edit3, AlertCircle, ShoppingCart, X, Send } from 'lucide-react';
 
 export const OrderTracking = () => {
   const { t, lang, isRtl } = useLanguage();
   const location = useLocation();
+
+  const { startEditingOrder } = useCart();
+  const navigate = useNavigate();
 
   // Search parameters
   const [orderNumber, setOrderNumber] = useState('');
@@ -19,6 +25,12 @@ export const OrderTracking = () => {
   const [searchMode, setSearchMode] = useState(''); // 'single' or 'multiple'
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Edit Request States
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editReason, setEditReason] = useState('');
+  const [requestingEdit, setRequestingEdit] = useState(false);
+  const [editNotice, setEditNotice] = useState('');
 
   // Auto query if parameters exist in URL (e.g. /track?order=SD-12&phone=091)
   useEffect(() => {
@@ -119,6 +131,66 @@ export const OrderTracking = () => {
     }
   };
 
+  const handleRequestEdit = async (e) => {
+    e.preventDefault();
+    if (!order) return;
+    setRequestingEdit(true);
+    try {
+      let existingMeta = {};
+      if (order.status_note) {
+        try {
+          existingMeta = JSON.parse(order.status_note);
+        } catch {
+          existingMeta = { original_text: order.status_note };
+        }
+      }
+
+      const updatedMeta = {
+        ...existingMeta,
+        edit_requested_at: new Date().toISOString(),
+        edit_request_note: editReason || null
+      };
+
+      const { data, error } = await supabase
+        .from('orders')
+        .update({
+          status: 'edit_requested',
+          status_note: JSON.stringify(updatedMeta)
+        })
+        .eq('id', order.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Add Admin notification
+      try {
+        await supabase.from('notifications').insert({
+          user_id: order.user_id || null,
+          title_ar: `طلب تعديل وارد للطلب #${order.order_number}`,
+          title_en: `Edit Request for Order #${order.order_number}`,
+          message_ar: `طلب الزبون ${order.customer_name} تعديل الطلبية #${order.order_number}${editReason ? `: "${editReason}"` : ''}`,
+          message_en: `Customer ${order.customer_name} requested to edit order #${order.order_number}`,
+          type: 'order_status'
+        });
+      } catch (_) {}
+
+      setOrder((prev) => ({ ...prev, status: 'edit_requested', status_note: JSON.stringify(updatedMeta) }));
+      setShowEditModal(false);
+      setEditNotice(isRtl ? 'تم إرسال طلب التعديل إلى الإدارة بنجاح، وستتمكن من تعديل السلة بمجرد الموافقة.' : 'Edit request sent successfully. You can edit items once approved.');
+    } catch (err) {
+      alert(err.message || 'حدث خطأ أثناء إرسال طلب التعديل');
+    } finally {
+      setRequestingEdit(false);
+    }
+  };
+
+  const handleOpenCartToEdit = () => {
+    if (!order) return;
+    startEditingOrder(order);
+    navigate('/cart');
+  };
+
   // Status mapping to timeline steps (0-5 index)
   const statusSteps = [
     { key: 'new', label_ar: 'طلب جديد', label_en: 'New Order', icon: Clock },
@@ -131,6 +203,8 @@ export const OrderTracking = () => {
 
   const getActiveStepIndex = (status) => {
     if (status === 'cancelled') return -1;
+    if (status === 'edit_requested' || status === 'editing' || status === 'edited_pending') return 1;
+    if (status === 'updated') return 2;
     return statusSteps.findIndex((step) => step.key === status);
   };
 
@@ -409,6 +483,254 @@ export const OrderTracking = () => {
               </div>
             </div>
           )}
+
+          {/* Edit Order Notice Banner */}
+          {editNotice && (
+            <div
+              style={{
+                padding: '1rem 1.25rem',
+                backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                border: '1px solid #10b981',
+                borderRadius: 'var(--radius-md)',
+                color: '#059669',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem'
+              }}
+              className="animate-fade-in"
+            >
+              <CheckCircle2 size={18} />
+              <span>{editNotice}</span>
+            </div>
+          )}
+
+          {/* EDIT ORDER ACTION BANNER / CARD */}
+          <div
+            className="card"
+            style={{
+              padding: '1.25rem 1.5rem',
+              backgroundColor: 'var(--surface-color)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-lg)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.85rem',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+          >
+            {/* Case 1: Order is ready to be edited in cart */}
+            {order.status === 'editing' ? (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '1rem',
+                  padding: '1rem',
+                  backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                  border: '1px solid rgba(37, 99, 235, 0.35)',
+                  borderRadius: 'var(--radius-md)'
+                }}
+              >
+                <div>
+                  <h4 style={{ margin: 0, color: '#2563eb', fontWeight: 800, fontSize: '1rem' }}>
+                    🎉 {isRtl ? 'تمت الموافقة على طلب التعديل!' : 'Edit Request Approved!'}
+                  </h4>
+                  <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    {isRtl
+                      ? 'يمكنك الآن فتح السلة وتعديل الأدوات أو الكميات والأسعار بكل سهولة.'
+                      : 'You can now open the cart and modify items, quantities, or add new tools.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleOpenCartToEdit}
+                  className="btn btn-primary"
+                  style={{ padding: '0.6rem 1.4rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <ShoppingCart size={16} />
+                  {isRtl ? 'فتح السلة وتعديل الطلبية ➔' : 'Open Cart & Edit Order ➔'}
+                </button>
+              </div>
+            ) : order.status === 'edit_requested' ? (
+              /* Case 2: Edit is already requested and under review */
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.9rem 1rem',
+                  backgroundColor: 'rgba(217, 119, 6, 0.08)',
+                  border: '1px solid rgba(217, 119, 6, 0.35)',
+                  borderRadius: 'var(--radius-md)',
+                  color: '#d97706'
+                }}
+              >
+                <Clock size={20} />
+                <div>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem' }}>
+                    ⏳ {isRtl ? 'طلب التعديل قيد المراجعة' : 'Edit Request Under Review'}
+                  </p>
+                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem', opacity: 0.9 }}>
+                    {isRtl
+                      ? 'لقد أرسلت طلباً لتعديل هذه الطلبية، ويتم مراجعته حالياً من قبل الإدارة. يمنع إرسال أكثر من طلب تعديل في نفس الوقت.'
+                      : 'Your edit request is being reviewed by the administration. You will be able to edit items once approved.'}
+                  </p>
+                </div>
+              </div>
+            ) : order.status === 'edited_pending' ? (
+              /* Case 3: Customer already edited and waiting confirmation */
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.9rem 1rem',
+                  backgroundColor: 'rgba(124, 58, 237, 0.08)',
+                  border: '1px solid rgba(124, 58, 237, 0.35)',
+                  borderRadius: 'var(--radius-md)',
+                  color: '#7c3aed'
+                }}
+              >
+                <CheckCircle2 size={20} />
+                <div>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem' }}>
+                    📝 {isRtl ? 'تم إرسال تعديلاتك بنجاح' : 'Modifications Submitted Successfully'}
+                  </p>
+                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem', opacity: 0.9 }}>
+                    {isRtl
+                      ? 'الطلبية بعد التعديل بانتظار المراجعة والاعتماد النهائي من الإدارة.'
+                      : 'The updated order has been received and is awaiting final admin verification.'}
+                  </p>
+                </div>
+              </div>
+            ) : !['delivered', 'cancelled'].includes(order.status) ? (
+              /* Case 4: Eligible for requesting edit */
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem' }}>
+                <div>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-main)' }}>
+                    {isRtl ? 'هل تريد تغيير محتويات الطلب أو الكميات؟' : 'Need to modify items or quantities?'}
+                  </p>
+                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    {isRtl
+                      ? 'يمكنك إرسال طلب تعديل للإدارة، وبمجرد الموافقة ستتمكن من تعديل السلة بالكامل.'
+                      : 'Send an edit request to admin. Once approved, the order will load into your cart for editing.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(true)}
+                  className="btn btn-outline"
+                  style={{ padding: '0.5rem 1.1rem', fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  <Edit3 size={15} />
+                  {isRtl ? 'طلب تعديل الطلبية' : 'Request Order Modification'}
+                </button>
+              </div>
+            ) : (
+              /* Case 5: Delivered or Cancelled */
+              <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                {isRtl ? 'هذه الطلبية مكتملة أو ملغية ولا يمكن تعديلها.' : 'This order is delivered or cancelled and cannot be modified.'}
+              </p>
+            )}
+          </div>
+
+          {/* EDIT REQUEST CONFIRMATION MODAL */}
+          {showEditModal && (
+            <div
+              onClick={() => setShowEditModal(false)}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.65)',
+                backdropFilter: 'blur(4px)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '1rem',
+                zIndex: 10000
+              }}
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="animate-fade-in card"
+                style={{
+                  width: '100%',
+                  maxWidth: '500px',
+                  backgroundColor: 'var(--surface-color)',
+                  padding: '2rem 1.5rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.25rem',
+                  boxShadow: 'var(--shadow-xl)',
+                  borderRadius: 'var(--radius-lg)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary)', margin: 0 }}>
+                    ✏️ {isRtl ? 'طلب تعديل الطلبية' : 'Request Order Edit'} #{order.order_number?.replace(/-/g, '').slice(0, 8)}
+                  </h3>
+                  <button onClick={() => setShowEditModal(false)} className="action-btn">
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <p style={{ fontSize: '0.88rem', color: 'var(--text-main)', lineHeight: 1.6, margin: 0 }}>
+                  {isRtl
+                    ? 'عند تأكيد الطلب، سيتم إرسال إشعار للإدارة لمراجعة طلب التعديل. بمجرد الموافقة، ستتحول الطلبية إلى حالتها القابلة للتعديل وتفتح لك السلة لإضافة أو حذف أي أدوات.'
+                    : 'Confirming will notify admin to review your edit request. Once approved, you can modify your cart directly.'}
+                </p>
+
+                <form onSubmit={handleRequestEdit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.82rem' }}>
+                      {isRtl ? 'سبب أو تفاصيل التعديل (اختياري):' : 'Reason or modification details (optional):'}
+                    </label>
+                    <textarea
+                      className="form-input"
+                      rows={3}
+                      value={editReason}
+                      onChange={(e) => setEditReason(e.target.value)}
+                      placeholder={isRtl ? 'مثال: أرغب في زيادة كمية أدوات النحت أو تغيير اللون...' : 'e.g. want to change box color or add carving tools...'}
+                      style={{ resize: 'none', fontSize: '0.85rem' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.8rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowEditModal(false)}
+                      disabled={requestingEdit}
+                      className="btn btn-outline"
+                      style={{ padding: '0.5rem 1.2rem' }}
+                    >
+                      {isRtl ? 'إلغاء' : 'Cancel'}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={requestingEdit}
+                      className="btn btn-primary"
+                      style={{ padding: '0.5rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}
+                    >
+                      <Send size={15} />
+                      {requestingEdit ? (isRtl ? 'جاري الإرسال...' : 'Sending...') : (isRtl ? 'تأكيد وإرسال الطلب' : 'Confirm & Submit')}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Order Edit History Component */}
+          <div>
+            <OrderEditHistory order={order} />
+          </div>
 
           {/* Sales invoice preview */}
           <div>

@@ -5,7 +5,10 @@ import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
 import InvoiceView from '../../components/InvoiceView';
 import MapPicker from '../../components/MapPicker';
-import { Search, Eye, RefreshCw, Printer, X, ClipboardList, CheckCircle, Trash2, Pencil, Save } from 'lucide-react';
+import AdminEditOrderModal from '../../components/AdminEditOrderModal';
+import OrderEditHistory from '../../components/OrderEditHistory';
+import { getOrderStatusMeta } from '../../utils/orderEditHelper';
+import { Search, Eye, RefreshCw, Printer, X, ClipboardList, CheckCircle, Trash2, Pencil, Save, Check, AlertCircle } from 'lucide-react';
 
 export const Orders = () => {
   const { t, lang, isRtl } = useLanguage();
@@ -25,8 +28,6 @@ export const Orders = () => {
 
   // Edit Modal
   const [editingOrder, setEditingOrder] = useState(null);
-  const [editForm, setEditForm] = useState({});
-  const [saving, setSaving] = useState(false);
 
   // Load query from URL if redirected from elsewhere (e.g. dashboard link)
   useEffect(() => {
@@ -94,15 +95,16 @@ export const Orders = () => {
         }
 
         // Add Notification for customer
-        const statusTextAr = t(`tracking.status_${newStatus}`);
-        const statusTextEn = t(`tracking.status_${newStatus}`);
+        const statusMeta = getOrderStatusMeta(newStatus, isRtl);
+        const targetOrder = orders.find(o => o.id === orderId) || selectedOrder;
+        const ordCode = targetOrder?.order_number?.replace(/-/g, '').slice(0, 8) || '';
         
         await supabase.from('notifications').insert({
-          user_id: selectedOrder?.user_id || null, // null if guest, will still show up based on matching tokens in general query
-          title_ar: `تحديث حالة الطلب ${selectedOrder?.order_number?.replace(/-/g, '').slice(0, 8)}`,
-          title_en: `Order Status Updated ${selectedOrder?.order_number?.replace(/-/g, '').slice(0, 8)}`,
-          message_ar: `حالة طلبك الآن هي: ${statusTextAr}`,
-          message_en: `Your order status is now: ${statusTextEn}`,
+          user_id: targetOrder?.user_id || null,
+          title_ar: `تحديث حالة الطلب ${ordCode}`,
+          title_en: `Order Status Updated ${ordCode}`,
+          message_ar: `حالة طلبك الآن هي: ${statusMeta.label}`,
+          message_en: `Your order status is now: ${statusMeta.label}`,
           type: 'order_status'
         });
       }
@@ -132,55 +134,16 @@ export const Orders = () => {
 
   const openEditModal = (ord) => {
     setEditingOrder(ord);
-    setEditForm({
-      customer_name: ord.customer_name || '',
-      customer_phone: ord.customer_phone || '',
-      customer_phone_secondary: ord.customer_phone_secondary || '',
-      customer_email: ord.customer_email || '',
-      university: ord.university || '',
-      college: ord.college || '',
-      notes: ord.notes || '',
-      status: ord.status || 'new',
-      shipping_fee: ord.shipping_fee ?? 0,
-      discount_amount: ord.discount_amount ?? 0,
-      address_text: ord.address_text || '',
-    });
   };
 
-  const handleSaveEdit = async () => {
-    if (!editingOrder) return;
-    setSaving(true);
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .update({
-          customer_name: editForm.customer_name,
-          customer_phone: editForm.customer_phone,
-          customer_phone_secondary: editForm.customer_phone_secondary,
-          customer_email: editForm.customer_email,
-          university: editForm.university,
-          college: editForm.college,
-          notes: editForm.notes,
-          status: editForm.status,
-          shipping_fee: parseFloat(editForm.shipping_fee) || 0,
-          discount_amount: parseFloat(editForm.discount_amount) || 0,
-          address_text: editForm.address_text,
-        })
-        .eq('id', editingOrder.id);
-
-      if (!error) {
-        setOrders((prev) => prev.map((o) =>
-          o.id === editingOrder.id ? { ...o, ...editForm } : o
-        ));
-        setEditingOrder(null);
-      } else {
-        alert('خطأ في الحفظ: ' + error.message);
-      }
-    } catch (err) {
-      alert('خطأ غير متوقع: ' + err.message);
-    } finally {
-      setSaving(false);
+  const handleOrderUpdated = (updatedOrder) => {
+    setOrders((prev) =>
+      prev.map((o) => (o.id === updatedOrder.id ? { ...o, ...updatedOrder } : o))
+    );
+    if (selectedOrder && selectedOrder.id === updatedOrder.id) {
+      setSelectedOrder((prev) => ({ ...prev, ...updatedOrder }));
     }
+    setEditingOrder(null);
   };
 
   // Get filtered lists
@@ -246,6 +209,10 @@ export const Orders = () => {
           <option value="all">جميع حالات الطلبات</option>
           <option value="new">طلبات جديدة</option>
           <option value="under_review">قيد المراجعة</option>
+          <option value="edit_requested">🟡 طلبات تعديل تنتظر الموافقة</option>
+          <option value="editing">🔵 قيد التعديل (الزبون)</option>
+          <option value="edited_pending">🟣 معدلة - بانتظار الاعتماد</option>
+          <option value="updated">🟢 تم التحديث والاعتماد</option>
           <option value="accepted">تم القبول</option>
           <option value="preparing">جاري التجهيز</option>
           <option value="out_for_delivery">خرج للتوصيل</option>
@@ -306,27 +273,83 @@ export const Orders = () => {
                   </td>
                   <td style={{ padding: '1rem 0.75rem', fontWeight: 800 }}>{ord.total_price} د.ل</td>
                   <td style={{ padding: '1rem 0.75rem' }}>
-                    <span
-                      style={{
-                        padding: '3px 10px',
-                        borderRadius: 'var(--radius-full)',
-                        fontSize: '0.7rem',
-                        fontWeight: 'bold',
-                        backgroundColor: ord.status === 'delivered' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(2, 195, 154, 0.15)',
-                        color: ord.status === 'delivered' ? 'var(--success)' : 'var(--secondary)'
-                      }}
-                    >
-                      {t(`tracking.status_${ord.status}`)}
-                    </span>
+                    {(() => {
+                      const meta = getOrderStatusMeta(ord.status, isRtl);
+                      return (
+                        <span
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: 'var(--radius-full)',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            backgroundColor: meta.bgColor,
+                            color: meta.color,
+                            border: `1px solid ${meta.borderColor}`,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {meta.label}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'center' }}>
                     <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      {/* Special quick action for edit_requested */}
+                      {ord.status === 'edit_requested' && (
+                        <button
+                          onClick={() => handleUpdateStatus(ord.id, 'editing')}
+                          title="الموافقة على طلب الزبون لتعديل الطلب"
+                          style={{
+                            padding: '0.3rem 0.55rem',
+                            fontSize: '0.72rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid rgba(16, 185, 129, 0.4)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                            color: 'var(--success)',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem',
+                            fontWeight: 700
+                          }}
+                        >
+                          <Check size={12} />
+                          <span>قبول التعديل</span>
+                        </button>
+                      )}
+
+                      {/* Special quick action for edited_pending */}
+                      {ord.status === 'edited_pending' && (
+                        <button
+                          onClick={() => handleUpdateStatus(ord.id, 'updated')}
+                          title="اعتماد تعديلات الزبون على الطلبية"
+                          style={{
+                            padding: '0.3rem 0.55rem',
+                            fontSize: '0.72rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid rgba(99, 102, 241, 0.4)',
+                            backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                            color: '#6366f1',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem',
+                            fontWeight: 700
+                          }}
+                        >
+                          <CheckCircle size={12} />
+                          <span>اعتماد التعديل</span>
+                        </button>
+                      )}
+
                       {/* Quick status change */}
                       <select
                         value={ord.status}
                         onChange={(e) => {
                           handleUpdateStatus(ord.id, e.target.value);
-                          // optimistic update
                           setOrders(prev => prev.map(o => o.id === ord.id ? { ...o, status: e.target.value } : o));
                         }}
                         style={{
@@ -337,11 +360,15 @@ export const Orders = () => {
                           backgroundColor: 'var(--surface-color)',
                           color: 'var(--text-main)',
                           cursor: 'pointer',
-                          maxWidth: '110px'
+                          maxWidth: '120px'
                         }}
                       >
                         <option value="new">جديد</option>
                         <option value="under_review">قيد المراجعة</option>
+                        <option value="edit_requested">طلب تعديل</option>
+                        <option value="editing">قيد التعديل</option>
+                        <option value="edited_pending">بانتظار الاعتماد</option>
+                        <option value="updated">تم التحديث</option>
                         <option value="accepted">تم القبول</option>
                         <option value="preparing">جاري التجهيز</option>
                         <option value="out_for_delivery">خرج للتوصيل</option>
@@ -351,7 +378,7 @@ export const Orders = () => {
                       {/* Edit */}
                       <button
                         onClick={() => openEditModal(ord)}
-                        title="تعديل الطلب"
+                        title="تعديل منتجات وتفاصيل الطلب"
                         style={{
                           padding: '0.3rem 0.5rem',
                           fontSize: '0.72rem',
@@ -404,110 +431,14 @@ export const Orders = () => {
         </div>
       )}
 
-      {/* EDIT ORDER MODAL */}
-      {editingOrder && createPortal(
-        <div
-          onClick={() => setEditingOrder(null)}
-          style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-            display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
-            padding: '2rem 1rem', zIndex: 10000, overflowY: 'auto'
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            className="animate-fade-in"
-            style={{
-              width: '100%', maxWidth: '580px',
-              backgroundColor: 'var(--surface-color)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '2rem',
-              display: 'flex', flexDirection: 'column', gap: '1.25rem',
-              boxShadow: 'var(--shadow-lg)'
-            }}
-          >
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>
-                ✏️ تعديل الطلب {editingOrder.order_number?.replace(/-/g, '').slice(0, 8)}
-              </h3>
-              <button onClick={() => setEditingOrder(null)} className="action-btn"><X size={18} /></button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label className="form-label">اسم العميل</label>
-                <input className="form-input" value={editForm.customer_name} onChange={e => setEditForm(p => ({...p, customer_name: e.target.value}))} />
-              </div>
-              <div>
-                <label className="form-label">رقم الهاتف</label>
-                <input className="form-input" value={editForm.customer_phone} onChange={e => setEditForm(p => ({...p, customer_phone: e.target.value}))} />
-              </div>
-              <div>
-                <label className="form-label">رقم احتياطي</label>
-                <input className="form-input" value={editForm.customer_phone_secondary} onChange={e => setEditForm(p => ({...p, customer_phone_secondary: e.target.value}))} />
-              </div>
-              <div>
-                <label className="form-label">البريد الإلكتروني</label>
-                <input className="form-input" type="email" value={editForm.customer_email} onChange={e => setEditForm(p => ({...p, customer_email: e.target.value}))} />
-              </div>
-              <div>
-                <label className="form-label">الجامعة</label>
-                <input className="form-input" value={editForm.university} onChange={e => setEditForm(p => ({...p, university: e.target.value}))} />
-              </div>
-              <div>
-                <label className="form-label">الكلية</label>
-                <input className="form-input" value={editForm.college} onChange={e => setEditForm(p => ({...p, college: e.target.value}))} />
-              </div>
-              <div>
-                <label className="form-label">رسوم التوصيل (د.ل)</label>
-                <input className="form-input" type="number" value={editForm.shipping_fee} onChange={e => setEditForm(p => ({...p, shipping_fee: e.target.value}))} />
-              </div>
-              <div>
-                <label className="form-label">قيمة الخصم (د.ل)</label>
-                <input className="form-input" type="number" value={editForm.discount_amount} onChange={e => setEditForm(p => ({...p, discount_amount: e.target.value}))} />
-              </div>
-            </div>
-
-            <div>
-              <label className="form-label">حالة الطلب</label>
-              <select className="form-input" value={editForm.status} onChange={e => setEditForm(p => ({...p, status: e.target.value}))}>
-                <option value="new">طلب جديد</option>
-                <option value="under_review">قيد المراجعة</option>
-                <option value="accepted">تم القبول</option>
-                <option value="preparing">جاري التجهيز</option>
-                <option value="out_for_delivery">خرج للتوصيل</option>
-                <option value="delivered">تم التسليم</option>
-                <option value="cancelled">إلغاء الطلب</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="form-label">عنوان التوصيل</label>
-              <input className="form-input" value={editForm.address_text} onChange={e => setEditForm(p => ({...p, address_text: e.target.value}))} />
-            </div>
-
-            <div>
-              <label className="form-label">ملاحظات</label>
-              <textarea className="form-input" rows={3} value={editForm.notes} onChange={e => setEditForm(p => ({...p, notes: e.target.value}))} style={{ resize: 'vertical' }} />
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-              <button onClick={() => setEditingOrder(null)} className="btn btn-outline" style={{ padding: '0.6rem 1.5rem' }}>إلغاء</button>
-              <button
-                onClick={handleSaveEdit}
-                disabled={saving}
-                className="btn btn-primary"
-                style={{ padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-              >
-                <Save size={15} />
-                {saving ? 'جاري الحفظ...' : 'حفظ التعديلات'}
-              </button>
-            </div>
-          </div>
-        </div>
-      , document.body)}
+      {/* FULL ADMIN ORDER EDITOR MODAL */}
+      {editingOrder && (
+        <AdminEditOrderModal
+          order={editingOrder}
+          onClose={() => setEditingOrder(null)}
+          onOrderUpdated={handleOrderUpdated}
+        />
+      )}
 
       {/* -------------------------------------------------------------
           ORDER DETAILS DRAWER/MODAL
@@ -552,25 +483,115 @@ export const Orders = () => {
               </button>
             </div>
 
+            {/* Customer Edit Request Banner */}
+            {selectedOrder.status === 'edit_requested' && (
+              <div style={{
+                padding: '1rem',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                borderRadius: 'var(--radius-md)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#d97706', fontWeight: 800, fontSize: '0.9rem' }}>
+                  <AlertCircle size={18} />
+                  <span>الزبون يطلب تعديل هذا الطلب</span>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.5 }}>
+                  عند الموافقة، ستفتح السلة للزبون بنفس المنتجات ليقوم بتعديلها وإعادة إرسالها.
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => handleUpdateStatus(selectedOrder.id, 'editing')}
+                    className="btn btn-primary"
+                    style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', gap: '0.4rem', fontWeight: 700 }}
+                  >
+                    <Check size={15} />
+                    الموافقة على التعديل (فتح السلة للزبون)
+                  </button>
+                  <button
+                    onClick={() => handleUpdateStatus(selectedOrder.id, 'accepted')}
+                    className="btn btn-outline"
+                    style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', color: '#ef4444', borderColor: 'rgba(239,68,68,0.4)' }}
+                  >
+                    رفض طلب التعديل
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Customer Edited - Awaiting Confirmation Banner */}
+            {selectedOrder.status === 'edited_pending' && (
+              <div style={{
+                padding: '1rem',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                border: '1px solid rgba(99, 102, 241, 0.3)',
+                borderRadius: 'var(--radius-md)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6366f1', fontWeight: 800, fontSize: '0.9rem' }}>
+                  <CheckCircle size={18} />
+                  <span>قام الزبون بتعديل الطلب وهو بانتظار اعتمادك النهائي</span>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.5 }}>
+                  يمكنك مراجعة التغييرات في سجل التعديلات أدناه، ثم اعتماد التعديل أو تعديله كأدمن.
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => handleUpdateStatus(selectedOrder.id, 'updated')}
+                    className="btn btn-primary"
+                    style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', gap: '0.4rem', fontWeight: 700 }}
+                  >
+                    <Check size={15} />
+                    اعتماد تعديلات الطلب
+                  </button>
+                  <button
+                    onClick={() => setEditingOrder(selectedOrder)}
+                    className="btn btn-outline"
+                    style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', gap: '0.4rem', color: '#6366f1', borderColor: 'rgba(99,102,241,0.4)' }}
+                  >
+                    <Pencil size={14} />
+                    تعديل إضافي كأدمن
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Status updates action */}
             <div style={{ padding: '1rem', backgroundColor: 'var(--accent)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <label className="form-label" style={{ fontWeight: 700 }}>{t('admin.change_status')}</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <select
                   className="form-input"
                   value={selectedOrder.status}
                   onChange={(e) => handleUpdateStatus(selectedOrder.id, e.target.value)}
                   disabled={updatingStatus}
-                  style={{ backgroundColor: 'var(--surface-color)' }}
+                  style={{ backgroundColor: 'var(--surface-color)', flex: 1, minWidth: '150px' }}
                 >
                   <option value="new">طلب جديد</option>
                   <option value="under_review">قيد المراجعة</option>
+                  <option value="edit_requested">طلب تعديل (بانتظار موافقة)</option>
+                  <option value="editing">قيد التعديل (الزبون)</option>
+                  <option value="edited_pending">معدل - بانتظار الاعتماد</option>
+                  <option value="updated">تم التحديث والاعتماد</option>
                   <option value="accepted">تم القبول</option>
                   <option value="preparing">جاري التجهيز</option>
                   <option value="out_for_delivery">خرج للتوصيل</option>
                   <option value="delivered">تم التسليم</option>
                   <option value="cancelled">إلغاء الطلب</option>
                 </select>
+                <button
+                  onClick={() => setEditingOrder(selectedOrder)}
+                  className="btn btn-outline"
+                  style={{ padding: '0.5rem 0.9rem', borderRadius: 'var(--radius-sm)', gap: '0.3rem', fontSize: '0.8rem', color: '#6366f1', borderColor: 'rgba(99,102,241,0.4)' }}
+                  title="تعديل منتجات الطلب وأسعاره كأدمن"
+                >
+                  <Pencil size={14} />
+                  تعديل الطلب
+                </button>
                 <button
                   onClick={() => setShowInvoicePrint(true)}
                   className="btn btn-secondary"
@@ -704,6 +725,9 @@ export const Orders = () => {
                 <span>{selectedOrder.total_price} د.ل</span>
               </div>
             </div>
+
+            {/* Audit Edit History */}
+            <OrderEditHistory order={selectedOrder} />
 
           </div>
         </div>

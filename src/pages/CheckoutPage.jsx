@@ -7,6 +7,7 @@ import supabase from '../supabaseClient';
 import InvoiceView from '../components/InvoiceView';
 import { CheckCircle2, FileText, MapPin, Truck, HelpCircle, Phone } from 'lucide-react';
 import MapPicker from '../components/MapPicker';
+import { createEditHistoryEntry, buildUpdatedStatusNote } from '../utils/orderEditHelper';
 
 const TRIPOLI_STREETS = [
   'حي الأندلس',
@@ -59,7 +60,7 @@ const TRIPOLI_STREETS = [
 
 export const CheckoutPage = () => {
   const { t, isRtl, lang } = useLanguage();
-  const { cartItems, subtotal, totalDiscount, clearCart } = useCart();
+  const { cartItems, subtotal, totalDiscount, clearCart, isEditingOrder, editingOrder, cancelEditingOrder } = useCart();
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
@@ -90,8 +91,25 @@ export const CheckoutPage = () => {
   const [placedOrder, setPlacedOrder] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Auto-fill logged-in profile data (excluding admin profile name)
+  // Auto-fill logged-in profile data (or existing order data if in edit mode)
   useEffect(() => {
+    if (isEditingOrder && editingOrder) {
+      if (editingOrder.customer_name) setFullName(editingOrder.customer_name);
+      if (editingOrder.customer_phone) setPhone(editingOrder.customer_phone);
+      if (editingOrder.customer_phone_secondary) setPhoneSec(editingOrder.customer_phone_secondary);
+      if (editingOrder.customer_email) setCustomerEmail(editingOrder.customer_email);
+      if (editingOrder.university) setUniversity(editingOrder.university);
+      if (editingOrder.college) setCollege(editingOrder.college);
+      if (editingOrder.address_text) {
+        setAddressText(editingOrder.address_text);
+        setShippingOption('tripoli_center');
+      }
+      if (editingOrder.latitude) setLatitude(editingOrder.latitude);
+      if (editingOrder.longitude) setLongitude(editingOrder.longitude);
+      if (editingOrder.notes) setNotes(editingOrder.notes);
+      return;
+    }
+
     if (profile) {
       if (profile.role === 'admin' || profile.full_name?.includes('أدمن') || profile.full_name === 'أدمن سمايلودنت') {
         setFullName('');
@@ -109,7 +127,7 @@ export const CheckoutPage = () => {
     if (user) {
       setCustomerEmail(user.email || '');
     }
-  }, [profile, user]);
+  }, [profile, user, isEditingOrder, editingOrder]);
 
   // Handle street blur with delay to let option click fire
   const handleBlur = () => {
@@ -198,6 +216,99 @@ export const CheckoutPage = () => {
             throw new Error(`❌ "${prodData.name_ar || prodData.name_en}" غير متاح للشراء حالياً — سيتوفر قريباً.`);
           }
         }
+      }
+
+      // -------------------------------------------------------------
+      // BRANCH: EDITING EXISTING ORDER IN-PLACE (Same Order ID)
+      // -------------------------------------------------------------
+      if (isEditingOrder && editingOrder) {
+        const editEntry = createEditHistoryEntry({
+          editor: 'Customer',
+          previousOrder: editingOrder,
+          newItems: cartItems,
+          newTotalPrice: finalTotal,
+          notes: combinedNotes,
+          status: 'edited_pending'
+        });
+
+        const updatedStatusNote = buildUpdatedStatusNote(editingOrder, editEntry, {
+          customer_edit_submitted_at: new Date().toISOString()
+        });
+
+        const updatePayload = {
+          customer_name: fullName,
+          customer_phone: phone,
+          customer_phone_secondary: phoneSec || null,
+          customer_email: customerEmail || null,
+          university,
+          college,
+          notes: combinedNotes || null,
+          address_text: shippingOption === 'faculty' ? null : addressText,
+          latitude: shippingOption === 'faculty' ? null : latitude,
+          longitude: shippingOption === 'faculty' ? null : longitude,
+          status: 'edited_pending',
+          subtotal: subtotal,
+          total_price: finalTotal,
+          discount_amount: totalDiscount,
+          shipping_fee: getShippingFee(),
+          items: cartItems.map((item) => ({
+            id: item.id,
+            name_ar: item.name_ar,
+            name_en: item.name_en,
+            quantity: item.quantity,
+            price: item.price,
+            image_url: item.image_url,
+            is_accessory: Boolean(item.is_accessory || !dbProductsMap.has(item.id))
+          })),
+          status_note: updatedStatusNote,
+          updated_at: new Date().toISOString()
+        };
+
+        const { data: updatedOrder, error: updateErr } = await supabase
+          .from('orders')
+          .update(updatePayload)
+          .eq('id', editingOrder.id)
+          .select()
+          .single();
+
+        if (updateErr) throw updateErr;
+
+        // Sync relational order_items table
+        await supabase.from('order_items').delete().eq('order_id', editingOrder.id);
+        const newOrderItemsData = cartItems.map((item) => ({
+          order_id: editingOrder.id,
+          product_id: dbProductsMap.has(item.id) ? item.id : null,
+          quantity: item.quantity,
+          price: item.price
+        }));
+        if (newOrderItemsData.length > 0) {
+          await supabase.from('order_items').insert(newOrderItemsData);
+        }
+
+        // Notify Admin of customer's edit submission
+        try {
+          await supabase.from('notifications').insert({
+            user_id: user?.id || null,
+            title_ar: `تعديل وارد للطلب #${editingOrder.order_number}`,
+            title_en: `Modified Order #${editingOrder.order_number}`,
+            message_ar: `قام الزبون ${fullName} بتعديل الطلب #${editingOrder.order_number}. الإجمالي الجديد: ${finalTotal} د.ل (بانتظار المراجعة والاعتماد)`,
+            message_en: `Customer ${fullName} updated order #${editingOrder.order_number}. New total: ${finalTotal} LYD (Awaiting review)`,
+            type: 'order_status'
+          });
+        } catch (notifErr) {
+          console.warn('Admin notification notice:', notifErr);
+        }
+
+        // Clean up editing state and clear cart
+        cancelEditingOrder();
+        clearCart();
+
+        setPlacedOrder({
+          ...(updatedOrder || { ...editingOrder, ...updatePayload }),
+          order_items: cartItems,
+          is_edited: true
+        });
+        return;
       }
 
       const orderData = {
@@ -340,10 +451,16 @@ export const CheckoutPage = () => {
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
           <CheckCircle2 size={64} style={{ color: 'var(--success)' }} className="animate-pulse-smile" />
           <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--primary)' }}>
-            {t('checkout.success_title')}
+            {placedOrder.is_edited
+              ? (isRtl ? 'تم إرسال تعديل الطلب بنجاح!' : 'Order Modifications Submitted!')
+              : t('checkout.success_title')}
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', maxWidth: '500px' }}>
-            {t('checkout.success_desc', { order_number: placedOrder.order_number })}
+            {placedOrder.is_edited
+              ? (isRtl
+                ? `تم تحديث الطلب رقم #${placedOrder.order_number} بنجاح، وهو الآن بانتظار مراجعة واعتماد الإدارة.`
+                : `Order #${placedOrder.order_number} has been updated and is awaiting admin review.`)
+              : t('checkout.success_desc', { order_number: placedOrder.order_number })}
           </p>
         </div>
 
@@ -378,8 +495,17 @@ export const CheckoutPage = () => {
       
       <div style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '0.8rem' }}>
         <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--primary)' }}>
-          {t('checkout.title')}
+          {isEditingOrder && editingOrder
+            ? (isRtl ? `✏️ تأكيد تعديل الطلب #${editingOrder.order_number?.replace(/-/g, '').slice(0, 8)}` : `✏️ Confirm Edit Order #${editingOrder.order_number?.replace(/-/g, '').slice(0, 8)}`)
+            : t('checkout.title')}
         </h1>
+        {isEditingOrder && (
+          <p style={{ fontSize: '0.85rem', color: '#2563eb', fontWeight: 600, marginTop: '0.3rem' }}>
+            {isRtl
+              ? 'سيتم حفظ كافة التعديلات على نفس رقم الطلب الأصلي وإرسالها للإدارة للاعتماد.'
+              : 'All modifications will be saved to your current order and submitted for review.'}
+          </p>
+        )}
       </div>
 
       {errorMsg && (
@@ -663,9 +789,13 @@ export const CheckoutPage = () => {
             type="submit"
             disabled={submitting || cartItems.length === 0}
             className="btn btn-secondary"
-            style={{ padding: '0.8rem', fontSize: '1rem', width: '100%', marginTop: '1rem' }}
+            style={{ padding: '0.8rem', fontSize: '1rem', width: '100%', marginTop: '1rem', fontWeight: 800 }}
           >
-            {submitting ? 'جاري إرسال الطلب... / Submitting...' : t('checkout.place_order')}
+            {submitting
+              ? (isRtl ? 'جاري إرسال التعديل...' : 'Submitting Changes...')
+              : (isEditingOrder
+                ? (isRtl ? '💾 إرسال الطلب بعد التعديل' : '💾 Submit Modified Order')
+                : (lang === 'ar' ? 'تأكيد وإرسال الطلب' : t('checkout.place_order')))}
           </button>
 
         </form>
