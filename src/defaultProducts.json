@@ -6,6 +6,7 @@
     "price": 225,
     "compare_at_price": 240,
     "availability": "available",
+    "stock_quantity": 6,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://7ij0d.github.io/absolute-dental/coxo-handpiece-c207.png",
     "sort_order": 0
@@ -16,7 +17,8 @@
     "name_en": "Student Glass Slab (Mixing Glass Slab)",
     "price": 3,
     "compare_at_price": null,
-    "availability": "available",
+    "availability": "limited_quantity",
+    "stock_quantity": 5,
     "subject_id": "11000000-0000-0000-0000-000000000012",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/0c18deeb-a571-419b-adf2-8060db42d8cf.jpg",
     "sort_order": 0
@@ -28,6 +30,7 @@
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 52,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/5528000b-cde4-4b27-8745-7956dc0e4b78.jpg",
     "sort_order": 0
@@ -39,6 +42,7 @@
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 23,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/8a2c351d-359c-4f5e-8c37-3d4ecb1eba19.jpg",
     "sort_order": 0
@@ -49,7 +53,8 @@
     "name_en": "Carving wax - Single Piece",
     "price": 2,
     "compare_at_price": null,
-    "availability": "available",
+    "availability": "unavailable",
+    "stock_quantity": 0,
     "subject_id": "11000000-0000-0000-0000-000000000011",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/106ad65c-3074-4cfb-8643-840f36f833f5.jpg",
     "sort_order": 0
@@ -61,6 +66,7 @@
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 7,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/2ebc663e-0967-4d6a-b8be-b07b9e84659c.jpg",
     "sort_order": 0
@@ -72,7 +78,8 @@
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
-    "subject_id": "22000000-0000-0000-0000-000000000023",
+    "stock_quantity": 20,
+    "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/d2a56c58-bf46-47aa-b803-6546aa7491c5.jpg",
     "sort_order": 0
   },
@@ -83,7 +90,8 @@
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
-    "subject_id": "22000000-0000-0000-0000-000000000023",
+    "stock_quantity": 53,
+    "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/d02e821e-91e3-4ed4-869e-f636142d8247.jpg",
     "sort_order": 0
   },
@@ -94,7 +102,8 @@
     "price": 15,
     "compare_at_price": null,
     "availability": "available",
-    "subject_id": "22000000-0000-0000-0000-000000000023",
+    "stock_quantity": 17,
+    "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/5b7d387c-f150-4e64-90fe-b21ac1249ebc.jpg",
     "sort_order": 0
   },
@@ -105,6 +114,7 @@
     "price": 15,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 12,
     "subject_id": "11000000-0000-0000-0000-000000000011",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/c554e6ff-3a55-4e36-aed6-562f70601342.jpg",
     "sort_order": 0
@@ -116,7 +126,8 @@
     "price": 0,
     "compare_at_price": null,
     "availability": "coming_soon",
-    "subject_id": "22000000-0000-0000-0000-000000000022",
+    "stock_quantity": 0,
+    "subject_id": "11000000-0000-0000-0000-000000000011",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/72e1069c-4319-42ff-a38c-2af8f8e4e546.jpg",
     "sort_order": 0
   },
@@ -126,7 +137,8 @@
     "name_en": "Round bur - BR 49",
     "price": 2,
     "compare_at_price": null,
-    "availability": "limited_quantity",
+    "availability": "unavailable",
+    "stock_quantity": 0,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/76f62cd7-df40-4e85-97d1-6fb63b09e2f1.jpg",
     "sort_order": 0
@@ -138,7 +150,8 @@
     "price": 0,
     "compare_at_price": null,
     "availability": "coming_soon",
-    "subject_id": "22000000-0000-0000-0000-000000000022",
+    "stock_quantity": 0,
+    "subject_id": "11000000-0000-0000-0000-000000000012",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/2a8f9bde-fb3f-485d-a1bd-d62aa0b83556.jpg",
     "sort_order": 0
   },
@@ -149,6 +162,7 @@
     "price": 15,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 10,
     "subject_id": "11000000-0000-0000-0000-000000000011",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/e009eaf4-f041-4706-b27d-daa394e512d3.jpg",
     "sort_order": 0
@@ -160,6 +174,7 @@
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 10,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/e625888c-c1b0-4479-9117-76a1215a75f4.jpg",
     "sort_order": 0
@@ -171,6 +186,7 @@
     "price": 15,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 16,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/af6c097d-6f53-4ce3-8d52-f9b9fc095295.jpg",
     "sort_order": 0
@@ -182,6 +198,7 @@
     "price": 17,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 13,
     "subject_id": "11000000-0000-0000-0000-000000000012",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/ba48f5b5-38c2-4571-94f5-67be7d38aab3.jpg",
     "sort_order": 0
@@ -193,6 +210,7 @@
     "price": 15,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 21,
     "subject_id": "11000000-0000-0000-0000-000000000012",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/75fb4e12-d06f-4a0e-b7ac-d571b9e996ab.jpg",
     "sort_order": 0
@@ -204,6 +222,7 @@
     "price": 5,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 13,
     "subject_id": "11000000-0000-0000-0000-000000000011",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/6c359465-a522-4654-933f-a64c627c6b38.jpg",
     "sort_order": 0
@@ -215,17 +234,19 @@
     "price": 0,
     "compare_at_price": null,
     "availability": "coming_soon",
+    "stock_quantity": 0,
     "subject_id": "22000000-0000-0000-0000-000000000022",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/7eaed4a6-5d82-480e-b35e-0ca2d15c90dc.jpg",
     "sort_order": 0
   },
   {
     "id": "4caab5ef-1c9c-411e-8b6e-76781a07fd97",
-    "name_ar": "Round burr - BR45",
-    "name_en": "Round burr - BR45",
+    "name_ar": "Round Bur – BR 46",
+    "name_en": "Round Bur – BR 46",
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 67,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/4caab5ef-1c9c-411e-8b6e-76781a07fd97.jpg",
     "sort_order": 0
@@ -237,6 +258,7 @@
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 10,
     "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/187f6429-fee1-4f50-8edc-2a18bac1de35.jpg",
     "sort_order": 0
@@ -248,6 +270,7 @@
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 29,
     "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/36e0d204-3613-44b0-b74e-0ba7869420c4.jpg",
     "sort_order": 0
@@ -259,6 +282,7 @@
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 17,
     "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/c78f57a0-54d0-4602-aa05-d92a82398a2f.jpg",
     "sort_order": 0
@@ -270,6 +294,7 @@
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 29,
     "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/627bdb62-3364-497b-8aa6-3b911ad78f26.jpg",
     "sort_order": 0
@@ -281,7 +306,8 @@
     "price": 60,
     "compare_at_price": null,
     "availability": "limited_quantity",
-    "subject_id": "22000000-0000-0000-0000-000000000022",
+    "stock_quantity": 3,
+    "subject_id": "11000000-0000-0000-0000-000000000011",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/c9442057-a22f-4ce8-a237-d37f2024146f.jpg",
     "sort_order": 0
   },
@@ -292,6 +318,7 @@
     "price": 135,
     "compare_at_price": null,
     "availability": "available",
+    "stock_quantity": 18,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/ad31f7c7-d710-4622-8e3f-377b9c657818.jpg",
     "sort_order": 0
@@ -303,7 +330,8 @@
     "price": 125,
     "compare_at_price": null,
     "availability": "available",
-    "subject_id": "22000000-0000-0000-0000-000000000021",
+    "stock_quantity": 10,
+    "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/8f344bd9-91ec-4787-8371-f489cccf635e.jpg",
     "sort_order": 0
   },
@@ -313,9 +341,34 @@
     "name_en": "Study cast + high-speed NSK hand piece",
     "price": 250,
     "compare_at_price": null,
-    "availability": "available",
-    "subject_id": "22000000-0000-0000-0000-000000000021",
+    "availability": "unavailable",
+    "stock_quantity": 0,
+    "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/fa042791-6d8d-48c1-8f60-f1a103162a1e.jpg",
+    "sort_order": 0
+  },
+  {
+    "id": "7e990001-0000-4000-8000-000000000001",
+    "name_ar": "مفك فحص شفاف (قلم فحص قياسي)",
+    "name_en": "Transparent Examination Penlight",
+    "price": 4,
+    "compare_at_price": null,
+    "availability": "limited_quantity",
+    "stock_quantity": 3,
+    "subject_id": "22000000-0000-0000-0000-000000000023",
+    "image_url": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80",
+    "sort_order": 0
+  },
+  {
+    "id": "7e990002-0000-4000-8000-000000000002",
+    "name_ar": "مفك فحص مع ضوء (Medical LED)",
+    "name_en": "Medical LED Penlight",
+    "price": 5,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 9,
+    "subject_id": "22000000-0000-0000-0000-000000000023",
+    "image_url": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80",
     "sort_order": 0
   }
 ]
