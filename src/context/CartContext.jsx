@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { isBundleProduct } from '../utils/productInventoryEngine';
 
 const CartContext = createContext();
 
@@ -93,17 +94,19 @@ export const CartProvider = ({ children }) => {
   const addToCart = (product, qty = 1) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
+      const isOffer = isBundleProduct(product.id);
+      const maxAllowed = product.effectiveStock !== undefined
+        ? product.effectiveStock
+        : (isOffer ? 999 : (product.stock_quantity !== undefined ? product.stock_quantity : 999));
+
       if (existing) {
-        // Enforce maximum stock check if available
         const newQty = existing.quantity + qty;
-        const finalQty = product.stock_quantity !== undefined && newQty > product.stock_quantity
-          ? product.stock_quantity
-          : newQty;
+        const finalQty = maxAllowed !== undefined && newQty > maxAllowed ? maxAllowed : newQty;
         return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: finalQty } : item
+          item.id === product.id ? { ...item, ...product, quantity: Math.max(1, finalQty) } : item
         );
       }
-      return [...prev, { ...product, quantity: qty }];
+      return [...prev, { ...product, quantity: Math.max(1, qty) }];
     });
   };
 
@@ -117,7 +120,14 @@ export const CartProvider = ({ children }) => {
       return;
     }
     setCartItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: qty } : item))
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        const maxAllowed = item.effectiveStock !== undefined
+          ? item.effectiveStock
+          : (isBundleProduct(item.id) ? 999 : (item.stock_quantity !== undefined ? item.stock_quantity : 999));
+        const finalQty = maxAllowed !== undefined && qty > maxAllowed ? maxAllowed : qty;
+        return { ...item, quantity: Math.max(1, finalQty) };
+      })
     );
   };
 

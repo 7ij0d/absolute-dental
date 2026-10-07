@@ -7,10 +7,18 @@ import ProductCard from '../components/ProductCard';
 import { useStorageImage } from '../utils/storageImage';
 import defaultProductsList from '../defaultProducts.json';
 import {
+  isBundleProduct,
+  getBundleDefinition,
+  calculateBundleAvailability,
+  computeEffectiveStock,
+  CANONICAL_MULTI_UNITS,
+  getPhysicalStockBreakdown
+} from '../utils/productInventoryEngine';
+import {
   ShoppingCart, Heart, Check, Plus, Minus,
   ChevronLeft, ChevronRight, ArrowLeft, ArrowRight,
   Package, AlertCircle, CheckCircle2, Clock, XCircle,
-  Sparkles
+  Sparkles, Layers, Box, Tag, ArrowLeftRight
 } from 'lucide-react';
 
 const DEFAULT_YEARS = [
@@ -82,6 +90,9 @@ export const ProductDetails = () => {
   const [isFav, setIsFav] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
   const [effectiveStock, setEffectiveStock] = useState(null);
+  const [bundleInfo, setBundleInfo] = useState(null);
+  const [physicalBreakdown, setPhysicalBreakdown] = useState(null);
+  const [siblingProduct, setSiblingProduct] = useState(null);
   const resolvedActiveImage = useStorageImage(
     activeImage,
     'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format'
@@ -124,16 +135,41 @@ export const ProductDetails = () => {
               fetchedYear = prod.subjects.years;
             }
 
-            // Shared inventory check
-            if (prod.shared_inventory_product_id) {
+            // 1.1 Dynamic Inventory Resolution via Unified Engine
+            if (isBundleProduct(prod.id)) {
+              const bundleDef = getBundleDefinition(prod.id);
+              const compIds = bundleDef.components.map(c => c.productId);
+              const { data: compProds } = await supabase
+                .from('products')
+                .select('id, name_ar, name_en, price, stock_quantity, availability')
+                .in('id', compIds);
+
+              const bundleRes = calculateBundleAvailability(prod.id, compProds || defaultProductsList);
+              setEffectiveStock(bundleRes.availableCount);
+              setBundleInfo(bundleRes);
+            } else if (prod.shared_inventory_product_id) {
               const { data: master } = await supabase
                 .from('products')
-                .select('stock_quantity')
+                .select('id, name_ar, name_en, stock_quantity, price, availability')
                 .eq('id', prod.shared_inventory_product_id)
                 .maybeSingle();
               const mult = prod.unit_multiplier || 1;
               const eff = master ? Math.floor(master.stock_quantity / mult) : 0;
               setEffectiveStock(eff);
+              setSiblingProduct(master);
+              if (master) {
+                setPhysicalBreakdown(getPhysicalStockBreakdown(prod, [prod, master]));
+              }
+            } else if (CANONICAL_MULTI_UNITS[prod.id]?.isBase) {
+              const childUnitId = CANONICAL_MULTI_UNITS[prod.id].packProductId;
+              const { data: childProd } = await supabase
+                .from('products')
+                .select('id, name_ar, name_en, price, unit_multiplier, availability')
+                .eq('id', childUnitId)
+                .maybeSingle();
+              setEffectiveStock(prod.stock_quantity ?? null);
+              setSiblingProduct(childProd);
+              setPhysicalBreakdown(getPhysicalStockBreakdown(prod, [prod, childProd || {}]));
             } else {
               setEffectiveStock(prod.stock_quantity ?? null);
             }
@@ -165,7 +201,15 @@ export const ProductDetails = () => {
           if (localProd) {
             fetchedProd = localProd;
             fetchedImages = [localProd.image_url].filter(Boolean);
-            setEffectiveStock(localProd.stock_quantity ?? null);
+            if (isBundleProduct(localProd.id)) {
+              const bundleRes = calculateBundleAvailability(localProd.id, defaultProductsList);
+              setEffectiveStock(bundleRes.availableCount);
+              setBundleInfo(bundleRes);
+            } else {
+              setEffectiveStock(computeEffectiveStock(localProd, defaultProductsList));
+              const breakdown = getPhysicalStockBreakdown(localProd, defaultProductsList);
+              if (breakdown) setPhysicalBreakdown(breakdown);
+            }
           }
         }
 
@@ -612,6 +656,132 @@ export const ProductDetails = () => {
                 </span>
               )}
             </div>
+
+            {/* Bundle / Offer Breakdown Card */}
+            {bundleInfo && (
+              <div style={{
+                margin: '1rem 0',
+                padding: '1.25rem',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.03))',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, color: '#065F46', fontSize: '0.95rem' }}>
+                    <Sparkles size={18} color="#10B981" />
+                    <span>{lang === 'ar' ? 'عرض خاص توفيري — حزمة متكاملة' : 'Special Value Bundle Offer'}</span>
+                  </div>
+                  {bundleInfo.savings > 0 && (
+                    <span style={{
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      background: '#10B981',
+                      color: '#fff',
+                      padding: '3px 10px',
+                      borderRadius: '999px'
+                    }}>
+                      {lang === 'ar' ? `توفير ${bundleInfo.savings} د.ل` : `Save ${bundleInfo.savings} LYD`}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ fontSize: '0.82rem', color: '#065F46', fontWeight: 600 }}>
+                  {lang === 'ar' ? 'محتويات الحزمة المشمولة بالعرض:' : 'Included in this bundle:'}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  {bundleInfo.componentsStatus.map((comp, idx) => (
+                    <div key={idx} style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.6rem 0.85rem',
+                      borderRadius: '10px',
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      border: '1px solid rgba(16, 185, 129, 0.15)',
+                      fontSize: '0.85rem'
+                    }}>
+                      <span style={{ fontWeight: 700, color: '#1F2937' }}>{comp.nameEn} (×{comp.required})</span>
+                      <span style={{ color: comp.isAvailable ? '#059669' : '#DC2626', fontWeight: 700, fontSize: '0.8rem' }}>
+                        {comp.isAvailable ? (lang === 'ar' ? '✓ متوفر بالمخزن' : '✓ In Stock') : (lang === 'ar' ? 'غير متوفر' : 'Out of Stock')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderTop: '1px dashed rgba(16, 185, 129, 0.35)',
+                  paddingTop: '0.6rem',
+                  fontSize: '0.85rem'
+                }}>
+                  <span style={{ color: 'var(--text-muted)' }}>
+                    {lang === 'ar' ? `السعر المنفصل: ${bundleInfo.normalTotalPrice} د.ل` : `Separate Total: ${bundleInfo.normalTotalPrice} LYD`}
+                  </span>
+                  <span style={{ fontWeight: 800, color: '#065F46', fontSize: '0.95rem' }}>
+                    {lang === 'ar' ? `المتوفر كعروض: ${bundleInfo.availableCount}` : `Available Offers: ${bundleInfo.availableCount}`}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Multiple Selling Units & Physical Stock Breakdown */}
+            {(siblingProduct || physicalBreakdown) && (
+              <div style={{
+                margin: '1rem 0',
+                padding: '1rem 1.15rem',
+                borderRadius: '14px',
+                background: 'rgba(245, 158, 11, 0.05)',
+                border: '1px solid rgba(245, 158, 11, 0.25)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.6rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, fontSize: '0.88rem', color: '#92400E' }}>
+                    <Box size={16} color="#D97706" />
+                    <span>{lang === 'ar' ? 'خيارات الوحدات ومخزون القطع:' : 'Selling Units & Stock:'}</span>
+                  </div>
+                  {physicalBreakdown && (
+                    <span style={{ fontSize: '0.8rem', color: '#B45309', fontWeight: 700, backgroundColor: 'rgba(245, 158, 11, 0.15)', padding: '2px 8px', borderRadius: '6px' }}>
+                      {lang === 'ar' ? physicalBreakdown.displayAr : physicalBreakdown.displayEn}
+                    </span>
+                  )}
+                </div>
+
+                {siblingProduct && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/product/${siblingProduct.id}`)}
+                      className="btn btn-outline"
+                      style={{
+                        fontSize: '0.82rem',
+                        padding: '0.4rem 0.85rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        borderColor: 'rgba(217, 119, 6, 0.35)',
+                        color: '#B45309',
+                        backgroundColor: '#FFFBEB'
+                      }}
+                    >
+                      <ArrowLeftRight size={14} />
+                      <span>
+                        {lang === 'ar'
+                          ? `الانتقال إلى: ${siblingProduct.name_ar || siblingProduct.name_en} (${siblingProduct.price} د.ل)`
+                          : `Switch to: ${siblingProduct.name_en} (${siblingProduct.price} LYD)`}
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Already in Cart Indicator (Requirement 11) */}
             {inCartItem && (

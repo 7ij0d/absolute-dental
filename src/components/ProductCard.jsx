@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { useStorageImage } from '../utils/storageImage';
-import { ShoppingCart, Check, Heart } from 'lucide-react';
+import { isBundleProduct, getBundleDefinition } from '../utils/productInventoryEngine';
+import { ShoppingCart, Check, Heart, Sparkles } from 'lucide-react';
 
 export const ProductCard = ({ product }) => {
   const { lang, t, isRtl } = useLanguage();
@@ -36,16 +37,19 @@ export const ProductCard = ({ product }) => {
     }
   };
 
-  const isOutOfStock = (product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 0 && !product.shared_inventory_product_id);
+  const isOffer = isBundleProduct(product.id);
+  const isOutOfStock = product.effectiveStock !== undefined
+    ? product.effectiveStock <= 0
+    : (!isOffer && product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 0 && !product.shared_inventory_product_id);
   const isUnavailable = product.availability === 'unavailable' || isOutOfStock;
   const isComingSoon = product.availability === 'coming_soon';
-  const isLimited = !isUnavailable && (product.availability === 'limited_quantity' || (product.stock_quantity > 0 && product.stock_quantity <= 5));
+  const isLimited = !isUnavailable && (product.availability === 'limited_quantity' || (!isOffer && product.stock_quantity > 0 && product.stock_quantity <= 5));
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (isUnavailable || isComingSoon) return;
-    addToCart({ ...product, quantity: 1 });
+    addToCart({ ...product, quantity: 1, isOffer });
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1800);
   };
@@ -77,6 +81,7 @@ export const ProductCard = ({ product }) => {
 
         {/* Status Badges */}
         <div className="product-card-badge">
+          {isOffer && !isUnavailable && <span className="badge badge-discount" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff' }}>{lang === 'ar' ? 'عرض خاص' : 'Special Offer'}</span>}
           {discountPercent > 0 && <span className="badge badge-discount">-{discountPercent}%</span>}
           {isUnavailable && <span className="badge badge-unavailable">{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>}
           {isLimited && <span className="badge badge-limited">{lang === 'ar' ? 'كمية محدودة' : 'Limited'}</span>}

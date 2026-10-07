@@ -3,6 +3,12 @@ import { createPortal } from 'react-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
 import { uploadProductImageToStorage } from '../../utils/storageImage';
+import {
+  isBundleProduct,
+  calculateBundleAvailability,
+  CANONICAL_MULTI_UNITS,
+  getPhysicalStockBreakdown
+} from '../../utils/productInventoryEngine';
 import { Plus, Edit, Trash2, Archive, Check, X, FileEdit, PlusCircle, Search } from 'lucide-react';
 
 export const Products = () => {
@@ -577,16 +583,35 @@ export const Products = () => {
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem', fontWeight: 800 }}>{prod.price} د.ل</td>
                   <td style={{ padding: '0.6rem 0.75rem', fontWeight: 700 }}>
-                    {prod.shared_inventory_product_id ? (() => {
+                    {isBundleProduct(prod.id) ? (() => {
+                      const bundleRes = calculateBundleAvailability(prod.id, products);
+                      return (
+                        <span
+                          style={{ color: bundleRes.isAvailable ? '#059669' : '#DC2626' }}
+                          title={`عرض مركب يعتمد على مكوناته: ${bundleRes.componentsStatus.map(c => `${c.nameEn}: ${c.currentStock}`).join(' | ')}`}
+                        >
+                          🎁 {bundleRes.availableCount} عرض
+                        </span>
+                      );
+                    })() : CANONICAL_MULTI_UNITS[prod.id]?.isBase ? (() => {
+                      const breakdown = getPhysicalStockBreakdown(prod, products);
+                      return (
+                        <span title={`المخزون الأساسي بالقطع: ${prod.stock_quantity}`}>
+                          📦 {breakdown ? breakdown.displayAr : `${prod.stock_quantity} قطعة`}
+                        </span>
+                      );
+                    })() : prod.shared_inventory_product_id ? (() => {
                       const master = products.find(p => p.id === prod.shared_inventory_product_id);
                       const mult = prod.unit_multiplier || 1;
                       const effective = master ? Math.floor(master.stock_quantity / mult) : '—';
                       return (
-                        <span title={`مرتبط بـ: ${master?.name_ar || '?'} (${master?.stock_quantity || 0} قطعة ÷ ${mult})`}>
-                          🔗 {effective}
+                        <span title={`مرتبط بالمنتج الأساسي: ${master?.name_ar || '?'} (${master?.stock_quantity || 0} قطعة ÷ ${mult})`}>
+                          🔗 {effective} علبة
                         </span>
                       );
-                    })() : prod.stock_quantity}
+                    })() : (
+                      <span>{prod.stock_quantity}</span>
+                    )}
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem' }}>
                     {prod.is_archived ? (
