@@ -148,7 +148,7 @@ export const AdminLayout = () => {
   ];
 
   return (
-    <div className="container admin-grid-layout" style={{ padding: '2rem 0', display: 'grid', gridTemplateColumns: '220px 1fr', gap: '2.5rem' }}>
+    <div className="container admin-grid-layout">
       
       {/* Sidebar Navigation */}
       <aside style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }} className="admin-sidebar-pane no-print">

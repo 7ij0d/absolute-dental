@@ -48,10 +48,10 @@ const PublicLayout = () => {
   const isHomePage = location.pathname === '/';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
       {!isHomePage && !location.pathname.startsWith('/study-tools') && !location.pathname.startsWith('/years') && !location.pathname.startsWith('/year') && !location.pathname.startsWith('/subject') && !location.pathname.startsWith('/product') && <AnnouncementBar />}
       <Navbar />
-      <main style={{ flexGrow: 1 }}>
+      <main style={{ flexGrow: 1, width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
         <Outlet />
       </main>
       <Footer />

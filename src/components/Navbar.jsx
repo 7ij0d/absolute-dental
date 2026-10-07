@@ -366,8 +366,11 @@ export const Navbar = () => {
           </div>
 
           <style>{`
-            @media (min-width: 900px) {
+            @media (min-width: 1080px) {
               #desktop-nav-light { display: flex !important; }
+            }
+            @media (max-width: 1079px) {
+              #desktop-nav-light { display: none !important; }
             }
           `}</style>
         </header>
@@ -517,6 +520,15 @@ export const Navbar = () => {
 
           {/* Actions */}
           <div className="navbar-actions">
+            {/* Tablet & Mobile Quick Search Icon */}
+            <button
+              onClick={() => navigate('/search')}
+              className="nav-icon-btn nav-search-btn-mobile"
+              title={lang === 'ar' ? 'بحث' : 'Search'}
+            >
+              <Search size={18} />
+            </button>
+
             {/* Language Toggle — hidden on tablet, accessible via ☰ */}
             <button
               onClick={toggleLanguage}
@@ -643,14 +655,17 @@ export const Navbar = () => {
         </div>
 
         <style>{`
-          @media (min-width: 900px) {
+          @media (min-width: 1080px) {
             #desktop-nav { display: flex !important; }
-            #desktop-search { display: flex !important; }
+            #desktop-search { display: flex !important; max-width: 280px; flex: 0 1 280px; }
             #mobile-menu-btn { display: none !important; }
+            .nav-search-btn-mobile { display: none !important; }
             .navbar-actions { gap: 0.4rem; }
           }
-          /* All mobile & tablet under 900px: hide desktop-only icons and cart text label */
-          @media (max-width: 899px) {
+          @media (max-width: 1079px) {
+            #desktop-nav { display: none !important; }
+            #desktop-search { display: none !important; }
+            #mobile-menu-btn { display: flex !important; }
             .nav-icon-desktop-only { display: none !important; }
             .nav-cart-label { display: none !important; }
             .navbar-actions { gap: 0.25rem; flex-shrink: 0; }

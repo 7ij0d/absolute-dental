@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:viewport": "node verify_viewports.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
@@ -28,6 +29,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "puppeteer-core": "^25.12.0",
     "sharp": "^0.35.4",
     "tweetsodium": "^0.0.4",
     "vite": "^8.0.12"
