@@ -7,11 +7,11 @@ import InvoiceView from '../../components/InvoiceView';
 import MapPicker from '../../components/MapPicker';
 import AdminEditOrderModal from '../../components/AdminEditOrderModal';
 import OrderEditHistory from '../../components/OrderEditHistory';
-import { getOrderStatusMeta } from '../../utils/orderEditHelper';
+import { getOrderStatusMeta, normalizeOrderStatus, createStatusAuditEntry, parseOrderEditHistory } from '../../utils/orderEditHelper';
 import {
   Search, Eye, RefreshCw, Printer, X, ClipboardList, CheckCircle,
   Trash2, Pencil, Save, Check, AlertCircle, ArrowUpDown, Calendar,
-  TrendingUp, Clock, ChevronLeft, ChevronRight, Filter, AlertTriangle, Layers
+  TrendingUp, Clock, ChevronLeft, ChevronRight, Filter, AlertTriangle, Layers, Plus
 } from 'lucide-react';
 
 export const Orders = () => {
@@ -39,13 +39,77 @@ export const Orders = () => {
   // Edit Modal
   const [editingOrder, setEditingOrder] = useState(null);
 
-  // Load query from URL if redirected from elsewhere (e.g. dashboard link)
+  // Add Order Modal
+  const [showAddOrderModal, setShowAddOrderModal] = useState(false);
+  const [availableProducts, setAvailableProducts] = useState([]);
+  const [newOrderForm, setNewOrderForm] = useState({
+    customerName: '',
+    phone: '',
+    phone2: '',
+    address: 'طرابلس',
+    notes: '',
+    shippingFee: 0,
+    items: []
+  });
+  const [addingOrderLoading, setAddingOrderLoading] = useState(false);
+
+  // Load query from URL if redirected from elsewhere & establish Realtime channel
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const q = params.get('q');
     if (q) setSearchQuery(q);
     fetchOrders();
+    fetchAvailableProducts();
+
+    // 1. Live Realtime Supabase Subscription: guarantees 2-way instant synchronization
+    const ordersChannel = supabase
+      .channel('central-admin-orders-feed')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            fetchOrders();
+          } else if (payload.eventType === 'UPDATE') {
+            const updated = payload.new;
+            setOrders((prev) =>
+              prev.map((ord) => (ord.id === updated.id || ord.order_number === updated.order_number ? { ...ord, ...updated } : ord))
+            );
+            setSelectedOrder((prev) =>
+              prev && (prev.id === updated.id || prev.order_number === updated.order_number) ? { ...prev, ...updated } : prev
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setOrders((prev) => prev.filter((ord) => ord.id !== payload.old.id));
+            setSelectedOrder((prev) => prev && prev.id === payload.old.id ? null : prev);
+          }
+        }
+      )
+      .subscribe();
+
+    // 2. Refresh on tab focus / visibility
+    const handleFocus = () => {
+      if (document.visibilityState === 'visible') fetchOrders();
+    };
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    return () => {
+      supabase.removeChannel(ordersChannel);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+    };
   }, [location.search]);
+
+  const fetchAvailableProducts = async () => {
+    try {
+      const { data } = await supabase
+        .from('products')
+        .select('id, name_ar, name_en, price, main_image_url, stock')
+        .eq('is_active', true)
+        .order('name_ar');
+      if (data) setAvailableProducts(data);
+    } catch (_) {}
+  };
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -115,25 +179,50 @@ export const Orders = () => {
   const handleUpdateStatus = async (orderId, newStatus) => {
     setUpdatingStatus(true);
     try {
+      const targetOrder = orders.find(o => o.id === orderId) || selectedOrder;
+      const oldStatus = normalizeOrderStatus(targetOrder?.status);
+      const canonicalNewStatus = normalizeOrderStatus(newStatus);
+
+      if (oldStatus === canonicalNewStatus) return;
+
+      const now = new Date();
+      const currentUser = 'الأدمن';
+
+      const historyEntry = createStatusAuditEntry({
+        fromStatus: getOrderStatusMeta(oldStatus, isRtl).label,
+        toStatus: getOrderStatusMeta(canonicalNewStatus, isRtl).label,
+        author: currentUser
+      });
+
+      const existingHistory = parseOrderEditHistory(targetOrder);
+      const updatedHistory = [historyEntry, ...existingHistory];
+      const updatedStatusNote = JSON.stringify({
+        status_history: updatedHistory,
+        last_status_change: historyEntry
+      });
+
       const { error } = await supabase
         .from('orders')
-        .update({ status: newStatus })
+        .update({
+          status: canonicalNewStatus,
+          status_note: updatedStatusNote,
+          updated_at: now.toISOString()
+        })
         .eq('id', orderId);
 
       if (!error) {
         // Refresh local orders list
         setOrders((prev) =>
-          prev.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord))
+          prev.map((ord) => (ord.id === orderId ? { ...ord, status: canonicalNewStatus, status_note: updatedStatusNote } : ord))
         );
         
         // Refresh selected details model
         if (selectedOrder && selectedOrder.id === orderId) {
-          setSelectedOrder((prev) => ({ ...prev, status: newStatus }));
+          setSelectedOrder((prev) => ({ ...prev, status: canonicalNewStatus, status_note: updatedStatusNote }));
         }
 
         // Add Notification for customer
-        const statusMeta = getOrderStatusMeta(newStatus, isRtl);
-        const targetOrder = orders.find(o => o.id === orderId) || selectedOrder;
+        const statusMeta = getOrderStatusMeta(canonicalNewStatus, isRtl);
         const ordCode = targetOrder?.order_number?.replace(/-/g, '').slice(0, 8) || '';
         
         await supabase.from('notifications').insert({
@@ -144,11 +233,81 @@ export const Orders = () => {
           message_en: `Your order status is now: ${statusMeta.label}`,
           type: 'order_status'
         });
+      } else {
+        alert('حدث خطأ أثناء تحديث حالة الطلب: ' + error.message);
       }
     } catch (err) {
       console.error(err);
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  const handleCreateAdminOrder = async (e) => {
+    e.preventDefault();
+    if (newOrderForm.items.length === 0) {
+      alert('يرجى إضافة منتج واحد على الأقل للطلب');
+      return;
+    }
+    setAddingOrderLoading(true);
+    try {
+      const orderNumber = String(Math.floor(10000000 + Math.random() * 90000000));
+      const subtotal = newOrderForm.items.reduce((s, it) => s + (it.price * it.qty), 0);
+      const fee = Number(newOrderForm.shippingFee || 0);
+      const total = subtotal + fee;
+
+      const orderPayload = {
+        order_number: orderNumber,
+        customer_name: newOrderForm.customerName.trim(),
+        customer_phone: newOrderForm.phone.trim(),
+        customer_phone_secondary: newOrderForm.phone2 ? newOrderForm.phone2.trim() : null,
+        address_text: newOrderForm.address || 'طرابلس',
+        notes: newOrderForm.notes ? `أنشأه الأدمن: ${newOrderForm.notes}` : 'أنشأه الأدمن',
+        status: 'pending_review',
+        total_price: total,
+        subtotal: subtotal,
+        shipping_fee: fee,
+        payment_method: 'cash_on_delivery',
+        is_guest: true
+      };
+
+      const { data: created, error } = await supabase
+        .from('orders')
+        .insert(orderPayload)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (created) {
+        // Insert order_items
+        const itemsPayload = newOrderForm.items.map(it => ({
+          order_id: created.id,
+          product_id: it.productId,
+          quantity: it.qty,
+          price: it.price
+        }));
+
+        await supabase.from('order_items').insert(itemsPayload);
+
+        // Reset and close
+        setNewOrderForm({
+          customerName: '',
+          phone: '',
+          phone2: '',
+          address: 'طرابلس',
+          notes: '',
+          shippingFee: 0,
+          items: []
+        });
+        setShowAddOrderModal(false);
+        fetchOrders();
+      }
+    } catch (err) {
+      console.error('Error creating order:', err);
+      alert('حدث خطأ أثناء إنشاء الطلب: ' + err.message);
+    } finally {
+      setAddingOrderLoading(false);
     }
   };
 
@@ -183,17 +342,22 @@ export const Orders = () => {
     setEditingOrder(null);
   };
 
-  // Compute stats for overview cards and quick filter tabs
+  // Compute stats for overview cards and quick filter tabs using canonical status keys
   const stats = useMemo(() => {
     const total = orders.length;
-    const needsAction = orders.filter((o) => ['new', 'under_review', 'edit_requested', 'edited_pending'].includes(o.status)).length;
-    const newOrders = orders.filter((o) => ['new', 'under_review'].includes(o.status)).length;
-    const edits = orders.filter((o) => ['edit_requested', 'editing', 'edited_pending', 'updated'].includes(o.status)).length;
-    const processing = orders.filter((o) => ['accepted', 'preparing'].includes(o.status)).length;
-    const shipping = orders.filter((o) => o.status === 'out_for_delivery').length;
-    const delivered = orders.filter((o) => o.status === 'delivered').length;
-    const cancelled = orders.filter((o) => o.status === 'cancelled').length;
-    
+    const pendingReview = orders.filter((o) => normalizeOrderStatus(o.status) === 'pending_review').length;
+    const accepted = orders.filter((o) => normalizeOrderStatus(o.status) === 'accepted').length;
+    const preparing = orders.filter((o) => normalizeOrderStatus(o.status) === 'preparing').length;
+    const readyForDelivery = orders.filter((o) => normalizeOrderStatus(o.status) === 'ready_for_delivery').length;
+    const outForDelivery = orders.filter((o) => normalizeOrderStatus(o.status) === 'out_for_delivery').length;
+    const delivered = orders.filter((o) => normalizeOrderStatus(o.status) === 'delivered').length;
+    const cancelled = orders.filter((o) => {
+      const k = normalizeOrderStatus(o.status);
+      return k === 'cancelled' || k === 'rejected';
+    }).length;
+
+    const needsAction = pendingReview;
+
     const todayOrders = orders.filter((o) => {
       try {
         return new Date(o.created_at).toDateString() === new Date().toDateString();
@@ -203,10 +367,13 @@ export const Orders = () => {
     }).length;
 
     const totalSales = orders
-      .filter((o) => o.status !== 'cancelled')
+      .filter((o) => {
+        const k = normalizeOrderStatus(o.status);
+        return k !== 'cancelled' && k !== 'rejected';
+      })
       .reduce((sum, o) => sum + (parseFloat(o.total_price) || 0), 0);
 
-    return { total, needsAction, newOrders, edits, processing, shipping, delivered, cancelled, todayOrders, totalSales };
+    return { total, pendingReview, accepted, preparing, readyForDelivery, outForDelivery, delivered, cancelled, needsAction, todayOrders, totalSales };
   }, [orders]);
 
   // Filtered & Sorted orders
@@ -214,22 +381,17 @@ export const Orders = () => {
     let list = [...orders];
 
     // Status filter
-    if (statusFilter === 'needs_action') {
-      list = list.filter((ord) => ['new', 'under_review', 'edit_requested', 'edited_pending'].includes(ord.status));
-    } else if (statusFilter === 'new') {
-      list = list.filter((ord) => ['new', 'under_review'].includes(ord.status));
-    } else if (statusFilter === 'edits') {
-      list = list.filter((ord) => ['edit_requested', 'editing', 'edited_pending', 'updated'].includes(ord.status));
-    } else if (statusFilter === 'processing') {
-      list = list.filter((ord) => ['accepted', 'preparing'].includes(ord.status));
-    } else if (statusFilter === 'shipping') {
-      list = list.filter((ord) => ord.status === 'out_for_delivery');
-    } else if (statusFilter === 'delivered') {
-      list = list.filter((ord) => ord.status === 'delivered');
-    } else if (statusFilter === 'cancelled') {
-      list = list.filter((ord) => ord.status === 'cancelled');
-    } else if (statusFilter !== 'all') {
-      list = list.filter((ord) => ord.status === statusFilter);
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'needs_action') {
+        list = list.filter((ord) => normalizeOrderStatus(ord.status) === 'pending_review');
+      } else if (statusFilter === 'cancelled') {
+        list = list.filter((ord) => {
+          const k = normalizeOrderStatus(ord.status);
+          return k === 'cancelled' || k === 'rejected';
+        });
+      } else {
+        list = list.filter((ord) => normalizeOrderStatus(ord.status) === statusFilter);
+      }
     }
 
     // Date filter
@@ -301,16 +463,26 @@ export const Orders = () => {
           </p>
         </div>
 
-        <button
-          onClick={fetchOrders}
-          className="btn btn-outline"
-          disabled={loading}
-          style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', gap: '0.4rem', borderRadius: 'var(--radius-sm)' }}
-          title="تحديث البيانات من السيرفر"
-        >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-          <span>{loading ? (isRtl ? 'جاري التحميل...' : 'Refreshing...') : (isRtl ? 'تحديث البيانات' : 'Refresh')}</span>
-        </button>
+        <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+          <button
+            onClick={() => setShowAddOrderModal(true)}
+            className="btn btn-secondary"
+            style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', gap: '0.4rem', borderRadius: 'var(--radius-sm)', fontWeight: 700 }}
+          >
+            <Plus size={15} />
+            <span>{isRtl ? '+ إضافة طلب' : '+ Add Order'}</span>
+          </button>
+          <button
+            onClick={fetchOrders}
+            className="btn btn-outline"
+            disabled={loading}
+            style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', gap: '0.4rem', borderRadius: 'var(--radius-sm)' }}
+            title="تحديث البيانات من السيرفر"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            <span>{loading ? (isRtl ? 'جاري التحميل...' : 'Refreshing...') : (isRtl ? 'تحديث البيانات' : 'Refresh')}</span>
+          </button>
+        </div>
       </div>
 
       {/* KPI Stats Summary Cards */}
@@ -355,7 +527,7 @@ export const Orders = () => {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.78rem', color: stats.needsAction > 0 ? '#ef4444' : 'var(--text-muted)', fontWeight: 700 }}>
-              ⚡ بحاجة لإجراء
+              ⚡ في انتظار المراجعة
             </span>
             <AlertCircle size={16} style={{ color: stats.needsAction > 0 ? '#ef4444' : 'var(--text-muted)' }} />
           </div>
@@ -368,7 +540,7 @@ export const Orders = () => {
             )}
           </div>
           <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-            {stats.newOrders} جديدة • {stats.edits} تعديلات
+            بانتظار قبول الطلب من الإدارة
           </span>
         </div>
 
@@ -433,13 +605,13 @@ export const Orders = () => {
       >
         {[
           { key: 'all', label: 'الكل', count: stats.total, color: 'var(--primary)' },
-          { key: 'needs_action', label: '⚡ بحاجة لإجراء', count: stats.needsAction, color: '#ef4444', isAlert: stats.needsAction > 0 },
-          { key: 'edits', label: '🟡 طلبات تعديل', count: stats.edits, color: '#d97706' },
-          { key: 'new', label: '🔴 جديدة', count: stats.newOrders, color: '#3b82f6' },
-          { key: 'processing', label: '⚙️ قيد التجهيز', count: stats.processing, color: 'var(--secondary)' },
-          { key: 'shipping', label: '🚚 للتوصيل', count: stats.shipping, color: '#8b5cf6' },
-          { key: 'delivered', label: '🟢 تم التسليم', count: stats.delivered, color: 'var(--success)' },
-          { key: 'cancelled', label: '⚪ ملغية', count: stats.cancelled, color: '#6b7280' },
+          { key: 'pending_review', label: 'في انتظار المراجعة', count: stats.pendingReview, color: '#f59e0b', isAlert: stats.pendingReview > 0 },
+          { key: 'accepted', label: 'تم قبول الطلب', count: stats.accepted, color: '#3b82f6' },
+          { key: 'preparing', label: 'جاري التجهيز', count: stats.preparing, color: '#06b6d4' },
+          { key: 'ready_for_delivery', label: 'جاهز للتوصيل', count: stats.readyForDelivery, color: '#6366f1' },
+          { key: 'out_for_delivery', label: 'خرج للتوصيل', count: stats.outForDelivery, color: '#8b5cf6' },
+          { key: 'delivered', label: 'تم التسليم', count: stats.delivered, color: 'var(--success)' },
+          { key: 'cancelled', label: 'ملغى / مرفوض', count: stats.cancelled, color: '#ef4444' },
         ].map((tab) => {
           const isActive = statusFilter === tab.key;
           return (
@@ -725,12 +897,11 @@ export const Orders = () => {
                         </button>
                       )}
 
-                      {/* Quick status change */}
+                      {/* Quick status change with canonical shared options */}
                       <select
-                        value={ord.status}
+                        value={normalizeOrderStatus(ord.status)}
                         onChange={(e) => {
                           handleUpdateStatus(ord.id, e.target.value);
-                          setOrders(prev => prev.map(o => o.id === ord.id ? { ...o, status: e.target.value } : o));
                         }}
                         style={{
                           fontSize: '0.7rem',
@@ -740,20 +911,17 @@ export const Orders = () => {
                           backgroundColor: 'var(--surface-color)',
                           color: 'var(--text-main)',
                           cursor: 'pointer',
-                          maxWidth: '120px'
+                          maxWidth: '125px'
                         }}
                       >
-                        <option value="new">جديد</option>
-                        <option value="under_review">قيد المراجعة</option>
-                        <option value="edit_requested">طلب تعديل</option>
-                        <option value="editing">قيد التعديل</option>
-                        <option value="edited_pending">بانتظار الاعتماد</option>
-                        <option value="updated">تم التحديث</option>
-                        <option value="accepted">تم القبول</option>
+                        <option value="pending_review">في انتظار المراجعة</option>
+                        <option value="accepted">تم قبول الطلب</option>
                         <option value="preparing">جاري التجهيز</option>
+                        <option value="ready_for_delivery">جاهز للتوصيل</option>
                         <option value="out_for_delivery">خرج للتوصيل</option>
                         <option value="delivered">تم التسليم</option>
-                        <option value="cancelled">إلغاء</option>
+                        <option value="cancelled">ملغى</option>
+                        <option value="rejected">مرفوض</option>
                       </select>
                       {/* Edit */}
                       <button
@@ -1012,22 +1180,19 @@ export const Orders = () => {
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <select
                   className="form-input"
-                  value={selectedOrder.status}
+                  value={normalizeOrderStatus(selectedOrder.status)}
                   onChange={(e) => handleUpdateStatus(selectedOrder.id, e.target.value)}
                   disabled={updatingStatus}
-                  style={{ backgroundColor: 'var(--surface-color)', flex: 1, minWidth: '150px' }}
+                  style={{ backgroundColor: 'var(--surface-color)', flex: 1, minWidth: '160px' }}
                 >
-                  <option value="new">طلب جديد</option>
-                  <option value="under_review">قيد المراجعة</option>
-                  <option value="edit_requested">طلب تعديل (بانتظار موافقة)</option>
-                  <option value="editing">قيد التعديل (الزبون)</option>
-                  <option value="edited_pending">معدل - بانتظار الاعتماد</option>
-                  <option value="updated">تم التحديث والاعتماد</option>
-                  <option value="accepted">تم القبول</option>
+                  <option value="pending_review">في انتظار المراجعة</option>
+                  <option value="accepted">تم قبول الطلب</option>
                   <option value="preparing">جاري التجهيز</option>
+                  <option value="ready_for_delivery">جاهز للتوصيل</option>
                   <option value="out_for_delivery">خرج للتوصيل</option>
                   <option value="delivered">تم التسليم</option>
-                  <option value="cancelled">إلغاء الطلب</option>
+                  <option value="cancelled">ملغى</option>
+                  <option value="rejected">مرفوض</option>
                 </select>
                 <button
                   onClick={() => setEditingOrder(selectedOrder)}
@@ -1204,6 +1369,226 @@ export const Orders = () => {
               العودة للطلبات / Back
             </button>
             <InvoiceView order={selectedOrder} />
+          </div>
+        </div>
+      , document.body)}
+
+      {/* 4. Add Order Modal (أنشأه الأدمن) */}
+      {showAddOrderModal && createPortal(
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, padding: '1rem'
+        }}>
+          <div className="card animate-fade-in" style={{
+            width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto',
+            backgroundColor: 'var(--surface-color)', padding: '1.75rem',
+            display: 'flex', flexDirection: 'column', gap: '1.25rem',
+            boxShadow: 'var(--shadow-lg)'
+          }}>
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>
+                  {isRtl ? '➕ إضافة طلب يدوي جديد (أنشأه الأدمن)' : '➕ Add Manual Order (Admin)'}
+                </h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                  {isRtl ? 'سيتم إدراج الطلب مباشرة في قاعدة البيانات المركزية ليتزامن مع المنظومة فوراً' : 'Order inserted into central DB and synced immediately'}
+                </p>
+              </div>
+              <button onClick={() => setShowAddOrderModal(false)} className="action-btn">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleCreateAdminOrder} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'اسم العميل *' : 'Customer Name *'}</label>
+                  <input
+                    type="text"
+                    required
+                    className="form-input"
+                    value={newOrderForm.customerName}
+                    onChange={(e) => setNewOrderForm({ ...newOrderForm, customerName: e.target.value })}
+                    placeholder={isRtl ? 'مثال: محمد ساسي' : 'Name'}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'رقم الهاتف *' : 'Phone *'}</label>
+                  <input
+                    type="tel"
+                    required
+                    className="form-input"
+                    value={newOrderForm.phone}
+                    onChange={(e) => setNewOrderForm({ ...newOrderForm, phone: e.target.value })}
+                    placeholder="0912345678"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'هاتف إضافي (اختياري)' : 'Secondary Phone'}</label>
+                  <input
+                    type="tel"
+                    className="form-input"
+                    value={newOrderForm.phone2}
+                    onChange={(e) => setNewOrderForm({ ...newOrderForm, phone2: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'العنوان / المدينة' : 'Address'}</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={newOrderForm.address}
+                    onChange={(e) => setNewOrderForm({ ...newOrderForm, address: e.target.value })}
+                    placeholder="طرابلس"
+                  />
+                </div>
+              </div>
+
+              {/* Items Selection */}
+              <div style={{ padding: '0.85rem', backgroundColor: 'var(--accent)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <label className="form-label" style={{ fontWeight: 700, margin: 0 }}>
+                    {isRtl ? 'منتجات الطلبية *' : 'Order Products *'}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (availableProducts.length > 0) {
+                        const first = availableProducts[0];
+                        setNewOrderForm({
+                          ...newOrderForm,
+                          items: [...newOrderForm.items, { productId: first.id, name: first.name_ar, price: Number(first.price || 0), qty: 1 }]
+                        });
+                      }
+                    }}
+                    className="btn btn-outline"
+                    style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', gap: '0.25rem' }}
+                  >
+                    <Plus size={12} />
+                    <span>{isRtl ? 'إضافة منتج' : 'Add Item'}</span>
+                  </button>
+                </div>
+
+                {newOrderForm.items.length === 0 ? (
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'center', margin: '0.5rem 0' }}>
+                    {isRtl ? 'لم يتم إضافة أي منتج بعد. اضغط «إضافة منتج» بالأعلى.' : 'No items added yet.'}
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {newOrderForm.items.map((it, idx) => (
+                      <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.4rem', alignItems: 'center' }}>
+                        <select
+                          className="form-input"
+                          style={{ fontSize: '0.75rem', padding: '0.35rem' }}
+                          value={it.productId}
+                          onChange={(e) => {
+                            const p = availableProducts.find(x => x.id === e.target.value);
+                            const updated = [...newOrderForm.items];
+                            updated[idx] = {
+                              ...updated[idx],
+                              productId: e.target.value,
+                              name: p?.name_ar || '',
+                              price: Number(p?.price || 0)
+                            };
+                            setNewOrderForm({ ...newOrderForm, items: updated });
+                          }}
+                        >
+                          {availableProducts.map(prod => (
+                            <option key={prod.id} value={prod.id}>
+                              {prod.name_ar} ({prod.price} د.ل)
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          type="number"
+                          min="1"
+                          className="form-input"
+                          style={{ fontSize: '0.75rem', padding: '0.35rem' }}
+                          value={it.qty}
+                          onChange={(e) => {
+                            const val = Math.max(1, parseInt(e.target.value) || 1);
+                            const updated = [...newOrderForm.items];
+                            updated[idx].qty = val;
+                            setNewOrderForm({ ...newOrderForm, items: updated });
+                          }}
+                        />
+                        <span style={{ fontSize: '0.78rem', fontWeight: 700, textAlign: 'center' }}>
+                          {(it.price * it.qty).toFixed(0)} د.ل
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = newOrderForm.items.filter((_, i) => i !== idx);
+                            setNewOrderForm({ ...newOrderForm, items: updated });
+                          }}
+                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.2rem' }}
+                        >
+                          <X size={15} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Delivery Fee & Total */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', alignItems: 'center' }}>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'رسوم التوصيل (د.ل)' : 'Delivery Fee'}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="form-input"
+                    value={newOrderForm.shippingFee}
+                    onChange={(e) => setNewOrderForm({ ...newOrderForm, shippingFee: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                <div style={{ textAlign: 'end', padding: '0.5rem', backgroundColor: 'var(--accent)', borderRadius: 'var(--radius-sm)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>{isRtl ? 'الإجمالي النهائي:' : 'Total:'}</span>
+                  <span style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--primary)' }}>
+                    {((newOrderForm.items.reduce((sum, it) => sum + (it.price * it.qty), 0)) + Number(newOrderForm.shippingFee || 0)).toFixed(0)} د.ل
+                  </span>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div className="form-group">
+                <label className="form-label">{isRtl ? 'ملاحظات' : 'Notes'}</label>
+                <textarea
+                  className="form-input"
+                  rows={2}
+                  value={newOrderForm.notes}
+                  onChange={(e) => setNewOrderForm({ ...newOrderForm, notes: e.target.value })}
+                  placeholder={isRtl ? 'أي ملاحظات إضافية بخصوص الطلب...' : 'Order notes'}
+                />
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAddOrderModal(false)}
+                  className="btn btn-outline"
+                >
+                  {isRtl ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  disabled={addingOrderLoading || newOrderForm.items.length === 0}
+                  className="btn btn-secondary"
+                  style={{ fontWeight: 700 }}
+                >
+                  {addingOrderLoading ? (isRtl ? 'جاري الحفظ...' : 'Saving...') : (isRtl ? 'حفظ وإرسال الطلب ✓' : 'Save Order')}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       , document.body)}

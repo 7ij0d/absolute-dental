@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
+import { normalizeOrderStatus } from '../../utils/orderEditHelper';
 import { DollarSign, ShoppingBag, Box, Inbox, Star, Flame, Eye } from 'lucide-react';
 
 export const Dashboard = () => {
@@ -30,7 +31,8 @@ export const Dashboard = () => {
         if (orders) {
           validOrdersCount = orders.length;
           orders.forEach((ord) => {
-            if (ord.status !== 'cancelled') {
+            const k = normalizeOrderStatus(ord.status);
+            if (k !== 'cancelled' && k !== 'rejected') {
               totalSales += parseFloat(ord.total_price || 0);
             }
           });

@@ -324,7 +324,7 @@ export const CheckoutPage = () => {
         address_text: shippingOption === 'faculty' ? null : addressText,
         latitude: shippingOption === 'faculty' ? null : latitude,
         longitude: shippingOption === 'faculty' ? null : longitude,
-        status: 'new',
+        status: 'pending_review',
         total_price: finalTotal,
         discount_amount: totalDiscount,
         shipping_fee: getShippingFee(),

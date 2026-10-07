@@ -222,100 +222,206 @@ export const buildUpdatedStatusNote = (order, newEntry, meta = {}) => {
 };
 
 /**
+ * CANONICAL ORDER STATUSES
+ * The authoritative status field for all Absolute Dental orders across Admin and Main System.
+ */
+export const CANONICAL_ORDER_STATUSES = {
+  pending_review: {
+    key: 'pending_review',
+    label_ar: 'في انتظار المراجعة',
+    label_en: 'Pending Review',
+    color: '#f59e0b',
+    bg: 'rgba(245, 158, 11, 0.12)',
+    border: 'rgba(245, 158, 11, 0.3)'
+  },
+  accepted: {
+    key: 'accepted',
+    label_ar: 'تم قبول الطلب',
+    label_en: 'Accepted',
+    color: '#3b82f6',
+    bg: 'rgba(59, 130, 246, 0.12)',
+    border: 'rgba(59, 130, 246, 0.3)'
+  },
+  preparing: {
+    key: 'preparing',
+    label_ar: 'جاري التجهيز',
+    label_en: 'Preparing Tools',
+    color: '#06b6d4',
+    bg: 'rgba(6, 182, 212, 0.12)',
+    border: 'rgba(6, 182, 212, 0.3)'
+  },
+  ready_for_delivery: {
+    key: 'ready_for_delivery',
+    label_ar: 'جاهز للتوصيل',
+    label_en: 'Ready for Delivery',
+    color: '#6366f1',
+    bg: 'rgba(99, 102, 241, 0.12)',
+    border: 'rgba(99, 102, 241, 0.3)'
+  },
+  out_for_delivery: {
+    key: 'out_for_delivery',
+    label_ar: 'خرج للتوصيل',
+    label_en: 'Out for Delivery',
+    color: '#8b5cf6',
+    bg: 'rgba(139, 92, 246, 0.12)',
+    border: 'rgba(139, 92, 246, 0.3)'
+  },
+  delivered: {
+    key: 'delivered',
+    label_ar: 'تم التسليم',
+    label_en: 'Delivered',
+    color: '#10b981',
+    bg: 'rgba(16, 185, 129, 0.18)',
+    border: 'rgba(16, 185, 129, 0.4)'
+  },
+  cancelled: {
+    key: 'cancelled',
+    label_ar: 'ملغى',
+    label_en: 'Cancelled',
+    color: '#ef4444',
+    bg: 'rgba(239, 68, 68, 0.12)',
+    border: 'rgba(239, 68, 68, 0.3)'
+  },
+  rejected: {
+    key: 'rejected',
+    label_ar: 'مرفوض',
+    label_en: 'Rejected',
+    color: '#dc2626',
+    bg: 'rgba(220, 38, 38, 0.12)',
+    border: 'rgba(220, 38, 38, 0.3)'
+  }
+};
+
+/**
+ * Normalizes any raw status string (Arabic or legacy English) into the canonical enum key.
+ */
+export const normalizeOrderStatus = (raw) => {
+  if (!raw) return 'pending_review';
+  const s = String(raw).trim().toLowerCase();
+
+  if (s === 'pending_review' || s === 'new' || s === 'under_review' || s.includes('انتظار') || s.includes('جديد')) {
+    return 'pending_review';
+  }
+  if (s === 'accepted' || s.includes('قبول')) {
+    return 'accepted';
+  }
+  if (s === 'preparing' || s.includes('تجهيز') || s === 'editing') {
+    return 'preparing';
+  }
+  if (s === 'ready_for_delivery' || s === 'ready' || s.includes('جاهز')) {
+    return 'ready_for_delivery';
+  }
+  if (s === 'out_for_delivery' || s === 'shipping' || (s.includes('خرج') && s.includes('توصيل'))) {
+    return 'out_for_delivery';
+  }
+  if (s === 'delivered' || s === 'completed' || s.includes('تسليم') || s.includes('مكتمل')) {
+    return 'delivered';
+  }
+  if (s === 'rejected' || s.includes('مرفوض')) {
+    return 'rejected';
+  }
+  if (s === 'cancelled' || s === 'canceled' || s.includes('ملغ')) {
+    return 'cancelled';
+  }
+
+  // Edit sub-states from website
+  if (s === 'edit_requested' || s === 'edited_pending' || s === 'updated') {
+    return s;
+  }
+
+  return 'pending_review';
+};
+
+/**
+ * Creates an audit trail log entry for order status changes.
+ */
+export const createStatusAuditEntry = ({ fromStatus, toStatus, author = 'النظام', notes = null }) => {
+  const now = new Date();
+  return {
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    from: fromStatus,
+    to: toStatus,
+    author,
+    notes,
+    timestamp: now.toISOString(),
+    date_formatted: now.toLocaleDateString('ar-LY') + ' ' + now.toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' })
+  };
+};
+
+/**
  * Returns human-readable status metadata, color badges, and labels.
  */
-export const getOrderStatusMeta = (status, isRtl = true) => {
-  switch (status) {
-    case 'new':
-      return {
-        label: isRtl ? 'طلب جديد' : 'New Order',
-        color: '#3b82f6',
-        bg: 'rgba(59, 130, 246, 0.12)',
-        border: 'rgba(59, 130, 246, 0.3)'
-      };
-    case 'under_review':
-      return {
-        label: isRtl ? 'قيد المراجعة' : 'Under Review',
-        color: '#f59e0b',
-        bg: 'rgba(245, 158, 11, 0.12)',
-        border: 'rgba(245, 158, 11, 0.3)'
-      };
-    case 'accepted':
-      return {
-        label: isRtl ? 'تم القبول' : 'Accepted',
-        color: '#10b981',
-        bg: 'rgba(16, 185, 129, 0.12)',
-        border: 'rgba(16, 185, 129, 0.3)'
-      };
-    case 'preparing':
-      return {
-        label: isRtl ? 'جاري التجهيز' : 'Preparing Tools',
-        color: '#06b6d4',
-        bg: 'rgba(6, 182, 212, 0.12)',
-        border: 'rgba(6, 182, 212, 0.3)'
-      };
-    case 'out_for_delivery':
-      return {
-        label: isRtl ? 'خرج للتوصيل' : 'Out for Delivery',
-        color: '#8b5cf6',
-        bg: 'rgba(139, 92, 246, 0.12)',
-        border: 'rgba(139, 92, 246, 0.3)'
-      };
-    case 'delivered':
-      return {
-        label: isRtl ? 'تم التسليم' : 'Delivered',
-        color: '#10b981',
-        bg: 'rgba(16, 185, 129, 0.18)',
-        border: 'rgba(16, 185, 129, 0.4)'
-      };
-    case 'cancelled':
-      return {
-        label: isRtl ? 'ملغي' : 'Cancelled',
-        color: '#ef4444',
-        bg: 'rgba(239, 68, 68, 0.12)',
-        border: 'rgba(239, 68, 68, 0.3)'
-      };
+export const getOrderStatusMeta = (rawStatus, isRtl = true) => {
+  const normKey = normalizeOrderStatus(rawStatus);
 
-    // --- Order Edit Statuses ---
+  if (CANONICAL_ORDER_STATUSES[normKey]) {
+    const c = CANONICAL_ORDER_STATUSES[normKey];
+    return {
+      key: c.key,
+      label: isRtl ? c.label_ar : c.label_en,
+      color: c.color,
+      bg: c.bg,
+      bgColor: c.bg,
+      border: c.border,
+      borderColor: c.border
+    };
+  }
+
+  // Handling special edit states
+  switch (rawStatus) {
     case 'edit_requested':
       return {
+        key: 'edit_requested',
         label: isRtl ? 'طلب تعديل قيد المراجعة' : 'Edit Requested',
         color: '#d97706',
         bg: 'rgba(217, 119, 6, 0.15)',
+        bgColor: 'rgba(217, 119, 6, 0.15)',
         border: 'rgba(217, 119, 6, 0.4)',
+        borderColor: 'rgba(217, 119, 6, 0.4)',
         isEditState: true
       };
     case 'editing':
       return {
+        key: 'editing',
         label: isRtl ? 'قيد التعديل' : 'Editing in Progress',
         color: '#2563eb',
         bg: 'rgba(37, 99, 235, 0.15)',
+        bgColor: 'rgba(37, 99, 235, 0.15)',
         border: 'rgba(37, 99, 235, 0.4)',
+        borderColor: 'rgba(37, 99, 235, 0.4)',
         isEditState: true
       };
     case 'edited_pending':
       return {
+        key: 'edited_pending',
         label: isRtl ? 'معدّل - بانتظار الاعتماد' : 'Edited – Awaiting Review',
         color: '#7c3aed',
         bg: 'rgba(124, 58, 237, 0.15)',
+        bgColor: 'rgba(124, 58, 237, 0.15)',
         border: 'rgba(124, 58, 237, 0.4)',
+        borderColor: 'rgba(124, 58, 237, 0.4)',
         isEditState: true
       };
     case 'updated':
       return {
+        key: 'updated',
         label: isRtl ? 'تم التحديث والاعتماد' : 'Updated & Confirmed',
         color: '#059669',
         bg: 'rgba(5, 150, 105, 0.15)',
+        bgColor: 'rgba(5, 150, 105, 0.15)',
         border: 'rgba(5, 150, 105, 0.4)',
+        borderColor: 'rgba(5, 150, 105, 0.4)',
         isEditState: true
       };
-
     default:
       return {
-        label: status || (isRtl ? 'غير محدد' : 'Unknown'),
+        key: rawStatus || 'unknown',
+        label: rawStatus || (isRtl ? 'غير محدد' : 'Unknown'),
         color: 'var(--text-muted)',
         bg: 'var(--accent)',
-        border: 'var(--border-color)'
+        bgColor: 'var(--accent)',
+        border: 'var(--border-color)',
+        borderColor: 'var(--border-color)'
       };
   }
 };

@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 import supabase from '../supabaseClient';
 import InvoiceView from '../components/InvoiceView';
 import OrderEditHistory from '../components/OrderEditHistory';
-import { getOrderStatusMeta } from '../utils/orderEditHelper';
+import { getOrderStatusMeta, normalizeOrderStatus } from '../utils/orderEditHelper';
 import { Search, MapPin, ClipboardList, CheckCircle2, Clock, Truck, ShieldAlert, ArrowRight, ArrowLeft, Edit3, AlertCircle, ShoppingCart, X, Send } from 'lucide-react';
 
 export const OrderTracking = () => {
@@ -193,19 +193,20 @@ export const OrderTracking = () => {
 
   // Status mapping to timeline steps (0-5 index)
   const statusSteps = [
-    { key: 'new', label_ar: 'طلب جديد', label_en: 'New Order', icon: Clock },
-    { key: 'under_review', label_ar: 'قيد المراجعة', label_en: 'Under Review', icon: ClipboardList },
-    { key: 'accepted', label_ar: 'تم القبول', label_en: 'Accepted', icon: CheckCircle2 },
+    { key: 'pending_review', label_ar: 'في انتظار المراجعة', label_en: 'Pending Review', icon: Clock },
+    { key: 'accepted', label_ar: 'تم قبول الطلب', label_en: 'Accepted', icon: CheckCircle2 },
     { key: 'preparing', label_ar: 'جاري التجهيز', label_en: 'Preparing Tools', icon: ClipboardList },
+    { key: 'ready_for_delivery', label_ar: 'جاهز للتوصيل', label_en: 'Ready for Delivery', icon: CheckCircle2 },
     { key: 'out_for_delivery', label_ar: 'خرج للتوصيل', label_en: 'Out for Delivery', icon: Truck },
     { key: 'delivered', label_ar: 'تم التسليم', label_en: 'Delivered', icon: CheckCircle2 }
   ];
 
   const getActiveStepIndex = (status) => {
-    if (status === 'cancelled') return -1;
-    if (status === 'edit_requested' || status === 'editing' || status === 'edited_pending') return 1;
-    if (status === 'updated') return 2;
-    return statusSteps.findIndex((step) => step.key === status);
+    const k = normalizeOrderStatus(status);
+    if (k === 'cancelled' || k === 'rejected') return -1;
+    if (status === 'edit_requested' || status === 'editing' || status === 'edited_pending') return 0;
+    if (status === 'updated') return 1;
+    return statusSteps.findIndex((step) => step.key === k);
   };
 
   const activeIndex = order ? getActiveStepIndex(order.status) : -1;
