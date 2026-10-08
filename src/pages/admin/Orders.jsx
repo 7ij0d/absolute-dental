@@ -20,8 +20,27 @@ export const Orders = () => {
   const { t, lang, isRtl } = useLanguage();
   const location = useLocation();
 
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_orders') || sessionStorage.getItem('abs_admin_cached_orders');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+    return [];
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_orders') || sessionStorage.getItem('abs_admin_cached_orders');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return false;
+      }
+    } catch (_) {}
+    return true;
+  });
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,7 +80,7 @@ export const Orders = () => {
     const params = new URLSearchParams(location.search);
     const q = params.get('q');
     if (q) setSearchQuery(q);
-    fetchOrders();
+    fetchOrders(orders.length > 0);
     fetchAvailableProducts();
 
     // 1. Live Realtime Supabase Subscription: guarantees 2-way instant synchronization
@@ -72,26 +91,32 @@ export const Orders = () => {
         { event: '*', schema: 'public', table: 'orders' },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            fetchOrders();
+            fetchOrders(true);
           } else if (payload.eventType === 'UPDATE') {
             const updated = payload.new;
-            setOrders((prev) =>
-              prev.map((ord) => (ord.id === updated.id || ord.order_number === updated.order_number ? { ...ord, ...updated } : ord))
-            );
+            setOrders((prev) => {
+              const next = prev.map((ord) => (ord.id === updated.id || ord.order_number === updated.order_number ? { ...ord, ...updated } : ord));
+              try { localStorage.setItem('abs_admin_cached_orders', JSON.stringify(next)); } catch (_) {}
+              return next;
+            });
             setSelectedOrder((prev) =>
               prev && (prev.id === updated.id || prev.order_number === updated.order_number) ? { ...prev, ...updated } : prev
             );
           } else if (payload.eventType === 'DELETE') {
-            setOrders((prev) => prev.filter((ord) => ord.id !== payload.old.id));
+            setOrders((prev) => {
+              const next = prev.filter((ord) => ord.id !== payload.old.id);
+              try { localStorage.setItem('abs_admin_cached_orders', JSON.stringify(next)); } catch (_) {}
+              return next;
+            });
             setSelectedOrder((prev) => prev && prev.id === payload.old.id ? null : prev);
           }
         }
       )
       .subscribe();
 
-    // 2. Refresh on tab focus / visibility
+    // 2. Silent Refresh on tab focus / visibility (never blocks or blanks UI)
     const handleFocus = () => {
-      if (document.visibilityState === 'visible') fetchOrders();
+      if (document.visibilityState === 'visible') fetchOrders(true);
     };
     window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleFocus);
@@ -107,17 +132,23 @@ export const Orders = () => {
     try {
       const { data } = await supabase
         .from('products')
-        .select('id, name_ar, name_en, price, main_image_url, stock')
+        .select('id, name_ar, name_en, price, image_url, stock_quantity')
         .eq('is_active', true)
         .order('name_ar');
-      if (data) setAvailableProducts(data);
+      if (data && Array.isArray(data)) setAvailableProducts(data);
     } catch (_) {}
   };
 
-  const fetchOrders = async () => {
-    setLoading(true);
+  const fetchOrders = async (isSilent = false) => {
+    // Only show full-page skeleton if there are NO cached orders to display
+    if (!isSilent && orders.length === 0) {
+      setLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
+
     try {
-      // Lightweight, high-performance query fetching only required columns
+      // Lightweight, high-performance query fetching only required columns with correct database schema
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -148,7 +179,7 @@ export const Orders = () => {
               id,
               name_ar,
               name_en,
-              main_image_url,
+              image_url,
               price
             )
           )
@@ -157,13 +188,21 @@ export const Orders = () => {
       
       if (!error && Array.isArray(data)) {
         setOrders(data);
+        try {
+          localStorage.setItem('abs_admin_cached_orders', JSON.stringify(data));
+        } catch (_) {}
       } else {
-        console.warn('Orders optimized query fallback:', error);
+        console.warn('Orders primary query notice:', error);
         const { data: directData } = await supabase
           .from('orders')
           .select('*')
           .order('created_at', { ascending: false });
-        if (directData) setOrders(directData);
+        if (directData && Array.isArray(directData)) {
+          setOrders(directData);
+          try {
+            localStorage.setItem('abs_admin_cached_orders', JSON.stringify(directData));
+          } catch (_) {}
+        }
       }
     } catch (err) {
       console.error('Error fetching admin order index', err);
@@ -172,10 +211,16 @@ export const Orders = () => {
           .from('orders')
           .select('*')
           .order('created_at', { ascending: false });
-        if (directData) setOrders(directData);
+        if (directData && Array.isArray(directData)) {
+          setOrders(directData);
+          try {
+            localStorage.setItem('abs_admin_cached_orders', JSON.stringify(directData));
+          } catch (_) {}
+        }
       } catch (_) {}
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -215,9 +260,11 @@ export const Orders = () => {
 
       if (!error) {
         // Refresh local orders list
-        setOrders((prev) =>
-          prev.map((ord) => (ord.id === orderId ? { ...ord, status: canonicalNewStatus, status_note: updatedStatusNote } : ord))
-        );
+        setOrders((prev) => {
+          const next = prev.map((ord) => (ord.id === orderId ? { ...ord, status: canonicalNewStatus, status_note: updatedStatusNote } : ord));
+          try { localStorage.setItem('abs_admin_cached_orders', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
         
         // Refresh selected details model
         if (selectedOrder && selectedOrder.id === orderId) {
@@ -479,14 +526,14 @@ export const Orders = () => {
             <span>{isRtl ? '+ إضافة طلب' : '+ Add Order'}</span>
           </button>
           <button
-            onClick={fetchOrders}
+            onClick={() => fetchOrders(false)}
             className="btn btn-outline"
-            disabled={loading}
+            disabled={loading || isRefreshing}
             style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', gap: '0.4rem', borderRadius: 'var(--radius-sm)' }}
             title="تحديث البيانات من السيرفر"
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            <span>{loading ? (isRtl ? 'جاري التحميل...' : 'Refreshing...') : (isRtl ? 'تحديث البيانات' : 'Refresh')}</span>
+            <RefreshCw size={14} className={(loading || isRefreshing) ? 'animate-spin' : ''} />
+            <span>{(loading || isRefreshing) ? (isRtl ? 'جاري التحديث...' : 'Refreshing...') : (isRtl ? 'تحديث البيانات' : 'Refresh')}</span>
           </button>
         </div>
       </div>

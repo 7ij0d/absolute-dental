@@ -50,7 +50,7 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
     setLoadingCatalog(true);
     supabase
       .from('products')
-      .select('id, name_ar, name_en, price, main_image_url, stock_quantity, unit_multiplier, shared_inventory_product_id')
+      .select('id, name_ar, name_en, price, image_url, stock_quantity, unit_multiplier, shared_inventory_product_id')
       .eq('is_active', true)
       .order('name_ar', { ascending: true })
       .then(({ data }) => {
@@ -90,7 +90,7 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
         name_en: oi.products?.name_en || oi.name_en || 'Product',
         price: parseFloat(oi.price) || 0,
         quantity: Math.max(1, parseInt(oi.quantity) || 1),
-        image_url: oi.products?.main_image_url || oi.image_url || '',
+        image_url: oi.products?.image_url || oi.image_url || '',
         selling_unit: oi.selling_unit || null,
         selling_unit_id: oi.selling_unit_id || (oi.selling_unit?.includes('علبة') ? 'box' : 'piece'),
         unit_multiplier: parseInt(oi.unit_multiplier) || 1,
@@ -314,7 +314,7 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
           name_en: product.name_en,
           price: parseFloat(product.price) || 0,
           quantity: 1,
-          image_url: product.main_image_url || '',
+          image_url: product.image_url || product.main_image_url || '',
           selling_unit: 'قطعة',
           selling_unit_id: 'piece',
           unit_multiplier: 1,
@@ -706,8 +706,8 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
                         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-color)')}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                          {prod.main_image_url ? (
-                            <img src={prod.main_image_url} alt="" style={{ width: '28px', height: '28px', objectFit: 'cover', borderRadius: '4px' }} />
+                          {(prod.image_url || prod.main_image_url) ? (
+                            <img src={prod.image_url || prod.main_image_url} alt="" style={{ width: '28px', height: '28px', objectFit: 'cover', borderRadius: '4px' }} />
                           ) : (
                             <Package size={20} color="var(--text-muted)" />
                           )}

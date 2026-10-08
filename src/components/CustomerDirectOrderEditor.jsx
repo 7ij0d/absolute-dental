@@ -55,7 +55,7 @@ export const CustomerDirectOrderEditor = ({ order, onClose, onModificationSubmit
     setLoadingCatalog(true);
     supabase
       .from('products')
-      .select('id, name_ar, name_en, price, main_image_url, stock_quantity, unit_multiplier, shared_inventory_product_id, category_id, year_id')
+      .select('id, name_ar, name_en, price, image_url, stock_quantity, unit_multiplier, shared_inventory_product_id, subject_id, year_id')
       .eq('is_active', true)
       .order('name_ar', { ascending: true })
       .then(({ data }) => {
@@ -161,7 +161,7 @@ export const CustomerDirectOrderEditor = ({ order, onClose, onModificationSubmit
         name_en: prod.name_en || prod.name_ar,
         price: parseFloat(prod.price || 0),
         quantity: 1,
-        image_url: prod.main_image_url || '',
+        image_url: prod.image_url || prod.main_image_url || '',
         selling_unit: prod.unit_multiplier > 1 ? 'علبة' : 'قطعة',
         selling_unit_id: prod.unit_multiplier > 1 ? 'box' : 'piece',
         unit_multiplier: prod.unit_multiplier || 1,
@@ -821,8 +821,8 @@ export const CustomerDirectOrderEditor = ({ order, onClose, onModificationSubmit
                         backgroundColor: '#f1f5f9',
                         flexShrink: 0
                       }}>
-                        {prod.main_image_url ? (
-                          <img src={prod.main_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        {(prod.image_url || prod.main_image_url) ? (
+                          <img src={prod.image_url || prod.main_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                           <Package size={18} color="#94a3b8" style={{ margin: '10px auto' }} />
                         )}
