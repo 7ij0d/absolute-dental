@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useLanguage } from '../context/LanguageContext';
 import supabase from '../supabaseClient';
 import { createEditHistoryEntry, buildUpdatedStatusNote } from '../utils/orderEditHelper';
+import { CANONICAL_MULTI_UNITS } from '../utils/productInventoryEngine';
 import {
   X,
   Save,
@@ -34,36 +35,7 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
   const [shippingFee, setShippingFee] = useState(parseFloat(order.shipping_fee ?? 0) || 0);
   const [discountAmount, setDiscountAmount] = useState(parseFloat(order.discount_amount ?? 0) || 0);
 
-  // Items State
-  const initialItems = useMemo(() => {
-    if (Array.isArray(order.items) && order.items.length > 0) {
-      return order.items.map((it) => ({
-        id: it.id,
-        name_ar: it.name_ar,
-        name_en: it.name_en,
-        price: parseFloat(it.price) || 0,
-        quantity: Math.max(1, parseInt(it.quantity) || 1),
-        image_url: it.image_url || '',
-        is_accessory: Boolean(it.is_accessory)
-      }));
-    }
-    if (Array.isArray(order.order_items)) {
-      return order.order_items.map((oi) => ({
-        id: oi.product_id || oi.id,
-        name_ar: oi.products?.name_ar || oi.name_ar || 'منتج',
-        name_en: oi.products?.name_en || oi.name_en || 'Product',
-        price: parseFloat(oi.price) || 0,
-        quantity: Math.max(1, parseInt(oi.quantity) || 1),
-        image_url: oi.products?.main_image_url || oi.image_url || '',
-        is_accessory: false
-      }));
-    }
-    return [];
-  }, [order]);
-
-  const [items, setItems] = useState(initialItems);
-
-  // Catalog Products (for adding new items)
+  // Catalog Products (preloaded for selling units and adding new items)
   const [catalogProducts, setCatalogProducts] = useState([]);
   const [catalogSearch, setCatalogSearch] = useState('');
   const [showCatalogPicker, setShowCatalogPicker] = useState(false);
@@ -73,22 +45,62 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Fetch catalog products when picker opens
+  // Preload catalog products for accurate selling unit resolution
   useEffect(() => {
-    if (showCatalogPicker && catalogProducts.length === 0) {
-      setLoadingCatalog(true);
-      supabase
-        .from('products')
-        .select('id, name_ar, name_en, price, main_image_url, stock_quantity')
-        .eq('is_active', true)
-        .order('name_ar', { ascending: true })
-        .then(({ data }) => {
-          if (data) setCatalogProducts(data);
-          setLoadingCatalog(false);
-        })
-        .catch(() => setLoadingCatalog(false));
+    setLoadingCatalog(true);
+    supabase
+      .from('products')
+      .select('id, name_ar, name_en, price, main_image_url, stock_quantity, unit_multiplier, shared_inventory_product_id')
+      .eq('is_active', true)
+      .order('name_ar', { ascending: true })
+      .then(({ data }) => {
+        if (data) setCatalogProducts(data);
+        setLoadingCatalog(false);
+      })
+      .catch((err) => {
+        console.warn('Preload catalog notice:', err);
+        setLoadingCatalog(false);
+      });
+  }, []);
+
+  // Items State with strict canonical product identity retention
+  const initialItems = useMemo(() => {
+    if (Array.isArray(order.items) && order.items.length > 0) {
+      return order.items.map((it, idx) => ({
+        lineId: it.lineId || `line_${idx}_${it.id || it.productId || idx}`,
+        id: it.productId || it.id,
+        productId: it.productId || it.id,
+        name_ar: it.name_ar,
+        name_en: it.name_en,
+        price: parseFloat(it.price) || 0,
+        quantity: Math.max(1, parseInt(it.quantity) || 1),
+        image_url: it.image_url || '',
+        selling_unit: it.selling_unit || it.sellingUnit || null,
+        selling_unit_id: it.selling_unit_id || it.sellingUnitId || (it.selling_unit?.includes('علبة') ? 'box' : 'piece'),
+        unit_multiplier: parseInt(it.unit_multiplier || it.unitMultiplier) || 1,
+        is_accessory: Boolean(it.is_accessory)
+      }));
     }
-  }, [showCatalogPicker, catalogProducts.length]);
+    if (Array.isArray(order.order_items)) {
+      return order.order_items.map((oi, idx) => ({
+        lineId: oi.lineId || `line_${idx}_${oi.product_id || oi.id}`,
+        id: oi.product_id || oi.id,
+        productId: oi.product_id || oi.id,
+        name_ar: oi.products?.name_ar || oi.name_ar || 'منتج',
+        name_en: oi.products?.name_en || oi.name_en || 'Product',
+        price: parseFloat(oi.price) || 0,
+        quantity: Math.max(1, parseInt(oi.quantity) || 1),
+        image_url: oi.products?.main_image_url || oi.image_url || '',
+        selling_unit: oi.selling_unit || null,
+        selling_unit_id: oi.selling_unit_id || (oi.selling_unit?.includes('علبة') ? 'box' : 'piece'),
+        unit_multiplier: parseInt(oi.unit_multiplier) || 1,
+        is_accessory: false
+      }));
+    }
+    return [];
+  }, [order]);
+
+  const [items, setItems] = useState(initialItems);
 
   // Recalculations
   const subtotal = useMemo(() => {
@@ -99,6 +111,136 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
     const final = subtotal + (parseFloat(shippingFee) || 0) - (parseFloat(discountAmount) || 0);
     return Math.max(0, final);
   }, [subtotal, shippingFee, discountAmount]);
+
+  /**
+   * Authoritative lookup of available selling units for a product.
+   * NEVER searches products flatly by price!
+   * Strictly inspects canonical multi-unit metadata and relational parent/child links.
+   */
+  const getAvailableSellingUnits = (item, catalogList) => {
+    const prodId = item.productId || item.id;
+    const units = [];
+
+    // 1. Check CANONICAL_MULTI_UNITS (Wax etc.)
+    const canonicalMeta = CANONICAL_MULTI_UNITS[prodId];
+    if (canonicalMeta) {
+      if (canonicalMeta.isBase) {
+        units.push({
+          id: 'piece',
+          nameAr: canonicalMeta.baseUnitNameAr || 'قطعة',
+          nameEn: canonicalMeta.baseUnitNameEn || 'Piece',
+          multiplier: 1,
+          defaultPrice: 2
+        });
+        const packProd = (catalogList || []).find((p) => p.id === canonicalMeta.packProductId);
+        units.push({
+          id: 'box',
+          nameAr: 'علبة (3 قطع)',
+          nameEn: 'Box (3 Pieces)',
+          multiplier: canonicalMeta.boxSize || 3,
+          defaultPrice: packProd ? parseFloat(packProd.price) : 5
+        });
+      } else {
+        const baseProd = (catalogList || []).find((p) => p.id === canonicalMeta.baseProductId);
+        units.push({
+          id: 'piece',
+          nameAr: 'قطعة',
+          nameEn: 'Piece',
+          multiplier: 1,
+          defaultPrice: baseProd ? parseFloat(baseProd.price) : 2
+        });
+        units.push({
+          id: 'box',
+          nameAr: canonicalMeta.unitNameAr || 'علبة (3 قطع)',
+          nameEn: canonicalMeta.unitNameEn || 'Box (3 Pieces)',
+          multiplier: canonicalMeta.unitMultiplier || 3,
+          defaultPrice: 5
+        });
+      }
+      return units;
+    }
+
+    // 2. Check relational shared_inventory in database catalog
+    const catalogItem = (catalogList || []).find((p) => p.id === prodId);
+    if (catalogItem) {
+      if (catalogItem.shared_inventory_product_id) {
+        const parent = (catalogList || []).find((p) => p.id === catalogItem.shared_inventory_product_id);
+        const mult = parseInt(catalogItem.unit_multiplier) || 3;
+        units.push({
+          id: 'piece',
+          nameAr: 'قطعة',
+          nameEn: 'Piece',
+          multiplier: 1,
+          defaultPrice: parent ? parseFloat(parent.price) : parseFloat((catalogItem.price / mult).toFixed(2))
+        });
+        units.push({
+          id: 'box',
+          nameAr: `علبة (${mult} قطع)`,
+          nameEn: `Box (${mult} Pieces)`,
+          multiplier: mult,
+          defaultPrice: parseFloat(catalogItem.price)
+        });
+        return units;
+      }
+
+      // Check if another product references this as its shared inventory master
+      const childPack = (catalogList || []).find((p) => p.shared_inventory_product_id === prodId);
+      if (childPack) {
+        const mult = parseInt(childPack.unit_multiplier) || 3;
+        units.push({
+          id: 'piece',
+          nameAr: 'قطعة',
+          nameEn: 'Piece',
+          multiplier: 1,
+          defaultPrice: parseFloat(catalogItem.price)
+        });
+        units.push({
+          id: 'box',
+          nameAr: `علبة (${mult} قطع)`,
+          nameEn: `Box (${mult} Pieces)`,
+          multiplier: mult,
+          defaultPrice: parseFloat(childPack.price)
+        });
+        return units;
+      }
+    }
+
+    // 3. If item has existing selling_unit, preserve it and offer standard alternative
+    if (item.selling_unit) {
+      units.push({
+        id: item.selling_unit.includes('علبة') ? 'box' : 'piece',
+        nameAr: item.selling_unit,
+        nameEn: item.selling_unit,
+        multiplier: item.unit_multiplier || 1,
+        defaultPrice: item.price
+      });
+      if (!item.selling_unit.includes('علبة')) {
+        units.push({
+          id: 'box',
+          nameAr: 'علبة (Box)',
+          nameEn: 'Box',
+          multiplier: 3,
+          defaultPrice: Math.round(item.price * 2.5)
+        });
+      }
+      if (!item.selling_unit.includes('قطعة')) {
+        units.push({
+          id: 'piece',
+          nameAr: 'قطعة (Piece)',
+          nameEn: 'Piece',
+          multiplier: 1,
+          defaultPrice: Math.max(1, Math.round(item.price / 3))
+        });
+      }
+      return units;
+    }
+
+    // Default units available for standard products
+    return [
+      { id: 'piece', nameAr: 'قطعة (Piece)', nameEn: 'Piece', multiplier: 1, defaultPrice: item.price },
+      { id: 'box', nameAr: 'علبة (Box)', nameEn: 'Box', multiplier: 3, defaultPrice: Math.round(item.price * 2.5) }
+    ];
+  };
 
   // Item handlers
   const handleUpdateItemQuantity = (index, newQty) => {
@@ -115,6 +257,39 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
     );
   };
 
+  /**
+   * CRITICAL FIX FOR BUG 2:
+   * Changing selling unit MUST NEVER change product identity (productId, name, image)!
+   * NEVER looks up by price across all products.
+   */
+  const handleUpdateItemSellingUnit = (index, selectedUnitKey) => {
+    setItems((prev) =>
+      prev.map((item, i) => {
+        if (i !== index) return item;
+
+        const availableUnits = getAvailableSellingUnits(item, catalogProducts);
+        const chosenUnit = availableUnits.find((u) => u.id === selectedUnitKey);
+        if (!chosenUnit) return item;
+
+        // Strictly preserve canonical product identity:
+        return {
+          ...item,
+          productId: item.productId || item.id,
+          id: item.productId || item.id,
+          name_ar: item.name_ar,
+          name_en: item.name_en,
+          image_url: item.image_url,
+          is_accessory: item.is_accessory,
+          // Updated selling unit attributes:
+          selling_unit: chosenUnit.nameAr,
+          selling_unit_id: chosenUnit.id,
+          unit_multiplier: chosenUnit.multiplier,
+          price: chosenUnit.defaultPrice !== undefined ? chosenUnit.defaultPrice : item.price
+        };
+      })
+    );
+  };
+
   const handleRemoveItem = (index) => {
     if (items.length <= 1) {
       if (!window.confirm(isRtl ? 'هذا هو المنتج الأخير في الطلب. هل تريد حذفه؟' : 'This is the last item in the order. Delete it?')) {
@@ -125,19 +300,24 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
   };
 
   const handleAddProductFromCatalog = (product) => {
-    const existingIndex = items.findIndex((it) => it.id === product.id);
+    const existingIndex = items.findIndex((it) => (it.productId || it.id) === product.id);
     if (existingIndex >= 0) {
       handleUpdateItemQuantity(existingIndex, items[existingIndex].quantity + 1);
     } else {
       setItems((prev) => [
         ...prev,
         {
+          lineId: `line_${Date.now()}_${product.id}`,
           id: product.id,
+          productId: product.id,
           name_ar: product.name_ar,
           name_en: product.name_en,
           price: parseFloat(product.price) || 0,
           quantity: 1,
           image_url: product.main_image_url || '',
+          selling_unit: 'قطعة',
+          selling_unit_id: 'piece',
+          unit_multiplier: 1,
           is_accessory: false
         }
       ]);
@@ -182,7 +362,7 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
         last_admin_edit_at: new Date().toISOString()
       });
 
-      // 2. Update orders table (same order ID!)
+      // 2. Update orders table (same order ID, preserving canonical productId)
       const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const orderPayload = {
         customer_name: customerName,
@@ -199,12 +379,16 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
         subtotal: subtotal,
         total_price: grandTotal,
         items: items.map((it) => ({
-          id: it.id,
+          id: it.productId || it.id,
+          productId: it.productId || it.id,
           name_ar: it.name_ar,
           name_en: it.name_en,
           price: it.price,
           quantity: it.quantity,
           image_url: it.image_url,
+          selling_unit: it.selling_unit || null,
+          selling_unit_id: it.selling_unit_id || null,
+          unit_multiplier: it.unit_multiplier || 1,
           is_accessory: Boolean(it.is_accessory)
         })),
         status_note: updatedStatusNote,
@@ -226,11 +410,11 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
 
       if (updateErr) throw updateErr;
 
-      // 3. Update relational order_items table
+      // 3. Update relational order_items table with canonical product ID & selling unit
       await supabase.from('order_items').delete().eq('order_id', order.id);
       const newOrderItems = items.map((it) => ({
         order_id: order.id,
-        product_id: UUID_REGEX.test(String(it.id || '')) ? it.id : null,
+        product_id: UUID_REGEX.test(String(it.productId || it.id || '')) ? (it.productId || it.id) : null,
         quantity: it.quantity,
         price: it.price
       }));
@@ -289,7 +473,7 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
         className="animate-fade-in"
         style={{
           width: '100%',
-          maxWidth: '850px',
+          maxWidth: '920px',
           backgroundColor: 'var(--surface-color)',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--border-color)',
@@ -317,8 +501,8 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
             </h2>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0.25rem 0 0 0' }}>
               {isRtl
-                ? 'تعديل المنتجات، الأسعار، الكميات، وبيانات العميل مع الحفظ في سجل التعديلات المعتمد.'
-                : 'Modify items, prices, quantities, and customer details with full audit logging.'}
+                ? 'تعديل المنتجات، وحدات البيع، الأسعار، الكميات، وبيانات العميل مع الحفظ في سجل التعديلات المعتمد.'
+                : 'Modify items, selling units, prices, quantities, and customer details with full audit logging.'}
             </p>
           </div>
           <button onClick={onClose} className="action-btn" title="Close">
@@ -442,12 +626,12 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
-                  📦 {isRtl ? 'منتجات الطلبية والأسعار' : 'Order Products & Pricing'} ({items.length})
+                  📦 {isRtl ? 'منتجات الطلبية ووحدات البيع والأسعار' : 'Order Products, Units & Pricing'} ({items.length})
                 </h4>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0.2rem 0 0 0' }}>
                   {isRtl
-                    ? 'يمكنك تعديل كمية أو سعر أي منتج، حذفه، أو إضافة منتجات جديدة من الكتالوج.'
-                    : 'Modify quantities or unit prices, remove items, or add new ones from catalog.'}
+                    ? 'يمكنك تبديل وحدة البيع (قطعة / علبة)، تعديل الكمية أو السعر، أو إضافة منتجات جديدة من الكتالوج دون المساس بهوية المنتج.'
+                    : 'Switch selling units (piece / box), adjust quantities or unit prices, or add items while strictly preserving product identity.'}
                 </p>
               </div>
 
@@ -551,24 +735,28 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
               </div>
             )}
 
-            {/* Items Table */}
+            {/* Items Table with Selling Unit Column */}
             <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'start' }}>
                 <thead>
                   <tr style={{ backgroundColor: 'var(--accent)', borderBottom: '2px solid var(--border-color)', color: 'var(--text-main)', fontWeight: 700 }}>
                     <th style={{ padding: '0.75rem 1rem' }}>{isRtl ? 'المنتج' : 'Product'}</th>
-                    <th style={{ padding: '0.75rem 0.5rem', width: '120px' }}>{isRtl ? 'سعر الوحدة (د.ل)' : 'Unit Price (LYD)'}</th>
-                    <th style={{ padding: '0.75rem 0.5rem', width: '130px' }}>{isRtl ? 'الكمية' : 'Quantity'}</th>
-                    <th style={{ padding: '0.75rem 1rem', width: '120px' }}>{isRtl ? 'الإجمالي' : 'Subtotal'}</th>
-                    <th style={{ padding: '0.75rem 0.5rem', width: '50px' }}></th>
+                    <th style={{ padding: '0.75rem 0.5rem', width: '140px' }}>{isRtl ? 'وحدة البيع' : 'Selling Unit'}</th>
+                    <th style={{ padding: '0.75rem 0.5rem', width: '110px' }}>{isRtl ? 'سعر الوحدة (د.ل)' : 'Unit Price (LYD)'}</th>
+                    <th style={{ padding: '0.75rem 0.5rem', width: '120px' }}>{isRtl ? 'الكمية' : 'Quantity'}</th>
+                    <th style={{ padding: '0.75rem 1rem', width: '110px' }}>{isRtl ? 'الإجمالي' : 'Subtotal'}</th>
+                    <th style={{ padding: '0.75rem 0.5rem', width: '45px' }}></th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((item, idx) => {
                     const lineTotal = (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1);
+                    const availableUnits = getAvailableSellingUnits(item, catalogProducts);
+                    const selectedUnitKey = item.selling_unit_id || (item.selling_unit?.includes('علبة') ? 'box' : 'piece');
+
                     return (
-                      <tr key={item.id || idx} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                        {/* Title & Image */}
+                      <tr key={item.lineId || item.id || idx} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        {/* Title & Image (Strictly preserved) */}
                         <td style={{ padding: '0.75rem 1rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                             {item.image_url ? (
@@ -580,8 +768,30 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
                               <p style={{ fontWeight: 700, margin: 0, fontSize: '0.88rem' }}>
                                 {isRtl ? (item.name_ar || item.name_en) : (item.name_en || item.name_ar)}
                               </p>
+                              {item.selling_unit && (
+                                <span style={{ fontSize: '0.72rem', color: '#b45309', backgroundColor: 'rgba(245, 158, 11, 0.1)', padding: '0.1rem 0.4rem', borderRadius: '4px', display: 'inline-block', marginTop: '0.15rem' }}>
+                                  {item.selling_unit}
+                                </span>
+                              )}
                             </div>
                           </div>
+                        </td>
+
+                        {/* Selling Unit Selector */}
+                        <td style={{ padding: '0.75rem 0.5rem' }}>
+                          <select
+                            className="form-input"
+                            value={selectedUnitKey}
+                            onChange={(e) => handleUpdateItemSellingUnit(idx, e.target.value)}
+                            style={{ padding: '0.35rem 0.5rem', fontSize: '0.82rem', fontWeight: 600, backgroundColor: 'var(--surface-color)' }}
+                            title={isRtl ? 'تبديل وحدة البيع للمنتج' : 'Switch selling unit'}
+                          >
+                            {availableUnits.map((u) => (
+                              <option key={u.id} value={u.id}>
+                                {isRtl ? u.nameAr : u.nameEn}
+                              </option>
+                            ))}
+                          </select>
                         </td>
 
                         {/* Unit Price Input */}
@@ -604,7 +814,7 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
                             <button
                               type="button"
                               onClick={() => handleUpdateItemQuantity(idx, item.quantity - 1)}
-                              style={{ padding: '0.25rem 0.6rem', border: 'none', background: 'var(--accent)', cursor: 'pointer', fontWeight: 'bold' }}
+                              style={{ padding: '0.25rem 0.55rem', border: 'none', background: 'var(--accent)', cursor: 'pointer', fontWeight: 'bold' }}
                             >
                               -
                             </button>
@@ -613,12 +823,12 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
                               min="1"
                               value={item.quantity}
                               onChange={(e) => handleUpdateItemQuantity(idx, e.target.value)}
-                              style={{ width: '45px', textAlign: 'center', border: 'none', background: 'transparent', fontWeight: 700, fontSize: '0.85rem' }}
+                              style={{ width: '40px', textAlign: 'center', border: 'none', background: 'transparent', fontWeight: 700, fontSize: '0.85rem' }}
                             />
                             <button
                               type="button"
                               onClick={() => handleUpdateItemQuantity(idx, item.quantity + 1)}
-                              style={{ padding: '0.25rem 0.6rem', border: 'none', background: 'var(--accent)', cursor: 'pointer', fontWeight: 'bold' }}
+                              style={{ padding: '0.25rem 0.55rem', border: 'none', background: 'var(--accent)', cursor: 'pointer', fontWeight: 'bold' }}
                             >
                               +
                             </button>

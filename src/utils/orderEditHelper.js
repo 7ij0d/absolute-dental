@@ -46,12 +46,14 @@ export const parseOrderEditHistory = (order) => {
  * Normalizes an item list so that comparing by ID or Name is consistent.
  */
 const normalizeItem = (item) => {
-  const id = String(item.id || item.product_id || item.name_en || item.name_ar || '');
+  const id = String(item.productId || item.product_id || item.id || item.name_en || item.name_ar || '');
   const name_ar = item.name_ar || item.products?.name_ar || item.name_en || '';
   const name_en = item.name_en || item.products?.name_en || item.name_ar || '';
   const quantity = Math.max(0, parseInt(item.quantity) || 1);
   const price = parseFloat(item.price ?? item.products?.price ?? 0);
   const image_url = item.image_url || item.products?.main_image_url || item.products?.image_url || '';
+  const selling_unit = item.selling_unit || item.sellingUnit || null;
+  const unit_multiplier = parseInt(item.unit_multiplier || item.unitMultiplier) || 1;
 
   return {
     id,
@@ -60,6 +62,8 @@ const normalizeItem = (item) => {
     quantity,
     price,
     image_url,
+    selling_unit,
+    unit_multiplier,
     is_accessory: Boolean(item.is_accessory)
   };
 };
@@ -102,14 +106,16 @@ export const calculateItemsDiff = (oldItems = [], newItems = []) => {
         name_en: newItem.name_en,
         quantity: newItem.quantity,
         price: newItem.price,
-        image_url: newItem.image_url
+        image_url: newItem.image_url,
+        selling_unit: newItem.selling_unit
       });
     } else {
       const oldItem = oldMap.get(key);
       const qtyChanged = oldItem.quantity !== newItem.quantity;
       const priceChanged = Math.abs(oldItem.price - newItem.price) > 0.001;
+      const unitChanged = (oldItem.selling_unit || '') !== (newItem.selling_unit || '');
 
-      if (qtyChanged || priceChanged) {
+      if (qtyChanged || priceChanged || unitChanged) {
         modified.push({
           id: newItem.id,
           name_ar: newItem.name_ar,
@@ -118,6 +124,8 @@ export const calculateItemsDiff = (oldItems = [], newItems = []) => {
           new_quantity: newItem.quantity,
           old_price: oldItem.price,
           new_price: newItem.price,
+          old_unit: oldItem.selling_unit,
+          new_unit: newItem.selling_unit,
           image_url: newItem.image_url
         });
       }

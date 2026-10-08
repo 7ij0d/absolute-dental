@@ -1259,9 +1259,16 @@ export const Orders = () => {
               <h4 style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--primary)', marginBottom: '0.6rem' }}>الأدوات والمستلزمات المطلوبة</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {(selectedOrder.order_items?.length > 0 ? selectedOrder.order_items : (selectedOrder.items || [])).map((item, idx) => {
-                  const snapshotItem = Array.isArray(selectedOrder.items) ? selectedOrder.items[idx] : null;
+                  const snapshotItem = Array.isArray(selectedOrder.items)
+                    ? (selectedOrder.items.find((si) =>
+                        (si.id && item.product_id && String(si.id) === String(item.product_id)) ||
+                        (si.productId && item.product_id && String(si.productId) === String(item.product_id)) ||
+                        (si.id && item.id && String(si.id) === String(item.id))
+                      ) || selectedOrder.items[idx] || null)
+                    : null;
                   const itemName = item.products?.name_en || item.products?.name_ar || item.name_en || item.name_ar || snapshotItem?.name_en || snapshotItem?.name_ar || 'Dental Box / إكسسوار';
                   const itemImg = item.products?.image_url || item.image_url || snapshotItem?.image_url || null;
+                  const itemSellingUnit = item.selling_unit || item.sellingUnit || snapshotItem?.selling_unit || snapshotItem?.sellingUnit || null;
                   return (
                     <div
                       key={item.id || idx}
@@ -1301,10 +1308,15 @@ export const Orders = () => {
                             <ClipboardList size={18} style={{ color: 'var(--text-muted)' }} />
                           )}
                         </div>
-                        <span>
-                          {itemName}{' '}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          <span>{itemName}</span>
+                          {itemSellingUnit && (
+                            <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#b45309', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 600 }}>
+                              {itemSellingUnit}
+                            </span>
+                          )}
                           <strong style={{ color: 'var(--secondary)' }}>x{item.quantity}</strong>
-                        </span>
+                        </div>
                       </div>
                       <span style={{ fontWeight: 700 }}>
                         {item.price} د.ل
