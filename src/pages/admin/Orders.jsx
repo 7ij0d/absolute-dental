@@ -6,8 +6,10 @@ import supabase from '../../supabaseClient';
 import InvoiceView from '../../components/InvoiceView';
 import MapPicker from '../../components/MapPicker';
 import AdminEditOrderModal from '../../components/AdminEditOrderModal';
+import AdminReviewEditModal from '../../components/AdminReviewEditModal';
 import OrderEditHistory from '../../components/OrderEditHistory';
 import { getOrderStatusMeta, normalizeOrderStatus, createStatusAuditEntry, parseOrderEditHistory } from '../../utils/orderEditHelper';
+import { parseOrderVersioning } from '../../utils/orderVersioning';
 import {
   Search, Eye, RefreshCw, Printer, X, ClipboardList, CheckCircle,
   Trash2, Pencil, Save, Check, AlertCircle, ArrowUpDown, Calendar,
@@ -38,6 +40,7 @@ export const Orders = () => {
 
   // Edit Modal
   const [editingOrder, setEditingOrder] = useState(null);
+  const [reviewingEditOrder, setReviewingEditOrder] = useState(null);
 
   // Add Order Modal
   const [showAddOrderModal, setShowAddOrderModal] = useState(false);
@@ -345,6 +348,7 @@ export const Orders = () => {
   // Compute stats for overview cards and quick filter tabs using canonical status keys
   const stats = useMemo(() => {
     const total = orders.length;
+    const pendingModifications = orders.filter((o) => parseOrderVersioning(o).hasPending).length;
     const pendingReview = orders.filter((o) => normalizeOrderStatus(o.status) === 'pending_review').length;
     const accepted = orders.filter((o) => normalizeOrderStatus(o.status) === 'accepted').length;
     const preparing = orders.filter((o) => normalizeOrderStatus(o.status) === 'preparing').length;
@@ -356,7 +360,7 @@ export const Orders = () => {
       return k === 'cancelled' || k === 'rejected';
     }).length;
 
-    const needsAction = pendingReview;
+    const needsAction = pendingReview + pendingModifications;
 
     const todayOrders = orders.filter((o) => {
       try {
@@ -373,7 +377,7 @@ export const Orders = () => {
       })
       .reduce((sum, o) => sum + (parseFloat(o.total_price) || 0), 0);
 
-    return { total, pendingReview, accepted, preparing, readyForDelivery, outForDelivery, delivered, cancelled, needsAction, todayOrders, totalSales };
+    return { total, pendingModifications, pendingReview, accepted, preparing, readyForDelivery, outForDelivery, delivered, cancelled, needsAction, todayOrders, totalSales };
   }, [orders]);
 
   // Filtered & Sorted orders
@@ -382,8 +386,10 @@ export const Orders = () => {
 
     // Status filter
     if (statusFilter !== 'all') {
-      if (statusFilter === 'needs_action') {
-        list = list.filter((ord) => normalizeOrderStatus(ord.status) === 'pending_review');
+      if (statusFilter === 'pending_modifications') {
+        list = list.filter((ord) => parseOrderVersioning(ord).hasPending);
+      } else if (statusFilter === 'needs_action') {
+        list = list.filter((ord) => normalizeOrderStatus(ord.status) === 'pending_review' || parseOrderVersioning(ord).hasPending);
       } else if (statusFilter === 'cancelled') {
         list = list.filter((ord) => {
           const k = normalizeOrderStatus(ord.status);
@@ -605,6 +611,7 @@ export const Orders = () => {
       >
         {[
           { key: 'all', label: 'الكل', count: stats.total, color: 'var(--primary)' },
+          { key: 'pending_modifications', label: 'تعديلات مقترحة', count: stats.pendingModifications, color: '#ea580c', isAlert: stats.pendingModifications > 0 },
           { key: 'pending_review', label: 'في انتظار المراجعة', count: stats.pendingReview, color: '#f59e0b', isAlert: stats.pendingReview > 0 },
           { key: 'accepted', label: 'تم قبول الطلب', count: stats.accepted, color: '#3b82f6' },
           { key: 'preparing', label: 'جاري التجهيز', count: stats.preparing, color: '#06b6d4' },
@@ -798,12 +805,35 @@ export const Orders = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedList.map((ord) => (
-                <tr key={ord.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+              {paginatedList.map((ord) => {
+                const versioning = parseOrderVersioning(ord);
+                return (
+                <tr key={ord.id} style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: versioning.hasPending ? 'rgba(234, 88, 12, 0.04)' : undefined }}>
                   <td style={{ padding: '1rem 0.75rem', fontWeight: 700 }}>
-                    <span style={{ fontFamily: 'monospace', letterSpacing: '0.04em', fontSize: '0.95rem', color: 'var(--primary)' }}>
-                      {ord.order_number?.replace(/\D/g, '') || ord.order_number}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                      <span style={{ fontFamily: 'monospace', letterSpacing: '0.04em', fontSize: '0.95rem', color: 'var(--primary)' }}>
+                        {ord.order_number?.replace(/\D/g, '') || ord.order_number}
+                      </span>
+                      {versioning.hasPending && (
+                        <span
+                          style={{
+                            padding: '2px 8px',
+                            borderRadius: '999px',
+                            fontSize: '0.68rem',
+                            fontWeight: 800,
+                            backgroundColor: '#ffedd5',
+                            color: '#c2410c',
+                            border: '1px solid #fed7aa',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#ea580c', display: 'inline-block' }}></span>
+                          تعديل مقترح (v{versioning.pendingVersion.version_number})
+                        </span>
+                      )}
+                    </div>
                     {ord.order_items?.length > 0 && (
                       <div style={{ fontSize: '0.78rem', color: 'var(--text-main)', marginTop: '0.35rem', lineHeight: '1.4' }}>
                         {ord.order_items.map((i, idx) => (
@@ -849,8 +879,33 @@ export const Orders = () => {
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'center' }}>
                     <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
-                      {/* Special quick action for edit_requested */}
-                      {ord.status === 'edit_requested' && (
+                      {/* Direct Proposed Customer Modification Review Action */}
+                      {versioning.hasPending && (
+                        <button
+                          onClick={() => setReviewingEditOrder(ord)}
+                          title="مراجعة التعديل المقترح من الزبون واعتماده"
+                          style={{
+                            padding: '0.35rem 0.65rem',
+                            fontSize: '0.72rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid #ea580c',
+                            backgroundColor: '#ea580c',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            fontWeight: 800,
+                            boxShadow: '0 1px 3px rgba(234, 88, 12, 0.25)'
+                          }}
+                        >
+                          <Layers size={13} />
+                          <span>مراجعة التعديل</span>
+                        </button>
+                      )}
+
+                      {/* Legacy quick action for edit_requested */}
+                      {!versioning.hasPending && ord.status === 'edit_requested' && (
                         <button
                           onClick={() => handleUpdateStatus(ord.id, 'editing')}
                           title="الموافقة على طلب الزبون لتعديل الطلب"
@@ -873,8 +928,8 @@ export const Orders = () => {
                         </button>
                       )}
 
-                      {/* Special quick action for edited_pending */}
-                      {ord.status === 'edited_pending' && (
+                      {/* Legacy quick action for edited_pending */}
+                      {!versioning.hasPending && ord.status === 'edited_pending' && (
                         <button
                           onClick={() => handleUpdateStatus(ord.id, 'updated')}
                           title="اعتماد تعديلات الزبون على الطلبية"
@@ -973,7 +1028,7 @@ export const Orders = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              ); })}
             </tbody>
           </table>
 
@@ -1054,6 +1109,18 @@ export const Orders = () => {
         />
       )}
 
+      {/* REVIEW PROPOSED CUSTOMER MODIFICATION MODAL */}
+      {reviewingEditOrder && (
+        <AdminReviewEditModal
+          order={reviewingEditOrder}
+          onClose={() => setReviewingEditOrder(null)}
+          onOrderUpdated={(updated) => {
+            handleOrderUpdated(updated);
+            setReviewingEditOrder(null);
+          }}
+        />
+      )}
+
       {/* -------------------------------------------------------------
           ORDER DETAILS DRAWER/MODAL
           ------------------------------------------------------------- */}
@@ -1097,8 +1164,93 @@ export const Orders = () => {
               </button>
             </div>
 
-            {/* Customer Edit Request Banner */}
-            {selectedOrder.status === 'edit_requested' && (
+            {/* Versioned Proposed Customer Edit Banner */}
+            {(() => {
+              const versioning = parseOrderVersioning(selectedOrder);
+              if (versioning.hasPending) {
+                const pendingVer = versioning.pendingVersion;
+                const currentVer = versioning.currentVersion;
+                const oldTot = parseFloat(currentVer?.total ?? selectedOrder.total_price ?? 0);
+                const newTot = parseFloat(pendingVer?.total ?? 0);
+                const diffTot = newTot - oldTot;
+
+                return (
+                  <div style={{
+                    padding: '1.1rem',
+                    backgroundColor: 'rgba(234, 88, 12, 0.08)',
+                    border: '1.5px solid rgba(234, 88, 12, 0.35)',
+                    borderRadius: 'var(--radius-md)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem',
+                    boxShadow: '0 2px 8px rgba(234, 88, 12, 0.06)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#c2410c', fontWeight: 800, fontSize: '0.95rem' }}>
+                        <Layers size={19} />
+                        <span>تعديل جديد للطلبية (الإصدار {pendingVer.version_number}) بانتظار مراجعتك واعتمادك</span>
+                      </div>
+                      <span style={{
+                        padding: '3px 10px',
+                        borderRadius: '999px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        backgroundColor: '#ffedd5',
+                        color: '#9a3412',
+                        border: '1px solid #fed7aa'
+                      }}>
+                        قيد مراجعة الإدارة
+                      </span>
+                    </div>
+
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.5 }}>
+                      قام الزبون بتعديل كميات أو أصناف هذه الطلبية مباشرة. الطلبية الأصلية لا تزال سارية بالإصدار المعتمد الحالي ({currentVer?.version_number || 1})، ولن يتم اعتماد المنتجات أو المجموع أو خصم الفارق بالمخزون حتى يتم قبول التعديل من طرفك.
+                    </p>
+
+                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', backgroundColor: 'var(--surface-color)', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ fontSize: '0.78rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>المجموع الحالي المعتمد: </span>
+                        <strong style={{ color: 'var(--text-main)' }}>{oldTot.toFixed(2)} د.ل</strong>
+                      </div>
+                      <div style={{ fontSize: '0.78rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>المجموع المقترح: </span>
+                        <strong style={{ color: '#ea580c' }}>{newTot.toFixed(2)} د.ل</strong>
+                      </div>
+                      <div style={{ fontSize: '0.78rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>الفارق: </span>
+                        <strong style={{ color: diffTot > 0 ? '#10b981' : diffTot < 0 ? '#ef4444' : 'var(--text-main)' }}>
+                          {diffTot > 0 ? `+${diffTot.toFixed(2)}` : diffTot.toFixed(2)} د.ل
+                        </strong>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                      <button
+                        onClick={() => setReviewingEditOrder(selectedOrder)}
+                        className="btn btn-primary"
+                        style={{
+                          padding: '0.5rem 1.15rem',
+                          fontSize: '0.82rem',
+                          gap: '0.45rem',
+                          fontWeight: 800,
+                          backgroundColor: '#ea580c',
+                          borderColor: '#ea580c',
+                          color: '#fff',
+                          boxShadow: '0 2px 6px rgba(234, 88, 12, 0.25)'
+                        }}
+                      >
+                        <Layers size={15} />
+                        مراجعة واعتماد التعديل (عرض الفروقات الذكية)
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Legacy fallback for unmigrated edit_requested status */}
+            {!parseOrderVersioning(selectedOrder).hasPending && selectedOrder.status === 'edit_requested' && (
               <div style={{
                 padding: '1rem',
                 backgroundColor: 'rgba(245, 158, 11, 0.1)',
@@ -1110,11 +1262,8 @@ export const Orders = () => {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#d97706', fontWeight: 800, fontSize: '0.9rem' }}>
                   <AlertCircle size={18} />
-                  <span>الزبون يطلب تعديل هذا الطلب</span>
+                  <span>طلب تعديل تقليدي (نظام قديم)</span>
                 </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.5 }}>
-                  عند الموافقة، ستفتح السلة للزبون بنفس المنتجات ليقوم بتعديلها وإعادة إرسالها.
-                </p>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => handleUpdateStatus(selectedOrder.id, 'editing')}
@@ -1122,53 +1271,7 @@ export const Orders = () => {
                     style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', gap: '0.4rem', fontWeight: 700 }}
                   >
                     <Check size={15} />
-                    الموافقة على التعديل (فتح السلة للزبون)
-                  </button>
-                  <button
-                    onClick={() => handleUpdateStatus(selectedOrder.id, 'accepted')}
-                    className="btn btn-outline"
-                    style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', color: '#ef4444', borderColor: 'rgba(239,68,68,0.4)' }}
-                  >
-                    رفض طلب التعديل
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Customer Edited - Awaiting Confirmation Banner */}
-            {selectedOrder.status === 'edited_pending' && (
-              <div style={{
-                padding: '1rem',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                border: '1px solid rgba(99, 102, 241, 0.3)',
-                borderRadius: 'var(--radius-md)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6366f1', fontWeight: 800, fontSize: '0.9rem' }}>
-                  <CheckCircle size={18} />
-                  <span>قام الزبون بتعديل الطلب وهو بانتظار اعتمادك النهائي</span>
-                </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.5 }}>
-                  يمكنك مراجعة التغييرات في سجل التعديلات أدناه، ثم اعتماد التعديل أو تعديله كأدمن.
-                </p>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={() => handleUpdateStatus(selectedOrder.id, 'updated')}
-                    className="btn btn-primary"
-                    style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', gap: '0.4rem', fontWeight: 700 }}
-                  >
-                    <Check size={15} />
-                    اعتماد تعديلات الطلب
-                  </button>
-                  <button
-                    onClick={() => setEditingOrder(selectedOrder)}
-                    className="btn btn-outline"
-                    style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', gap: '0.4rem', color: '#6366f1', borderColor: 'rgba(99,102,241,0.4)' }}
-                  >
-                    <Pencil size={14} />
-                    تعديل إضافي كأدمن
+                    فتح الطلب للتعديل
                   </button>
                 </div>
               </div>
