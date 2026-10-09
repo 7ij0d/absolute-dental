@@ -608,5 +608,26 @@
     "details_ar": "النوع: حاجز مطاطي طبي لعزل الأسنان (Natural Latex Dental Rubber Dam)\nالمقاس: 6×6 بوصة (6x6)\nالموديلات والألوان المتوفرة:\n• هيفي - Heavy (أزرق - Blue): متوفر 35 شيت\n• ميد - Mid / Medium (أخضر - Green): متوفر 36 شيت\nسعر البيع: 2.50 د.ل\nسعر التكلفة: 2.285 د.ل\nإجمالي المخزون: 71 شيت\nالمادة الدراسية: صناعة الأسنان الثابتة 2 (البرستو)",
     "details_en": "Type: Natural Latex Dental Rubber Dam Sheets\nSize: 6x6 inches\nAvailable Models & Colors:\n• Heavy - Blue: In Stock 35 sheets\n• Mid / Medium - Green: In Stock 36 sheets\nSelling Price: 2.50 LYD\nCost Price: 2.285 LYD\nTotal Stock: 71 sheets\nSubject: Fixed Prosthodontics 2 (Prostho)",
     "sort_order": 11
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000113",
+    "name_ar": "خيط أسنان طبي عيادي (Dental Floss Dispenser)",
+    "name_en": "Clinical Dental Floss (Dispenser Box)",
+    "price": 10,
+    "compare_at_price": null,
+    "availability": "limited_quantity",
+    "stock_quantity": 10,
+    "subject_id": "33000000-0000-0000-0000-000000000032",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "33000000-0000-0000-0000-000000000031",
+      "33000000-0000-0000-0000-000000000033"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-floss-dispenser.png",
+    "description_ar": "خيط أسنان طبي عيادي عالي المتانة داخل علبة موزع شفافة مع قاطع معدني مدمج. مخصص لتنظيف المسافات بين الأسنان (Interdental cleaning)، إزالة البلاك، وفحص نقاط التماس (Contact points) أثناء الإجراءات السريرية والتدريب في طب الأسنان الوقائي والتحفظي.",
+    "description_en": "Professional clinical dental floss in a compact dispenser box with integrated stainless steel cutter. Ideal for interdental cleaning, plaque removal, checking restorative contact points, and clinical procedures in Preventive and Conservative Dentistry.",
+    "details_ar": "المنتج: خيط أسنان طبي عيادي مع علبة موزع (Dental Floss Dispenser)\nالمواصفات: خيط مشمع عالي القوة ومقاوم للقطع، علبة شفافة مع شفرة قطع معدنية\nسعر البيع: 10.00 د.ل\nسعر التكلفة: 8.00 د.ل\nالكمية في المخزون: 10 علب\nالمادة الدراسية: طب الأسنان الوقائي 1 (البريفنشن)",
+    "details_en": "Product: Clinical Dental Floss Dispenser\nFeatures: High-tensile strength waxed floss, transparent protective case with cutting blade\nSelling Price: 10.00 LYD\nCost Price: 8.00 LYD\nQuantity in Stock: 10 boxes\nSubject: Preventive Dentistry",
+    "sort_order": 11
   }
 ]
