@@ -509,5 +509,25 @@
     "details_ar": "الماركة: Zhermack (إيطاليا)\nالوزن: 50 جرام (50g Student Pack)\nالنوع: مادة طبعة الجينات عالية المرونة (Impression Material)\nسعر البيع: 10 د.ل\nسعر التكلفة: 7.52 د.ل\nالكمية في المخزون: 9 عبوات\nالمادة الدراسية: صناعة الأسنان المتحركة",
     "details_en": "Brand: Zhermack (Italy)\nWeight: 50g Student Pack\nType: High Elasticity Alginate Impression Material\nSelling Price: 10 LYD\nCost Price: 7.52 LYD\nQuantity in Stock: 9 packs\nSubject: Removable Prosthodontics",
     "sort_order": 5
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000106",
+    "name_ar": "مادة طبعة الجينات آي كيو - IQ Alginate (50g)",
+    "name_en": "IQ Alginate | Impression Material (50g)",
+    "price": 7,
+    "compare_at_price": null,
+    "availability": "limited_quantity",
+    "stock_quantity": 9,
+    "subject_id": "33000000-0000-0000-0000-000000000034",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000022"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/iq-alginate-impression-material-50g.png",
+    "description_ar": "مادة أخذ طبعات الجينات سريعة التصلب وعالية المرونة IQ Alginate (عبوة معملية مخصصة للطلاب 50 جرام). تتميز بدقة عالية وسهولة الخلط ومرونة ممتازة لأخذ طبعات الأسنان ودراسة النماذج في معمل صناعة الأسنان المتحركة.",
+    "description_en": "High-elasticity fast-setting IQ Alginate dental impression material (Student 50g lab portion). Excellent detail reproduction and tear strength for diagnostic casts and preliminary impressions in Removable Prosthodontics.",
+    "details_ar": "الماركة: IQ Alginate\nالوزن: 50 جرام (50g Student Pack)\nالنوع: مادة طبعة الجينات معملية (Impression Material)\nسعر البيع: 7 د.ل\nسعر التكلفة: 6.125 د.ل\nالكمية في المخزون: 9 عبوات\nالمادة الدراسية: صناعة الأسنان المتحركة",
+    "details_en": "Brand: IQ Alginate\nWeight: 50g Student Pack\nType: Dental Alginate Impression Material\nSelling Price: 7 LYD\nCost Price: 6.125 LYD\nQuantity in Stock: 9 packs\nSubject: Removable Prosthodontics",
+    "sort_order": 6
   }
 ]
