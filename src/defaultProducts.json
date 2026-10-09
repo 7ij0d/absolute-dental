@@ -489,5 +489,25 @@
     "details_ar": "اللون: أزرق (Blue)\nالكمية في المخزون: 125 قطعة\nالنوع: مفرش واقي عازل ومقاوم للماء (Waterproof Dental Bib)\nسعر البيع: 0.5 د.ل للقطعة\nسعر التكلفة: 0.11 د.ل\nالسنة الدراسية: السنة الثالثة (جميع المواد)",
     "details_en": "Color: Blue\nQuantity in Stock: 125 pieces\nType: Disposable Waterproof Dental Bib / Cover Sheet\nSelling Price: 0.5 LYD\nCost Price: 0.11 LYD\nAcademic Year: 3rd Year (All Subjects)",
     "sort_order": 4
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000105",
+    "name_ar": "مادة طبعة الجينات زيرماك - Zhermack Alginate (50g)",
+    "name_en": "Zhermack Alginate | Impression Material (50g)",
+    "price": 10,
+    "compare_at_price": null,
+    "availability": "limited_quantity",
+    "stock_quantity": 9,
+    "subject_id": "33000000-0000-0000-0000-000000000034",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000022"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/zhermack-alginate-impression-material-50g.png",
+    "description_ar": "مادة أخذ طبعات الجينات عالية الدقة من شركة Zhermack الإيطالية (عبوة معملية مخصصة للطلاب 50 جرام). سريعة التصلب ومرنة، مثالية لأخذ الطبعات التشخيصية والدراسية وقوالب الأطقم في معمل صناعة الأسنان المتحركة.",
+    "description_en": "High-precision Zhermack dental alginate impression material (Student 50g lab portion). Fast setting and high elastic recovery, ideal for study models and preliminary impressions in Removable Prosthodontics.",
+    "details_ar": "الماركة: Zhermack (إيطاليا)\nالوزن: 50 جرام (50g Student Pack)\nالنوع: مادة طبعة الجينات عالية المرونة (Impression Material)\nسعر البيع: 10 د.ل\nسعر التكلفة: 7.52 د.ل\nالكمية في المخزون: 9 عبوات\nالمادة الدراسية: صناعة الأسنان المتحركة",
+    "details_en": "Brand: Zhermack (Italy)\nWeight: 50g Student Pack\nType: High Elasticity Alginate Impression Material\nSelling Price: 10 LYD\nCost Price: 7.52 LYD\nQuantity in Stock: 9 packs\nSubject: Removable Prosthodontics",
+    "sort_order": 5
   }
 ]
