@@ -629,5 +629,29 @@
     "details_ar": "المنتج: خيط أسنان طبي عيادي مع علبة موزع (Dental Floss Dispenser)\nالمواصفات: خيط مشمع عالي القوة ومقاوم للقطع، علبة شفافة مع شفرة قطع معدنية\nسعر البيع: 10.00 د.ل\nسعر التكلفة: 8.00 د.ل\nالكمية في المخزون: 10 علب\nالمادة الدراسية: طب الأسنان الوقائي 1 (البريفنشن)",
     "details_en": "Product: Clinical Dental Floss Dispenser\nFeatures: High-tensile strength waxed floss, transparent protective case with cutting blade\nSelling Price: 10.00 LYD\nCost Price: 8.00 LYD\nQuantity in Stock: 10 boxes\nSubject: Preventive Dentistry",
     "sort_order": 11
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000114",
+    "name_ar": "طقم فحص أسنان عيادي معقم أحادي الاستخدام (Disposable Dental Examination Kit)",
+    "name_en": "Disposable Dental Examination Kit (Sterile Clinical Set)",
+    "price": 2.25,
+    "compare_at_price": null,
+    "availability": "limited_quantity",
+    "stock_quantity": 10,
+    "subject_id": "33000000-0000-0000-0000-000000000031",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "33000000-0000-0000-0000-000000000033",
+      "33000000-0000-0000-0000-000000000034",
+      "22000000-0000-0000-0000-000000000021",
+      "22000000-0000-0000-0000-000000000023",
+      "22000000-0000-0000-0000-000000000022"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/disposable-dental-examination-kit.png",
+    "description_ar": "طقم فحص أسنان عيادي معقم ومغلف للاستخدام الفردي لمرة واحدة (Single-use Sterile Kit). يحتوي على صينية بلاستيكية مدمجة، مرآة فحص أسنان، مسبار فحص/بروب، ملقط طبي معدني، كرات قطنية، ومفرش طبي واقٍ (Bib). أساسي لجلسات الفحص والتشخيص السريري في عيادات العلاج التحفظي (الكونس) وصناعة الأسنان الثابتة (البرستو) والمتحركة (الريموفبل).",
+    "description_en": "Professional disposable sterile dental examination kit for single-patient clinical procedures. Includes a rigid examination tray, dental mouth mirror, double-ended dental probe/explorer, stainless steel clinical tweezers, cotton rolls, and protective dental bib. Essential for clinical diagnosis and practice in Conservative Dentistry, Fixed Prosthodontics, and Removable Prosthodontics.",
+    "details_ar": "المنتج: طقم فحص أسنان عيادي معقم للاستخدام مرة واحدة (Disposable Examination Kit)\nالمحتويات: مرآة فحص، مسبار (Probe/Explorer)، ملقط أسنان، كرات قطن طبي، مفرش واقٍ، وصينية فحص\nسعر البيع: 2.25 د.ل\nسعر التكلفة: 2.25 د.ل\nالكمية في المخزون: 10 أطقم\nالمواد الدراسية: علاج الأسنان التحفظي (الكونس)، صناعة الأسنان الثابتة (البرستو)، وصناعة الأسنان المتحركة (الريموفبل)",
+    "details_en": "Product: Disposable Sterile Dental Examination Kit\nContents: Mouth mirror, dental probe/explorer, clinical tweezers, sterile cotton rolls, dental bib, organized compartment tray\nSelling Price: 2.25 LYD\nCost Price: 2.25 LYD\nQuantity in Stock: 10 kits\nSubjects: Conservative Dentistry, Fixed Prosthodontics, Removable Prosthodontics",
+    "sort_order": 12
   }
 ]
