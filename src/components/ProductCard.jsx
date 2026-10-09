@@ -214,8 +214,8 @@ export const ProductCard = ({ product }) => {
           >
             <span style={{ fontSize: '0.74rem', fontWeight: 700, color: sizePrompt ? '#DC2626' : 'var(--text-muted)' }}>
               {sizePrompt
-                ? (lang === 'ar' ? (sizedConfig.hasColorAndSize ? '⚠️ حدد اللون والمقاس أولاً:' : '⚠️ حدد المقاس أولاً:') : (sizedConfig.hasColorAndSize ? '⚠️ Select option:' : '⚠️ Select size:'))
-                : (lang === 'ar' ? (sizedConfig.hasColorAndSize ? 'الخيارات:' : 'المقاس:') : (sizedConfig.hasColorAndSize ? 'Options:' : 'Size:'))}
+                ? (lang === 'ar' ? (sizedConfig.optionsPromptAr || (sizedConfig.hasColorAndSize ? '⚠️ حدد الخيار أولاً:' : '⚠️ حدد المقاس أولاً:')) : (sizedConfig.optionsPromptEn || (sizedConfig.hasColorAndSize ? '⚠️ Select option:' : '⚠️ Select size:')))
+                : (lang === 'ar' ? (sizedConfig.optionsLabelAr || (sizedConfig.hasColorAndSize ? 'الخيارات:' : 'المقاس:')) : (sizedConfig.optionsLabelEn || (sizedConfig.hasColorAndSize ? 'Options:' : 'Size:')))}
             </span>
             <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
               {sizedConfig.sizes.map(s => {
@@ -308,11 +308,11 @@ export const ProductCard = ({ product }) => {
           ) : isComingSoon ? (
             <span>{lang === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
           ) : sizePrompt ? (
-            <span>{lang === 'ar' ? (sizedConfig?.hasColorAndSize ? '⚠️ يرجى تحديد اللون والمقاس أولاً' : '⚠️ يرجى اختيار المقاس (M أو L)') : (sizedConfig?.hasColorAndSize ? '⚠️ Please select color & size' : '⚠️ Please select size (M or L)')}</span>
+            <span>{lang === 'ar' ? (sizedConfig?.optionsPromptAr || (sizedConfig?.hasColorAndSize ? '⚠️ يرجى تحديد الخيار المطلوب أولاً' : '⚠️ يرجى اختيار المقاس (M أو L)')) : (sizedConfig?.optionsPromptEn || (sizedConfig?.hasColorAndSize ? '⚠️ Please select an option first' : '⚠️ Please select size (M or L)'))}</span>
           ) : sizedConfig && !selectedSize ? (
             <>
               <ShoppingCart size={15} strokeWidth={2.2} />
-              <span>{lang === 'ar' ? (sizedConfig.hasColorAndSize ? 'اختر اللون والمقاس وأضف' : 'اختر المقاس وأضف') : (sizedConfig.hasColorAndSize ? 'Select Option & Add' : 'Select Size & Add')}</span>
+              <span>{lang === 'ar' ? (sizedConfig.buttonPromptAr || (sizedConfig.hasColorAndSize ? 'اختر الخيار وأضف' : 'اختر المقاس وأضف')) : (sizedConfig.buttonPromptEn || (sizedConfig.hasColorAndSize ? 'Select Option & Add' : 'Select Size & Add'))}</span>
             </>
           ) : sizedConfig && selectedSize ? (
             <>

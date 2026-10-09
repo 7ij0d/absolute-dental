@@ -392,37 +392,20 @@
   },
   {
     "id": "99000000-0000-0000-0000-000000000001",
-    "name_ar": "كمامات طبية جراحية MedProtect (أزرق)",
-    "name_en": "MedProtect Disposable Surgical Face Masks with Ear Loops",
+    "name_ar": "كمامات طبية جراحية MedProtect (أزرق وأسود)",
+    "name_en": "MedProtect Disposable Surgical Face Masks (Blue & Black)",
     "price": 0.5,
     "compare_at_price": null,
     "availability": "available",
-    "stock_quantity": 50,
+    "stock_quantity": 150,
     "subject_id": "11000000-0000-0000-0000-000000000011",
     "all_subjects": true,
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-medprotect-blue.png",
-    "description_ar": "كمامات طبية جراحية ثلاثية الطبقات عالية الكفاءة مع حلقات أذن مطاطية مريحة، خالية تماماً من اللاتكس والنيكل والكادميوم لحماية قصوى في المعامل والعيادات.",
-    "description_en": "Latex-free, nickel-free and cadmium-free. High-filtration 3-ply surgical face mask with comfortable elastic ear loops.",
-    "details_ar": "الماركة: MedProtect\nاللون: أزرق (Blue)\nالكمية: 50 قطعة في العلبة\nالنوع: خالية من اللاتكس والنيكل والكادميوم (latex-free, nickel-free, cadmium-free)\nسعر البيع: 0.5 د.ل للقطعة",
-    "details_en": "Color: Blue\nQuantity: 50 pieces\nFeatures: Latex-free, nickel-free, cadmium-free\nSelling Price: 0.5 LYD per piece",
+    "description_ar": "كمامات طبية جراحية ثلاثية الطبقات عالية الكفاءة مع حلقات أذن مطاطية مريحة، خالية تماماً من اللاتكس والنيكل والكادميوم لحماية قصوى في المعامل والعيادات. متوفرة باللونين الأزرق والأسود.",
+    "description_en": "Latex-free, nickel-free and cadmium-free. High-filtration 3-ply surgical face mask with comfortable elastic ear loops. Available in Blue and Black.",
+    "details_ar": "الماركة: MedProtect\nالنوع: خالية من اللاتكس والنيكل والكادميوم (latex-free, nickel-free, cadmium-free)\nالألوان المتوفرة:\n• أزرق (Blue): متوفر 50 قطعة (سعر التكلفة: 0.12 د.ل)\n• أسود (Black): متوفر 100 قطعة (سعر التكلفة: 0.13 د.ل)\nسعر البيع: 0.5 د.ل للقطعة\nالمواد الدراسية: جميع المواد",
+    "details_en": "Brand: MedProtect\nFeatures: Latex-free, nickel-free, cadmium-free\nAvailable Colors:\n• Blue: 50 pcs (Cost: 0.12 LYD)\n• Black: 100 pcs (Cost: 0.13 LYD)\nSelling Price: 0.5 LYD per piece\nAcademic Year: All Subjects",
     "sort_order": 1
-  },
-  {
-    "id": "99000000-0000-0000-0000-000000000002",
-    "name_ar": "كمامات طبية جراحية أحادية الاستخدام (أسود)",
-    "name_en": "Disposable Surgical Face Masks (Black)",
-    "price": 0.5,
-    "compare_at_price": null,
-    "availability": "available",
-    "stock_quantity": 100,
-    "subject_id": "11000000-0000-0000-0000-000000000011",
-    "all_subjects": true,
-    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-disposable-black.png",
-    "description_ar": "كمامات طبية وقائية ثلاثية الطبقات بلون أسود أنيق، أحادية الاستخدام مع حلقات أذن مريحة ودعامة أنف مرنة للاستخدام اليومي في كليات ومعامل الأسنان.",
-    "description_en": "Disposable 3-ply protective face masks with comfortable elastic ear loops. Sleek black design.",
-    "details_ar": "اللون: أسود (Black)\nالكمية: 100 قطعة\nالنوع: كمامات طبية أحادية الاستخدام (Disposable Face Masks)\nسعر البيع: 0.5 د.ل للقطعة",
-    "details_en": "Color: Black\nQuantity: 100 pieces\nType: Disposable 3-ply face masks\nSelling Price: 0.5 LYD per piece",
-    "sort_order": 2
   },
   {
     "id": "33000000-0000-0000-0000-000000000102",
@@ -448,12 +431,12 @@
   },
   {
     "id": "33000000-0000-0000-0000-000000000103",
-    "name_ar": "مفرش عيادة أسنان طبي واقي وعازل - Cover Sheet (وردي)",
-    "name_en": "Cover Sheet Disposable Waterproof Dental Bib (Pink)",
+    "name_ar": "مفرش عيادة أسنان طبي واقي وعازل - Cover Sheet (وردي وأزرق)",
+    "name_en": "Cover Sheet Disposable Waterproof Dental Bib (Pink & Blue)",
     "price": 0.5,
     "compare_at_price": null,
     "availability": "available",
-    "stock_quantity": 375,
+    "stock_quantity": 500,
     "subject_id": "33000000-0000-0000-0000-000000000031",
     "year_id": "30000000-0000-0000-0000-000000000003",
     "extra_subject_ids": [
@@ -462,33 +445,11 @@
       "33000000-0000-0000-0000-000000000034"
     ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-pink.png",
-    "description_ar": "مفرش طبي واقي للاستخدام لمرة واحدة (Waterproof Dental Bib) بلون وردي، مصنوع من طبقات ورقية ماصة عالية الجودة مدعمة بطبقة بولي إيثيلين عازلة ومقاومة للماء تماماً لحماية ملابس المرضى وأسطح العمل في العيادات.",
-    "description_en": "Disposable waterproof dental bib / cover sheet in pink. 2-ply absorbent paper backing laminated with 1-ply waterproof PE film to protect patients and clinic trays from liquids.",
-    "details_ar": "اللون: وردي (Pink)\nالكمية في المخزون: 375 قطعة\nالنوع: مفرش واقي عازل ومقاوم للماء (Waterproof Dental Bib)\nسعر البيع: 0.5 د.ل للقطعة\nسعر التكلفة: 0.11 د.ل\nالسنة الدراسية: السنة الثالثة (جميع المواد)",
-    "details_en": "Color: Pink\nQuantity in Stock: 375 pieces\nType: Disposable Waterproof Dental Bib / Cover Sheet\nSelling Price: 0.5 LYD\nCost Price: 0.11 LYD\nAcademic Year: 3rd Year (All Subjects)",
+    "description_ar": "مفرش طبي واقي للاستخدام لمرة واحدة (Waterproof Dental Bib) مصنوع من طبقات ورقية ماصة عالية الجودة مدعمة بطبقة بولي إيثيلين عازلة ومقاومة للماء تماماً لحماية ملابس المرضى وأسطح العمل في العيادات. متوفر باللونين الوردي والأزرق.",
+    "description_en": "Disposable waterproof dental bib / cover sheet. 2-ply absorbent paper backing laminated with 1-ply waterproof PE film to protect patients and clinic trays from liquids. Available in Pink and Blue.",
+    "details_ar": "الألوان المتوفرة:\n• وردي (Pink): متوفر 375 قطعة\n• أزرق (Blue): متوفر 125 قطعة\nالنوع: مفرش واقي عازل ومقاوم للماء (Waterproof Dental Bib)\nسعر البيع: 0.5 د.ل للقطعة\nسعر التكلفة: 0.11 د.ل\nالسنة الدراسية: السنة الثالثة (جميع المواد)",
+    "details_en": "Available Colors:\n• Pink: 375 pieces in stock\n• Blue: 125 pieces in stock\nType: Disposable Waterproof Dental Bib / Cover Sheet\nSelling Price: 0.5 LYD\nCost Price: 0.11 LYD\nAcademic Year: 3rd Year (All Subjects)",
     "sort_order": 3
-  },
-  {
-    "id": "33000000-0000-0000-0000-000000000104",
-    "name_ar": "مفرش عيادة أسنان طبي واقي وعازل - Cover Sheet (أزرق)",
-    "name_en": "Cover Sheet Disposable Waterproof Dental Bib (Blue)",
-    "price": 0.5,
-    "compare_at_price": null,
-    "availability": "available",
-    "stock_quantity": 125,
-    "subject_id": "33000000-0000-0000-0000-000000000031",
-    "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000032",
-      "33000000-0000-0000-0000-000000000033",
-      "33000000-0000-0000-0000-000000000034"
-    ],
-    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-blue.png",
-    "description_ar": "مفرش طبي واقي للاستخدام لمرة واحدة (Waterproof Dental Bib) بلون أزرق عيادي أنيق، مصنوع من طبقات ورقية ماصة عالية الجودة مدعمة بطبقة عازلة ومقاومة للماء تماماً لحماية ملابس المرضى وأسطح العمل في العيادات.",
-    "description_en": "Disposable waterproof dental bib / cover sheet in clinic blue. 2-ply absorbent paper backing laminated with 1-ply waterproof PE film to protect patients and clinic trays from liquids.",
-    "details_ar": "اللون: أزرق (Blue)\nالكمية في المخزون: 125 قطعة\nالنوع: مفرش واقي عازل ومقاوم للماء (Waterproof Dental Bib)\nسعر البيع: 0.5 د.ل للقطعة\nسعر التكلفة: 0.11 د.ل\nالسنة الدراسية: السنة الثالثة (جميع المواد)",
-    "details_en": "Color: Blue\nQuantity in Stock: 125 pieces\nType: Disposable Waterproof Dental Bib / Cover Sheet\nSelling Price: 0.5 LYD\nCost Price: 0.11 LYD\nAcademic Year: 3rd Year (All Subjects)",
-    "sort_order": 4
   },
   {
     "id": "33000000-0000-0000-0000-000000000105",
@@ -626,5 +587,26 @@
     "details_ar": "المادة: رول عزل وتغليف عيادي (Barrier Film Wrapping Roll)\nاللون: أزرق (Blue)\nالاستخدام: عزل أسطح الأجهزة ومقابض الإنارة والعيادات لمنع التلوث المتبادل\nسعر البيع: 28.00 د.ل\nسعر التكلفة: 23.00 د.ل\nالكمية في المخزون: 5 رول\nالمادة الدراسية: صناعة الأسنان المتحركة (Removable Prosthodontics)",
     "details_en": "Product: Dental Barrier Film Wrapping Roll\nColor: Blue\nApplication: Clinical surface isolation, cross-contamination prevention, equipment protection\nSelling Price: 28.00 LYD\nCost Price: 23.00 LYD\nQuantity in Stock: 5 rolls\nSubject: Removable Prosthodontics",
     "sort_order": 10
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000112",
+    "name_ar": "حاجز مطاطي عيادي Rubber Dam 6×6 (موديلات وألوان متعددة)",
+    "name_en": "Dental Rubber Dam Sheets 6×6 (Multiple Models & Colors)",
+    "price": 2.5,
+    "compare_at_price": null,
+    "availability": "limited_quantity",
+    "stock_quantity": 71,
+    "subject_id": "33000000-0000-0000-0000-000000000033",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "33000000-0000-0000-0000-000000000034",
+      "22000000-0000-0000-0000-000000000023"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/rubber-dam-heavy-blue.png",
+    "description_ar": "شيتات حاجز مطاطي عيادي Rubber Dam قياس 6×6 بوصة (Natural Latex Dental Rubber Dams) عالي المرونة ومقاوم للتمزق. متوفر بموديلين: هيفي (Heavy) باللون الأزرق لثبات وعزل محكم فائق، وميد (Mid/Medium) باللون الأخضر للمرونة العالية أثناء العزل في عيادات البرستو والتحفظي.",
+    "description_en": "High-grade 6x6 inch natural latex dental rubber dam sheets for superior clinical isolation and moisture control. Available in Heavy model (Blue) for maximum tear-resistance and seal, and Mid/Medium model (Green) for optimal flexibility during restorative and prosthodontic procedures.",
+    "details_ar": "النوع: حاجز مطاطي طبي لعزل الأسنان (Natural Latex Dental Rubber Dam)\nالمقاس: 6×6 بوصة (6x6)\nالموديلات والألوان المتوفرة:\n• هيفي - Heavy (أزرق - Blue): متوفر 35 شيت\n• ميد - Mid / Medium (أخضر - Green): متوفر 36 شيت\nسعر البيع: 2.50 د.ل\nسعر التكلفة: 2.285 د.ل\nإجمالي المخزون: 71 شيت\nالمادة الدراسية: صناعة الأسنان الثابتة 2 (البرستو)",
+    "details_en": "Type: Natural Latex Dental Rubber Dam Sheets\nSize: 6x6 inches\nAvailable Models & Colors:\n• Heavy - Blue: In Stock 35 sheets\n• Mid / Medium - Green: In Stock 36 sheets\nSelling Price: 2.50 LYD\nCost Price: 2.285 LYD\nTotal Stock: 71 sheets\nSubject: Fixed Prosthodontics 2 (Prostho)",
+    "sort_order": 11
   }
 ]

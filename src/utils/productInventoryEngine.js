@@ -129,6 +129,153 @@ export const CANONICAL_SIZED_PRODUCTS = {
         image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/overseasglove-nitrile-gloves-blue-m.png'
       }
     ]
+  },
+  '33000000-0000-0000-0000-000000000112': {
+    productId: '33000000-0000-0000-0000-000000000112',
+    nameAr: 'حاجز مطاطي عيادي Rubber Dam 6×6 (موديلات وألوان متعددة)',
+    nameEn: 'Dental Rubber Dam Sheets 6×6 (Multiple Models & Colors)',
+    hasColorAndSize: true,
+    optionsLabelAr: 'اختر الموديل واللون المتوفر',
+    optionsLabelEn: 'Select Model & Color',
+    optionsPromptAr: '⚠️ يرجى تحديد الموديل واللون أولاً',
+    optionsPromptEn: '⚠️ Please select model & color',
+    buttonPromptAr: 'اختر الموديل واللون وأضف',
+    buttonPromptEn: 'Select Model & Color',
+    required: true,
+    galleryImages: [
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/rubber-dam-heavy-blue.png',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/rubber-dam-mid-green.png'
+    ],
+    sizes: [
+      {
+        size: 'heavy-blue',
+        code: 'Heavy',
+        color: 'Blue',
+        colorAr: 'أزرق',
+        colorHex: '#2563EB',
+        labelAr: 'موديل هيفي - Heavy (أزرق)',
+        labelEn: 'Heavy Model (Blue)',
+        shortLabel: 'Heavy (أزرق)',
+        stock: 35,
+        costPrice: 2.285,
+        price: 2.50,
+        unitNameAr: 'شيت',
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/rubber-dam-heavy-blue.png'
+      },
+      {
+        size: 'mid-green',
+        code: 'Mid',
+        color: 'Green',
+        colorAr: 'أخضر',
+        colorHex: '#10B981',
+        labelAr: 'موديل ميد - Mid (أخضر)',
+        labelEn: 'Mid Model (Green)',
+        shortLabel: 'Mid (أخضر)',
+        stock: 36,
+        costPrice: 2.285,
+        price: 2.50,
+        unitNameAr: 'شيت',
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/rubber-dam-mid-green.png'
+      }
+    ]
+  },
+  '99000000-0000-0000-0000-000000000001': {
+    productId: '99000000-0000-0000-0000-000000000001',
+    nameAr: 'كمامات طبية جراحية MedProtect (أزرق وأسود)',
+    nameEn: 'MedProtect Disposable Surgical Face Masks (Blue & Black)',
+    hasColorAndSize: true,
+    optionsLabelAr: 'اختر اللون المتوفر',
+    optionsLabelEn: 'Select Color',
+    optionsPromptAr: '⚠️ يرجى تحديد لون الكمامة أولاً',
+    optionsPromptEn: '⚠️ Please select mask color',
+    buttonPromptAr: 'اختر اللون وأضف للسلة',
+    buttonPromptEn: 'Select Color & Add',
+    required: true,
+    galleryImages: [
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-medprotect-blue.png',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-disposable-black.png'
+    ],
+    sizes: [
+      {
+        size: 'blue',
+        code: 'Blue',
+        color: 'Blue',
+        colorAr: 'أزرق',
+        colorHex: '#3B82F6',
+        labelAr: 'أزرق (Blue)',
+        labelEn: 'Blue',
+        shortLabel: 'أزرق (Blue)',
+        stock: 50,
+        costPrice: 0.12,
+        price: 0.50,
+        unitNameAr: 'قطعة',
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-medprotect-blue.png'
+      },
+      {
+        size: 'black',
+        code: 'Black',
+        color: 'Black',
+        colorAr: 'أسود',
+        colorHex: '#1E293B',
+        labelAr: 'أسود (Black)',
+        labelEn: 'Black',
+        shortLabel: 'أسود (Black)',
+        stock: 100,
+        costPrice: 0.13,
+        price: 0.50,
+        unitNameAr: 'قطعة',
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-disposable-black.png'
+      }
+    ]
+  },
+  '33000000-0000-0000-0000-000000000103': {
+    productId: '33000000-0000-0000-0000-000000000103',
+    nameAr: 'مفرش عيادة أسنان طبي واقي وعازل - Cover Sheet (وردي وأزرق)',
+    nameEn: 'Cover Sheet Disposable Waterproof Dental Bib (Pink & Blue)',
+    hasColorAndSize: true,
+    optionsLabelAr: 'اختر اللون المتوفر',
+    optionsLabelEn: 'Select Color',
+    optionsPromptAr: '⚠️ يرجى تحديد لون المفرش أولاً',
+    optionsPromptEn: '⚠️ Please select cover sheet color',
+    buttonPromptAr: 'اختر اللون وأضف للسلة',
+    buttonPromptEn: 'Select Color & Add',
+    required: true,
+    galleryImages: [
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-pink.png',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-blue.png'
+    ],
+    sizes: [
+      {
+        size: 'pink',
+        code: 'Pink',
+        color: 'Pink',
+        colorAr: 'وردي',
+        colorHex: '#EC4899',
+        labelAr: 'وردي (Pink)',
+        labelEn: 'Pink',
+        shortLabel: 'وردي (Pink)',
+        stock: 375,
+        costPrice: 0.11,
+        price: 0.50,
+        unitNameAr: 'قطعة',
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-pink.png'
+      },
+      {
+        size: 'blue',
+        code: 'Blue',
+        color: 'Blue',
+        colorAr: 'أزرق',
+        colorHex: '#3B82F6',
+        labelAr: 'أزرق (Blue)',
+        labelEn: 'Blue',
+        shortLabel: 'أزرق (Blue)',
+        stock: 125,
+        costPrice: 0.11,
+        price: 0.50,
+        unitNameAr: 'قطعة',
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-blue.png'
+      }
+    ]
   }
 };
 

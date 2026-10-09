@@ -942,12 +942,12 @@ export const ProductDetails = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <span style={{ fontSize: '1.2rem' }}>{sizedConfig.hasColorAndSize ? '🎨' : '📐'}</span>
                         <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main, #1E293B)' }}>
-                          {lang === 'ar' ? (sizedConfig.hasColorAndSize ? 'اللون والمقاس المتوفر (اختيار إلزامي):' : 'المقاس المطلوب (اختيار إلزامي):') : (sizedConfig.hasColorAndSize ? 'Available Color & Size (Mandatory):' : 'Required Size (Mandatory):')}
+                          {lang === 'ar' ? (sizedConfig.optionsLabelAr ? `${sizedConfig.optionsLabelAr} (اختيار إلزامي):` : (sizedConfig.hasColorAndSize ? 'اللون والمقاس المتوفر (اختيار إلزامي):' : 'المقاس المطلوب (اختيار إلزامي):')) : (sizedConfig.optionsLabelEn ? `${sizedConfig.optionsLabelEn} (Mandatory):` : (sizedConfig.hasColorAndSize ? 'Available Color & Size (Mandatory):' : 'Required Size (Mandatory):'))}
                         </span>
                       </div>
                       {sizeError ? (
                         <span style={{ color: '#DC2626', fontWeight: 800, fontSize: '0.82rem', animation: 'pulse 1s infinite' }}>
-                          {lang === 'ar' ? (sizedConfig.hasColorAndSize ? '⚠️ يرجى اختيار اللون والمقاس أولاً' : '⚠️ يرجى اختيار المقاس (M أو L) أولاً') : (sizedConfig.hasColorAndSize ? '⚠️ Please select color & size first' : '⚠️ Please select size (M or L) first')}
+                          {lang === 'ar' ? (sizedConfig.optionsPromptAr || (sizedConfig.hasColorAndSize ? '⚠️ يرجى اختيار اللون والمقاس أولاً' : '⚠️ يرجى اختيار المقاس (M أو L) أولاً')) : (sizedConfig.optionsPromptEn || (sizedConfig.hasColorAndSize ? '⚠️ Please select color & size first' : '⚠️ Please select size (M or L) first'))}
                         </span>
                       ) : selectedSize ? (
                         <span style={{ color: '#059669', fontWeight: 700, fontSize: '0.82rem' }}>
@@ -955,7 +955,7 @@ export const ProductDetails = () => {
                         </span>
                       ) : (
                         <span style={{ color: 'var(--text-muted, #64748B)', fontSize: '0.8rem', fontWeight: 600 }}>
-                          {lang === 'ar' ? (sizedConfig.hasColorAndSize ? 'اضغط لتحديد اللون والمقاس' : 'اضغط لتحديد المقاس') : (sizedConfig.hasColorAndSize ? 'Click to select option' : 'Click to select size')}
+                          {lang === 'ar' ? (sizedConfig.optionsLabelAr ? `اضغط لتحديد ${sizedConfig.optionsLabelAr}` : (sizedConfig.hasColorAndSize ? 'اضغط لتحديد اللون والمقاس' : 'اضغط لتحديد المقاس')) : (sizedConfig.optionsLabelEn ? `Click to select ${sizedConfig.optionsLabelEn}` : (sizedConfig.hasColorAndSize ? 'Click to select option' : 'Click to select size'))}
                         </span>
                       )}
                     </div>
@@ -1013,7 +1013,7 @@ export const ProductDetails = () => {
                               background: isSelected ? 'rgba(255, 255, 255, 0.2)' : '#F1F5F9',
                               color: isSelected ? '#FFFFFF' : '#64748B'
                             }}>
-                              {lang === 'ar' ? `المتوفر: ${s.stock} ${sizedConfig.hasColorAndSize ? 'زوج' : 'قطعة'}` : `Stock: ${s.stock} ${sizedConfig.hasColorAndSize ? 'pairs' : 'pcs'}`}
+                              {lang === 'ar' ? `المتوفر: ${s.stock} ${s.unitNameAr || (s.size.includes('s') || s.size.includes('m') ? 'زوج' : 'قطعة')}` : `Stock: ${s.stock} ${s.size.includes('s') || s.size.includes('m') ? 'pairs' : 'pcs'}`}
                             </span>
                           </button>
                         );
