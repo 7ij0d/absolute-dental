@@ -550,5 +550,22 @@
     "details_ar": "الماركة: Lascod (إيطاليا)\nالوزن: 450 جرام (Full Bag 450g)\nالنوع: مادة طبعة الجينات متغيرة الألوان (Chromatic Alginate)\nسعر البيع: 50 د.ل\nسعر التكلفة: 45 د.ل\nالكمية في المخزون: 1 عبوة\nالمادة الدراسية: صناعة الأسنان (Prosthodontics)",
     "details_en": "Brand: Lascod (Italy)\nWeight: 450g Full Bag\nType: Chromatic Alginate Impression Material (Mint Flavor)\nSelling Price: 50 LYD\nCost Price: 45 LYD\nQuantity in Stock: 1 pack\nSubject: Prosthodontics",
     "sort_order": 7
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000108",
+    "name_ar": "شاش طبي معقم لايف سبورت - Life Support Sterile Gauze Swab",
+    "name_en": "Life Support Sterile Gauze Swab (10cm x 10cm)",
+    "price": 0.5,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 200,
+    "subject_id": "33000000-0000-0000-0000-000000000032",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/life-support-sterile-gauze-swab.png",
+    "description_ar": "شاش طبي قطني نقي معقم بأكسيد الإيثيلين (Sterile EO) عالي الامتصاص من Life Support. متعدد الطبقات بمقاس 10cm × 10cm، مثالي للتحكم في اللعاب والعزل ومسح وتجفيف الأسنان وتطبيق محاليل الفلورايد في عيادات طب الأسنان الوقائي وطب أسنان الأطفال.",
+    "description_en": "Life Support ethylene oxide sterilized (Sterile EO) 100% cotton gauze swab (10cm x 10cm, 4-ply / 12-ply). Highly absorbent and lint-free, essential for isolation, moisture control, cleaning, and topical fluoride applications in Preventive & Pediatric Dentistry.",
+    "details_ar": "الماركة: Life Support (IPC)\nالمقاس: 10cm × 10cm (40S, 4PLY, 12PLY)\nالنوع: شاش قطني طبي معقم (Sterile Gauze Swab)\nسعر البيع: 0.50 د.ل للقطعة\nسعر التكلفة: 0.20 د.ل\nالكمية في المخزون: 200 قطعة\nالمادة الدراسية: طب أسنان الأطفال والوقائي 1 (البريفنشن)",
+    "details_en": "Brand: Life Support (IPC)\nSize: 10cm x 10cm (40S, 4PLY, 12PLY)\nType: Sterile Cotton Gauze Swab (EO Sterilized)\nSelling Price: 0.50 LYD\nCost Price: 0.20 LYD\nQuantity in Stock: 200 pcs\nSubject: Pediatric & Preventive Dentistry 1",
+    "sort_order": 8
   }
 ]
