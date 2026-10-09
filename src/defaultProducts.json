@@ -445,5 +445,49 @@
     "details_ar": "الماركة: L+F Support\nالمقاس: 22 (Size 22)\nالمادة: كربون ستيل معقم (Carbon Steel - Sterile R)\nسعر البيع: 0.50 د.ل للقطعة\nسعر التكلفة: 0.20 د.ل\nالكمية في المخزون: 300 قطعة\nالاستخدام: صناعة الأسنان الثابتة والمتحركة",
     "details_en": "Brand: L+F Support\nSize: 22\nMaterial: Carbon Steel (Sterile R)\nSelling Price: 0.50 LYD\nCost Price: 0.20 LYD\nStock Quantity: 300 pieces\nDepartment: Fixed & Removable Prosthodontics",
     "sort_order": 2
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000103",
+    "name_ar": "مفرش عيادة أسنان طبي واقي وعازل - Cover Sheet (وردي)",
+    "name_en": "Cover Sheet Disposable Waterproof Dental Bib (Pink)",
+    "price": 0.5,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 375,
+    "subject_id": "33000000-0000-0000-0000-000000000031",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "33000000-0000-0000-0000-000000000032",
+      "33000000-0000-0000-0000-000000000033",
+      "33000000-0000-0000-0000-000000000034"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-pink.png",
+    "description_ar": "مفرش طبي واقي للاستخدام لمرة واحدة (Waterproof Dental Bib) بلون وردي، مصنوع من طبقات ورقية ماصة عالية الجودة مدعمة بطبقة بولي إيثيلين عازلة ومقاومة للماء تماماً لحماية ملابس المرضى وأسطح العمل في العيادات.",
+    "description_en": "Disposable waterproof dental bib / cover sheet in pink. 2-ply absorbent paper backing laminated with 1-ply waterproof PE film to protect patients and clinic trays from liquids.",
+    "details_ar": "اللون: وردي (Pink)\nالكمية في المخزون: 375 قطعة\nالنوع: مفرش واقي عازل ومقاوم للماء (Waterproof Dental Bib)\nسعر البيع: 0.5 د.ل للقطعة\nسعر التكلفة: 0.11 د.ل\nالسنة الدراسية: السنة الثالثة (جميع المواد)",
+    "details_en": "Color: Pink\nQuantity in Stock: 375 pieces\nType: Disposable Waterproof Dental Bib / Cover Sheet\nSelling Price: 0.5 LYD\nCost Price: 0.11 LYD\nAcademic Year: 3rd Year (All Subjects)",
+    "sort_order": 3
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000104",
+    "name_ar": "مفرش عيادة أسنان طبي واقي وعازل - Cover Sheet (أزرق)",
+    "name_en": "Cover Sheet Disposable Waterproof Dental Bib (Blue)",
+    "price": 0.5,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 125,
+    "subject_id": "33000000-0000-0000-0000-000000000031",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "33000000-0000-0000-0000-000000000032",
+      "33000000-0000-0000-0000-000000000033",
+      "33000000-0000-0000-0000-000000000034"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-blue.png",
+    "description_ar": "مفرش طبي واقي للاستخدام لمرة واحدة (Waterproof Dental Bib) بلون أزرق عيادي أنيق، مصنوع من طبقات ورقية ماصة عالية الجودة مدعمة بطبقة عازلة ومقاومة للماء تماماً لحماية ملابس المرضى وأسطح العمل في العيادات.",
+    "description_en": "Disposable waterproof dental bib / cover sheet in clinic blue. 2-ply absorbent paper backing laminated with 1-ply waterproof PE film to protect patients and clinic trays from liquids.",
+    "details_ar": "اللون: أزرق (Blue)\nالكمية في المخزون: 125 قطعة\nالنوع: مفرش واقي عازل ومقاوم للماء (Waterproof Dental Bib)\nسعر البيع: 0.5 د.ل للقطعة\nسعر التكلفة: 0.11 د.ل\nالسنة الدراسية: السنة الثالثة (جميع المواد)",
+    "details_en": "Color: Blue\nQuantity in Stock: 125 pieces\nType: Disposable Waterproof Dental Bib / Cover Sheet\nSelling Price: 0.5 LYD\nCost Price: 0.11 LYD\nAcademic Year: 3rd Year (All Subjects)",
+    "sort_order": 4
   }
 ]
