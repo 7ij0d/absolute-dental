@@ -400,13 +400,17 @@ export const ProductDetails = () => {
 
     if (sizedConfig && selectedSize) {
       const sizeDef = sizedConfig.sizes.find(s => s.size === selectedSize);
+      const variantNameEn = sizeDef?.labelEn ? `${product.name_en} (${sizeDef.labelEn})` : `${product.name_en} (Size ${selectedSize})`;
+      const variantNameAr = sizeDef?.labelAr ? `${product.name_ar} (${sizeDef.labelAr})` : `${product.name_ar} (مقاس ${selectedSize})`;
       addToCart({
         ...product,
         id: `${product.id}-${selectedSize}`,
         base_product_id: product.id,
-        name_en: `${product.name_en} (Size ${selectedSize})`,
-        name_ar: `${product.name_ar} (مقاس ${selectedSize})`,
-        selected_size: selectedSize,
+        name_en: variantNameEn,
+        name_ar: variantNameAr,
+        selected_size: sizeDef?.code || selectedSize,
+        selected_color: sizeDef?.color || product.color,
+        image_url: sizeDef?.image || product.image_url,
         stock_quantity: sizeDef ? sizeDef.stock : 24,
         effectiveStock: sizeDef ? sizeDef.stock : 24
       }, quantity);
@@ -636,7 +640,16 @@ export const ProductDetails = () => {
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => setActiveImage(img)}
+                    onClick={() => {
+                      setActiveImage(img);
+                      if (sizedConfig) {
+                        const matchSize = sizedConfig.sizes.find(s => s.image === img);
+                        if (matchSize) {
+                          setSelectedSize(matchSize.size);
+                          setSizeError(false);
+                        }
+                      }
+                    }}
                     className={`product-thumb-btn ${activeImage === img ? 'active' : ''}`}
                   >
                     <img
@@ -927,27 +940,27 @@ export const ProductDetails = () => {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '1.2rem' }}>📐</span>
+                        <span style={{ fontSize: '1.2rem' }}>{sizedConfig.hasColorAndSize ? '🎨' : '📐'}</span>
                         <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main, #1E293B)' }}>
-                          {lang === 'ar' ? 'المقاس المطلوب (اختيار إلزامي):' : 'Required Size (Mandatory):'}
+                          {lang === 'ar' ? (sizedConfig.hasColorAndSize ? 'اللون والمقاس المتوفر (اختيار إلزامي):' : 'المقاس المطلوب (اختيار إلزامي):') : (sizedConfig.hasColorAndSize ? 'Available Color & Size (Mandatory):' : 'Required Size (Mandatory):')}
                         </span>
                       </div>
                       {sizeError ? (
                         <span style={{ color: '#DC2626', fontWeight: 800, fontSize: '0.82rem', animation: 'pulse 1s infinite' }}>
-                          {lang === 'ar' ? '⚠️ يرجى اختيار المقاس (M أو L) أولاً' : '⚠️ Please select size (M or L) first'}
+                          {lang === 'ar' ? (sizedConfig.hasColorAndSize ? '⚠️ يرجى اختيار اللون والمقاس أولاً' : '⚠️ يرجى اختيار المقاس (M أو L) أولاً') : (sizedConfig.hasColorAndSize ? '⚠️ Please select color & size first' : '⚠️ Please select size (M or L) first')}
                         </span>
                       ) : selectedSize ? (
                         <span style={{ color: '#059669', fontWeight: 700, fontSize: '0.82rem' }}>
-                          ✓ {lang === 'ar' ? `تم تحديد مقاس ${selectedSize}` : `Size ${selectedSize} selected`}
+                          ✓ {lang === 'ar' ? `تم تحديد: ${selectedSizeDef?.labelAr || selectedSize}` : `Selected: ${selectedSizeDef?.labelEn || selectedSize}`}
                         </span>
                       ) : (
                         <span style={{ color: 'var(--text-muted, #64748B)', fontSize: '0.8rem', fontWeight: 600 }}>
-                          {lang === 'ar' ? 'اضغط لتحديد المقاس' : 'Click to select size'}
+                          {lang === 'ar' ? (sizedConfig.hasColorAndSize ? 'اضغط لتحديد اللون والمقاس' : 'اضغط لتحديد المقاس') : (sizedConfig.hasColorAndSize ? 'Click to select option' : 'Click to select size')}
                         </span>
                       )}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
                       {sizedConfig.sizes.map(s => {
                         const isSelected = selectedSize === s.size;
                         return (
@@ -956,6 +969,7 @@ export const ProductDetails = () => {
                             type="button"
                             onClick={() => {
                               setSelectedSize(s.size);
+                              if (s.image) setActiveImage(s.image);
                               setSizeError(false);
                             }}
                             style={{
@@ -976,7 +990,17 @@ export const ProductDetails = () => {
                             }}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                              <span style={{ fontSize: '1.3rem', fontWeight: 900 }}>{s.shortLabel}</span>
+                              {s.colorHex && (
+                                <span style={{
+                                  width: '10px',
+                                  height: '10px',
+                                  borderRadius: '50%',
+                                  backgroundColor: s.colorHex,
+                                  display: 'inline-block',
+                                  border: '1.5px solid rgba(255,255,255,0.8)'
+                                }} />
+                              )}
+                              <span style={{ fontSize: '1.2rem', fontWeight: 900 }}>{s.shortLabel}</span>
                               <span style={{ fontSize: '0.85rem', fontWeight: 700, opacity: 0.9 }}>
                                 {lang === 'ar' ? s.labelAr : s.labelEn}
                               </span>
@@ -989,7 +1013,7 @@ export const ProductDetails = () => {
                               background: isSelected ? 'rgba(255, 255, 255, 0.2)' : '#F1F5F9',
                               color: isSelected ? '#FFFFFF' : '#64748B'
                             }}>
-                              {lang === 'ar' ? `المتوفر: ${s.stock} قطعة` : `Stock: ${s.stock} pcs`}
+                              {lang === 'ar' ? `المتوفر: ${s.stock} ${sizedConfig.hasColorAndSize ? 'زوج' : 'قطعة'}` : `Stock: ${s.stock} ${sizedConfig.hasColorAndSize ? 'pairs' : 'pcs'}`}
                             </span>
                           </button>
                         );

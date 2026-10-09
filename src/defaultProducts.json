@@ -567,5 +567,27 @@
     "details_ar": "الماركة: Life Support (IPC)\nالمقاس: 10cm × 10cm (40S, 4PLY, 12PLY)\nالنوع: شاش قطني طبي معقم (Sterile Gauze Swab)\nسعر البيع: 0.50 د.ل للقطعة\nسعر التكلفة: 0.20 د.ل\nالكمية في المخزون: 200 قطعة\nالمادة الدراسية: طب أسنان الأطفال والوقائي 1 (البريفنشن)",
     "details_en": "Brand: Life Support (IPC)\nSize: 10cm x 10cm (40S, 4PLY, 12PLY)\nType: Sterile Cotton Gauze Swab (EO Sterilized)\nSelling Price: 0.50 LYD\nCost Price: 0.20 LYD\nQuantity in Stock: 200 pcs\nSubject: Pediatric & Preventive Dentistry 1",
     "sort_order": 8
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000109",
+    "name_ar": "قفازات نايتريل طبية فاحصة OverseasGlove (غير معقمة)",
+    "name_en": "OverseasGlove Disposable Nitrile Gloves (Non-Sterile)",
+    "price": 1,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 100,
+    "subject_id": "33000000-0000-0000-0000-000000000031",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "33000000-0000-0000-0000-000000000032",
+      "33000000-0000-0000-0000-000000000033",
+      "33000000-0000-0000-0000-000000000034"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/overseasglove-nitrile-gloves-black-s.png",
+    "description_ar": "قفازات فحص طبية نايتريل خالية من البودرة واللاتكس من OverseasGlove للاستخدام لمرة واحدة (حماية فائقة وملمس مريح). متوفرة بمقاسات وألوان متعددة (أسود مقاس S، أزرق مقاس M). أساسية لجميع عيادات ومعامل السنة الثالثة.",
+    "description_en": "Premium OverseasGlove disposable non-sterile nitrile examination gloves (Powder-free & Latex-free). Available in multiple colors and sizes (Black Size S, Blue Size M). Essential protection across all 3rd-year dental clinics and laboratories.",
+    "details_ar": "الماركة: OverseasGlove\nالنوع: قفازات نايتريل طبية غير معقمة (Disposable Nitrile Examination Gloves)\nالألوان والمقاسات المتوفرة:\n• أسود (Black) - مقاس Small (S) - متوفر: 50 زوج\n• أزرق (Blue) - مقاس Medium (M) - متوفر: 50 زوج\nسعر البيع: 1.00 د.ل للزوج\nسعر التكلفة: 0.56 د.ل\nالمواد الدراسية: السنة الثالثة (جميع المواد الأربعة الأساسية)",
+    "details_en": "Brand: OverseasGlove\nType: Disposable Non-Sterile Nitrile Gloves\nAvailable Colors & Sizes:\n• Black - Size Small (S) - In Stock: 50 pairs\n• Blue - Size Medium (M) - In Stock: 50 pairs\nSelling Price: 1.00 LYD per pair\nCost Price: 0.56 LYD\nAcademic Year: 3rd Year (All 4 Subjects)",
+    "sort_order": 9
   }
 ]

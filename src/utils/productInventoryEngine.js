@@ -86,6 +86,49 @@ export const CANONICAL_SIZED_PRODUCTS = {
         price: 2
       }
     ]
+  },
+  '33000000-0000-0000-0000-000000000109': {
+    productId: '33000000-0000-0000-0000-000000000109',
+    nameAr: 'قفازات نايتريل طبية فاحصة OverseasGlove (غير معقمة)',
+    nameEn: 'OverseasGlove Disposable Nitrile Gloves (Non-Sterile)',
+    hasColorAndSize: true,
+    optionsLabelAr: 'اختر اللون والمقاس المتوفر',
+    optionsLabelEn: 'Select Available Color & Size',
+    required: true,
+    galleryImages: [
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/overseasglove-nitrile-gloves-black-s.png',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/overseasglove-nitrile-gloves-blue-m.png'
+    ],
+    sizes: [
+      {
+        size: 'black-s',
+        code: 'S',
+        color: 'Black',
+        colorAr: 'أسود',
+        colorHex: '#1E293B',
+        labelAr: 'أسود (مقاس S)',
+        labelEn: 'Black (Size S)',
+        shortLabel: 'Black S',
+        stock: 50,
+        costPrice: 0.56,
+        price: 1.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/overseasglove-nitrile-gloves-black-s.png'
+      },
+      {
+        size: 'blue-m',
+        code: 'M',
+        color: 'Blue',
+        colorAr: 'أزرق',
+        colorHex: '#2563EB',
+        labelAr: 'أزرق (مقاس M)',
+        labelEn: 'Blue (Size M)',
+        shortLabel: 'Blue M',
+        stock: 50,
+        costPrice: 0.56,
+        price: 1.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/overseasglove-nitrile-gloves-blue-m.png'
+      }
+    ]
   }
 };
 

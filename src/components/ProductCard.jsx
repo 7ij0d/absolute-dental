@@ -15,8 +15,9 @@ export const ProductCard = ({ product }) => {
   const [justAdded, setJustAdded] = useState(false);
   const [selectedSize, setSelectedSize] = useState(null);
   const [sizePrompt, setSizePrompt] = useState(false);
-  const resolvedImageSrc = useStorageImage(product.image_url);
   const sizedConfig = getProductSizedConfig(product.id);
+  const currentImageUrl = (sizedConfig && selectedSize && sizedConfig.sizes.find(s => s.size === selectedSize)?.image) || product.image_url;
+  const resolvedImageSrc = useStorageImage(currentImageUrl);
 
   useEffect(() => {
     try {
@@ -61,13 +62,17 @@ export const ProductCard = ({ product }) => {
 
     if (sizedConfig && selectedSize) {
       const sizeDef = sizedConfig.sizes.find(s => s.size === selectedSize);
+      const variantNameEn = sizeDef?.labelEn ? `${product.name_en} (${sizeDef.labelEn})` : `${product.name_en} (Size ${selectedSize})`;
+      const variantNameAr = sizeDef?.labelAr ? `${product.name_ar} (${sizeDef.labelAr})` : `${product.name_ar} (مقاس ${selectedSize})`;
       addToCart({
         ...product,
         id: `${product.id}-${selectedSize}`,
         base_product_id: product.id,
-        name_en: `${product.name_en} (Size ${selectedSize})`,
-        name_ar: `${product.name_ar} (مقاس ${selectedSize})`,
-        selected_size: selectedSize,
+        name_en: variantNameEn,
+        name_ar: variantNameAr,
+        selected_size: sizeDef?.code || selectedSize,
+        selected_color: sizeDef?.color || product.color,
+        image_url: sizeDef?.image || product.image_url,
         quantity: 1,
         stock_quantity: sizeDef ? sizeDef.stock : 24,
         effectiveStock: sizeDef ? sizeDef.stock : 24
@@ -208,9 +213,11 @@ export const ProductCard = ({ product }) => {
             }}
           >
             <span style={{ fontSize: '0.74rem', fontWeight: 700, color: sizePrompt ? '#DC2626' : 'var(--text-muted)' }}>
-              {sizePrompt ? (lang === 'ar' ? '⚠️ حدد المقاس أولاً:' : '⚠️ Select size first:') : (lang === 'ar' ? 'المقاس:' : 'Size:')}
+              {sizePrompt
+                ? (lang === 'ar' ? (sizedConfig.hasColorAndSize ? '⚠️ حدد اللون والمقاس أولاً:' : '⚠️ حدد المقاس أولاً:') : (sizedConfig.hasColorAndSize ? '⚠️ Select option:' : '⚠️ Select size:'))
+                : (lang === 'ar' ? (sizedConfig.hasColorAndSize ? 'الخيارات:' : 'المقاس:') : (sizedConfig.hasColorAndSize ? 'Options:' : 'Size:'))}
             </span>
-            <div style={{ display: 'flex', gap: '0.35rem' }}>
+            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
               {sizedConfig.sizes.map(s => {
                 const isSelected = selectedSize === s.size;
                 return (
@@ -224,22 +231,35 @@ export const ProductCard = ({ product }) => {
                       setSizePrompt(false);
                     }}
                     style={{
-                      minWidth: '34px',
+                      minWidth: '32px',
                       height: '26px',
                       padding: '0 8px',
                       borderRadius: '6px',
-                      fontSize: '0.78rem',
+                      fontSize: '0.75rem',
                       fontWeight: 800,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.3rem',
                       border: isSelected ? '1px solid #3D352E' : '1px solid #CBD5E1',
                       background: isSelected ? '#3D352E' : '#FFFFFF',
                       color: isSelected ? '#FFFFFF' : '#334155',
                       cursor: 'pointer',
                       transition: 'all 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
-                      transform: isSelected ? 'scale(1.06)' : 'none',
+                      transform: isSelected ? 'scale(1.05)' : 'none',
                       boxShadow: isSelected ? '0 1px 4px rgba(0,0,0,0.2)' : 'none'
                     }}
                   >
-                    {s.shortLabel}
+                    {s.colorHex && (
+                      <span style={{
+                        width: '7px',
+                        height: '7px',
+                        borderRadius: '50%',
+                        backgroundColor: s.colorHex,
+                        display: 'inline-block',
+                        border: '1px solid rgba(255,255,255,0.7)'
+                      }} />
+                    )}
+                    <span>{s.shortLabel}</span>
                   </button>
                 );
               })}
@@ -288,16 +308,16 @@ export const ProductCard = ({ product }) => {
           ) : isComingSoon ? (
             <span>{lang === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
           ) : sizePrompt ? (
-            <span>{lang === 'ar' ? '⚠️ يرجى اختيار المقاس (M أو L)' : '⚠️ Please select size (M or L)'}</span>
+            <span>{lang === 'ar' ? (sizedConfig?.hasColorAndSize ? '⚠️ يرجى تحديد اللون والمقاس أولاً' : '⚠️ يرجى اختيار المقاس (M أو L)') : (sizedConfig?.hasColorAndSize ? '⚠️ Please select color & size' : '⚠️ Please select size (M or L)')}</span>
           ) : sizedConfig && !selectedSize ? (
             <>
               <ShoppingCart size={15} strokeWidth={2.2} />
-              <span>{lang === 'ar' ? 'اختر المقاس وأضف' : 'Select Size & Add'}</span>
+              <span>{lang === 'ar' ? (sizedConfig.hasColorAndSize ? 'اختر اللون والمقاس وأضف' : 'اختر المقاس وأضف') : (sizedConfig.hasColorAndSize ? 'Select Option & Add' : 'Select Size & Add')}</span>
             </>
           ) : sizedConfig && selectedSize ? (
             <>
               <ShoppingCart size={15} strokeWidth={2.2} />
-              <span>{lang === 'ar' ? `أضف للسلة (مقاس ${selectedSize})` : `Add to Cart (Size ${selectedSize})`}</span>
+              <span>{lang === 'ar' ? `أضف للسلة (${sizedConfig.sizes.find(s => s.size === selectedSize)?.shortLabel || selectedSize})` : `Add to Cart (${sizedConfig.sizes.find(s => s.size === selectedSize)?.shortLabel || selectedSize})`}</span>
             </>
           ) : (
             <>
