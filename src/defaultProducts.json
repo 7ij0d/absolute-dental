@@ -589,5 +589,22 @@
     "details_ar": "الماركة: OverseasGlove\nالنوع: قفازات نايتريل طبية غير معقمة (Disposable Nitrile Examination Gloves)\nالألوان والمقاسات المتوفرة:\n• أسود (Black) - مقاس Small (S) - متوفر: 50 زوج\n• أزرق (Blue) - مقاس Medium (M) - متوفر: 50 زوج\nسعر البيع: 1.00 د.ل للزوج\nسعر التكلفة: 0.56 د.ل\nالمواد الدراسية: السنة الثالثة (جميع المواد الأربعة الأساسية)",
     "details_en": "Brand: OverseasGlove\nType: Disposable Non-Sterile Nitrile Gloves\nAvailable Colors & Sizes:\n• Black - Size Small (S) - In Stock: 50 pairs\n• Blue - Size Medium (M) - In Stock: 50 pairs\nSelling Price: 1.00 LYD per pair\nCost Price: 0.56 LYD\nAcademic Year: 3rd Year (All 4 Subjects)",
     "sort_order": 9
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000110",
+    "name_ar": "رول شاش طبي قطني GM (وزن 500 جرام)",
+    "name_en": "GM Medical Gauze Roll (500g)",
+    "price": 26,
+    "compare_at_price": null,
+    "availability": "limited_quantity",
+    "stock_quantity": 2,
+    "subject_id": "33000000-0000-0000-0000-000000000032",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/gauze-roll-500g.png",
+    "description_ar": "رول شاش طبي قطني نقي 100% عالي الجودة والامتصاص من GM (عبوة كبيرة 500 جرام، قياس 36 بوصة × 100 ياردة، 4 طبقات). مخصص لإعداد ومسح وتجهيز مسحات الشاش المعملية والعيادية والتحكم في الرطوبة في عيادات طب الأسنان الوقائي.",
+    "description_en": "GM Medical 100% pure cotton absorbent gauze roll (500g roll, 36 inch x 100Y, 4-ply, 40s/12x8 mesh, 8 threads, Latex-free). High absorbency for custom swabs, isolation, and clinical procedures in Preventive Dentistry.",
+    "details_ar": "الماركة: GM (Al Gohay International Medical Equipment)\nالوزن: 500 جرام (500G Roll)\nالمواصفات: 100% قطن نقي، 36 بوصة × 100 ياردة، 4PLY، خالٍ من اللاتكس (Latex Free)\nسعر البيع: 26.00 د.ل\nسعر التكلفة: 22.00 د.ل\nالكمية في المخزون: 2 رول\nالمادة الدراسية: طب أسنان الأطفال والوقائي 1 (البريفنشن)",
+    "details_en": "Brand: GM\nWeight: 500g Roll\nSpecifications: 100% Cotton, 36 inch x 100Y, 4-ply, Latex Free, CE certified\nSelling Price: 26.00 LYD\nCost Price: 22.00 LYD\nQuantity in Stock: 2 rolls\nSubject: Pediatric & Preventive Dentistry 1",
+    "sort_order": 10
   }
 ]
