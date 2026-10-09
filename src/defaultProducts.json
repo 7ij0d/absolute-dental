@@ -529,5 +529,26 @@
     "details_ar": "الماركة: IQ Alginate\nالوزن: 50 جرام (50g Student Pack)\nالنوع: مادة طبعة الجينات معملية (Impression Material)\nسعر البيع: 7 د.ل\nسعر التكلفة: 6.125 د.ل\nالكمية في المخزون: 9 عبوات\nالمادة الدراسية: صناعة الأسنان المتحركة",
     "details_en": "Brand: IQ Alginate\nWeight: 50g Student Pack\nType: Dental Alginate Impression Material\nSelling Price: 7 LYD\nCost Price: 6.125 LYD\nQuantity in Stock: 9 packs\nSubject: Removable Prosthodontics",
     "sort_order": 6
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000107",
+    "name_ar": "مادة طبعة الجينات لاسكود آي كيو - Lascod iQ Alginate (450g)",
+    "name_en": "Lascod iQ Alginate | Impression Material (450g)",
+    "price": 50,
+    "compare_at_price": null,
+    "availability": "limited_quantity",
+    "stock_quantity": 1,
+    "subject_id": "33000000-0000-0000-0000-000000000034",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "33000000-0000-0000-0000-000000000033",
+      "22000000-0000-0000-0000-000000000022"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-iq-alginate-impression-material-450g.png",
+    "description_ar": "مادة أخذ طبعات الجينات الإيطالية الشهيرة Lascod iQ Alginate (عبوة كاملة 450 جرام). تتميز بتغير لوني إرشادي لمراحل التصلب (Chromatic indicator)، ونكهة النعناع المنعشة، وسرعة فائقة في التصلب ومرونة استثنائية لأخذ طبعات غاية في الدقة في معامل وعيادات صناعة الأسنان.",
+    "description_en": "World-renowned Italian Chromatic Alginate impression material by Lascod (Full 450g bag). Features visual chromatic phase indicator, mint flavor, fast setting, and high elastic recovery for precision impressions in Prosthodontics.",
+    "details_ar": "الماركة: Lascod (إيطاليا)\nالوزن: 450 جرام (Full Bag 450g)\nالنوع: مادة طبعة الجينات متغيرة الألوان (Chromatic Alginate)\nسعر البيع: 50 د.ل\nسعر التكلفة: 45 د.ل\nالكمية في المخزون: 1 عبوة\nالمادة الدراسية: صناعة الأسنان (Prosthodontics)",
+    "details_en": "Brand: Lascod (Italy)\nWeight: 450g Full Bag\nType: Chromatic Alginate Impression Material (Mint Flavor)\nSelling Price: 50 LYD\nCost Price: 45 LYD\nQuantity in Stock: 1 pack\nSubject: Prosthodontics",
+    "sort_order": 7
   }
 ]
