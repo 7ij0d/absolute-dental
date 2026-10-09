@@ -132,7 +132,7 @@ export const SubjectPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const CACHE_KEY = `subject_v6:${slug}`;
+    const CACHE_KEY = `subject_v7:${slug}`;
 
     const applyData = ({ subject, year, prods }) => {
       setSubjectData(subject);
@@ -190,7 +190,7 @@ export const SubjectPage = () => {
 
         // Ensure seeded default products for this subject are merged if not already present
         const existingIds = new Set(allProds.map(p => p.id));
-        const defaultsForSub = defaultProductsList.filter(p => p.subject_id === subject.id);
+        const defaultsForSub = defaultProductsList.filter(p => p.subject_id === subject.id || p.all_subjects === true);
         for (const dp of defaultsForSub) {
           if (!existingIds.has(dp.id)) {
             allProds.push(dp);
@@ -213,7 +213,7 @@ export const SubjectPage = () => {
         console.warn('SubjectPage fetch fallback:', err);
         const fallbackSub = DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) || DEFAULT_SUBJECTS[0];
         const fallbackYear = DEFAULT_YEARS.find(y => String(y.id) === String(fallbackSub.year_id)) || DEFAULT_YEARS[0];
-        const fallbackProds = defaultProductsList.filter(p => p.subject_id === fallbackSub.id);
+        const fallbackProds = defaultProductsList.filter(p => p.subject_id === fallbackSub.id || p.all_subjects === true);
         applyData({ subject: fallbackSub, year: fallbackYear, prods: fallbackProds });
       } finally {
         setLoading(false);

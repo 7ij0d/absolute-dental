@@ -389,5 +389,39 @@
     "details_ar": "اللون: أزرق\nالمقاسات المتوفرة: M و L\nالكمية: 24 مقاس كبير (L) + 24 مقاس متوسط (M)\nسعر البيع: 2 د.ل",
     "details_en": "Color: Blue\nAvailable Sizes: M & L\nIn Stock: 24 Large (L) + 24 Mid (M)\nSelling Price: 2 LYD",
     "sort_order": 1
+  },
+  {
+    "id": "99000000-0000-0000-0000-000000000001",
+    "name_ar": "كمامات طبية جراحية MedProtect (أزرق)",
+    "name_en": "MedProtect Disposable Surgical Face Masks with Ear Loops",
+    "price": 0.5,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 50,
+    "subject_id": "11000000-0000-0000-0000-000000000011",
+    "all_subjects": true,
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-medprotect-blue.png",
+    "description_ar": "كمامات طبية جراحية ثلاثية الطبقات عالية الكفاءة مع حلقات أذن مطاطية مريحة، خالية تماماً من اللاتكس والنيكل والكادميوم لحماية قصوى في المعامل والعيادات.",
+    "description_en": "Latex-free, nickel-free and cadmium-free. High-filtration 3-ply surgical face mask with comfortable elastic ear loops.",
+    "details_ar": "الماركة: MedProtect\nاللون: أزرق (Blue)\nالكمية: 50 قطعة في العلبة\nالنوع: خالية من اللاتكس والنيكل والكادميوم (latex-free, nickel-free, cadmium-free)\nسعر البيع: 0.5 د.ل للقطعة",
+    "details_en": "Color: Blue\nQuantity: 50 pieces\nFeatures: Latex-free, nickel-free, cadmium-free\nSelling Price: 0.5 LYD per piece",
+    "sort_order": 1
+  },
+  {
+    "id": "99000000-0000-0000-0000-000000000002",
+    "name_ar": "كمامات طبية جراحية أحادية الاستخدام (أسود)",
+    "name_en": "Disposable Surgical Face Masks (Black)",
+    "price": 0.5,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 100,
+    "subject_id": "11000000-0000-0000-0000-000000000011",
+    "all_subjects": true,
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-disposable-black.png",
+    "description_ar": "كمامات طبية وقائية ثلاثية الطبقات بلون أسود أنيق، أحادية الاستخدام مع حلقات أذن مريحة ودعامة أنف مرنة للاستخدام اليومي في كليات ومعامل الأسنان.",
+    "description_en": "Disposable 3-ply protective face masks with comfortable elastic ear loops. Sleek black design.",
+    "details_ar": "اللون: أسود (Black)\nالكمية: 100 قطعة\nالنوع: كمامات طبية أحادية الاستخدام (Disposable Face Masks)\nسعر البيع: 0.5 د.ل للقطعة",
+    "details_en": "Color: Black\nQuantity: 100 pieces\nType: Disposable 3-ply face masks\nSelling Price: 0.5 LYD per piece",
+    "sort_order": 2
   }
 ]

@@ -72,6 +72,34 @@ const DEFAULT_SUBJECTS = [
     name_en: 'Fixed Prosthodontics',
     slug: 'fixed-prosthodontics',
   },
+  {
+    id: '33000000-0000-0000-0000-000000000031',
+    year_id: '30000000-0000-0000-0000-000000000003',
+    name_ar: 'علاج الأسنان التحفظي 2',
+    name_en: 'Conservative Dentistry 2',
+    slug: 'conservative-dentistry-2',
+  },
+  {
+    id: '33000000-0000-0000-0000-000000000032',
+    year_id: '30000000-0000-0000-0000-000000000003',
+    name_ar: 'طب الأسنان الوقائي',
+    name_en: 'Preventive Dentistry',
+    slug: 'preventive-dentistry',
+  },
+  {
+    id: '33000000-0000-0000-0000-000000000033',
+    year_id: '30000000-0000-0000-0000-000000000003',
+    name_ar: 'صناعة الأسنان الثابتة 2',
+    name_en: 'Fixed Prosthodontics 2',
+    slug: 'fixed-prosthodontics-2',
+  },
+  {
+    id: '33000000-0000-0000-0000-000000000034',
+    year_id: '30000000-0000-0000-0000-000000000003',
+    name_ar: 'صناعة الأسنان المتحركة 2',
+    name_en: 'Removable Prosthodontics 2',
+    slug: 'removable-prosthodontics-2',
+  },
 ];
 
 export const ProductDetails = () => {
