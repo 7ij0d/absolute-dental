@@ -606,5 +606,25 @@
     "details_ar": "الماركة: GM (Al Gohay International Medical Equipment)\nالوزن: 500 جرام (500G Roll)\nالمواصفات: 100% قطن نقي، 36 بوصة × 100 ياردة، 4PLY، خالٍ من اللاتكس (Latex Free)\nسعر البيع: 26.00 د.ل\nسعر التكلفة: 22.00 د.ل\nالكمية في المخزون: 2 رول\nالمادة الدراسية: طب أسنان الأطفال والوقائي 1 (البريفنشن)",
     "details_en": "Brand: GM\nWeight: 500g Roll\nSpecifications: 100% Cotton, 36 inch x 100Y, 4-ply, Latex Free, CE certified\nSelling Price: 26.00 LYD\nCost Price: 22.00 LYD\nQuantity in Stock: 2 rolls\nSubject: Pediatric & Preventive Dentistry 1",
     "sort_order": 10
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000111",
+    "name_ar": "رول تغليف وعزل عيادي واقي (أزرق) - Dental Barrier Wrapping Roll",
+    "name_en": "Dental Barrier Film Wrapping Roll (Blue)",
+    "price": 28,
+    "compare_at_price": null,
+    "availability": "limited_quantity",
+    "stock_quantity": 5,
+    "subject_id": "33000000-0000-0000-0000-000000000034",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000022"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-barrier-wrapping-roll-blue.png",
+    "description_ar": "رول تغليف وعزل عيادي واقي عالي الجودة باللون الأزرق (Dental Barrier Film Roll)، مخصص لتغطية وعزل مقابض الأجهزة، رؤوس الإضاءة، لوحات التحكم، وخراطيم الوحدات العيادية لمنع انتقال العدوى وضمان أعلى معايير التعقيم أثناء العمل السريري والمعملي في صناعة الأسنان المتحركة.",
+    "description_en": "Premium medical dental barrier film wrapping roll in blue. Designed for surface infection control, protecting equipment handles, light handles, control panels, and clinic tubing during clinical and lab procedures in Removable Prosthodontics.",
+    "details_ar": "المادة: رول عزل وتغليف عيادي (Barrier Film Wrapping Roll)\nاللون: أزرق (Blue)\nالاستخدام: عزل أسطح الأجهزة ومقابض الإنارة والعيادات لمنع التلوث المتبادل\nسعر البيع: 28.00 د.ل\nسعر التكلفة: 23.00 د.ل\nالكمية في المخزون: 5 رول\nالمادة الدراسية: صناعة الأسنان المتحركة (Removable Prosthodontics)",
+    "details_en": "Product: Dental Barrier Film Wrapping Roll\nColor: Blue\nApplication: Clinical surface isolation, cross-contamination prevention, equipment protection\nSelling Price: 28.00 LYD\nCost Price: 23.00 LYD\nQuantity in Stock: 5 rolls\nSubject: Removable Prosthodontics",
+    "sort_order": 10
   }
 ]
