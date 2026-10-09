@@ -423,5 +423,27 @@
     "details_ar": "اللون: أسود (Black)\nالكمية: 100 قطعة\nالنوع: كمامات طبية أحادية الاستخدام (Disposable Face Masks)\nسعر البيع: 0.5 د.ل للقطعة",
     "details_en": "Color: Black\nQuantity: 100 pieces\nType: Disposable 3-ply face masks\nSelling Price: 0.5 LYD per piece",
     "sort_order": 2
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000102",
+    "name_ar": "شفرات جراحية معقمة L+F Support (مقاس 22)",
+    "name_en": "L+F Support Surgical Blades (Size 22)",
+    "price": 0.5,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 300,
+    "subject_id": "33000000-0000-0000-0000-000000000034",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "33000000-0000-0000-0000-000000000033",
+      "22000000-0000-0000-0000-000000000022",
+      "22000000-0000-0000-0000-000000000023"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/surgical-blades-lf-support.png",
+    "description_ar": "شفرات جراحية معقمة من الفولاذ الكربوني (Carbon Steel) مقاس 22، مغلفة بشكل فردي ومعقمة بأشعة غاما، مثالية لأعمال التشميع والنحت وتعديل الطبعات في معمل صناعة الأسنان الثابتة والمتحركة.",
+    "description_en": "Gamma sterile carbon steel surgical blades (Size 22), individually foil-wrapped. Ideal for waxing, carving, and impression trimming in Fixed and Removable Prosthodontics.",
+    "details_ar": "الماركة: L+F Support\nالمقاس: 22 (Size 22)\nالمادة: كربون ستيل معقم (Carbon Steel - Sterile R)\nسعر البيع: 0.50 د.ل للقطعة\nسعر التكلفة: 0.20 د.ل\nالكمية في المخزون: 300 قطعة\nالاستخدام: صناعة الأسنان الثابتة والمتحركة",
+    "details_en": "Brand: L+F Support\nSize: 22\nMaterial: Carbon Steel (Sterile R)\nSelling Price: 0.50 LYD\nCost Price: 0.20 LYD\nStock Quantity: 300 pieces\nDepartment: Fixed & Removable Prosthodontics",
+    "sort_order": 2
   }
 ]
