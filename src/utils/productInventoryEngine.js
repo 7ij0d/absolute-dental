@@ -50,6 +50,60 @@ export const CANONICAL_MULTI_UNITS = {
   }
 };
 
+export const CANONICAL_SIZED_PRODUCTS = {
+  '33000000-0000-0000-0000-000000000101': {
+    productId: '33000000-0000-0000-0000-000000000101',
+    nameAr: 'قالب طبعة الأسنان (Dental impression tray) - أزرق',
+    nameEn: 'Dental impression tray (Blue)',
+    color: 'Blue',
+    colorAr: 'أزرق',
+    optionsLabelAr: 'اختر المقاس',
+    optionsLabelEn: 'Select Size',
+    required: true,
+    galleryImages: [
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-impression-tray-blue.png',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-impression-tray-blue-angle.png'
+    ],
+    sizes: [
+      {
+        size: 'M',
+        code: 'M',
+        labelAr: 'مقاس M (متوسط)',
+        labelEn: 'Size M (Medium)',
+        shortLabel: 'M',
+        stock: 24,
+        costPrice: 1,
+        price: 2
+      },
+      {
+        size: 'L',
+        code: 'L',
+        labelAr: 'مقاس L (كبير)',
+        labelEn: 'Size L (Large)',
+        shortLabel: 'L',
+        stock: 24,
+        costPrice: 1,
+        price: 2
+      }
+    ]
+  }
+};
+
+/**
+ * Checks if a given product ID is a product with mandatory sizing.
+ */
+export function isSizedProduct(productId) {
+  return Boolean(productId && CANONICAL_SIZED_PRODUCTS[productId]);
+}
+
+/**
+ * Returns sized product configuration.
+ */
+export function getProductSizedConfig(productId) {
+  if (!productId) return null;
+  return CANONICAL_SIZED_PRODUCTS[productId] || null;
+}
+
 /**
  * Normalizes input products into a Map keyed by id.
  */
@@ -278,7 +332,18 @@ export function calculateOrderDeductions(orderItems, currentProducts) {
       return;
     }
 
-    // C. Standard physical product or base product
+    // C. Check if item is a sized product variant
+    const basePId = item.base_product_id || (typeof pId === 'string' && (pId.endsWith('-M') || pId.endsWith('-L')) ? pId.slice(0, -2) : pId);
+    if (basePId && CANONICAL_SIZED_PRODUCTS[basePId]) {
+      recordDeduction(
+        basePId,
+        qty,
+        `منتج بمقاسات: ${item.name || prod?.name_en || 'Dental impression tray'} (${item.selected_size || 'M/L'}) ×${qty}`
+      );
+      return;
+    }
+
+    // D. Standard physical product or base product
     recordDeduction(
       pId,
       qty,

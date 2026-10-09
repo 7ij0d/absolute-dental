@@ -362,10 +362,10 @@ export const CheckoutPage = () => {
 
       if (orderErr) throw orderErr;
 
-      // 2. Insert items (product_id is null for accessory/box items to satisfy FK on products table)
+      // 2. Insert items (product_id is resolved or null for custom items to satisfy FK on products table)
       const orderItemsData = cartItems.map((item) => ({
         order_id: newOrder.id,
-        product_id: dbProductsMap.has(item.id) ? item.id : null,
+        product_id: dbProductsMap.has(item.id) ? item.id : (item.base_product_id && dbProductsMap.has(item.base_product_id) ? item.base_product_id : null),
         quantity: item.quantity,
         price: item.price
       }));

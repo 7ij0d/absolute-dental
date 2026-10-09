@@ -12,7 +12,8 @@ import {
   calculateBundleAvailability,
   computeEffectiveStock,
   CANONICAL_MULTI_UNITS,
-  getPhysicalStockBreakdown
+  getPhysicalStockBreakdown,
+  getProductSizedConfig
 } from '../utils/productInventoryEngine';
 import {
   ShoppingCart, Heart, Check, Plus, Minus,
@@ -93,6 +94,9 @@ export const ProductDetails = () => {
   const [bundleInfo, setBundleInfo] = useState(null);
   const [physicalBreakdown, setPhysicalBreakdown] = useState(null);
   const [siblingProduct, setSiblingProduct] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [sizeError, setSizeError] = useState(false);
+  const sizedConfig = getProductSizedConfig(product?.id || id);
   const resolvedActiveImage = useStorageImage(
     activeImage,
     'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format'
@@ -263,8 +267,10 @@ export const ProductDetails = () => {
           setProduct(fetchedProd);
           setSubject(fetchedSubject);
           setYear(fetchedYear);
-          setImages(fetchedImages.length > 0 ? fetchedImages : [fetchedProd.image_url]);
-          setActiveImage(fetchedImages[0] || fetchedProd.image_url || '');
+          const pSized = getProductSizedConfig(fetchedProd.id);
+          const finalImages = (pSized && pSized.galleryImages) || (fetchedImages.length > 0 ? fetchedImages : [fetchedProd.image_url]);
+          setImages(finalImages);
+          setActiveImage(finalImages[0] || fetchedProd.image_url || '');
           setRelatedProducts(related);
           setLoading(false);
 
@@ -340,7 +346,10 @@ export const ProductDetails = () => {
   const isComingSoon = product?.availability === 'coming_soon';
   const isOrderable = !isUnavailable && !isComingSoon;
 
-  const maxStockLimit = effectiveStock !== null ? Math.max(1, effectiveStock) : (product?.stock_quantity || 99);
+  const selectedSizeDef = (sizedConfig && selectedSize) ? sizedConfig.sizes.find(s => s.size === selectedSize) : null;
+  const maxStockLimit = selectedSizeDef
+    ? selectedSizeDef.stock
+    : (effectiveStock !== null ? Math.max(1, effectiveStock) : (product?.stock_quantity || 99));
 
   const handleQtyChange = (delta) => {
     setQuantity(prev => {
@@ -353,6 +362,31 @@ export const ProductDetails = () => {
 
   const handleAddToCart = () => {
     if (!product || !isOrderable) return;
+
+    if (sizedConfig && !selectedSize) {
+      setSizeError(true);
+      const el = document.getElementById('productSizeSelectorBox');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    if (sizedConfig && selectedSize) {
+      const sizeDef = sizedConfig.sizes.find(s => s.size === selectedSize);
+      addToCart({
+        ...product,
+        id: `${product.id}-${selectedSize}`,
+        base_product_id: product.id,
+        name_en: `${product.name_en} (Size ${selectedSize})`,
+        name_ar: `${product.name_ar} (مقاس ${selectedSize})`,
+        selected_size: selectedSize,
+        stock_quantity: sizeDef ? sizeDef.stock : 24,
+        effectiveStock: sizeDef ? sizeDef.stock : 24
+      }, quantity);
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 1800);
+      return;
+    }
+
     addToCart(product, quantity);
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1800);
@@ -848,49 +882,157 @@ export const ProductDetails = () => {
                 {lang === 'ar' ? 'عذراً، هذا المنتج غير متوفر حالياً' : 'Sorry, this product is currently out of stock'}
               </div>
             ) : (
-              <div className="product-action-row">
-                {/* Quantity Selector */}
-                <div className="product-qty-selector">
+              <>
+                {/* Mandatory Size Selection Box for Sized Dental Products */}
+                {sizedConfig && (
+                  <div
+                    id="productSizeSelectorBox"
+                    style={{
+                      margin: '1.25rem 0',
+                      padding: '1.25rem',
+                      borderRadius: '16px',
+                      background: sizeError ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-surface, #F8FAFC)',
+                      border: sizeError ? '2px solid #EF4444' : '1px solid var(--border-card, #e2e8f0)',
+                      boxShadow: sizeError ? '0 0 0 4px rgba(239, 68, 68, 0.15)' : '0 2px 8px rgba(0,0,0,0.03)',
+                      transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '1.2rem' }}>📐</span>
+                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main, #1E293B)' }}>
+                          {lang === 'ar' ? 'المقاس المطلوب (اختيار إلزامي):' : 'Required Size (Mandatory):'}
+                        </span>
+                      </div>
+                      {sizeError ? (
+                        <span style={{ color: '#DC2626', fontWeight: 800, fontSize: '0.82rem', animation: 'pulse 1s infinite' }}>
+                          {lang === 'ar' ? '⚠️ يرجى اختيار المقاس (M أو L) أولاً' : '⚠️ Please select size (M or L) first'}
+                        </span>
+                      ) : selectedSize ? (
+                        <span style={{ color: '#059669', fontWeight: 700, fontSize: '0.82rem' }}>
+                          ✓ {lang === 'ar' ? `تم تحديد مقاس ${selectedSize}` : `Size ${selectedSize} selected`}
+                        </span>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted, #64748B)', fontSize: '0.8rem', fontWeight: 600 }}>
+                          {lang === 'ar' ? 'اضغط لتحديد المقاس' : 'Click to select size'}
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
+                      {sizedConfig.sizes.map(s => {
+                        const isSelected = selectedSize === s.size;
+                        return (
+                          <button
+                            key={s.size}
+                            type="button"
+                            onClick={() => {
+                              setSelectedSize(s.size);
+                              setSizeError(false);
+                            }}
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.4rem',
+                              padding: '0.9rem 1rem',
+                              borderRadius: '12px',
+                              border: isSelected ? '2px solid var(--primary, #3D352E)' : '1px solid #CBD5E1',
+                              background: isSelected ? 'var(--primary, #3D352E)' : '#FFFFFF',
+                              color: isSelected ? '#FFFFFF' : '#1E293B',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                              boxShadow: isSelected ? '0 4px 12px rgba(61, 53, 46, 0.25)' : '0 1px 3px rgba(0,0,0,0.05)',
+                              transform: isSelected ? 'scale(1.02)' : 'none',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <span style={{ fontSize: '1.3rem', fontWeight: 900 }}>{s.shortLabel}</span>
+                              <span style={{ fontSize: '0.85rem', fontWeight: 700, opacity: 0.9 }}>
+                                {lang === 'ar' ? s.labelAr : s.labelEn}
+                              </span>
+                            </div>
+                            <span style={{
+                              fontSize: '0.725rem',
+                              fontWeight: 700,
+                              padding: '2px 8px',
+                              borderRadius: '999px',
+                              background: isSelected ? 'rgba(255, 255, 255, 0.2)' : '#F1F5F9',
+                              color: isSelected ? '#FFFFFF' : '#64748B'
+                            }}>
+                              {lang === 'ar' ? `المتوفر: ${s.stock} قطعة` : `Stock: ${s.stock} pcs`}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div className="product-action-row">
+                  {/* Quantity Selector */}
+                  <div className="product-qty-selector">
+                    <button
+                      type="button"
+                      onClick={() => handleQtyChange(-1)}
+                      disabled={quantity <= 1}
+                      className="qty-btn"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus size={15} />
+                    </button>
+                    <span className="qty-display">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleQtyChange(1)}
+                      disabled={quantity >= maxStockLimit}
+                      className="qty-btn"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus size={15} />
+                    </button>
+                  </div>
+
+                  {/* Primary Add to Cart Button */}
                   <button
                     type="button"
-                    onClick={() => handleQtyChange(-1)}
-                    disabled={quantity <= 1}
-                    className="qty-btn"
-                    aria-label="Decrease quantity"
+                    onClick={handleAddToCart}
+                    className={`product-detail-add-cart-btn ${justAdded ? 'just-added' : ''}`}
+                    style={{
+                      background: sizeError ? '#DC2626' : undefined,
+                      boxShadow: sizeError ? '0 4px 14px rgba(220, 38, 38, 0.35)' : undefined
+                    }}
                   >
-                    <Minus size={15} />
-                  </button>
-                  <span className="qty-display">{quantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleQtyChange(1)}
-                    disabled={quantity >= maxStockLimit}
-                    className="qty-btn"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus size={15} />
+                    {justAdded ? (
+                      <>
+                        <Check size={18} strokeWidth={2.5} />
+                        <span>{lang === 'ar' ? (selectedSize ? `تمت إضافة (${selectedSize}) للسلة ✓` : 'تمت الإضافة للسلة ✓') : (selectedSize ? `Added (${selectedSize}) to Cart ✓` : 'Added to Cart ✓')}</span>
+                      </>
+                    ) : sizeError ? (
+                      <>
+                        <AlertCircle size={18} />
+                        <span>{lang === 'ar' ? '⚠️ اختر المقاس (M أو L) أولاً' : '⚠️ Select Size (M or L) First'}</span>
+                      </>
+                    ) : sizedConfig && !selectedSize ? (
+                      <>
+                        <ShoppingCart size={18} />
+                        <span>{lang === 'ar' ? 'حدد المقاس للإضافة للسلة' : 'Select Size to Add'}</span>
+                      </>
+                    ) : sizedConfig && selectedSize ? (
+                      <>
+                        <ShoppingCart size={18} />
+                        <span>{lang === 'ar' ? `أضف للسلة (مقاس ${selectedSize})` : `Add to Cart (Size ${selectedSize})`}</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart size={18} />
+                        <span>{lang === 'ar' ? 'أضف إلى السلة' : 'Add to Cart'}</span>
+                      </>
+                    )}
                   </button>
                 </div>
-
-                {/* Primary Add to Cart Button */}
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  className={`product-detail-add-cart-btn ${justAdded ? 'just-added' : ''}`}
-                >
-                  {justAdded ? (
-                    <>
-                      <Check size={18} strokeWidth={2.5} />
-                      <span>{lang === 'ar' ? 'تمت الإضافة للسلة ✓' : 'Added to Cart ✓'}</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart size={18} />
-                      <span>{lang === 'ar' ? 'أضف إلى السلة' : 'Add to Cart'}</span>
-                    </>
-                  )}
-                </button>
-              </div>
+              </>
             )}
 
             {/* Product Description (Requirement 12) */}

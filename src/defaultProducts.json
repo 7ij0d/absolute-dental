@@ -372,5 +372,22 @@
     "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80",
     "sort_order": 0
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000101",
+    "name_ar": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
+    "name_en": "Dental impression tray (Blue)",
+    "price": 2,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 48,
+    "subject_id": "33000000-0000-0000-0000-000000000033",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-impression-tray-blue.png",
+    "description_ar": "قالب أخذ الطبعات السنية البلاستيكي المثقب بلون أزرق عالي الجودة لمادتي صناعة الأسنان الثابتة والمتحركة 2. المقاسات المتوفرة: M و L.",
+    "description_en": "Perforated blue plastic dental impression tray for Fixed and Removable Prosthodontics 2. Available in sizes M and L.",
+    "details_ar": "اللون: أزرق\nالمقاسات المتوفرة: M و L\nالكمية: 24 مقاس كبير (L) + 24 مقاس متوسط (M)\nسعر البيع: 2 د.ل",
+    "details_en": "Color: Blue\nAvailable Sizes: M & L\nIn Stock: 24 Large (L) + 24 Mid (M)\nSelling Price: 2 LYD",
+    "sort_order": 1
   }
 ]
