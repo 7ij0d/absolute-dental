@@ -72,6 +72,42 @@ const DEFAULT_SUBJECTS = [
     description_en: 'Required tools and burs for Fixed Prosthodontics',
     slug: 'fixed-prosthodontics',
   },
+  {
+    id: '33000000-0000-0000-0000-000000000031',
+    year_id: '30000000-0000-0000-0000-000000000003',
+    name_ar: 'علاج الأسنان التحفظي 2',
+    name_en: 'Conservative Dentistry 2',
+    description_ar: 'الأدوات والمواد المطلوبة لمادة كونسيرفتف 2',
+    description_en: 'Required tools and materials for Conservative Dentistry 2',
+    slug: 'conservative-dentistry-2',
+  },
+  {
+    id: '33000000-0000-0000-0000-000000000032',
+    year_id: '30000000-0000-0000-0000-000000000003',
+    name_ar: 'طب الأسنان الوقائي',
+    name_en: 'Preventive Dentistry',
+    description_ar: 'الأدوات والمستلزمات المطلوبة لمادة بريفنشن',
+    description_en: 'Required tools and supplies for Preventive Dentistry',
+    slug: 'preventive-dentistry',
+  },
+  {
+    id: '33000000-0000-0000-0000-000000000033',
+    year_id: '30000000-0000-0000-0000-000000000003',
+    name_ar: 'صناعة الأسنان الثابتة 2',
+    name_en: 'Fixed Prosthodontics 2',
+    description_ar: 'الأدوات والمواد المطلوبة لمادة فكسد برستودونتيك 2',
+    description_en: 'Required tools and burs for Fixed Prosthodontics 2',
+    slug: 'fixed-prosthodontics-2',
+  },
+  {
+    id: '33000000-0000-0000-0000-000000000034',
+    year_id: '30000000-0000-0000-0000-000000000003',
+    name_ar: 'صناعة الأسنان المتحركة 2',
+    name_en: 'Removable Prosthodontics 2',
+    description_ar: 'الأدوات والمواد المطلوبة لمادة ريموفبل برستودونتيك 2',
+    description_en: 'Required tools and gear for Removable Prosthodontics 2',
+    slug: 'removable-prosthodontics-2',
+  },
 ];
 
 export const SubjectPage = () => {

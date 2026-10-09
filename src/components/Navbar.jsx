@@ -24,8 +24,10 @@ const DEFAULT_NAV_SUBJECTS = [
   { id: '21', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'علاج الأسنان التحفظي', name_en: 'Restorative Dentistry', slug: 'restorative-dentistry' },
   { id: '22', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان المتحركة', name_en: 'Removable Prosthodontics', slug: 'removable-prosthodontics' },
   { id: '23', year_id: '20000000-0000-0000-0000-000000000002', name_ar: 'صناعة الأسنان الثابتة', name_en: 'Fixed Prosthodontics', slug: 'fixed-prosthodontics' },
-  { id: '31', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'علاج الجذور', name_en: 'Endodontics', slug: 'endodontics' },
-  { id: '32', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'أمراض وجراحة اللثة', name_en: 'Periodontics', slug: 'periodontics' },
+  { id: '31', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'علاج الأسنان التحفظي 2', name_en: 'Conservative Dentistry 2', slug: 'conservative-dentistry-2' },
+  { id: '32', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'طب الأسنان الوقائي', name_en: 'Preventive Dentistry', slug: 'preventive-dentistry' },
+  { id: '33', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'صناعة الأسنان الثابتة 2', name_en: 'Fixed Prosthodontics 2', slug: 'fixed-prosthodontics-2' },
+  { id: '34', year_id: '30000000-0000-0000-0000-000000000003', name_ar: 'صناعة الأسنان المتحركة 2', name_en: 'Removable Prosthodontics 2', slug: 'removable-prosthodontics-2' },
   { id: '41', year_id: '40000000-0000-0000-0000-000000000004', name_ar: 'جراحة الفم والتخدير', name_en: 'Oral Surgery', slug: 'oral-surgery' },
   { id: '42', year_id: '40000000-0000-0000-0000-000000000004', name_ar: 'تقويم الأسنان', name_en: 'Orthodontics', slug: 'orthodontics' }
 ];

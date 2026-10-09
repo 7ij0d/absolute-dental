@@ -17,11 +17,13 @@ import removableProsthoWebp from '../assets/images/removable-prosthodontics-fade
 import removableProsthoPng from '../assets/images/removable-prosthodontics-faded.png';
 import operativeDentWebp from '../assets/images/operative-dentistry-faded.webp';
 import operativeDentPng from '../assets/images/operative-dentistry-faded.png';
+import preventiveDentWebp from '../assets/images/preventive-dentistry-faded.webp';
+import preventiveDentPng from '../assets/images/preventive-dentistry-faded.png';
 
 const DEFAULT_YEARS = [
   { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى', name_en: '1st Year', slug: '1st-year', sort_order: 1, is_coming_soon: false },
   { id: '20000000-0000-0000-0000-000000000002', name_ar: 'السنة الثانية', name_en: '2nd Year', slug: '2nd-year', sort_order: 2, is_coming_soon: false },
-  { id: '30000000-0000-0000-0000-000000000003', name_ar: 'السنة الثالثة', name_en: '3rd Year', slug: '3rd-year', sort_order: 3, is_coming_soon: true },
+  { id: '30000000-0000-0000-0000-000000000003', name_ar: 'السنة الثالثة', name_en: '3rd Year', slug: '3rd-year', sort_order: 3, is_coming_soon: false },
   { id: '40000000-0000-0000-0000-000000000004', name_ar: 'السنة الرابعة', name_en: '4th Year', slug: '4th-year', sort_order: 4, is_coming_soon: true },
 ];
 
@@ -71,20 +73,56 @@ const YEAR_2_SUBJECTS = [
   },
 ];
 
+const YEAR_3_SUBJECTS = [
+  {
+    slug: 'conservative-dentistry-2',
+    titleAr: 'علاج الأسنان التحفظي 2',
+    titleEn: 'Conservative Dentistry 2',
+    href: '/subject/conservative-dentistry-2',
+    webp: operativeDentWebp,
+    png: operativeDentPng,
+  },
+  {
+    slug: 'preventive-dentistry',
+    titleAr: 'طب الأسنان الوقائي',
+    titleEn: 'Preventive Dentistry',
+    href: '/subject/preventive-dentistry',
+    webp: preventiveDentWebp,
+    png: preventiveDentPng,
+  },
+  {
+    slug: 'fixed-prosthodontics-2',
+    titleAr: 'صناعة الأسنان الثابتة 2',
+    titleEn: 'Fixed Prosthodontics 2',
+    href: '/subject/fixed-prosthodontics-2',
+    webp: fixedProsthoWebp,
+    png: fixedProsthoPng,
+  },
+  {
+    slug: 'removable-prosthodontics-2',
+    titleAr: 'صناعة الأسنان المتحركة 2',
+    titleEn: 'Removable Prosthodontics 2',
+    href: '/subject/removable-prosthodontics-2',
+    webp: removableProsthoWebp,
+    png: removableProsthoPng,
+  },
+];
+
 export const YearPage = () => {
   const { slug } = useParams();
   const { lang, isRtl } = useLanguage();
 
-  const isYear2 = slug === '2nd-year' || slug === '2nd' || slug?.startsWith('2');
-  const isYear1 = !isYear2;
+  const isYear3 = slug === '3rd-year' || slug === '3rd' || slug?.startsWith('3');
+  const isYear2 = !isYear3 && (slug === '2nd-year' || slug === '2nd' || slug?.startsWith('2'));
+  const isYear1 = !isYear3 && !isYear2;
 
-  const defaultYear = isYear2 ? DEFAULT_YEARS[1] : DEFAULT_YEARS[0];
-  const [yearData, setYearData] = useState(() => DEFAULT_YEARS.find(y => y.slug === slug) || defaultYear);
+  const targetSlug = isYear3 ? '3rd-year' : (isYear2 ? '2nd-year' : '1st-year');
+  const defaultYear = isYear3 ? DEFAULT_YEARS[2] : (isYear2 ? DEFAULT_YEARS[1] : DEFAULT_YEARS[0]);
+  const [yearData, setYearData] = useState(() => DEFAULT_YEARS.find(y => y.slug === slug || y.slug === targetSlug) || defaultYear);
 
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
 
   useEffect(() => {
-    const targetSlug = isYear2 ? '2nd-year' : '1st-year';
     const CACHE_KEY = `year_v3:${targetSlug}`;
 
     const fetchYear = async () => {
@@ -107,9 +145,9 @@ export const YearPage = () => {
     } else {
       fetchYear();
     }
-  }, [slug, isYear2]);
+  }, [slug, targetSlug]);
 
-  // ── COMING SOON VIEW (Year 3 & 4) ──
+  // ── COMING SOON VIEW (Year 4 only) ──
   if (yearData.is_coming_soon) {
     return (
       <div className="choose-subject-page">
@@ -144,11 +182,11 @@ export const YearPage = () => {
     );
   }
 
-  const currentSubjects = isYear2 ? YEAR_2_SUBJECTS : YEAR_1_SUBJECTS;
+  const currentSubjects = isYear3 ? YEAR_3_SUBJECTS : (isYear2 ? YEAR_2_SUBJECTS : YEAR_1_SUBJECTS);
 
   const yearDisplayName = lang === 'ar'
-    ? (yearData?.name_ar || (isYear2 ? 'السنة الثانية' : 'السنة الأولى'))
-    : (yearData?.name_en || (isYear2 ? '2nd Year' : '1st Year'));
+    ? (yearData?.name_ar || (isYear3 ? 'السنة الثالثة' : (isYear2 ? 'السنة الثانية' : 'السنة الأولى')))
+    : (yearData?.name_en || (isYear3 ? '3rd Year' : (isYear2 ? '2nd Year' : '1st Year')));
 
   return (
     <div className="choose-subject-page">
