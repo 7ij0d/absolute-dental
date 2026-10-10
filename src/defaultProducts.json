@@ -448,10 +448,10 @@
     "subject_id": "33000000-0000-0000-0000-000000000033",
     "year_id": "30000000-0000-0000-0000-000000000003",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-impression-tray-blue.png",
-    "description_ar": "قالب أخذ الطبعات السنية البلاستيكي المثقب بلون أزرق عالي الجودة لمادتي صناعة الأسنان الثابتة والمتحركة 2. المقاسات المتوفرة: M و L.",
-    "description_en": "Perforated blue plastic dental impression tray for Fixed and Removable Prosthodontics 2. Available in sizes M and L.",
-    "details_ar": "اللون: أزرق\nالمقاسات المتوفرة: M و L\nالكمية: 24 مقاس كبير (L) + 24 مقاس متوسط (M)",
-    "details_en": "Color: Blue\nAvailable Sizes: M & L",
+    "description_ar": "قالب أخذ الطبعات السنية البلاستيكي المثقب بلون أزرق عالي الجودة لمادتي صناعة الأسنان الثابتة والمتحركة 2. الخيارات المتاحة: فك علوي (Upper) وفك سفلي (Lower).",
+    "description_en": "Perforated blue plastic dental impression tray for Fixed and Removable Prosthodontics 2. Available for Upper and Lower dental arch.",
+    "details_ar": "اللون: أزرق\nالخيارات المتوفرة: علوي (Upper) وسفلي (Lower)\nالاستخدام: أخذ طبعات الأسنان السريرية والمعملية",
+    "details_en": "Color: Blue\nAvailable Options: Upper & Lower Arch\nUsage: Clinical and laboratory dental impressions",
     "sort_order": 1,
     "extra_subject_ids": [
       "33000000-0000-0000-0000-000000000034"

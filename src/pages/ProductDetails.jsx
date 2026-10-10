@@ -21,7 +21,7 @@ import {
   ShoppingCart, Heart, Check, Plus, Minus,
   ChevronLeft, ChevronRight, ArrowLeft, ArrowRight,
   Package, AlertCircle, CheckCircle2, Clock, XCircle, Info,
-  Sparkles, Layers, Box, Tag, ArrowLeftRight, ShieldAlert
+  Sparkles, Layers, Box, Tag, ArrowLeftRight
 } from 'lucide-react';
 
 const DEFAULT_YEARS = [
@@ -119,7 +119,7 @@ export const ProductDetails = () => {
   );
 
   const sanitizeDetailsText = (text) => {
-    if (!text || isUserAdmin) return text;
+    if (!text) return '';
     return text
       .split('\n')
       .filter(line => {
@@ -129,11 +129,16 @@ export const ProductDetails = () => {
                !line.includes('سعر الشراء') &&
                !line.includes('الكمية في المخزون') &&
                !line.includes('إجمالي المخزون') &&
+               !line.includes('الكمية المسجلة') &&
+               !line.includes('المخزون المسجل') &&
+               !line.includes('الكمية:') &&
                !line.includes('سعر البيع') &&
                !l.includes('cost price') &&
                !l.includes('selling price') &&
                !l.includes('purchase price') &&
                !l.includes('quantity in stock') &&
+               !l.includes('registered stock') &&
+               !l.includes('stock quantity') &&
                !l.includes('total stock');
       })
       .join('\n');
@@ -791,30 +796,6 @@ export const ProductDetails = () => {
                 <p style={{ margin: 0, fontSize: '0.92rem', color: '#78350F', lineHeight: 1.75, fontWeight: 500 }}>
                   {lang === 'ar' ? guideInfo.noteAr : guideInfo.noteEn}
                 </p>
-              </div>
-            )}
-
-            {/* Admin-Only Inventory Indicator */}
-            {isUserAdmin && (
-              <div style={{
-                marginTop: '0.65rem',
-                padding: '0.65rem 0.9rem',
-                borderRadius: '12px',
-                background: 'rgba(245, 158, 11, 0.08)',
-                border: '1px solid rgba(245, 158, 11, 0.25)',
-                color: '#92400e',
-                fontSize: '0.82rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                <ShieldAlert size={16} color="#D97706" style={{ flexShrink: 0 }} />
-                <span>
-                  <strong>{lang === 'ar' ? 'لوحة الإدارة (خاص بالمسؤول): ' : 'Admin Only: '}</strong>
-                  {lang === 'ar'
-                    ? `حالة المخزون: ${product?.availability === 'by_order' ? 'بالطلب' : (isUnavailable ? 'غير متوفر' : 'متوفر')} | الكمية المسجلة: ${product?.stock_quantity ?? 'غير محدد'}`
-                    : `Stock State: ${product?.availability} | Quantity: ${product?.stock_quantity ?? 'N/A'}`}
-                </span>
               </div>
             )}
 
