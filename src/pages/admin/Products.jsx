@@ -12,6 +12,93 @@ import {
 } from '../../utils/productInventoryEngine';
 import { Plus, Edit, Trash2, Archive, Check, X, FileEdit, PlusCircle, Search, Layers, Globe, Sparkles, BookOpen, AlertCircle, Info } from 'lucide-react';
 
+// Specialized Dental Specialty Icons matching reference mockup
+const ToothSvg = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C221E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2C8.5 2 6 4 6 7c0 2.5 1 4 1.5 6.5.5 2.5.5 6.5 2 6.5 1.5 0 2-3 2.5-4 .5 1 1 4 2.5 4 1.5 0 1.5-4 2-6.5C17 11 18 9.5 18 7c0-3-2.5-5-6-5Z" />
+  </svg>
+);
+
+const TwoTeethIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 28 24" fill="none" stroke="#C2410C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8.5 3C5.5 3 3.5 4.8 3.5 7.5c0 2.2.8 3.5 1.3 5.7.4 2.2.4 5.7 1.7 5.7 1.3 0 1.7-2.6 2.1-3.5.4.9.8 3.5 2.1 3.5 1.3 0 1.3-3.5 1.7-5.7.5-2.2 1.3-3.5 1.3-5.7C13.7 4.8 11.5 3 8.5 3Z" />
+    <path d="M19.5 3C16.5 3 14.5 4.8 14.5 7.5c0 2.2.8 3.5 1.3 5.7.4 2.2.4 5.7 1.7 5.7 1.3 0 1.7-2.6 2.1-3.5.4.9.8 3.5 2.1 3.5 1.3 0 1.3-3.5 1.7-5.7.5-2.2 1.3-3.5 1.3-5.7C24.7 4.8 22.5 3 19.5 3Z" />
+  </svg>
+);
+
+const CrownSvg = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C221E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
+  </svg>
+);
+
+const MaterialsSvg = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C221E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="6" cy="6" r="3" />
+    <path d="M8.12 8.12 12 12m0 0 3.88 3.88M12 12l3.88-3.88M12 12 8.12 15.88" />
+    <circle cx="6" cy="18" r="3" />
+    <path d="M14.8 14.8 20 20M14.8 9.2 20 4" />
+  </svg>
+);
+
+const DenturesSvg = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C221E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 9c0-2.8 3.6-5 8-5s8 2.2 8 5v3c0 2.8-3.6 5-8 5s-8-2.2-8-5V9Z" />
+    <path d="M7 9v3M10 8v5M14 8v5M17 9v3" />
+    <path d="M4 11h16" />
+  </svg>
+);
+
+const ShieldToothSvg = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C221E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <path d="M9 12l2 2 4-4" />
+  </svg>
+);
+
+const BracesSvg = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C221E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12h18" />
+    <rect x="5" y="9" width="3" height="6" rx="1" />
+    <rect x="10.5" y="9" width="3" height="6" rx="1" />
+    <rect x="16" y="9" width="3" height="6" rx="1" />
+  </svg>
+);
+
+const SurgerySvg = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C221E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m14 4 6 6-10 10H4v-6L14 4Z" />
+    <path d="m17 7-3-3" />
+  </svg>
+);
+
+const PediatricSvg = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C221E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="8" />
+    <path d="M9 10h.01M15 10h.01M9 15c1 1 5 1 6 0" />
+  </svg>
+);
+
+const GumsSvg = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C221E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 18c3-3 6-3 9 0 3-3 6-3 9 0" />
+    <path d="M12 4c-2 0-3.5 1.5-3.5 3.5 0 2 .5 3.5 1.5 5.5 1 2 2 5 2 5s1-3 2-5c1-2 1.5-3.5 1.5-5.5C15.5 5.5 14 4 12 4Z" />
+  </svg>
+);
+
+const renderSubjectSpecialtyIcon = (sub) => {
+  const text = `${sub?.slug || ''} ${sub?.name_ar || ''} ${sub?.name_en || ''}`.toLowerCase();
+  if (text.includes('fixed') || text.includes('ثابتة') || text.includes('crown') || text.includes('تعويضات')) return <CrownSvg />;
+  if (text.includes('material') || text.includes('مواد')) return <MaterialsSvg />;
+  if (text.includes('removable') || text.includes('متحركة') || text.includes('denture')) return <DenturesSvg />;
+  if (text.includes('prevent') || text.includes('وقائي')) return <ShieldToothSvg />;
+  if (text.includes('ortho') || text.includes('تقويم')) return <BracesSvg />;
+  if (text.includes('surg') || text.includes('جراحة') || text.includes('خلع')) return <SurgerySvg />;
+  if (text.includes('ped') || text.includes('أطفال')) return <PediatricSvg />;
+  if (text.includes('perio') || text.includes('لثة')) return <GumsSvg />;
+  return <ToothSvg />;
+};
+
 export const Products = () => {
   const { t, lang } = useLanguage();
 
@@ -491,7 +578,7 @@ export const Products = () => {
   };
 
   const openEditModal = async (prod) => {
-    await ensureMetadataLoaded();
+    const meta = await ensureMetadataLoaded();
     setEditingProduct(prod);
     setNameAr(prod.name_ar || '');
     setNameEn(prod.name_en || '');
@@ -527,10 +614,12 @@ export const Products = () => {
     if (prod.subject_id) {
       sIds.add(prod.subject_id);
     }
-    if (Array.isArray(prod.extra_subject_ids)) {
-      prod.extra_subject_ids.forEach(id => { if (id) sIds.add(id); });
+    if (isUniv && sIds.size === 0) {
+      const allSubList = (meta.subjects && meta.subjects.length > 0) ? meta.subjects : subjects;
+      setSelectedSubjectIds(allSubList.map(s => s.id));
+    } else {
+      setSelectedSubjectIds(Array.from(sIds));
     }
-    setSelectedSubjectIds(Array.from(sIds));
 
     setMainImageUrl(prod.image_url || '');
     setUsageVideoUrl(prod.usage_video_url || '');
@@ -872,7 +961,7 @@ export const Products = () => {
             className="card animate-fade-in"
             style={{
               width: '100%',
-              maxWidth: '700px',
+              maxWidth: 'min(94vw, 840px)',
               maxHeight: '90vh',
               overflowY: 'auto',
               backgroundColor: 'var(--surface-color)',
@@ -972,486 +1061,619 @@ export const Products = () => {
 
               {/* =============================================================
                   SUBJECT SELECTION & AUTOMATIC CLASSIFICATION SYSTEM
+                  (Redesigned to precisely match the reference UI mockup)
                   ============================================================= */}
-              <div className="form-group" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{
+                marginTop: '0.25rem',
+                padding: '1.25rem',
+                backgroundColor: '#FAF7F2',
+                borderRadius: '18px',
+                border: '1.5px solid #EADBCE',
+                boxShadow: '0 2px 10px rgba(44, 34, 30, 0.04)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                {/* Section Header */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem',
+                  paddingBottom: '0.85rem',
+                  borderBottom: '1px solid #ECE2D5'
+                }}>
+                  {/* Right: Section Title & Subtitle */}
                   <div>
-                    <label className="form-label" style={{ marginBottom: '0.2rem', fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <BookOpen size={16} style={{ color: 'var(--secondary)' }} />
-                      <span>{lang === 'ar' ? 'المواد الدراسية المرتبط بها المنتج' : 'Subject(s) Associated with Product'} *</span>
-                    </label>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
+                    <h4 style={{
+                      margin: 0,
+                      fontSize: '1.15rem',
+                      fontWeight: 800,
+                      color: '#2C221E',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.45rem'
+                    }}>
+                      {lang === 'ar' ? 'المواد الدراسية المرتبطة بالمنتج' : 'Subjects Associated with Product'}
+                    </h4>
+                    <p style={{
+                      margin: '0.25rem 0 0 0',
+                      fontSize: '0.82rem',
+                      color: '#7A6E65',
+                      lineHeight: 1.35
+                    }}>
                       {lang === 'ar'
-                        ? 'مادة واحدة = أداة خاصة بالمادة | مادتان فأكثر = أداة مشتركة | جميع المواد = مستلزم عام لكل السنوات'
-                        : '1 Subject = Specific Tool | 2+ Subjects = Shared Tool | All Subjects = Universal Supplies'}
+                        ? 'اختر السنة أو السنوات والمواد التي يظهر فيها هذا المنتج'
+                        : 'Choose the year(s) and subjects where this product appears'}
                     </p>
                   </div>
-                </div>
 
-                {/* Segmented Mode Selector Cards */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
-                  {/* Mode Card 1: Specific / Custom Subjects */}
-                  <div
-                    onClick={() => {
-                      setSubjectSelectionMode('custom');
-                      setIsUniversal(false);
-                    }}
-                    style={{
-                      border: subjectSelectionMode === 'custom' ? '2px solid var(--secondary)' : '1px solid var(--border-color)',
-                      backgroundColor: subjectSelectionMode === 'custom' ? 'rgba(128, 0, 32, 0.05)' : 'var(--accent)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '0.75rem 1rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      boxShadow: subjectSelectionMode === 'custom' ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 6px rgba(128,0,32,0.1)' : 'none',
-                      transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-                    }}
-                  >
-                    <div style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      border: subjectSelectionMode === 'custom' ? '5px solid var(--secondary)' : '2px solid var(--border-color)',
-                      backgroundColor: 'var(--surface-color)',
-                      flexShrink: 0
-                    }} />
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: '0.85rem', color: subjectSelectionMode === 'custom' ? 'var(--secondary)' : 'var(--text-main)' }}>
-                        📚 {lang === 'ar' ? 'مواد دراسية محددة' : 'Specific Subjects'}
-                      </div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        {lang === 'ar' ? 'اختيار مادة واحدة أو عدة مواد' : 'Select one or more subjects'}
-                      </div>
-                    </div>
-                  </div>
+                  {/* Left: Top Actions (مسح الكل & جميع المواد) */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {/* Button: مسح الكل */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedSubjectIds([]);
+                        setSubjectSelectionMode('custom');
+                        setIsUniversal(false);
+                      }}
+                      className="btn btn-outline"
+                      style={{
+                        padding: '0.4rem 0.85rem',
+                        fontSize: '0.8rem',
+                        height: '38px',
+                        fontWeight: 700,
+                        backgroundColor: '#FFFFFF',
+                        borderColor: '#D8CCA8',
+                        color: '#5C4E43',
+                        borderRadius: '10px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                      title={lang === 'ar' ? 'إلغاء جميع التحديدات الحالية' : 'Clear all selections'}
+                    >
+                      <Trash2 size={15} style={{ color: '#8C7E72' }} />
+                      <span>{lang === 'ar' ? 'مسح الكل' : 'Clear All'}</span>
+                    </button>
 
-                  {/* Mode Card 2: Universal (All Subjects) */}
-                  <div
-                    onClick={() => {
-                      setSubjectSelectionMode('all');
-                      setIsUniversal(true);
-                    }}
-                    style={{
-                      border: subjectSelectionMode === 'all' ? '2px solid #059669' : '1px solid var(--border-color)',
-                      backgroundColor: subjectSelectionMode === 'all' ? 'rgba(16, 185, 129, 0.08)' : 'var(--accent)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '0.75rem 1rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      boxShadow: subjectSelectionMode === 'all' ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 6px rgba(16,185,129,0.15)' : 'none',
-                      transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-                    }}
-                  >
-                    <div style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      border: subjectSelectionMode === 'all' ? '5px solid #059669' : '2px solid var(--border-color)',
-                      backgroundColor: 'var(--surface-color)',
-                      flexShrink: 0
-                    }} />
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: '0.85rem', color: subjectSelectionMode === 'all' ? '#047857' : 'var(--text-main)' }}>
-                        🌐 {lang === 'ar' ? 'جميع المواد (مستلزم عام)' : 'All Subjects (Universal)'}
-                      </div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        {lang === 'ar' ? 'قفازات، كمامات، كافر شيت لكافة السنوات' : 'Gloves, masks, covers for all years'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Content when Universal is selected */}
-                {subjectSelectionMode === 'all' && (
-                  <div style={{
-                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
-                    border: '1px solid rgba(16, 185, 129, 0.25)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '0.85rem 1rem',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '0.65rem'
-                  }}>
-                    <Globe size={18} style={{ color: '#059669', flexShrink: 0, marginTop: '2px' }} />
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
-                      <strong>{lang === 'ar' ? 'تم اختيار: مستلزم عام لجميع المواد والسنوات' : 'Selected: Universal Supplies'}</strong>
-                      <p style={{ margin: '0.2rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.75rem', lineHeight: 1.45 }}>
-                        {lang === 'ar'
-                          ? 'سيتم تصنيف هذا المنتج تلقائياً وعرضه في «القسم الثالث: مستلزمات مشتركة بين جميع السنوات» داخل كافة صفحات المواد، مع توحيد المخزون والسعر دون تكرار في النظام.'
-                          : 'This product will automatically appear in Section 3 across all subject pages with unified stock and pricing.'}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Content when Specific / Custom Subjects is selected */}
-                {subjectSelectionMode === 'custom' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                    {/* Search and Action Toolbar */}
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ position: 'relative', flex: '1 1 220px', minWidth: '180px' }}>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder={lang === 'ar' ? '🔍 ابحث في المواد الدراسية...' : '🔍 Search subjects...'}
-                          value={subjectSearchInModal}
-                          onChange={(e) => setSubjectSearchInModal(e.target.value)}
-                          style={{ paddingInlineStart: '2.2rem', paddingInlineEnd: subjectSearchInModal ? '2rem' : '0.75rem', fontSize: '0.82rem', height: '36px' }}
-                        />
-                        <Search size={14} style={{ position: 'absolute', insetInlineStart: '0.75rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, pointerEvents: 'none' }} />
-                        {subjectSearchInModal && (
-                          <button
-                            type="button"
-                            onClick={() => setSubjectSearchInModal('')}
-                            style={{ position: 'absolute', insetInlineEnd: '0.6rem', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                            title={lang === 'ar' ? 'مسح البحث' : 'Clear search'}
-                          >
-                            <X size={14} />
-                          </button>
-                        )}
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedSubjectIds(subjects.map(s => s.id))}
-                          className="btn btn-outline"
-                          style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', height: '36px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
-                        >
-                          <Check size={13} />
-                          {lang === 'ar' ? 'تحديد الكل' : 'Select All'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedSubjectIds([])}
-                          className="btn btn-outline"
-                          style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', height: '36px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
-                        >
-                          <X size={13} />
-                          {lang === 'ar' ? 'إلغاء التحديد' : 'Clear'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Selected Subjects Chips & Counter */}
-                    {selectedSubjectIds.length > 0 && (
-                      <div style={{
-                        backgroundColor: 'var(--accent)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: 'var(--radius-sm)',
-                        padding: '0.5rem 0.75rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.4rem'
-                      }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-                          <span>
-                            {lang === 'ar' ? `المواد المحددة (${selectedSubjectIds.length} من أصل ${subjects.length}):` : `Selected (${selectedSubjectIds.length} of ${subjects.length}):`}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedSubjectIds([])}
-                            style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '0.72rem', fontWeight: 600 }}
-                          >
-                            {lang === 'ar' ? 'مسح الكل' : 'Clear all'}
-                          </button>
-                        </div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', maxHeight: '90px', overflowY: 'auto' }}>
-                          {selectedSubjectIds.map(sid => {
-                            const sub = subjects.find(s => s.id === sid);
-                            if (!sub) return null;
-                            return (
-                              <span
-                                key={sid}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.3rem',
-                                  padding: '2px 8px',
-                                  borderRadius: '9999px',
-                                  backgroundColor: 'rgba(128, 0, 32, 0.08)',
-                                  border: '1px solid rgba(128, 0, 32, 0.25)',
-                                  color: 'var(--secondary)',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 700
-                                }}
-                              >
-                                {sub.name_ar}
-                                <button
-                                  type="button"
-                                  onClick={() => setSelectedSubjectIds(prev => prev.filter(id => id !== sid))}
-                                  style={{
-                                    border: 'none',
-                                    background: 'none',
-                                    padding: 0,
-                                    cursor: 'pointer',
-                                    color: 'var(--danger)',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                  }}
-                                  title={lang === 'ar' ? 'إلغاء المادة' : 'Remove subject'}
-                                >
-                                  <X size={12} />
-                                </button>
-                              </span>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Grouped Checkboxes by Academic Year */}
-                    <div style={{
-                      maxHeight: 'min(420px, 48vh)',
-                      overflowY: 'auto',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: 'var(--radius-md)',
-                      backgroundColor: 'var(--accent)',
-                      padding: '0.65rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.75rem',
-                      boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.02)',
-                      overscrollBehavior: 'contain'
-                    }}>
-                      {groupedSubjects.map((grp) => {
-                        const grpSubjectIds = grp.subjects.map(s => s.id);
-                        const selectedInGroup = grp.subjects.filter(s => selectedSubjectIds.includes(s.id)).length;
-                        const allGroupSelected = grp.subjects.length > 0 && selectedInGroup === grp.subjects.length;
-
-                        return (
-                          <div
-                            key={grp.year.id}
-                            style={{
-                              backgroundColor: 'var(--surface-color)',
-                              border: '1px solid var(--border-color)',
-                              borderRadius: 'var(--radius-md)',
-                              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
-                              overflow: 'hidden'
-                            }}
-                          >
-                            {/* Academic Year Header with quick toggle */}
-                            <div style={{
-                              padding: '0.55rem 0.85rem',
-                              backgroundColor: 'var(--accent)',
-                              borderBottom: '1px solid var(--border-color)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: '0.5rem',
-                              flexWrap: 'wrap'
-                            }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                                  🎓 {grp.year.name_ar}
-                                </span>
-                                {grp.subjects.length > 0 ? (
-                                  selectedInGroup > 0 ? (
-                                    <span style={{
-                                      fontSize: '0.7rem',
-                                      color: 'var(--secondary)',
-                                      fontWeight: 700,
-                                      backgroundColor: 'rgba(128, 0, 32, 0.08)',
-                                      padding: '2px 7px',
-                                      borderRadius: '4px',
-                                      border: '1px solid rgba(128, 0, 32, 0.2)'
-                                    }}>
-                                      {lang === 'ar' ? `(${selectedInGroup} من ${grp.subjects.length} محددة)` : `(${selectedInGroup}/${grp.subjects.length} selected)`}
-                                    </span>
-                                  ) : (
-                                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                                      ({grp.subjects.length} {lang === 'ar' ? 'مواد' : 'subjects'})
-                                    </span>
-                                  )
-                                ) : (
-                                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                                    (0 {lang === 'ar' ? 'مواد' : 'subjects'})
-                                  </span>
-                                )}
-                              </div>
-
-                              {grp.subjects.length > 0 && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    if (allGroupSelected) {
-                                      setSelectedSubjectIds(prev => prev.filter(id => !grpSubjectIds.includes(id)));
-                                    } else {
-                                      setSelectedSubjectIds(prev => Array.from(new Set([...prev, ...grpSubjectIds])));
-                                    }
-                                  }}
-                                  className="btn btn-outline"
-                                  style={{
-                                    padding: '0.2rem 0.55rem',
-                                    fontSize: '0.7rem',
-                                    height: 'auto',
-                                    fontWeight: 600,
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.25rem'
-                                  }}
-                                >
-                                  {allGroupSelected ? (
-                                    <>
-                                      <X size={12} />
-                                      {lang === 'ar' ? 'إلغاء مواد السنة' : 'Deselect Year'}
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Check size={12} />
-                                      {lang === 'ar' ? 'تحديد مواد السنة' : 'Select Year'}
-                                    </>
-                                  )}
-                                </button>
-                              )}
-                            </div>
-
-                            {/* Subjects checkboxes in this year */}
-                            {grp.subjects.length === 0 ? (
-                              <div style={{
-                                padding: '0.85rem 1rem',
-                                fontSize: '0.8rem',
-                                color: 'var(--text-muted)',
-                                textAlign: 'center',
-                                fontStyle: 'italic'
-                              }}>
-                                {lang === 'ar' ? 'لا توجد مواد دراسية مسجلة لهذه السنة حتى الآن' : 'No subjects registered under this academic year yet'}
-                              </div>
-                            ) : (
-                              <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                                gap: '0.5rem',
-                                padding: '0.65rem',
-                                backgroundColor: 'var(--surface-color)'
-                              }}>
-                                {grp.subjects.map((s) => {
-                                  const isChecked = selectedSubjectIds.includes(s.id);
-                                  return (
-                                    <label
-                                      key={s.id}
-                                      style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.6rem',
-                                        padding: '0.45rem 0.65rem',
-                                        borderRadius: 'var(--radius-sm)',
-                                        backgroundColor: isChecked ? 'rgba(128, 0, 32, 0.06)' : 'var(--accent)',
-                                        border: isChecked ? '1.5px solid var(--secondary)' : '1px solid var(--border-color)',
-                                        cursor: 'pointer',
-                                        fontSize: '0.84rem',
-                                        fontWeight: isChecked ? 700 : 500,
-                                        color: isChecked ? 'var(--secondary)' : 'var(--text-main)',
-                                        transition: 'all 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
-                                        userSelect: 'none'
-                                      }}
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        checked={isChecked}
-                                        onChange={(e) => {
-                                          if (e.target.checked) {
-                                            setSelectedSubjectIds(prev => Array.from(new Set([...prev, s.id])));
-                                          } else {
-                                            setSelectedSubjectIds(prev => prev.filter(id => id !== s.id));
-                                          }
-                                        }}
-                                        style={{ accentColor: 'var(--secondary)', width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
-                                      />
-                                      <span style={{ lineHeight: 1.3, flexGrow: 1 }}>{s.name_ar}</span>
-                                    </label>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-
-                      {groupedSubjects.length === 0 && (
-                        <div style={{ textAlign: 'center', padding: '1.75rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                          <p style={{ margin: 0 }}>{lang === 'ar' ? 'لا توجد مواد دراسية مطابقة للبحث' : 'No subjects matched your search'}</p>
-                          {subjectSearchInModal && (
-                            <button
-                              type="button"
-                              onClick={() => setSubjectSearchInModal('')}
-                              className="btn btn-outline"
-                              style={{ marginTop: '0.5rem', padding: '0.25rem 0.75rem', fontSize: '0.75rem' }}
-                            >
-                              {lang === 'ar' ? 'إعادة ضبط البحث' : 'Reset search'}
-                            </button>
-                          )}
-                        </div>
+                    {/* Button: جميع المواد */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (subjectSelectionMode === 'all') {
+                          setSubjectSelectionMode('custom');
+                          setIsUniversal(false);
+                        } else {
+                          setSubjectSelectionMode('all');
+                          setIsUniversal(true);
+                          setSelectedSubjectIds(subjects.map(s => s.id));
+                        }
+                      }}
+                      style={{
+                        padding: '0.4rem 0.95rem',
+                        fontSize: '0.8rem',
+                        height: '38px',
+                        fontWeight: 800,
+                        backgroundColor: subjectSelectionMode === 'all' ? 'rgba(16, 185, 129, 0.15)' : '#FFFFFF',
+                        border: subjectSelectionMode === 'all' ? '2px solid #059669' : '1px solid #D8CCA8',
+                        color: subjectSelectionMode === 'all' ? '#047857' : '#5C4E43',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.45rem',
+                        boxShadow: subjectSelectionMode === 'all' ? '0 2px 8px rgba(16, 185, 129, 0.2)' : '0 1px 3px rgba(0,0,0,0.03)',
+                        transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+                      }}
+                      title={lang === 'ar' ? 'ربط المنتج بجميع المواد المسجلة في النظام' : 'Associate product with all subjects'}
+                    >
+                      <Globe size={16} style={{ color: subjectSelectionMode === 'all' ? '#059669' : '#8C7E72' }} />
+                      <span>{lang === 'ar' ? 'جميع المواد' : 'All Subjects'}</span>
+                      {subjectSelectionMode === 'all' && (
+                        <span style={{
+                          fontSize: '0.68rem',
+                          backgroundColor: '#059669',
+                          color: '#FFFFFF',
+                          borderRadius: '9999px',
+                          padding: '1px 6px',
+                          marginInlineStart: '2px'
+                        }}>
+                          ✓
+                        </span>
                       )}
-                    </div>
+                    </button>
                   </div>
-                )}
+                </div>
 
-                {/* -------------------------------------------------------------
-                    LIVE AUTO-CLASSIFICATION PREVIEW CARD
-                    ------------------------------------------------------------- */}
+                {/* Quick Search bar */}
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder={lang === 'ar' ? '🔍 ابحث في أسماء المواد الدراسية (عربي / English)...' : '🔍 Search subjects...'}
+                    value={subjectSearchInModal}
+                    onChange={(e) => setSubjectSearchInModal(e.target.value)}
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      borderColor: '#E2D7C7',
+                      borderRadius: '10px',
+                      paddingInlineStart: '2.4rem',
+                      paddingInlineEnd: subjectSearchInModal ? '2.2rem' : '1rem',
+                      height: '40px',
+                      fontSize: '0.84rem'
+                    }}
+                  />
+                  <Search size={15} style={{ position: 'absolute', insetInlineStart: '0.9rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.45, pointerEvents: 'none' }} />
+                  {subjectSearchInModal && (
+                    <button
+                      type="button"
+                      onClick={() => setSubjectSearchInModal('')}
+                      style={{ position: 'absolute', insetInlineEnd: '0.75rem', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', cursor: 'pointer', color: '#8C7E72' }}
+                      title={lang === 'ar' ? 'مسح البحث' : 'Clear search'}
+                    >
+                      <X size={15} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Year Cards List */}
                 <div style={{
-                  border: `1.5px solid ${classificationMeta.badgeBorder}`,
-                  backgroundColor: classificationMeta.badgeBg,
-                  borderRadius: 'var(--radius-md)',
-                  padding: '0.9rem 1rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.6rem',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+                  gap: '1rem',
+                  maxHeight: 'min(460px, 52vh)',
+                  overflowY: 'auto',
+                  paddingInlineEnd: '0.25rem',
+                  overscrollBehavior: 'contain'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                      <span style={{ fontSize: '1.3rem' }}>{classificationMeta.icon}</span>
-                      <div>
-                        <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', fontWeight: 700 }}>
-                          {lang === 'ar' ? 'التصنيف التلقائي الذكي للنظام' : 'Automatic System Classification'}
+                  {groupedSubjects.map((grp) => {
+                    const grpSubjectIds = grp.subjects.map(s => s.id);
+                    const selectedInGroup = grp.subjects.filter(s => selectedSubjectIds.includes(s.id)).length;
+                    const allGroupSelected = grp.subjects.length > 0 && selectedInGroup === grp.subjects.length;
+
+                    return (
+                      <div
+                        key={grp.year.id}
+                        style={{
+                          backgroundColor: '#FCF9F4',
+                          border: '1.5px solid #E8DFD3',
+                          borderRadius: '16px',
+                          padding: '0.9rem 1rem',
+                          boxShadow: '0 2px 6px rgba(44, 34, 30, 0.03)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.75rem'
+                        }}
+                      >
+                        {/* Year Header */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                          gap: '0.65rem',
+                          paddingBottom: '0.65rem',
+                          borderBottom: '1px solid #EFE6DA'
+                        }}>
+                          {/* Title & Count */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '1.1rem' }}>🎓</span>
+                            <span style={{ fontSize: '1rem', fontWeight: 800, color: '#2C221E' }}>
+                              {grp.year.name_ar}
+                            </span>
+                            <span style={{
+                              fontSize: '0.84rem',
+                              fontWeight: 800,
+                              color: '#800020',
+                              backgroundColor: 'rgba(128, 0, 32, 0.06)',
+                              padding: '2px 8px',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(128, 0, 32, 0.15)'
+                            }}>
+                              ({grp.subjects.length} {lang === 'ar' ? 'مواد' : 'subjects'})
+                            </span>
+                            {selectedInGroup > 0 && selectedInGroup < grp.subjects.length && (
+                              <span style={{ fontSize: '0.74rem', color: '#7A6E65', fontWeight: 600 }}>
+                                ({lang === 'ar' ? `محدد: ${selectedInGroup}` : `${selectedInGroup} selected`})
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Year Action Buttons */}
+                          {grp.subjects.length > 0 ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                              {/* Deselect All Year Subjects */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (subjectSelectionMode === 'all') {
+                                    setSubjectSelectionMode('custom');
+                                    setIsUniversal(false);
+                                  }
+                                  setSelectedSubjectIds(prev => prev.filter(id => !grpSubjectIds.includes(id)));
+                                }}
+                                className="btn btn-outline"
+                                style={{
+                                  padding: '0.25rem 0.65rem',
+                                  fontSize: '0.75rem',
+                                  height: '32px',
+                                  fontWeight: 600,
+                                  backgroundColor: '#FFFFFF',
+                                  borderColor: '#D5C9B8',
+                                  color: '#6B5E54',
+                                  borderRadius: '8px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.35rem',
+                                  cursor: 'pointer'
+                                }}
+                                title={lang === 'ar' ? 'إلغاء تحديد مواد هذه السنة فقط' : 'Deselect this year subjects'}
+                              >
+                                <Trash2 size={13} style={{ color: '#8C7E72' }} />
+                                <span>{lang === 'ar' ? 'إلغاء تحديد جميع المواد' : 'Deselect Year'}</span>
+                              </button>
+
+                              {/* Select All Year Subjects */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (subjectSelectionMode === 'all') {
+                                    setSubjectSelectionMode('custom');
+                                    setIsUniversal(false);
+                                  }
+                                  setSelectedSubjectIds(prev => Array.from(new Set([...prev, ...grpSubjectIds])));
+                                }}
+                                className="btn btn-outline"
+                                style={{
+                                  padding: '0.25rem 0.75rem',
+                                  fontSize: '0.75rem',
+                                  height: '32px',
+                                  fontWeight: 700,
+                                  backgroundColor: allGroupSelected ? 'rgba(128, 0, 32, 0.08)' : '#FFFFFF',
+                                  borderColor: '#800020',
+                                  color: '#800020',
+                                  borderRadius: '8px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.35rem',
+                                  cursor: 'pointer'
+                                }}
+                                title={lang === 'ar' ? 'تحديد كافة مواد هذه السنة' : 'Select all subjects for this year'}
+                              >
+                                <Check size={13} strokeWidth={2.5} />
+                                <span>{lang === 'ar' ? 'تحديد جميع مواد السنة' : 'Select All Year'}</span>
+                              </button>
+                            </div>
+                          ) : null}
                         </div>
-                        <div style={{ fontSize: '0.92rem', fontWeight: 800, color: classificationMeta.badgeColor }}>
-                          {classificationMeta.labelAr}
+
+                        {/* Subjects Grid */}
+                        {grp.subjects.length === 0 ? (
+                          <div style={{
+                            padding: '1.25rem 1rem',
+                            textAlign: 'center',
+                            color: '#8C7E72',
+                            fontSize: '0.82rem',
+                            backgroundColor: '#FFFFFF',
+                            borderRadius: '12px',
+                            border: '1px dashed #DCCFBF'
+                          }}>
+                            <span>{lang === 'ar' ? 'لا توجد مواد مسجلة لهذه السنة حالياً في قاعدة البيانات' : 'No subjects registered under this academic year yet'}</span>
+                          </div>
+                        ) : (
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(215px, 1fr))',
+                            gap: '0.65rem'
+                          }}>
+                            {grp.subjects.map((s) => {
+                              const isChecked = selectedSubjectIds.includes(s.id);
+
+                              return (
+                                <div
+                                  key={s.id}
+                                  onClick={() => {
+                                    if (subjectSelectionMode === 'all') {
+                                      setSubjectSelectionMode('custom');
+                                      setIsUniversal(false);
+                                    }
+                                    setSelectedSubjectIds(prev =>
+                                      prev.includes(s.id) ? prev.filter(id => id !== s.id) : [...prev, s.id]
+                                    );
+                                  }}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: '0.65rem',
+                                    padding: '0.7rem 0.85rem',
+                                    borderRadius: '12px',
+                                    backgroundColor: isChecked ? '#FFF9F7' : '#FFFFFF',
+                                    border: isChecked ? '1.5px solid #800020' : '1px solid #E6DAC8',
+                                    boxShadow: isChecked ? '0 2px 8px rgba(128, 0, 32, 0.09)' : '0 1px 3px rgba(44, 34, 30, 0.02)',
+                                    cursor: 'pointer',
+                                    userSelect: 'none',
+                                    transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+                                  }}
+                                >
+                                  {/* Right side: Icon + Names */}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+                                    <div style={{
+                                      width: '38px',
+                                      height: '38px',
+                                      borderRadius: '10px',
+                                      backgroundColor: isChecked ? 'rgba(128, 0, 32, 0.08)' : '#FAF4EC',
+                                      border: isChecked ? '1px solid rgba(128, 0, 32, 0.2)' : '1px solid #EDE2D3',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      flexShrink: 0
+                                    }}>
+                                      {renderSubjectSpecialtyIcon(s)}
+                                    </div>
+                                    <div style={{ minWidth: 0 }}>
+                                      <div style={{
+                                        fontSize: '0.88rem',
+                                        fontWeight: 800,
+                                        color: isChecked ? '#800020' : '#2C221E',
+                                        lineHeight: 1.25,
+                                        whiteSpace: 'normal',
+                                        wordBreak: 'break-word'
+                                      }}>
+                                        {s.name_ar}
+                                      </div>
+                                      {s.name_en && (
+                                        <div style={{
+                                          fontSize: '0.72rem',
+                                          fontWeight: 500,
+                                          color: '#7C6E65',
+                                          lineHeight: 1.2,
+                                          marginTop: '2px',
+                                          whiteSpace: 'normal',
+                                          wordBreak: 'break-word'
+                                        }}>
+                                          {s.name_en}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Left side: Custom Checkbox */}
+                                  <div style={{
+                                    width: '20px',
+                                    height: '20px',
+                                    borderRadius: '5px',
+                                    border: isChecked ? '1.5px solid #800020' : '1.5px solid #C8BCAC',
+                                    backgroundColor: isChecked ? '#800020' : '#FFFFFF',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0,
+                                    transition: 'all 0.15s ease'
+                                  }}>
+                                    {isChecked && <Check size={13} color="#FFFFFF" strokeWidth={3} />}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {groupedSubjects.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '1.75rem', color: '#8C7E72', fontSize: '0.85rem' }}>
+                      <p style={{ margin: 0 }}>{lang === 'ar' ? 'لا توجد مواد دراسية مطابقة للبحث' : 'No subjects matched your search'}</p>
+                      {subjectSearchInModal && (
+                        <button
+                          type="button"
+                          onClick={() => setSubjectSearchInModal('')}
+                          className="btn btn-outline"
+                          style={{ marginTop: '0.5rem', padding: '0.25rem 0.75rem', fontSize: '0.75rem' }}
+                        >
+                          {lang === 'ar' ? 'إعادة ضبط البحث' : 'Reset search'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* =============================================================
+                    BOTTOM 3 EXPLANATORY CARDS (As shown in reference mockup)
+                    ============================================================= */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                  gap: '0.75rem',
+                  marginTop: '0.25rem'
+                }}>
+                  {/* Box 1: مادة واحدة فقط */}
+                  {(() => {
+                    const isSpecificActive = !isUniversal && subjectSelectionMode !== 'all' && selectedSubjectIds.length === 1;
+                    return (
+                      <div style={{
+                        backgroundColor: isSpecificActive ? '#EFF6FF' : 'rgba(239, 246, 255, 0.55)',
+                        border: isSpecificActive ? '2px solid #2563EB' : '1.5px solid #BFDBFE',
+                        borderRadius: '14px',
+                        padding: '0.85rem 1rem',
+                        boxShadow: isSpecificActive ? '0 4px 14px rgba(37, 99, 235, 0.15)' : 'none',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.75rem',
+                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                      }}>
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          <ToothSvg />
+                        </div>
+                        <div>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            fontWeight: 800,
+                            fontSize: '0.92rem',
+                            color: '#1D4ED8'
+                          }}>
+                            <span>{lang === 'ar' ? 'مادة واحدة فقط' : 'Single Subject'}</span>
+                            {isSpecificActive && (
+                              <span style={{ fontSize: '0.65rem', backgroundColor: '#2563EB', color: '#FFFFFF', padding: '1px 6px', borderRadius: '9999px' }}>
+                                ✓ {lang === 'ar' ? 'نشط' : 'Active'}
+                              </span>
+                            )}
+                          </div>
+                          <p style={{
+                            margin: '0.25rem 0 0 0',
+                            fontSize: '0.78rem',
+                            color: '#4B5563',
+                            lineHeight: 1.35
+                          }}>
+                            {lang === 'ar' ? 'يظهر المنتج في قسم الأدوات الخاصة بهذه المادة فقط' : 'Appears in specific tools section for this subject only'}
+                          </p>
                         </div>
                       </div>
-                    </div>
-                    <span style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 800,
-                      padding: '3px 10px',
-                      borderRadius: '9999px',
-                      backgroundColor: classificationMeta.badgeColor,
-                      color: '#ffffff',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
-                    }}>
-                      {classificationMeta.type === 'universal' ? (lang === 'ar' ? 'القسم الثالث' : 'Section 3') :
-                       classificationMeta.type === 'shared' ? (lang === 'ar' ? 'القسم الثاني' : 'Section 2') :
-                       classificationMeta.type === 'specific' ? (lang === 'ar' ? 'القسم الأول' : 'Section 1') : (lang === 'ar' ? 'غير مصنف' : 'Pending')}
-                    </span>
-                  </div>
+                    );
+                  })()}
 
-                  <div style={{
-                    backgroundColor: 'var(--surface-color)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '0.6rem 0.8rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.25rem',
-                    fontSize: '0.8rem'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, color: 'var(--text-main)', flexWrap: 'wrap' }}>
-                      <Layers size={14} style={{ color: classificationMeta.badgeColor, flexShrink: 0 }} />
-                      <span>{lang === 'ar' ? 'مكان الظهور في الموقع:' : 'Storefront Display Location:'}</span>
-                      <span style={{ color: classificationMeta.badgeColor }}>{classificationMeta.sectionAr}</span>
-                    </div>
-                    <p style={{ margin: 0, fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
-                      💡 {classificationMeta.descriptionAr}
-                    </p>
-                  </div>
+                  {/* Box 2: مادتين أو أكثر */}
+                  {(() => {
+                    const isSharedActive = !isUniversal && subjectSelectionMode !== 'all' && selectedSubjectIds.length >= 2;
+                    return (
+                      <div style={{
+                        backgroundColor: isSharedActive ? '#FFF7ED' : 'rgba(255, 247, 237, 0.65)',
+                        border: isSharedActive ? '2px solid #EA580C' : '1.5px solid #FED7AA',
+                        borderRadius: '14px',
+                        padding: '0.85rem 1rem',
+                        boxShadow: isSharedActive ? '0 4px 14px rgba(234, 88, 12, 0.15)' : 'none',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.75rem',
+                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                      }}>
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(234, 88, 12, 0.12)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          <TwoTeethIcon />
+                        </div>
+                        <div>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            fontWeight: 800,
+                            fontSize: '0.92rem',
+                            color: '#C2410C'
+                          }}>
+                            <span>{lang === 'ar' ? 'مادتين أو أكثر' : 'Two or More Subjects'}</span>
+                            {isSharedActive && (
+                              <span style={{ fontSize: '0.65rem', backgroundColor: '#EA580C', color: '#FFFFFF', padding: '1px 6px', borderRadius: '9999px' }}>
+                                ✓ {lang === 'ar' ? `نشط (${selectedSubjectIds.length})` : `Active (${selectedSubjectIds.length})`}
+                              </span>
+                            )}
+                          </div>
+                          <p style={{
+                            margin: '0.25rem 0 0 0',
+                            fontSize: '0.78rem',
+                            color: '#4B5563',
+                            lineHeight: 1.35
+                          }}>
+                            {lang === 'ar' ? 'يظهر المنتج في قسم الأدوات المشتركة بين المواد' : 'Appears in shared tools section across selected subjects'}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Box 3: جميع المواد */}
+                  {(() => {
+                    const isUniversalActive = isUniversal || subjectSelectionMode === 'all';
+                    return (
+                      <div
+                        onClick={() => {
+                          if (subjectSelectionMode === 'all') {
+                            setSubjectSelectionMode('custom');
+                            setIsUniversal(false);
+                          } else {
+                            setSubjectSelectionMode('all');
+                            setIsUniversal(true);
+                            setSelectedSubjectIds(subjects.map(s => s.id));
+                          }
+                        }}
+                        style={{
+                          backgroundColor: isUniversalActive ? '#ECFDF5' : 'rgba(236, 253, 245, 0.65)',
+                          border: isUniversalActive ? '2px solid #059669' : '1.5px solid #A7F3D0',
+                          borderRadius: '14px',
+                          padding: '0.85rem 1rem',
+                          boxShadow: isUniversalActive ? '0 4px 14px rgba(5, 150, 105, 0.15)' : 'none',
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '0.75rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                        }}
+                      >
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          <Globe size={19} style={{ color: '#059669' }} />
+                        </div>
+                        <div>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            fontWeight: 800,
+                            fontSize: '0.92rem',
+                            color: '#047857'
+                          }}>
+                            <span>{lang === 'ar' ? 'جميع المواد' : 'All Subjects'}</span>
+                            {isUniversalActive && (
+                              <span style={{ fontSize: '0.65rem', backgroundColor: '#059669', color: '#FFFFFF', padding: '1px 6px', borderRadius: '9999px' }}>
+                                ✓ {lang === 'ar' ? 'نشط (عام)' : 'Active (Universal)'}
+                              </span>
+                            )}
+                          </div>
+                          <p style={{
+                            margin: '0.25rem 0 0 0',
+                            fontSize: '0.78rem',
+                            color: '#4B5563',
+                            lineHeight: 1.35
+                          }}>
+                            {lang === 'ar' ? 'يظهر المنتج في قسم المستلزمات المشتركة بين جميع السنوات' : 'Appears in universal supplies section across all years'}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
