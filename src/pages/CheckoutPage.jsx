@@ -1,58 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import supabase from '../supabaseClient';
 import InvoiceView from '../components/InvoiceView';
-import { CheckCircle2, FileText, MapPin, Truck, HelpCircle, Phone, Clock } from 'lucide-react';
+import { CheckCircle2, FileText, MapPin, Truck, HelpCircle, Phone, Clock, Calendar } from 'lucide-react';
 import MapPicker from '../components/MapPicker';
 import { createEditHistoryEntry, buildUpdatedStatusNote } from '../utils/orderEditHelper';
 import { isBundleProduct, getBundleDefinition, calculateBundleAvailability, calculateOrderDeductions } from '../utils/productInventoryEngine';
+import {
+  DELIVERY_TIME_SLOTS,
+  getUpcomingDeliveryDays,
+  formatCustomDateToDeliveryDay,
+  formatSelectedSlots,
+  parseDeliveryTimeSlots,
+  toggleTimeSlotSelection,
+  extractOrderDeliverySchedule
+} from '../utils/deliveryScheduleEngine';
 
-export const DELIVERY_TIME_SLOTS = [
-  { id: '8:00', value: '8:00 صباحاً', labelAr: '8:00 صباحاً', labelEn: '8:00 AM', periodAr: 'الصباح الباكر', periodEn: 'Early Morning', icon: '🌅' },
-  { id: '10:00', value: '10:00 صباحاً', labelAr: '10:00 صباحاً', labelEn: '10:00 AM', periodAr: 'الفترة الصباحية', periodEn: 'Mid-Morning', icon: '☀️' },
-  { id: '12:00', value: '12:00 ظهراً', labelAr: '12:00 ظهراً', labelEn: '12:00 PM', periodAr: 'فترة الظهيرة', periodEn: 'Noon', icon: '🕛' },
-  { id: '2:00', value: '2:00 ظهراً', labelAr: '2:00 ظهراً', labelEn: '2:00 PM', periodAr: 'بعد الظهر', periodEn: 'Afternoon', icon: '🌤️' },
-  { id: 'anytime', value: 'أي وقت يناسبكم', labelAr: 'أي وقت يناسبكم', labelEn: 'Any time suits you', periodAr: 'متاح طوال اليوم', periodEn: 'Flexible all day', icon: '🤝' },
-];
-
-export const formatSelectedSlots = (slots, lang = 'ar') => {
-  if (!Array.isArray(slots) || slots.length === 0) return lang === 'ar' ? '10:00 صباحاً' : '10:00 AM';
-  if (slots.includes('أي وقت يناسبكم')) return lang === 'ar' ? 'أي وقت يناسبكم' : 'Any time suits you';
-  const sep = lang === 'ar' ? ' أو ' : ' or ';
-  return slots.join(sep);
-};
-
-export const parseDeliveryTimeSlots = (rawString) => {
-  if (!rawString) return ['10:00 صباحاً'];
-  const s = String(rawString).trim();
-  if (s.includes('أي وقت') || s.includes('اي وقت') || s.includes('Any time')) {
-    return ['أي وقت يناسبكم'];
-  }
-  const found = [];
-  if (s.includes('08:00') || s.includes('8:00')) found.push('8:00 صباحاً');
-  if (s.includes('10:00')) found.push('10:00 صباحاً');
-  if (s.includes('12:00')) found.push('12:00 ظهراً');
-  if (s.includes('02:00') || s.includes('2:00')) found.push('2:00 ظهراً');
-  return found.length > 0 ? found : [s];
-};
-
-export const toggleTimeSlotSelection = (currentSlots, slotValue) => {
-  if (slotValue === 'أي وقت يناسبكم') {
-    return ['أي وقت يناسبكم'];
-  }
-  const base = (currentSlots || []).filter(s => s !== 'أي وقت يناسبكم');
-  if (base.includes(slotValue)) {
-    if (base.length <= 1) return base;
-    return base.filter(s => s !== slotValue);
-  } else {
-    const chronological = ['8:00 صباحاً', '10:00 صباحاً', '12:00 ظهراً', '2:00 ظهراً'];
-    const updated = [...base, slotValue];
-    updated.sort((a, b) => chronological.indexOf(a) - chronological.indexOf(b));
-    return updated;
-  }
+export {
+  DELIVERY_TIME_SLOTS,
+  getUpcomingDeliveryDays,
+  formatCustomDateToDeliveryDay,
+  formatSelectedSlots,
+  parseDeliveryTimeSlots,
+  toggleTimeSlotSelection
 };
 
 const TRIPOLI_STREETS = [
@@ -121,6 +94,14 @@ export const CheckoutPage = () => {
   const [shippingOption, setShippingOption] = useState('faculty'); // faculty, tripoli_center, tripoli_suburbs
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(['10:00 صباحاً']);
   
+  // Delivery Day state
+  const upcomingDeliveryDays = useMemo(() => getUpcomingDeliveryDays(), []);
+  const [selectedDeliveryDay, setSelectedDeliveryDay] = useState(() => {
+    return upcomingDeliveryDays[2]?.value || 'غداً';
+  });
+  const [customDate, setCustomDate] = useState('');
+  const [showCustomDate, setShowCustomDate] = useState(false);
+
   // Searchable street selection & Maps location
   const [selectedStreet, setSelectedStreet] = useState('');
   const [streetSearch, setStreetSearch] = useState('');
@@ -153,13 +134,21 @@ export const CheckoutPage = () => {
       }
       if (editingOrder.latitude) setLatitude(editingOrder.latitude);
       if (editingOrder.longitude) setLongitude(editingOrder.longitude);
-      const combinedOrderNotes = `${editingOrder.delivery_notes || ''} ${editingOrder.notes || ''}`;
-      const timeMatch = combinedOrderNotes.match(/\[توقيت التسليم المفضل:\s*([^\]]+)\]/);
-      if (timeMatch && timeMatch[1]) {
-        setSelectedTimeSlots(parseDeliveryTimeSlots(timeMatch[1]));
+      
+      const schedule = extractOrderDeliverySchedule(editingOrder);
+      if (schedule.hasDay && schedule.day) {
+        setSelectedDeliveryDay(schedule.day);
+      }
+      if (schedule.timeSlots && schedule.timeSlots.length > 0) {
+        setSelectedTimeSlots(schedule.timeSlots);
       }
       if (editingOrder.notes) {
-        const cleanNotes = editingOrder.notes.replace(/\[توقيت التسليم المفضل:[^\]]+\]\s*/g, '').trim();
+        const cleanNotes = editingOrder.notes
+          .replace(/\[يوم الاستلام:[^\]]+\]\s*/g, '')
+          .replace(/\[يوم التسليم المفضل:[^\]]+\]\s*/g, '')
+          .replace(/\[توقيت التسليم المفضل:[^\]]+\]\s*/g, '')
+          .replace(/\[وقت التسليم:[^\]]+\]\s*/g, '')
+          .trim();
         setNotes(cleanNotes);
       }
       return;
@@ -212,17 +201,19 @@ export const CheckoutPage = () => {
     const orderNum = Math.floor(10000000 + Math.random() * 90000000).toString();
 
     try {
-      // Format final notes with time slot, street, and location link if available
+      // Format final notes with delivery day, time slot, street, and location link if available
       const formattedTimeSlot = formatSelectedSlots(selectedTimeSlots, 'ar');
+      const dayTag = `[يوم الاستلام: ${selectedDeliveryDay}]`;
       const timeSlotTag = `[توقيت التسليم المفضل: ${formattedTimeSlot}]`;
-      let combinedNotes = notes ? `${timeSlotTag}\n${notes}` : timeSlotTag;
+      const scheduleHeader = `${dayTag} ${timeSlotTag}`;
+      let combinedNotes = notes ? `${scheduleHeader}\n${notes}` : scheduleHeader;
       if (shippingOption !== 'faculty') {
         const locationLink = (latitude && longitude) ? `https://www.google.com/maps?q=${latitude},${longitude}` : null;
         const streetLabel = lang === 'ar' ? 'الشارع/المنطقة' : 'Street/Area';
         const locationLabel = lang === 'ar' ? 'خرائط جوجل' : 'Google Maps';
         const notesLabel = lang === 'ar' ? 'ملاحظات' : 'Notes';
         
-        combinedNotes = `${timeSlotTag}\n[${streetLabel}: ${addressText || 'لم يحدد'}]` + 
+        combinedNotes = `${scheduleHeader}\n[${streetLabel}: ${addressText || 'لم يحدد'}]` + 
           (locationLink ? ` [${locationLabel}: ${locationLink}]` : '') + 
           (notes ? ` \n[${notesLabel}: ${notes}]` : '');
       }
@@ -325,7 +316,7 @@ export const CheckoutPage = () => {
           university,
           college,
           notes: combinedNotes || null,
-          delivery_notes: `[توقيت التسليم المفضل: ${formattedTimeSlot}]`,
+          delivery_notes: `${dayTag} ${timeSlotTag}`,
           address_text: shippingOption === 'faculty' ? null : addressText,
           latitude: shippingOption === 'faculty' ? null : latitude,
           longitude: shippingOption === 'faculty' ? null : longitude,
@@ -412,7 +403,7 @@ export const CheckoutPage = () => {
         university,
         college,
         notes: combinedNotes || null,
-        delivery_notes: `[توقيت التسليم المفضل: ${formattedTimeSlot}]`,
+        delivery_notes: `${dayTag} ${timeSlotTag}`,
         address_text: shippingOption === 'faculty' ? null : addressText,
         latitude: shippingOption === 'faculty' ? null : latitude,
         longitude: shippingOption === 'faculty' ? null : longitude,
@@ -874,138 +865,297 @@ export const CheckoutPage = () => {
             </div>
           )}
 
-          {/* Delivery Time Slot Selection (Multi-select or Anytime) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
-              <label className="form-label" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 800 }}>
-                <Clock size={16} style={{ color: 'var(--secondary)' }} />
-                <span>{lang === 'ar' ? 'تحديد التوقيت المفضل للتسليم *' : 'Preferred Delivery / Pickup Time *'}</span>
-              </label>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                {lang === 'ar' ? 'اختر وقتاً واحداً أو عدة أوقات تناسبك' : 'Choose one or multiple suitable times'}
-              </span>
-            </div>
-
-            {/* Informative flexible multi-selection callout */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.65rem',
-              padding: '0.75rem 0.95rem',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'rgba(59, 130, 246, 0.08)',
-              border: '1px solid rgba(59, 130, 246, 0.25)',
-              color: '#1d4ed8',
-              fontSize: '0.82rem',
-              lineHeight: 1.55
-            }}>
-              <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>💡</span>
-              <div>
-                <strong style={{ fontWeight: 800 }}>{lang === 'ar' ? 'مرونة المواعيد:' : 'Flexible Timing:'}</strong>{' '}
-                {lang === 'ar'
-                  ? 'يمكنك اختيار أكثر من توقيت يناسبك (مثلاً: 8:00 و 10:00 صباحاً معاً)، أو اختيار «أي وقت يناسبكم» لتسليمها بالوقت المتاح لفريق العمل.'
-                  : 'You can choose multiple times (e.g. 8:00 AM & 10:00 AM together), or select "Any time suits you".'}
+          {/* Delivery Schedule (Day & Time Selection) */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.1rem',
+            padding: '1.25rem',
+            borderRadius: 'var(--radius-lg)',
+            backgroundColor: 'var(--surface-color)',
+            border: '1.5px solid var(--border-color)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7), var(--shadow-sm)'
+          }}>
+            {/* 1. Delivery Day Selection */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
+                <label className="form-label" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 800 }}>
+                  <Calendar size={17} style={{ color: 'var(--secondary)' }} />
+                  <span>{lang === 'ar' ? 'تحديد يوم الاستلام المفضل *' : 'Preferred Delivery / Pickup Day *'}</span>
+                </label>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  {lang === 'ar' ? 'اختر اليوم الأنسب لك أو أي يوم متاح' : 'Choose your preferred day'}
+                </span>
               </div>
-            </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))',
-              gap: '0.65rem'
-            }}>
-              {DELIVERY_TIME_SLOTS.map((slot) => {
-                const isSelected = selectedTimeSlots.includes(slot.value);
-                return (
-                  <button
-                    key={slot.id}
-                    type="button"
-                    onClick={() => setSelectedTimeSlots(prev => toggleTimeSlotSelection(prev, slot.value))}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.35rem',
-                      padding: '0.85rem 0.5rem',
-                      borderRadius: 'var(--radius-md)',
-                      border: isSelected ? '2px solid var(--secondary)' : '1px solid var(--border-color)',
-                      backgroundColor: isSelected ? 'var(--accent)' : 'var(--surface-color)',
-                      boxShadow: isSelected
-                        ? 'inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px rgba(104,72,53,0.12)'
-                        : 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-                      transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-                    }}
-                  >
-                    <span style={{ fontSize: '1.25rem' }}>{slot.icon}</span>
-                    <span style={{
-                      fontSize: '0.88rem',
-                      fontWeight: isSelected ? 800 : 600,
-                      color: isSelected ? 'var(--primary)' : 'var(--text-main)',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {lang === 'ar' ? slot.labelAr : slot.labelEn}
-                    </span>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      {lang === 'ar' ? slot.periodAr : slot.periodEn}
-                    </span>
-                    {isSelected && (
+              {/* Day selection grid */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(125px, 1fr))',
+                gap: '0.55rem'
+              }}>
+                {upcomingDeliveryDays.map((dayObj) => {
+                  const isSelected = selectedDeliveryDay === dayObj.value;
+                  return (
+                    <button
+                      key={dayObj.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDeliveryDay(dayObj.value);
+                        setShowCustomDate(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.25rem',
+                        padding: '0.75rem 0.4rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: isSelected ? '2px solid var(--secondary)' : '1px solid var(--border-color)',
+                        backgroundColor: isSelected ? 'var(--accent)' : 'var(--surface-color)',
+                        boxShadow: isSelected
+                          ? 'inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px rgba(104,72,53,0.12)'
+                          : 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                        transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+                        position: 'relative'
+                      }}
+                    >
+                      <span style={{ fontSize: '1.2rem' }}>{dayObj.icon}</span>
                       <span style={{
-                        fontSize: '0.68rem',
-                        fontWeight: 800,
-                        color: 'var(--secondary)',
-                        backgroundColor: 'rgba(104,72,53,0.12)',
-                        padding: '1px 6px',
-                        borderRadius: '999px'
+                        fontSize: '0.85rem',
+                        fontWeight: isSelected ? 800 : 700,
+                        color: isSelected ? 'var(--primary)' : 'var(--text-main)',
+                        textAlign: 'center'
                       }}>
-                        ✓ {lang === 'ar' ? 'محدد' : 'Selected'}
+                        {lang === 'ar' ? dayObj.labelAr : dayObj.labelEn}
                       </span>
-                    )}
-                  </button>
-                );
-              })}
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                        {lang === 'ar' ? dayObj.subAr : dayObj.subEn}
+                      </span>
+                      {isSelected && (
+                        <span style={{
+                          fontSize: '0.65rem',
+                          fontWeight: 800,
+                          color: 'var(--secondary)',
+                          backgroundColor: 'rgba(104,72,53,0.12)',
+                          padding: '1px 6px',
+                          borderRadius: '999px',
+                          marginTop: '0.15rem'
+                        }}>
+                          ✓ {lang === 'ar' ? 'محدد' : 'Selected'}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+
+                {/* Custom Date Pick button */}
+                <button
+                  type="button"
+                  onClick={() => setShowCustomDate(prev => !prev)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.25rem',
+                    padding: '0.75rem 0.4rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: showCustomDate ? '2px solid var(--secondary)' : '1px dashed var(--border-color)',
+                    backgroundColor: showCustomDate ? 'var(--accent)' : 'rgba(0,0,0,0.02)',
+                    cursor: 'pointer',
+                    transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>🗓️</span>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    {lang === 'ar' ? 'تاريخ محدد...' : 'Pick Date...'}
+                  </span>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                    {lang === 'ar' ? 'اختيار من التقويم' : 'Calendar picker'}
+                  </span>
+                </button>
+              </div>
+
+              {/* Custom Date input drawer */}
+              {showCustomDate && (
+                <div style={{
+                  marginTop: '0.4rem',
+                  padding: '0.75rem',
+                  backgroundColor: 'var(--accent)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)' }}>
+                    {lang === 'ar' ? 'اختر التاريخ المطلوب:' : 'Select Date:'}
+                  </label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    min={new Date().toISOString().split('T')[0]}
+                    value={customDate}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCustomDate(val);
+                      if (val) {
+                        const formatted = formatCustomDateToDeliveryDay(val);
+                        setSelectedDeliveryDay(formatted);
+                      }
+                    }}
+                    style={{ width: 'auto', minWidth: '160px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}
+                  />
+                  {customDate && (
+                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--secondary)' }}>
+                      ✓ {formatCustomDateToDeliveryDay(customDate)}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Selected slots summary indicator */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '0.5rem',
-              padding: '0.55rem 0.85rem',
-              borderRadius: 'var(--radius-sm)',
-              backgroundColor: 'var(--accent)',
-              border: '1px solid var(--border-color)',
-              fontSize: '0.82rem'
-            }}>
-              <span style={{ color: 'var(--text-muted)' }}>
-                {lang === 'ar' ? 'المواعيد المحددة للطلب:' : 'Selected slots for order:'}
-              </span>
-              <strong style={{ color: 'var(--secondary)', fontWeight: 800 }}>
-                {formatSelectedSlots(selectedTimeSlots, lang)}
-              </strong>
-            </div>
+            <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '0.15rem 0' }} />
 
-            {/* WhatsApp Confirmation Notice */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.85rem 1rem',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'rgba(245, 158, 11, 0.08)',
-              border: '1.5px solid rgba(245, 158, 11, 0.3)',
-              color: '#92400E',
-              marginTop: '0.2rem'
-            }}>
-              <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>📲</span>
-              <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, lineHeight: 1.55 }}>
-                {lang === 'ar'
-                  ? 'سيتم التواصل والتأكيد النهائي على موعد ومكان التسليم معك مباشرة عبر الواتساب فور مراجعة طلبيتك.'
-                  : 'Final delivery time and location will be confirmed directly with you via WhatsApp once your order is reviewed.'}
-              </p>
+            {/* 2. Delivery Time Slot Selection (Multi-select or Anytime) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
+                <label className="form-label" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 800 }}>
+                  <Clock size={16} style={{ color: 'var(--secondary)' }} />
+                  <span>{lang === 'ar' ? 'تحديد التوقيت المفضل للتسليم *' : 'Preferred Delivery / Pickup Time *'}</span>
+                </label>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  {lang === 'ar' ? 'اختر وقتاً واحداً أو عدة أوقات تناسبك' : 'Choose one or multiple suitable times'}
+                </span>
+              </div>
+
+              {/* Informative flexible multi-selection callout */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.65rem',
+                padding: '0.75rem 0.95rem',
+                borderRadius: 'var(--radius-md)',
+                backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                border: '1px solid rgba(59, 130, 246, 0.25)',
+                color: '#1d4ed8',
+                fontSize: '0.82rem',
+                lineHeight: 1.55
+              }}>
+                <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>💡</span>
+                <div>
+                  <strong style={{ fontWeight: 800 }}>{lang === 'ar' ? 'مرونة المواعيد:' : 'Flexible Timing:'}</strong>{' '}
+                  {lang === 'ar'
+                    ? 'يمكنك اختيار أكثر من توقيت يناسبك (مثلاً: 8:00 و 10:00 صباحاً معاً)، أو اختيار «أي وقت يناسبكم» لتسليمها بالوقت المتاح لفريق العمل.'
+                    : 'You can choose multiple times (e.g. 8:00 AM & 10:00 AM together), or select "Any time suits you".'}
+                </div>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))',
+                gap: '0.65rem'
+              }}>
+                {DELIVERY_TIME_SLOTS.map((slot) => {
+                  const isSelected = selectedTimeSlots.includes(slot.value);
+                  return (
+                    <button
+                      key={slot.id}
+                      type="button"
+                      onClick={() => setSelectedTimeSlots(prev => toggleTimeSlotSelection(prev, slot.value))}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.35rem',
+                        padding: '0.85rem 0.5rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: isSelected ? '2px solid var(--secondary)' : '1px solid var(--border-color)',
+                        backgroundColor: isSelected ? 'var(--accent)' : 'var(--surface-color)',
+                        boxShadow: isSelected
+                          ? 'inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px rgba(104,72,53,0.12)'
+                          : 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                        transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+                      }}
+                    >
+                      <span style={{ fontSize: '1.25rem' }}>{slot.icon}</span>
+                      <span style={{
+                        fontSize: '0.88rem',
+                        fontWeight: isSelected ? 800 : 600,
+                        color: isSelected ? 'var(--primary)' : 'var(--text-main)',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {lang === 'ar' ? slot.labelAr : slot.labelEn}
+                      </span>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        {lang === 'ar' ? slot.periodAr : slot.periodEn}
+                      </span>
+                      {isSelected && (
+                        <span style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 800,
+                          color: 'var(--secondary)',
+                          backgroundColor: 'rgba(104,72,53,0.12)',
+                          padding: '1px 6px',
+                          borderRadius: '999px'
+                        }}>
+                          ✓ {lang === 'ar' ? 'محدد' : 'Selected'}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Selected Schedule summary indicator */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                padding: '0.65rem 0.95rem',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: 'var(--accent)',
+                border: '1px solid var(--border-color)',
+                fontSize: '0.84rem'
+              }}>
+                <span style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Calendar size={15} />
+                  {lang === 'ar' ? 'الموعد المحدد للطلب:' : 'Selected Delivery Schedule:'}
+                </span>
+                <strong style={{ color: 'var(--secondary)', fontWeight: 800 }}>
+                  {selectedDeliveryDay} — {formatSelectedSlots(selectedTimeSlots, lang)}
+                </strong>
+              </div>
+
+              {/* WhatsApp Confirmation Notice */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.85rem 1rem',
+                borderRadius: 'var(--radius-md)',
+                backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                border: '1.5px solid rgba(245, 158, 11, 0.3)',
+                color: '#92400E',
+                marginTop: '0.2rem'
+              }}>
+                <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>📲</span>
+                <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, lineHeight: 1.55 }}>
+                  {lang === 'ar'
+                    ? 'سيتم التواصل والتأكيد النهائي على موعد ومكان التسليم معك مباشرة عبر الواتساب فور مراجعة طلبيتك.'
+                    : 'Final delivery time and location will be confirmed directly with you via WhatsApp once your order is reviewed.'}
+                </p>
+              </div>
             </div>
           </div>
 

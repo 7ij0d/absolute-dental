@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import supabase from '../supabaseClient';
@@ -7,66 +7,29 @@ import OrderEditHistory from '../components/OrderEditHistory';
 import CustomerDirectOrderEditor from '../components/CustomerDirectOrderEditor';
 import { getOrderStatusMeta, normalizeOrderStatus } from '../utils/orderEditHelper';
 import { parseOrderVersioning, isOrderEditable } from '../utils/orderVersioning';
-import { Search, MapPin, ClipboardList, CheckCircle2, Clock, Truck, ShieldAlert, ArrowRight, ArrowLeft, Edit3, AlertCircle, ShoppingCart, X, Send, Sparkles } from 'lucide-react';
+import { Search, MapPin, ClipboardList, CheckCircle2, Clock, Calendar, Truck, ShieldAlert, ArrowRight, ArrowLeft, Edit3, AlertCircle, ShoppingCart, X, Send, Sparkles } from 'lucide-react';
+import {
+  DELIVERY_TIME_SLOTS as TRACKING_DELIVERY_TIME_SLOTS,
+  getUpcomingDeliveryDays,
+  formatCustomDateToDeliveryDay,
+  formatSelectedSlots,
+  parseDeliveryTimeSlots,
+  toggleTimeSlotSelection,
+  extractOrderDeliverySchedule,
+  buildDeliveryScheduleNotes
+} from '../utils/deliveryScheduleEngine';
 
-export const TRACKING_DELIVERY_TIME_SLOTS = [
-  { id: '8:00', value: '8:00 صباحاً', labelAr: '8:00 صباحاً', labelEn: '8:00 AM', periodAr: 'الصباح الباكر', periodEn: 'Early Morning', icon: '🌅' },
-  { id: '10:00', value: '10:00 صباحاً', labelAr: '10:00 صباحاً', labelEn: '10:00 AM', periodAr: 'الفترة الصباحية', periodEn: 'Mid-Morning', icon: '☀️' },
-  { id: '12:00', value: '12:00 ظهراً', labelAr: '12:00 ظهراً', labelEn: '12:00 PM', periodAr: 'فترة الظهيرة', periodEn: 'Noon', icon: '🕛' },
-  { id: '2:00', value: '2:00 ظهراً', labelAr: '2:00 ظهراً', labelEn: '2:00 PM', periodAr: 'بعد الظهر', periodEn: 'Afternoon', icon: '🌤️' },
-  { id: 'anytime', value: 'أي وقت يناسبكم', labelAr: 'أي وقت يناسبكم', labelEn: 'Any time suits you', periodAr: 'متاح طوال اليوم', periodEn: 'Flexible all day', icon: '🤝' },
-];
-
-export const formatSelectedSlots = (slots, lang = 'ar') => {
-  if (!Array.isArray(slots) || slots.length === 0) return lang === 'ar' ? '10:00 صباحاً' : '10:00 AM';
-  if (slots.includes('أي وقت يناسبكم')) return lang === 'ar' ? 'أي وقت يناسبكم' : 'Any time suits you';
-  const sep = lang === 'ar' ? ' أو ' : ' or ';
-  return slots.join(sep);
-};
-
-export const parseDeliveryTimeSlots = (rawString) => {
-  if (!rawString) return ['10:00 صباحاً'];
-  const s = String(rawString).trim();
-  if (s.includes('أي وقت') || s.includes('اي وقت') || s.includes('Any time')) {
-    return ['أي وقت يناسبكم'];
-  }
-  const found = [];
-  if (s.includes('08:00') || s.includes('8:00')) found.push('8:00 صباحاً');
-  if (s.includes('10:00')) found.push('10:00 صباحاً');
-  if (s.includes('12:00')) found.push('12:00 ظهراً');
-  if (s.includes('02:00') || s.includes('2:00')) found.push('2:00 ظهراً');
-  return found.length > 0 ? found : [s];
-};
-
-export const toggleTimeSlotSelection = (currentSlots, slotValue) => {
-  if (slotValue === 'أي وقت يناسبكم') {
-    return ['أي وقت يناسبكم'];
-  }
-  const base = (currentSlots || []).filter(s => s !== 'أي وقت يناسبكم');
-  if (base.includes(slotValue)) {
-    if (base.length <= 1) return base;
-    return base.filter(s => s !== slotValue);
-  } else {
-    const chronological = ['8:00 صباحاً', '10:00 صباحاً', '12:00 ظهراً', '2:00 ظهراً'];
-    const updated = [...base, slotValue];
-    updated.sort((a, b) => chronological.indexOf(a) - chronological.indexOf(b));
-    return updated;
-  }
+export {
+  TRACKING_DELIVERY_TIME_SLOTS,
+  formatSelectedSlots,
+  parseDeliveryTimeSlots,
+  toggleTimeSlotSelection
 };
 
 export const extractOrderTimeSlot = (order) => {
   if (!order) return null;
-  const combined = `${order.delivery_notes || ''} ${order.notes || ''}`;
-  const match = combined.match(/\[توقيت التسليم المفضل:\s*([^\]]+)\]/);
-  if (match && match[1]) return match[1].trim();
-  if (combined.includes('أي وقت') || combined.includes('اي وقت')) return 'أي وقت يناسبكم';
-  const found = [];
-  if (combined.includes('08:00') || combined.includes('8:00')) found.push('8:00 صباحاً');
-  if (combined.includes('10:00')) found.push('10:00 صباحاً');
-  if (combined.includes('12:00')) found.push('12:00 ظهراً');
-  if (combined.includes('02:00') || combined.includes('2:00')) found.push('2:00 ظهراً');
-  if (found.length > 0) return found.join(' أو ');
-  return null;
+  const schedule = extractOrderDeliverySchedule(order);
+  return schedule.time;
 };
 
 export const OrderTracking = () => {
@@ -89,8 +52,12 @@ export const OrderTracking = () => {
   const [showDirectEditor, setShowDirectEditor] = useState(false);
   const [editNotice, setEditNotice] = useState('');
 
-  // Delivery Time Slot Editing State
+  // Delivery Schedule Editing State
+  const upcomingDeliveryDays = useMemo(() => getUpcomingDeliveryDays(), []);
+  const [selectedDeliveryDay, setSelectedDeliveryDay] = useState('غداً');
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(['10:00 صباحاً']);
+  const [customDate, setCustomDate] = useState('');
+  const [showCustomDate, setShowCustomDate] = useState(false);
   const [isUpdatingSlot, setIsUpdatingSlot] = useState(false);
   const [slotFeedback, setSlotFeedback] = useState(null);
 
@@ -198,12 +165,13 @@ export const OrderTracking = () => {
     setEditNotice(isRtl ? 'تم إرسال تعديل الطلبية للمراجعة بنجاح' : 'Order modification submitted for review');
   };
 
-  // Synchronize preferred delivery time slot when order loads or changes
+  // Synchronize preferred delivery schedule when order loads or changes
   useEffect(() => {
     if (order) {
-      const existing = extractOrderTimeSlot(order);
-      if (existing) {
-        setSelectedTimeSlots(parseDeliveryTimeSlots(existing));
+      const schedule = extractOrderDeliverySchedule(order);
+      setSelectedDeliveryDay(schedule.day || 'غداً');
+      if (schedule.timeSlots?.length > 0) {
+        setSelectedTimeSlots(schedule.timeSlots);
       } else {
         setSelectedTimeSlots(['10:00 صباحاً']);
       }
@@ -211,7 +179,8 @@ export const OrderTracking = () => {
     }
   }, [order?.id, order?.delivery_notes, order?.notes]);
 
-  const handleSaveDeliveryTimeSlot = async (slotsToSave) => {
+  const handleSaveDeliverySchedule = async (dayToSave, slotsToSave) => {
+    const finalDay = dayToSave || selectedDeliveryDay || 'غداً';
     const slotsArray = Array.isArray(slotsToSave) ? slotsToSave : selectedTimeSlots;
     const formattedSlotStr = formatSelectedSlots(slotsArray, 'ar');
     if (!order || !formattedSlotStr || isUpdatingSlot) return;
@@ -219,17 +188,18 @@ export const OrderTracking = () => {
     setSlotFeedback(null);
 
     try {
-      const currentNotes = order.notes || '';
-      const cleanedNotes = currentNotes.replace(/\[توقيت التسليم المفضل:[^\]]+\]\s*/g, '').trim();
-      const newNotes = `[توقيت التسليم المفضل: ${formattedSlotStr}]${cleanedNotes ? ` ${cleanedNotes}` : ''}`;
-      const newDeliveryNotes = `[توقيت التسليم المفضل: ${formattedSlotStr}]`;
+      const { combinedNotes, deliveryNotes } = buildDeliveryScheduleNotes({
+        day: finalDay,
+        timeSlots: slotsArray,
+        existingNotes: order.notes
+      });
 
       // 1. Update database orders table
       const { data, error } = await supabase
         .from('orders')
         .update({
-          delivery_notes: newDeliveryNotes,
-          notes: newNotes,
+          delivery_notes: deliveryNotes,
+          notes: combinedNotes,
           updated_at: new Date().toISOString()
         })
         .eq('id', order.id)
@@ -254,9 +224,9 @@ export const OrderTracking = () => {
         await supabase.from('notifications').insert({
           user_id: null,
           title_ar: `تحديث موعد التسليم للطلب #${orderNum}`,
-          title_en: `Delivery Time Slot Updated #${orderNum}`,
-          message_ar: `قام الزبون ${customerName} بتحديد/تعديل موعد التسليم المفضل إلى: ${formattedSlotStr} (الطلب #${orderNum}). يرجى مراجعة الطلب وتأكيد الموعد عبر الواتساب.`,
-          message_en: `Customer ${customerName} set/updated preferred delivery time slot to: ${formattedSlotStr} for order #${orderNum}.`,
+          title_en: `Delivery Schedule Updated #${orderNum}`,
+          message_ar: `قام الزبون ${customerName} بتحديد/تعديل موعد الاستلام المفضل إلى: ${finalDay} (الساعة: ${formattedSlotStr}) (الطلب #${orderNum}). يرجى مراجعة الطلب وتأكيد الموعد عبر الواتساب.`,
+          message_en: `Customer ${customerName} set/updated preferred delivery schedule to: ${finalDay} - ${formattedSlotStr} for order #${orderNum}.`,
           type: 'order_status',
           is_read: false
         });
@@ -270,8 +240,8 @@ export const OrderTracking = () => {
       } else {
         setOrder((prev) => ({
           ...prev,
-          delivery_notes: newDeliveryNotes,
-          notes: newNotes,
+          delivery_notes: deliveryNotes,
+          notes: combinedNotes,
           updated_at: new Date().toISOString()
         }));
       }
@@ -279,11 +249,11 @@ export const OrderTracking = () => {
       setSlotFeedback({
         type: 'success',
         text: isRtl
-          ? `✓ تم حفظ وتأكيد موعد التسليم (${formattedSlotStr}) بنجاح! سيتم التواصل معك عبر الواتساب لتأكيد الاستلام.`
-          : `✓ Preferred delivery time (${formattedSlotStr}) saved! We will contact you via WhatsApp to confirm.`
+          ? `✓ تم حفظ وتأكيد موعد الاستلام (${finalDay} — ${formattedSlotStr}) بنجاح! سيتم التواصل معك عبر الواتساب لتأكيد الاستلام.`
+          : `✓ Preferred delivery schedule (${finalDay} — ${formattedSlotStr}) saved! We will contact you via WhatsApp to confirm.`
       });
     } catch (err) {
-      console.error('Error updating delivery time slot:', err);
+      console.error('Error updating delivery schedule:', err);
       setSlotFeedback({
         type: 'error',
         text: isRtl
@@ -611,13 +581,15 @@ export const OrderTracking = () => {
             </div>
           )}
 
-          {/* DELIVERY TIME SLOT REVIEW & UPDATE CARD */}
+          {/* DELIVERY SCHEDULE REVIEW & UPDATE CARD (DAY & TIME) */}
           {(() => {
-            const existingSlot = extractOrderTimeSlot(order);
+            const existingSchedule = extractOrderDeliverySchedule(order);
             const isDeliveredOrCancelled = order.status === 'delivered' || order.status === 'cancelled';
             const formattedSelected = formatSelectedSlots(selectedTimeSlots, isRtl ? 'ar' : 'en');
-            const hasChanged = existingSlot ? formattedSelected !== existingSlot : true;
-            const existingSlotsArray = parseDeliveryTimeSlots(existingSlot);
+            const hasDayChanged = selectedDeliveryDay !== (existingSchedule.hasDay ? existingSchedule.day : 'غداً');
+            const hasTimeChanged = formattedSelected !== (existingSchedule.hasTime ? existingSchedule.time : '10:00 صباحاً');
+            const hasChanged = hasDayChanged || hasTimeChanged || !existingSchedule.hasDay;
+            const existingSlotsArray = existingSchedule.timeSlots || [];
 
             return (
               <div
@@ -647,22 +619,22 @@ export const OrderTracking = () => {
                       justifyContent: 'center',
                       border: '1px solid var(--border-color)'
                     }}>
-                      <Clock size={20} />
+                      <Calendar size={20} />
                     </div>
                     <div>
                       <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--primary)', margin: 0 }}>
-                        {isRtl ? 'موعد التسليم المفضل' : 'Preferred Delivery Time Slot'}
+                        {isRtl ? 'موعد وتوقيت الاستلام المفضل' : 'Preferred Delivery Schedule'}
                       </h3>
                       <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0.2rem 0 0 0' }}>
                         {isRtl
-                          ? 'يمكنك تحديد توقيت واحد أو عدة أوقات تناسبك، وسيصل إشعار للإدارة لتأكيد الطلب والموعد عبر الواتساب 📲'
-                          : 'Set one or multiple preferred times; admins will receive an update to confirm via WhatsApp 📲'}
+                          ? 'يمكنك تحديد يوم الاستلام وتوقيت التسليم، وسيصل إشعار للإدارة لتأكيد الطلب والموعد عبر الواتساب 📲'
+                          : 'Set your preferred delivery day and time slots; admins will be notified to confirm via WhatsApp 📲'}
                       </p>
                     </div>
                   </div>
 
                   {/* Status Badge */}
-                  {existingSlot ? (
+                  {existingSchedule.hasDay || existingSchedule.hasTime ? (
                     <div style={{
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -676,7 +648,7 @@ export const OrderTracking = () => {
                       fontWeight: 800
                     }}>
                       <CheckCircle2 size={15} />
-                      <span>{isRtl ? `المعتمد: ${existingSlot}` : `Confirmed: ${existingSlot}`}</span>
+                      <span>{isRtl ? `المعتمد: ${existingSchedule.display}` : `Confirmed: ${existingSchedule.display}`}</span>
                     </div>
                   ) : (
                     <div style={{
@@ -692,55 +664,10 @@ export const OrderTracking = () => {
                       fontWeight: 700
                     }}>
                       <AlertCircle size={15} />
-                      <span>{isRtl ? '⚠️ لم يتم تحديد موعد مسبقاً' : '⚠️ No slot set yet'}</span>
+                      <span>{isRtl ? '⚠️ لم يتم تحديد موعد مسبقاً' : '⚠️ No schedule set yet'}</span>
                     </div>
                   )}
                 </div>
-
-                {/* Informative flexible multi-selection callout banner */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.65rem',
-                  padding: '0.75rem 0.95rem',
-                  borderRadius: 'var(--radius-md)',
-                  backgroundColor: 'rgba(59, 130, 246, 0.08)',
-                  border: '1px solid rgba(59, 130, 246, 0.25)',
-                  color: '#1d4ed8',
-                  fontSize: '0.82rem',
-                  lineHeight: 1.55
-                }}>
-                  <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>💡</span>
-                  <div>
-                    <strong style={{ fontWeight: 800 }}>{isRtl ? 'مرونة المواعيد:' : 'Flexible Timing:'}</strong>{' '}
-                    {isRtl
-                      ? 'يمكنك اختيار أكثر من توقيت يناسبك (مثلاً: 8:00 و 10:00 صباحاً معاً)، أو اختيار «أي وقت يناسبكم» لتسليمها بالوقت المتاح لفريق العمل.'
-                      : 'You can choose multiple times (e.g. 8:00 AM & 10:00 AM together), or select "Any time suits you".'}
-                  </div>
-                </div>
-
-                {/* Explanatory banner if not set yet */}
-                {!existingSlot && !isDeliveredOrCancelled && (
-                  <div style={{
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(245, 158, 11, 0.08)',
-                    border: '1px solid rgba(245, 158, 11, 0.25)',
-                    color: '#b45309',
-                    fontSize: '0.83rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    lineHeight: 1.5
-                  }}>
-                    <Sparkles size={16} style={{ flexShrink: 0 }} />
-                    <span>
-                      {isRtl
-                        ? 'لم يتم تحديد موعد تسليم عند تأكيد الطلب مسبقاً. حدد الموعد أو الأوقات الأنسب لك واضغط على "تأكيد موعد التسليم".'
-                        : 'No delivery time was chosen at checkout. Select your preferred slots below and confirm.'}
-                    </span>
-                  </div>
-                )}
 
                 {/* Feedback Message */}
                 {slotFeedback && (
@@ -761,105 +688,267 @@ export const OrderTracking = () => {
                   </div>
                 )}
 
-                {/* Slots Grid */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                  gap: '0.75rem'
-                }}>
-                  {TRACKING_DELIVERY_TIME_SLOTS.map((slot) => {
-                    const isSelected = selectedTimeSlots.includes(slot.value);
-                    const isConfirmed = existingSlotsArray.includes(slot.value);
+                {/* SECTION 1: Delivery Day Selection */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    <label className="form-label" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 800 }}>
+                      <Calendar size={16} style={{ color: 'var(--secondary)' }} />
+                      <span>{isRtl ? '١. اختيار يوم الاستلام المفضل' : '1. Select Delivery Day'}</span>
+                    </label>
+                    <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                      {isRtl ? 'اختر اليوم الأنسب لك أو أي يوم متاح' : 'Choose suitable day'}
+                    </span>
+                  </div>
 
-                    return (
-                      <button
-                        key={slot.id}
-                        type="button"
-                        disabled={isDeliveredOrCancelled || isUpdatingSlot}
-                        onClick={() => setSelectedTimeSlots(prev => toggleTimeSlotSelection(prev, slot.value))}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.35rem',
-                          padding: '1rem 0.6rem',
-                          borderRadius: 'var(--radius-md)',
-                          border: isSelected ? '2px solid var(--secondary)' : '1px solid var(--border-color)',
-                          backgroundColor: isSelected ? 'var(--accent)' : 'var(--bg-color)',
-                          boxShadow: isSelected
-                            ? 'inset 0 1px 0 rgba(255,255,255,0.6), 0 3px 10px rgba(104,72,53,0.12)'
-                            : 'none',
-                          cursor: isDeliveredOrCancelled ? 'not-allowed' : 'pointer',
-                          opacity: isDeliveredOrCancelled ? 0.6 : 1,
-                          transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-                          transform: isSelected ? 'translateY(-2px)' : 'none',
-                          position: 'relative'
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(125px, 1fr))',
+                    gap: '0.55rem'
+                  }}>
+                    {upcomingDeliveryDays.map((dayObj) => {
+                      const isSelected = selectedDeliveryDay === dayObj.value;
+                      return (
+                        <button
+                          key={dayObj.id}
+                          type="button"
+                          disabled={isDeliveredOrCancelled || isUpdatingSlot}
+                          onClick={() => {
+                            setSelectedDeliveryDay(dayObj.value);
+                            setShowCustomDate(false);
+                          }}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.25rem',
+                            padding: '0.75rem 0.4rem',
+                            borderRadius: 'var(--radius-md)',
+                            border: isSelected ? '2px solid var(--secondary)' : '1px solid var(--border-color)',
+                            backgroundColor: isSelected ? 'var(--accent)' : 'var(--bg-color)',
+                            boxShadow: isSelected
+                              ? 'inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px rgba(104,72,53,0.12)'
+                              : 'none',
+                            cursor: isDeliveredOrCancelled ? 'not-allowed' : 'pointer',
+                            opacity: isDeliveredOrCancelled ? 0.6 : 1,
+                            transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                            transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+                            position: 'relative'
+                          }}
+                        >
+                          <span style={{ fontSize: '1.2rem' }}>{dayObj.icon}</span>
+                          <span style={{
+                            fontSize: '0.85rem',
+                            fontWeight: isSelected ? 800 : 700,
+                            color: isSelected ? 'var(--primary)' : 'var(--text-main)',
+                            textAlign: 'center'
+                          }}>
+                            {isRtl ? dayObj.labelAr : dayObj.labelEn}
+                          </span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                            {isRtl ? dayObj.subAr : dayObj.subEn}
+                          </span>
+                          {isSelected && (
+                            <span style={{
+                              fontSize: '0.65rem',
+                              fontWeight: 800,
+                              color: 'var(--secondary)',
+                              backgroundColor: 'rgba(104,72,53,0.12)',
+                              padding: '1px 6px',
+                              borderRadius: '999px',
+                              marginTop: '0.15rem'
+                            }}>
+                              ✓ {isRtl ? 'محدد' : 'Selected'}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+
+                    {/* Custom Date Pick button */}
+                    <button
+                      type="button"
+                      disabled={isDeliveredOrCancelled || isUpdatingSlot}
+                      onClick={() => setShowCustomDate(prev => !prev)}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.25rem',
+                        padding: '0.75rem 0.4rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: showCustomDate ? '2px solid var(--secondary)' : '1px dashed var(--border-color)',
+                        backgroundColor: showCustomDate ? 'var(--accent)' : 'rgba(0,0,0,0.02)',
+                        cursor: isDeliveredOrCancelled ? 'not-allowed' : 'pointer',
+                        opacity: isDeliveredOrCancelled ? 0.6 : 1,
+                        transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+                      }}
+                    >
+                      <span style={{ fontSize: '1.2rem' }}>🗓️</span>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                        {isRtl ? 'تاريخ محدد...' : 'Pick Date...'}
+                      </span>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                        {isRtl ? 'اختيار من التقويم' : 'Calendar picker'}
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Custom Date input drawer */}
+                  {showCustomDate && (
+                    <div style={{
+                      marginTop: '0.4rem',
+                      padding: '0.75rem',
+                      backgroundColor: 'var(--accent)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-md)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      flexWrap: 'wrap'
+                    }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)' }}>
+                        {isRtl ? 'اختر التاريخ المطلوب:' : 'Select Date:'}
+                      </label>
+                      <input
+                        type="date"
+                        className="form-input"
+                        min={new Date().toISOString().split('T')[0]}
+                        value={customDate}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCustomDate(val);
+                          if (val) {
+                            const formatted = formatCustomDateToDeliveryDay(val);
+                            setSelectedDeliveryDay(formatted);
+                          }
                         }}
-                      >
-                        <span style={{ fontSize: '1.35rem' }}>{slot.icon}</span>
-                        <span style={{
-                          fontSize: '0.92rem',
-                          fontWeight: isSelected ? 800 : 600,
-                          color: isSelected ? 'var(--primary)' : 'var(--text-main)',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {isRtl ? slot.labelAr : slot.labelEn}
+                        style={{ width: 'auto', minWidth: '160px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}
+                      />
+                      {customDate && (
+                        <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--secondary)' }}>
+                          ✓ {formatCustomDateToDeliveryDay(customDate)}
                         </span>
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                          {isRtl ? slot.periodAr : slot.periodEn}
-                        </span>
-
-                        {isSelected && (
-                          <span style={{
-                            fontSize: '0.67rem',
-                            fontWeight: 800,
-                            color: 'var(--secondary)',
-                            backgroundColor: 'rgba(104,72,53,0.12)',
-                            padding: '1px 7px',
-                            borderRadius: '999px',
-                            marginTop: '0.2rem'
-                          }}>
-                            ✓ {isRtl ? 'محدد' : 'Selected'}
-                          </span>
-                        )}
-
-                        {isConfirmed && !isSelected && (
-                          <span style={{
-                            fontSize: '0.67rem',
-                            fontWeight: 800,
-                            color: '#059669',
-                            backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                            padding: '1px 7px',
-                            borderRadius: '999px',
-                            marginTop: '0.2rem'
-                          }}>
-                            {isRtl ? 'المعتمد سابقاً' : 'Previous'}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {/* Selected Slots Summary Indicator */}
+                <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '0.15rem 0' }} />
+
+                {/* SECTION 2: Delivery Time Selection */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    <label className="form-label" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 800 }}>
+                      <Clock size={16} style={{ color: 'var(--secondary)' }} />
+                      <span>{isRtl ? '٢. اختيار توقيت التسليم المفضل' : '2. Select Delivery Time'}</span>
+                    </label>
+                    <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                      {isRtl ? 'يمكنك اختيار أكثر من وقت يناسبك' : 'Multi-select suitable times'}
+                    </span>
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(125px, 1fr))',
+                    gap: '0.65rem'
+                  }}>
+                    {TRACKING_DELIVERY_TIME_SLOTS.map((slot) => {
+                      const isSelected = selectedTimeSlots.includes(slot.value);
+                      const isConfirmed = existingSlotsArray.includes(slot.value);
+
+                      return (
+                        <button
+                          key={slot.id}
+                          type="button"
+                          disabled={isDeliveredOrCancelled || isUpdatingSlot}
+                          onClick={() => setSelectedTimeSlots(prev => toggleTimeSlotSelection(prev, slot.value))}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.35rem',
+                            padding: '0.85rem 0.5rem',
+                            borderRadius: 'var(--radius-md)',
+                            border: isSelected ? '2px solid var(--secondary)' : '1px solid var(--border-color)',
+                            backgroundColor: isSelected ? 'var(--accent)' : 'var(--bg-color)',
+                            boxShadow: isSelected
+                              ? 'inset 0 1px 0 rgba(255,255,255,0.6), 0 3px 10px rgba(104,72,53,0.12)'
+                              : 'none',
+                            cursor: isDeliveredOrCancelled ? 'not-allowed' : 'pointer',
+                            opacity: isDeliveredOrCancelled ? 0.6 : 1,
+                            transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                            transform: isSelected ? 'translateY(-2px)' : 'none',
+                            position: 'relative'
+                          }}
+                        >
+                          <span style={{ fontSize: '1.25rem' }}>{slot.icon}</span>
+                          <span style={{
+                            fontSize: '0.88rem',
+                            fontWeight: isSelected ? 800 : 600,
+                            color: isSelected ? 'var(--primary)' : 'var(--text-main)',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            {isRtl ? slot.labelAr : slot.labelEn}
+                          </span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                            {isRtl ? slot.periodAr : slot.periodEn}
+                          </span>
+
+                          {isSelected && (
+                            <span style={{
+                              fontSize: '0.65rem',
+                              fontWeight: 800,
+                              color: 'var(--secondary)',
+                              backgroundColor: 'rgba(104,72,53,0.12)',
+                              padding: '1px 6px',
+                              borderRadius: '999px',
+                              marginTop: '0.15rem'
+                            }}>
+                              ✓ {isRtl ? 'محدد' : 'Selected'}
+                            </span>
+                          )}
+
+                          {isConfirmed && !isSelected && (
+                            <span style={{
+                              fontSize: '0.65rem',
+                              fontWeight: 800,
+                              color: '#059669',
+                              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                              padding: '1px 6px',
+                              borderRadius: '999px',
+                              marginTop: '0.15rem'
+                            }}>
+                              {isRtl ? 'المعتمد سابقاً' : 'Previous'}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Selected Schedule Summary Indicator */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   flexWrap: 'wrap',
                   gap: '0.5rem',
-                  padding: '0.55rem 0.85rem',
+                  padding: '0.65rem 0.95rem',
                   borderRadius: 'var(--radius-sm)',
                   backgroundColor: 'var(--accent)',
                   border: '1px solid var(--border-color)',
-                  fontSize: '0.82rem'
+                  fontSize: '0.84rem'
                 }}>
-                  <span style={{ color: 'var(--text-muted)' }}>
-                    {isRtl ? 'المواعيد المحددة للطلب:' : 'Selected slots for order:'}
+                  <span style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Calendar size={15} />
+                    {isRtl ? 'الموعد المحدد للطلب:' : 'Selected Delivery Schedule:'}
                   </span>
                   <strong style={{ color: 'var(--secondary)', fontWeight: 800 }}>
-                    {formattedSelected}
+                    {selectedDeliveryDay} — {formattedSelected}
                   </strong>
                 </div>
 
@@ -883,11 +972,11 @@ export const OrderTracking = () => {
                       </span>
                     </div>
 
-                    {hasChanged || !existingSlot ? (
+                    {hasChanged || !existingSchedule.hasDay ? (
                       <button
                         type="button"
                         disabled={isUpdatingSlot}
-                        onClick={() => handleSaveDeliveryTimeSlot(selectedTimeSlots)}
+                        onClick={() => handleSaveDeliverySchedule(selectedDeliveryDay, selectedTimeSlots)}
                         className="btn btn-secondary"
                         style={{
                           padding: '0.65rem 1.4rem',
@@ -903,9 +992,9 @@ export const OrderTracking = () => {
                           <>
                             <span>💾</span>
                             <span>
-                              {!existingSlot
-                                ? (isRtl ? `تأكيد موعد التسليم (${formattedSelected})` : `Confirm Delivery Time (${formattedSelected})`)
-                                : (isRtl ? `حفظ وتعديل الموعد إلى (${formattedSelected})` : `Save & Update to (${formattedSelected})`)}
+                              {!existingSchedule.hasDay
+                                ? (isRtl ? `تأكيد موعد الاستلام (${selectedDeliveryDay} — ${formattedSelected})` : `Confirm Schedule (${selectedDeliveryDay} — ${formattedSelected})`)
+                                : (isRtl ? `حفظ وتعديل الموعد إلى (${selectedDeliveryDay} — ${formattedSelected})` : `Save & Update to (${selectedDeliveryDay} — ${formattedSelected})`)}
                             </span>
                           </>
                         )}
@@ -913,13 +1002,13 @@ export const OrderTracking = () => {
                     ) : (
                       <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         <CheckCircle2 size={16} />
-                        <span>{isRtl ? `موعدك الحالي (${existingSlot}) معتمد ومسجل` : `Current time (${existingSlot}) confirmed`}</span>
+                        <span>{isRtl ? `موعدك الحالي (${existingSchedule.display}) معتمد ومسجل` : `Current schedule (${existingSchedule.display}) confirmed`}</span>
                       </div>
                     )}
                   </div>
                 ) : (
                   <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', paddingTop: '0.4rem', borderTop: '1px solid var(--border-color)' }}>
-                    {isRtl ? 'لا يمكن تعديل موعد التسليم لأن الطلب تم تسليمه أو إلغاؤه.' : 'Delivery time slot cannot be modified for delivered or cancelled orders.'}
+                    {isRtl ? 'لا يمكن تعديل موعد التسليم لأن الطلب تم تسليمه أو إلغاؤه.' : 'Delivery schedule cannot be modified for delivered or cancelled orders.'}
                   </div>
                 )}
               </div>

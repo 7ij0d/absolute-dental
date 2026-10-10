@@ -9,6 +9,7 @@ import AdminEditOrderModal from '../../components/AdminEditOrderModal';
 import AdminReviewEditModal from '../../components/AdminReviewEditModal';
 import OrderEditHistory from '../../components/OrderEditHistory';
 import { isBundleProduct, getBundleDefinition, getBundleUnitLabel } from '../../utils/productInventoryEngine';
+import { extractOrderDeliverySchedule } from '../../utils/deliveryScheduleEngine';
 import { getOrderStatusMeta, normalizeOrderStatus, createStatusAuditEntry, parseOrderEditHistory } from '../../utils/orderEditHelper';
 import { parseOrderVersioning } from '../../utils/orderVersioning';
 import {
@@ -29,24 +30,26 @@ export function formatLibyanPhoneForWhatsapp(phone) {
 
 export function extractDeliveryTimeSlot(order) {
   if (!order) return '10:00 صباحاً';
-  const combined = `${order.delivery_notes || ''} ${order.notes || ''}`;
-  const match = combined.match(/\[توقيت التسليم المفضل:\s*([^\]]+)\]/);
-  if (match && match[1]) return match[1].trim();
-  if (combined.includes('أي وقت') || combined.includes('اي وقت')) return 'أي وقت يناسبكم';
-  const detected = [];
-  if (combined.includes('08:00') || combined.includes('8:00')) detected.push('8:00 صباحاً');
-  if (combined.includes('10:00')) detected.push('10:00 صباحاً');
-  if (combined.includes('12:00')) detected.push('12:00 ظهراً');
-  if (combined.includes('02:00') || combined.includes('2:00')) detected.push('2:00 ظهراً');
-  if (detected.length > 0) return detected.join(' أو ');
-  return '10:00 صباحاً';
+  const schedule = extractOrderDeliverySchedule(order);
+  return schedule.display;
 }
 
 export function buildOrderWhatsappMessage(order, options = {}) {
   if (!order) return '';
   const studentName = (options.studentName || order.customer_name || 'دكتور/ة').trim();
   const orderNumber = (order.order_number || order.id || '').replace(/-/g, '').slice(0, 8);
-  const timeSlot = options.timeSlot || extractDeliveryTimeSlot(order);
+  const schedule = extractOrderDeliverySchedule(order);
+
+  let deliveryScheduleText = '';
+  if (options.deliverySchedule) {
+    deliveryScheduleText = options.deliverySchedule;
+  } else if (options.deliveryDay && options.timeSlot) {
+    deliveryScheduleText = `${options.deliveryDay} — الساعة: ${options.timeSlot}`;
+  } else if (options.timeSlot) {
+    deliveryScheduleText = schedule.hasDay ? `${schedule.day} — الساعة: ${options.timeSlot}` : `الساعة: ${options.timeSlot}`;
+  } else {
+    deliveryScheduleText = schedule.display;
+  }
 
   // Items list
   const itemsList = (order.order_items?.length > 0 ? order.order_items : (order.items || []));
@@ -88,7 +91,7 @@ export function buildOrderWhatsappMessage(order, options = {}) {
     `✅ *تمت الموافقة على طلبيتك رقم #${orderNumber}*\n\n` +
     `📦 *قائمة الأدوات والمعدات المطلوبة:*\n` +
     `${itemsFormatted || '• تم اعتماد كافة الأدوات المسجلة'}\n\n` +
-    `🕒 *الموعد المفضل للتسليم:* ${timeSlot}\n` +
+    `🕒 *الموعد المفضل للتسليم:* ${deliveryScheduleText}\n` +
     `📍 *مكان التسليم:* ${deliveryPlace}\n` +
     `🚚 *رسوم التوصيل:* ${deliveryFeeText}\n` +
     `💰 *إجمالي الفاتورة:* ${totalFormatted} د.ل\n\n` +
@@ -149,6 +152,7 @@ export const Orders = () => {
   const [whatsappModalOrder, setWhatsappModalOrder] = useState(null);
   const [whatsappStudentName, setWhatsappStudentName] = useState('');
   const [whatsappPhone, setWhatsappPhone] = useState('');
+  const [whatsappDeliveryDay, setWhatsappDeliveryDay] = useState('غداً');
   const [whatsappTimeSlot, setWhatsappTimeSlot] = useState('10:00 صباحاً');
   const [whatsappDeliveryType, setWhatsappDeliveryType] = useState('faculty');
   const [whatsappCustomLocation, setWhatsappCustomLocation] = useState('');
@@ -157,10 +161,12 @@ export const Orders = () => {
 
   const openWhatsappModal = (order) => {
     if (!order) return;
+    const schedule = extractOrderDeliverySchedule(order);
     setWhatsappModalOrder(order);
     setWhatsappStudentName(order.customer_name || '');
     setWhatsappPhone(order.customer_phone || '');
-    setWhatsappTimeSlot(extractDeliveryTimeSlot(order));
+    setWhatsappDeliveryDay(schedule.day || 'غداً');
+    setWhatsappTimeSlot(schedule.time || '10:00 صباحاً');
     const isFaculty = !order.address_text || order.address_text.includes('الكلية') || !order.latitude;
     setWhatsappDeliveryType(isFaculty ? 'faculty' : 'custom');
     setWhatsappCustomLocation(order.address_text || '');
@@ -173,6 +179,7 @@ export const Orders = () => {
     const formattedPhone = formatLibyanPhoneForWhatsapp(whatsappPhone);
     const message = buildOrderWhatsappMessage(whatsappModalOrder, {
       studentName: whatsappStudentName,
+      deliveryDay: whatsappDeliveryDay,
       timeSlot: whatsappTimeSlot,
       deliveryType: whatsappDeliveryType,
       customLocation: whatsappCustomLocation,
@@ -1574,8 +1581,8 @@ export const Orders = () => {
                 <p>رقم الهاتف: <strong style={{ color: 'var(--text-main)' }}>{selectedOrder.customer_phone}</strong></p>
                 {selectedOrder.customer_phone_secondary && <p>الهاتف الاحتياطي: <strong style={{ color: 'var(--text-main)' }}>{selectedOrder.customer_phone_secondary}</strong></p>}
                 <p>الكلية والجامعة: <strong style={{ color: 'var(--text-main)' }}>{selectedOrder.university} - {selectedOrder.college}</strong></p>
-                <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
-                  <span>التوقيت المفضل للتسليم:</span>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
+                  <span>موعد وتوقيت الاستلام المفضل:</span>
                   <span style={{
                     backgroundColor: 'var(--accent)',
                     color: 'var(--secondary)',
@@ -1585,7 +1592,7 @@ export const Orders = () => {
                     border: '1px solid var(--border-color)',
                     fontSize: '0.82rem'
                   }}>
-                    🕒 {extractDeliveryTimeSlot(selectedOrder)}
+                    📅 {extractDeliveryTimeSlot(selectedOrder)}
                   </span>
                 </p>
               </div>
@@ -2078,11 +2085,53 @@ export const Orders = () => {
               </div>
             </div>
 
+            {/* Delivery Day selector */}
+            <div>
+              <label className="form-label" style={{ fontSize: '0.78rem', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <Calendar size={14} style={{ color: 'var(--secondary)' }} />
+                <span>يوم التسليم (اختر أو عدّل):</span>
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(85px, 1fr))', gap: '0.4rem', marginBottom: '0.35rem' }}>
+                {['اليوم', 'غداً', 'بعد غد', 'أي يوم يناسبكم'].map((dOption) => {
+                  const isSelected = whatsappDeliveryDay.includes(dOption) || whatsappDeliveryDay === dOption;
+                  return (
+                    <button
+                      key={dOption}
+                      type="button"
+                      onClick={() => setWhatsappDeliveryDay(dOption)}
+                      style={{
+                        padding: '0.45rem 0.2rem',
+                        fontSize: '0.76rem',
+                        fontWeight: isSelected ? 800 : 600,
+                        borderRadius: 'var(--radius-sm)',
+                        border: isSelected ? '1.5px solid var(--secondary)' : '1px solid var(--border-color)',
+                        backgroundColor: isSelected ? 'var(--accent)' : 'var(--surface-color)',
+                        color: isSelected ? 'var(--primary)' : 'var(--text-main)',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'var(--transition-fast)'
+                      }}
+                    >
+                      {dOption}
+                    </button>
+                  );
+                })}
+              </div>
+              <input
+                type="text"
+                className="form-input"
+                style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
+                placeholder="أو اكتب يوم التسليم..."
+                value={whatsappDeliveryDay}
+                onChange={(e) => setWhatsappDeliveryDay(e.target.value)}
+              />
+            </div>
+
             {/* Delivery Time Slot selector */}
             <div>
               <label className="form-label" style={{ fontSize: '0.78rem', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <Clock size={14} style={{ color: 'var(--secondary)' }} />
-                <span>الموعد المقترح للتسليم (اختر أو عدّل):</span>
+                <span>توقيت التسليم (اختر أو عدّل):</span>
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(95px, 1fr))', gap: '0.45rem', marginBottom: '0.45rem' }}>
                 {['8:00 صباحاً', '10:00 صباحاً', '12:00 ظهراً', '2:00 ظهراً', 'أي وقت يناسبكم'].map((slot) => {
@@ -2196,6 +2245,7 @@ export const Orders = () => {
               }}>
                 {buildOrderWhatsappMessage(whatsappModalOrder, {
                   studentName: whatsappStudentName,
+                  deliveryDay: whatsappDeliveryDay,
                   timeSlot: whatsappTimeSlot,
                   deliveryType: whatsappDeliveryType,
                   customLocation: whatsappCustomLocation,
