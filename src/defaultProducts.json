@@ -9,7 +9,10 @@
     "stock_quantity": 6,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://7ij0d.github.io/absolute-dental/coxo-handpiece-c207.png",
-    "sort_order": 0
+    "sort_order": 0,
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000023"
+    ]
   },
   {
     "id": "0c18deeb-a571-419b-adf2-8060db42d8cf",
@@ -82,7 +85,10 @@
     "stock_quantity": 20,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/d2a56c58-bf46-47aa-b803-6546aa7491c5.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000023"
+    ]
   },
   {
     "id": "d02e821e-91e3-4ed4-869e-f636142d8247",
@@ -107,7 +113,10 @@
     "stock_quantity": 17,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/5b7d387c-f150-4e64-90fe-b21ac1249ebc.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000023"
+    ]
   },
   {
     "id": "c554e6ff-3a55-4e36-aed6-562f70601342",
@@ -119,7 +128,10 @@
     "stock_quantity": 12,
     "subject_id": "11000000-0000-0000-0000-000000000011",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/c554e6ff-3a55-4e36-aed6-562f70601342.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000022"
+    ]
   },
   {
     "id": "72e1069c-4319-42ff-a38c-2af8f8e4e546",
@@ -191,7 +203,10 @@
     "stock_quantity": 16,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/af6c097d-6f53-4ce3-8d52-f9b9fc095295.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000023"
+    ]
   },
   {
     "id": "ba48f5b5-38c2-4571-94f5-67be7d38aab3",
@@ -323,7 +338,10 @@
     "stock_quantity": 18,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/ad31f7c7-d710-4622-8e3f-377b9c657818.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000023"
+    ]
   },
   {
     "id": "8f344bd9-91ec-4787-8371-f489cccf635e",
@@ -335,7 +353,10 @@
     "stock_quantity": 10,
     "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/8f344bd9-91ec-4787-8371-f489cccf635e.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000021"
+    ]
   },
   {
     "id": "fa042791-6d8d-48c1-8f60-f1a103162a1e",
@@ -347,7 +368,10 @@
     "stock_quantity": 0,
     "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/fa042791-6d8d-48c1-8f60-f1a103162a1e.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000021"
+    ]
   },
   {
     "id": "7e990001-0000-4000-8000-000000000001",
@@ -388,7 +412,10 @@
     "description_en": "Perforated blue plastic dental impression tray for Fixed and Removable Prosthodontics 2. Available in sizes M and L.",
     "details_ar": "اللون: أزرق\nالمقاسات المتوفرة: M و L\nالكمية: 24 مقاس كبير (L) + 24 مقاس متوسط (M)",
     "details_en": "Color: Blue\nAvailable Sizes: M & L",
-    "sort_order": 1
+    "sort_order": 1,
+    "extra_subject_ids": [
+      "33000000-0000-0000-0000-000000000034"
+    ]
   },
   {
     "id": "99000000-0000-0000-0000-000000000001",
@@ -405,7 +432,19 @@
     "description_en": "Latex-free, nickel-free and cadmium-free. High-filtration 3-ply surgical face mask with comfortable elastic ear loops. Available in Blue and Black.",
     "details_ar": "الماركة: MedProtect\nالنوع: خالية من اللاتكس والنيكل والكادميوم (latex-free, nickel-free, cadmium-free)\nالألوان المتوفرة:\n• أزرق (Blue)\n• أسود (Black)\nالمواد الدراسية: جميع المواد",
     "details_en": "Brand: MedProtect\nFeatures: Latex-free, nickel-free, cadmium-free\nAvailable Colors:\n• Blue: 50 pcs (Cost: 0.12 LYD)\n• Black: 100 pcs (Cost: 0.13 LYD)\nAcademic Year: All Subjects",
-    "sort_order": 1
+    "sort_order": 1,
+    "is_universal": true,
+    "discount_label_en": "universal",
+    "extra_subject_ids": [
+      "11000000-0000-0000-0000-000000000012",
+      "22000000-0000-0000-0000-000000000021",
+      "22000000-0000-0000-0000-000000000022",
+      "22000000-0000-0000-0000-000000000023",
+      "33000000-0000-0000-0000-000000000031",
+      "33000000-0000-0000-0000-000000000032",
+      "33000000-0000-0000-0000-000000000033",
+      "33000000-0000-0000-0000-000000000034"
+    ]
   },
   {
     "id": "33000000-0000-0000-0000-000000000102",
@@ -440,14 +479,19 @@
     "extra_subject_ids": [
       "33000000-0000-0000-0000-000000000032",
       "33000000-0000-0000-0000-000000000033",
-      "33000000-0000-0000-0000-000000000034"
+      "33000000-0000-0000-0000-000000000034",
+      "22000000-0000-0000-0000-000000000021",
+      "22000000-0000-0000-0000-000000000022",
+      "22000000-0000-0000-0000-000000000023"
     ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-pink.png",
     "description_ar": "مفرش طبي واقي للاستخدام لمرة واحدة (Waterproof Dental Bib) مصنوع من طبقات ورقية ماصة عالية الجودة مدعمة بطبقة بولي إيثيلين عازلة ومقاومة للماء تماماً لحماية ملابس المرضى وأسطح العمل في العيادات. متوفر باللونين الوردي والأزرق.",
     "description_en": "Disposable waterproof dental bib / cover sheet. 2-ply absorbent paper backing laminated with 1-ply waterproof PE film to protect patients and clinic trays from liquids. Available in Pink and Blue.",
     "details_ar": "الألوان المتوفرة:\n• وردي (Pink)\n• أزرق (Blue)\nالنوع: مفرش واقي عازل ومقاوم للماء (Waterproof Dental Bib)\nالسنة الدراسية: السنة الثالثة (جميع المواد)",
     "details_en": "Available Colors:\n• Pink\n• Blue\nType: Disposable Waterproof Dental Bib / Cover Sheet\nAcademic Year: 3rd Year (All Subjects)",
-    "sort_order": 3
+    "sort_order": 3,
+    "is_universal": true,
+    "discount_label_en": "universal"
   },
   {
     "id": "33000000-0000-0000-0000-000000000105",
@@ -533,14 +577,19 @@
     "extra_subject_ids": [
       "33000000-0000-0000-0000-000000000032",
       "33000000-0000-0000-0000-000000000033",
-      "33000000-0000-0000-0000-000000000034"
+      "33000000-0000-0000-0000-000000000034",
+      "22000000-0000-0000-0000-000000000021",
+      "22000000-0000-0000-0000-000000000022",
+      "22000000-0000-0000-0000-000000000023"
     ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/overseasglove-nitrile-gloves-black-s.png",
     "description_ar": "قفازات فحص طبية نايتريل خالية من البودرة واللاتكس من OverseasGlove للاستخدام لمرة واحدة (حماية فائقة وملمس مريح). متوفرة بمقاسات وألوان متعددة (أسود مقاس S، أزرق مقاس M). أساسية لجميع عيادات ومعامل السنة الثالثة.",
     "description_en": "Premium OverseasGlove disposable non-sterile nitrile examination gloves (Powder-free & Latex-free). Available in multiple colors and sizes (Black Size S, Blue Size M). Essential protection across all 3rd-year dental clinics and laboratories.",
     "details_ar": "الماركة: OverseasGlove\nالنوع: قفازات نايتريل طبية غير معقمة (Disposable Nitrile Examination Gloves)\nالألوان والمقاسات المتوفرة:\n• أسود (Black) - مقاس Small (S)\n• أزرق (Blue) - مقاس Medium (M)\nالمواد الدراسية: السنة الثالثة (جميع المواد الأربعة الأساسية)",
     "details_en": "Brand: OverseasGlove\nType: Disposable Non-Sterile Nitrile Gloves\nAvailable Colors & Sizes:\n• Black - Size Small (S)\n• Blue - Size Medium (M)\nAcademic Year: 3rd Year (All 4 Subjects)",
-    "sort_order": 9
+    "sort_order": 9,
+    "is_universal": true,
+    "discount_label_en": "universal"
   },
   {
     "id": "33000000-0000-0000-0000-000000000110",

@@ -2920,6 +2920,107 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   width: 100%;
 }
 
+/* Subject Products Categorized Sections */
+.subject-sections-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  width: 100%;
+}
+
+.subject-section-block {
+  width: 100%;
+}
+
+.subject-section-divider {
+  margin-top: 2.75rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(226, 218, 208, 0.7);
+  position: relative;
+}
+
+.subject-section-divider::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  inset-inline-start: 0;
+  width: 50px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--secondary, #800020), transparent);
+  border-radius: 2px;
+}
+
+.subject-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.subject-section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.subject-section-title {
+  font-family: 'Cairo', 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1A130E;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.subject-section-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+}
+
+.subject-section-pill.specific {
+  background-color: rgba(128, 0, 32, 0.08);
+  color: var(--secondary, #800020);
+  border: 1px solid rgba(128, 0, 32, 0.18);
+}
+
+.subject-section-pill.shared {
+  background-color: rgba(14, 116, 144, 0.08);
+  color: #0E7490;
+  border: 1px solid rgba(14, 116, 144, 0.2);
+}
+
+.subject-section-pill.universal {
+  background-color: rgba(16, 185, 129, 0.08);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.subject-section-count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #8C7E72;
+  background-color: #F8F5F0;
+  padding: 0.2rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid rgba(226, 218, 208, 0.6);
+}
+
+.subject-section-subtitle {
+  font-size: 0.82rem;
+  color: #7A6E65;
+  margin: 0 0 1rem 0;
+  line-height: 1.45;
+}
+
 /* Empty State */
 .subject-empty-state {
   text-align: center;

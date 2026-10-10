@@ -45,6 +45,7 @@ export const Products = () => {
   const [isActive, setIsActive] = useState(true);
   const [unitMultiplier, setUnitMultiplier] = useState(1);
   const [sharedInventoryProductId, setSharedInventoryProductId] = useState('');
+  const [isUniversal, setIsUniversal] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [uploadingMain, setUploadingMain] = useState(false);
@@ -324,6 +325,7 @@ export const Products = () => {
     setIsActive(true);
     setUnitMultiplier(1);
     setSharedInventoryProductId('');
+    setIsUniversal(false);
     setAudioUrl('');
     setRecordedBlobUrl('');
     setAudioChunks([]);
@@ -358,6 +360,7 @@ export const Products = () => {
     setIsActive(prod.is_active !== false);
     setUnitMultiplier(prod.unit_multiplier || 1);
     setSharedInventoryProductId(prod.shared_inventory_product_id || '');
+    setIsUniversal(Boolean(prod.discount_label_en === 'universal' || prod.all_subjects === true || prod.is_universal === true));
     setAudioUrl(prod.audio_url || '');
     setRecordedBlobUrl('');
     setAudioChunks([]);
@@ -404,6 +407,7 @@ export const Products = () => {
       availability,
       year_id: yearId || null,
       subject_id: selectedSubjectIds[0] || null, // primary subject for backward compat
+      discount_label_en: isUniversal ? 'universal' : (editingProduct?.discount_label_en === 'universal' ? null : editingProduct?.discount_label_en || null),
       image_url: mainImageUrl.trim(),
       usage_video_url: usageVideoUrl.trim() || null,
       audio_url: audioUrl.trim() || null,
@@ -579,7 +583,22 @@ export const Products = () => {
                     <img src={prod.image_url} alt="thumbnail" style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem' }}>
-                    <p style={{ fontWeight: 700 }}>{prod.name_ar}</p>
+                    <p style={{ fontWeight: 700, margin: 0 }}>{prod.name_ar}</p>
+                    <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
+                      {(prod.discount_label_en === 'universal' || prod.all_subjects || prod.is_universal) ? (
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '1px 6px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#047857', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                          🌐 {lang === 'ar' ? 'مستلزمات عامة (كل السنوات)' : 'Universal Supplies'}
+                        </span>
+                      ) : ((Array.isArray(prod.product_subjects) && prod.product_subjects.length > 1) || (Array.isArray(prod.extra_subject_ids) && prod.extra_subject_ids.length > 0)) ? (
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '1px 6px', backgroundColor: 'rgba(14, 116, 144, 0.12)', color: '#0E7490', borderRadius: '4px', border: '1px solid rgba(14, 116, 144, 0.25)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                          🔄 {lang === 'ar' ? `مشتركة (${(prod.product_subjects?.length || (prod.extra_subject_ids?.length + 1))} مواد)` : `Shared (${(prod.product_subjects?.length || (prod.extra_subject_ids?.length + 1))} subjects)`}
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 6px', backgroundColor: 'rgba(128, 0, 32, 0.08)', color: 'var(--secondary)', borderRadius: '4px', border: '1px solid rgba(128, 0, 32, 0.18)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                          🎯 {lang === 'ar' ? 'خاصة بمادة واحدة' : 'Single Subject'}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem', fontWeight: 800 }}>{prod.price} د.ل</td>
                   <td style={{ padding: '0.6rem 0.75rem', fontWeight: 700 }}>
@@ -756,6 +775,37 @@ export const Products = () => {
                 )}
               </div>
 
+              {/* Universal Dental Supplies Toggle */}
+              <div className="form-group" style={{
+                marginBottom: 0,
+                padding: '0.85rem',
+                backgroundColor: isUniversal ? 'rgba(16, 185, 129, 0.08)' : 'var(--accent)',
+                border: `1px solid ${isUniversal ? '#10B981' : 'var(--border-color)'}`,
+                borderRadius: 'var(--radius-md)',
+                transition: 'all 0.2s ease'
+              }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', fontWeight: 800, fontSize: '0.88rem', color: isUniversal ? '#047857' : 'var(--text-main)', margin: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={isUniversal}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setIsUniversal(checked);
+                      if (checked && subjects.length > 0 && selectedSubjectIds.length === 0) {
+                        setSelectedSubjectIds(subjects.map(s => s.id));
+                      }
+                    }}
+                    style={{ accentColor: '#10B981', width: '18px', height: '18px', cursor: 'pointer' }}
+                  />
+                  <span>🌐 {lang === 'ar' ? 'مستلزمات عامة لجميع السنوات (Universal Dental Supplies)' : 'Universal Supplies (All Years)'}</span>
+                </label>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.35rem', marginInlineStart: '1.75rem', marginBottom: 0 }}>
+                  {lang === 'ar'
+                    ? 'سيتم تصنيف هذا المنتج وعرضه في القسم الثالث «مستلزمات مشتركة بين جميع السنوات» في المواد الدراسية المرتبطة.'
+                    : 'This product will appear in Section 3 "Universal Dental Supplies" across linked subjects.'}
+                </p>
+              </div>
+
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">{t('admin.year')}</label>
                 <select className="form-input" value={yearId} onChange={(e) => setYearId(e.target.value)}>
@@ -768,7 +818,27 @@ export const Products = () => {
 
               {/* Multi-subject checkboxes */}
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">المواد الدراسية (يمكن اختيار أكثر من مادة)</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <label className="form-label" style={{ marginBottom: 0 }}>المواد الدراسية (يمكن اختيار أكثر من مادة)</label>
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSubjectIds(subjects.map(s => s.id))}
+                      className="btn btn-outline"
+                      style={{ padding: '0.2rem 0.55rem', fontSize: '0.72rem', height: 'auto', fontWeight: 600 }}
+                    >
+                      {lang === 'ar' ? 'تحديد جميع المواد' : 'Select All'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSubjectIds([])}
+                      className="btn btn-outline"
+                      style={{ padding: '0.2rem 0.55rem', fontSize: '0.72rem', height: 'auto', fontWeight: 600 }}
+                    >
+                      {lang === 'ar' ? 'إلغاء التحديد' : 'Clear All'}
+                    </button>
+                  </div>
+                </div>
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',

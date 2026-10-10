@@ -55,7 +55,15 @@
     "limited": "Limited Quantity",
     "coming_soon": "Coming Soon",
     "unavailable": "Out of Stock",
-    "discounted_only": "Special Offers Only"
+    "discounted_only": "Special Offers Only",
+    "section_specific": "Subject-Specific Tools & Materials",
+    "section_specific_badge": "Subject Specific",
+    "section_shared": "Shared Instruments & Materials",
+    "section_shared_badge": "Shared Tools",
+    "section_shared_sub": "Instruments required for this subject and also utilized across other courses.",
+    "section_universal": "Universal Dental Supplies",
+    "section_universal_badge": "Universal",
+    "section_universal_sub": "Essential clinical consumables and PPE used across all academic years."
   },
   "product": {
     "add_to_cart": "Add to Cart",

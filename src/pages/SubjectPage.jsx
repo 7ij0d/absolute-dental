@@ -8,7 +8,7 @@ import { cacheGet, cacheSet } from '../cache';
 import defaultProductsList from '../defaultProducts.json';
 import {
   SlidersHorizontal, ChevronLeft, ChevronRight,
-  Package, Search, X, RotateCcw
+  Package, Search, X, RotateCcw, Layers, Sparkles
 } from 'lucide-react';
 
 const DEFAULT_YEARS = [
@@ -143,7 +143,7 @@ export const SubjectPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const CACHE_KEY = `subject_v25:${slug}`;
+    const CACHE_KEY = `subject_v26:${slug}`;
 
     const applyData = ({ subject, year, prods }) => {
       setSubjectData(subject);
@@ -170,13 +170,16 @@ export const SubjectPage = () => {
           DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) ||
           DEFAULT_SUBJECTS[0];
 
-        // 2. Fetch Year + Primary Products + Junction Products
-        const [{ data: yearRes }, { data: primaryProds }, { data: junctionLinks }] = await Promise.all([
+        // 2. Fetch Year + Primary Products + Junction Products + Universal Supplies
+        const [{ data: yearRes }, { data: primaryProds }, { data: junctionLinks }, { data: universalProds }] = await Promise.all([
           supabase.from('years').select('*').eq('id', subject.year_id).maybeSingle(),
           supabase.from('products').select('*')
             .eq('is_active', true).eq('is_archived', false)
             .eq('subject_id', subject.id),
-          supabase.from('product_subjects').select('product_id').eq('subject_id', subject.id)
+          supabase.from('product_subjects').select('product_id').eq('subject_id', subject.id),
+          supabase.from('products').select('*')
+            .eq('is_active', true).eq('is_archived', false)
+            .eq('discount_label_en', 'universal')
         ]);
 
         const year = yearRes ||
@@ -199,11 +202,36 @@ export const SubjectPage = () => {
 
         let allProds = [...(primaryProds || []), ...extraProds];
 
-        // Ensure seeded default products for this subject are merged if not already present
+        // 4. Merge Universal Supplies for this subject
+        const junctionIdSet = new Set((junctionLinks || []).map(r => r.product_id));
+        const CANONICAL_UNIVERSAL_IDS = new Set([
+          '99000000-0000-0000-0000-000000000001',
+          '99000000-0000-0000-0000-000000000002',
+          '33000000-0000-0000-0000-000000000103',
+          '33000000-0000-0000-0000-000000000104',
+          '33000000-0000-0000-0000-000000000109'
+        ]);
+
+        if (Array.isArray(universalProds)) {
+          for (const up of universalProds) {
+            const isRelevant = 
+              junctionIdSet.has(up.id) || 
+              up.subject_id === subject.id || 
+              up.all_subjects === true || 
+              CANONICAL_UNIVERSAL_IDS.has(up.id);
+            if (isRelevant) {
+              allProds.push(up);
+            }
+          }
+        }
+
+        // 5. Ensure seeded default products for this subject are merged if not already present
         const existingIds = new Set(allProds.map(p => p.id));
         const defaultsForSub = defaultProductsList.filter(p => 
           p.subject_id === subject.id || 
           p.all_subjects === true || 
+          p.discount_label_en === 'universal' ||
+          CANONICAL_UNIVERSAL_IDS.has(p.id) ||
           (Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.includes(subject.id))
         );
         for (const dp of defaultsForSub) {
@@ -213,17 +241,6 @@ export const SubjectPage = () => {
           }
         }
 
-        // Year boundary guard: Prevent cross-year leakage unless explicitly an all_subjects / universal item
-        allProds = allProds.filter(p => {
-          if (!p || !p.id) return false;
-          if (p.all_subjects || p.all_years) return true;
-          if (subject.year_id && p.year_id && String(p.year_id) !== String(subject.year_id)) {
-            const hasExplicitExtra = Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.includes(subject.id);
-            if (!hasExplicitExtra) return false;
-          }
-          return true;
-        });
-
         // Strictly deduplicate by product id
         const seenIds = new Set();
         allProds = allProds.filter(p => {
@@ -232,6 +249,33 @@ export const SubjectPage = () => {
           return true;
         });
 
+        // 6. Gather all junction links for loaded products to determine accurate multi-subject mapping
+        const allLoadedIds = allProds.map(p => p.id);
+        const junctionMap = {};
+        if (allLoadedIds.length > 0) {
+          const { data: allJunctions } = await supabase
+            .from('product_subjects')
+            .select('product_id, subject_id')
+            .in('product_id', allLoadedIds);
+
+          if (allJunctions) {
+            for (const j of allJunctions) {
+              if (!junctionMap[j.product_id]) junctionMap[j.product_id] = new Set();
+              junctionMap[j.product_id].add(j.subject_id);
+            }
+          }
+        }
+
+        // Populate assigned_subject_ids for each product
+        for (const p of allProds) {
+          const subsSet = new Set(junctionMap[p.id] || []);
+          if (p.subject_id) subsSet.add(p.subject_id);
+          if (Array.isArray(p.extra_subject_ids)) {
+            p.extra_subject_ids.forEach(id => subsSet.add(id));
+          }
+          p.assigned_subject_ids = Array.from(subsSet);
+        }
+
         const bundle = { subject, year: year || null, prods: allProds };
         cacheSet(CACHE_KEY, bundle, 60);
         applyData(bundle);
@@ -239,11 +283,26 @@ export const SubjectPage = () => {
         console.warn('SubjectPage fetch fallback:', err);
         const fallbackSub = DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) || DEFAULT_SUBJECTS[0];
         const fallbackYear = DEFAULT_YEARS.find(y => String(y.id) === String(fallbackSub.year_id)) || DEFAULT_YEARS[0];
+        const CANONICAL_UNIVERSAL_IDS = new Set([
+          '99000000-0000-0000-0000-000000000001',
+          '99000000-0000-0000-0000-000000000002',
+          '33000000-0000-0000-0000-000000000103',
+          '33000000-0000-0000-0000-000000000104',
+          '33000000-0000-0000-0000-000000000109'
+        ]);
         const fallbackProds = defaultProductsList.filter(p => 
           p.subject_id === fallbackSub.id || 
           p.all_subjects === true || 
+          p.discount_label_en === 'universal' ||
+          CANONICAL_UNIVERSAL_IDS.has(p.id) ||
           (Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.includes(fallbackSub.id))
         );
+        for (const p of fallbackProds) {
+          const subsSet = new Set();
+          if (p.subject_id) subsSet.add(p.subject_id);
+          if (Array.isArray(p.extra_subject_ids)) p.extra_subject_ids.forEach(id => subsSet.add(id));
+          p.assigned_subject_ids = Array.from(subsSet);
+        }
         applyData({ subject: fallbackSub, year: fallbackYear, prods: fallbackProds });
       } finally {
         setLoading(false);
@@ -300,6 +359,47 @@ export const SubjectPage = () => {
 
     return list;
   }, [products, inPageSearch, maxPrice, selectedStock, sortBy]);
+
+  // Categorize filtered products into 3 distinct sections:
+  // 1. Subject-Specific Tools & Materials (الأدوات والمواد الخاصة بالمادة)
+  // 2. Shared Instruments & Materials (أدوات مشتركة بين المواد)
+  // 3. Universal Dental Supplies across all years (مستلزمات مشتركة بين جميع السنوات)
+  const categorizedSections = useMemo(() => {
+    const CANONICAL_UNIVERSAL_IDS = new Set([
+      '99000000-0000-0000-0000-000000000001',
+      '99000000-0000-0000-0000-000000000002',
+      '33000000-0000-0000-0000-000000000103',
+      '33000000-0000-0000-0000-000000000104',
+      '33000000-0000-0000-0000-000000000109'
+    ]);
+
+    const specific = [];
+    const shared = [];
+    const universal = [];
+
+    for (const p of filteredList) {
+      const isUniv = Boolean(
+        p.is_universal === true ||
+        p.discount_label_en === 'universal' ||
+        p.all_subjects === true ||
+        p.all_years === true ||
+        CANONICAL_UNIVERSAL_IDS.has(p.id)
+      );
+
+      if (isUniv) {
+        universal.push(p);
+      } else if (
+        (Array.isArray(p.assigned_subject_ids) && p.assigned_subject_ids.length > 1) ||
+        (Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.length > 0)
+      ) {
+        shared.push(p);
+      } else {
+        specific.push(p);
+      }
+    }
+
+    return { specific, shared, universal };
+  }, [filteredList]);
 
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
 
@@ -565,10 +665,90 @@ export const SubjectPage = () => {
                 )}
               </div>
             ) : (
-              <div className="subject-products-grid" aria-label="Products Grid">
-                {filteredList.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+              <div className="subject-sections-stack">
+                {/* 1. القسم الأول: الأدوات والمواد الخاصة بالمادة */}
+                {categorizedSections.specific.length > 0 && (
+                  <section className="subject-section-block" aria-label="Specific Tools">
+                    <div className="subject-section-header">
+                      <div className="subject-section-title-wrap">
+                        <span className="subject-section-pill specific">
+                          {lang === 'ar' ? 'خاص بالمادة' : 'Subject Specific'}
+                        </span>
+                        <h2 className="subject-section-title">
+                          {lang === 'ar' ? 'الأدوات والمواد الخاصة بالمادة' : 'Subject-Specific Tools & Materials'}
+                        </h2>
+                      </div>
+                      <span className="subject-section-count">
+                        {categorizedSections.specific.length} {lang === 'ar' ? 'أداة' : 'tools'}
+                      </span>
+                    </div>
+                    <div className="subject-products-grid">
+                      {categorizedSections.specific.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* 2. القسم الثاني: الأدوات المشتركة بين المواد */}
+                {categorizedSections.shared.length > 0 && (
+                  <section className={`subject-section-block ${categorizedSections.specific.length > 0 ? 'subject-section-divider' : ''}`} aria-label="Shared Instruments">
+                    <div className="subject-section-header">
+                      <div className="subject-section-title-wrap">
+                        <span className="subject-section-pill shared">
+                          <Layers size={13} />
+                          {lang === 'ar' ? 'مشترك بين المواد' : 'Shared Tools'}
+                        </span>
+                        <h2 className="subject-section-title">
+                          {lang === 'ar' ? 'أدوات مشتركة بين المواد' : 'Shared Instruments & Materials'}
+                        </h2>
+                      </div>
+                      <span className="subject-section-count">
+                        {categorizedSections.shared.length} {lang === 'ar' ? 'أداة' : 'tools'}
+                      </span>
+                    </div>
+                    <p className="subject-section-subtitle">
+                      {lang === 'ar'
+                        ? 'أدوات مطلوبة لهذه المادة وتُستخدم أيضاً في مادة دراسية أخرى أو أكثر.'
+                        : 'Instruments required for this subject and also utilized across other courses.'}
+                    </p>
+                    <div className="subject-products-grid">
+                      {categorizedSections.shared.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* 3. القسم الثالث: المستلزمات المشتركة بين جميع السنوات */}
+                {categorizedSections.universal.length > 0 && (
+                  <section className={`subject-section-block ${(categorizedSections.specific.length > 0 || categorizedSections.shared.length > 0) ? 'subject-section-divider' : ''}`} aria-label="Universal Supplies">
+                    <div className="subject-section-header">
+                      <div className="subject-section-title-wrap">
+                        <span className="subject-section-pill universal">
+                          <Sparkles size={13} />
+                          {lang === 'ar' ? 'مستلزمات عامة' : 'Universal'}
+                        </span>
+                        <h2 className="subject-section-title">
+                          {lang === 'ar' ? 'مستلزمات مشتركة بين جميع السنوات' : 'Universal Dental Supplies'}
+                        </h2>
+                      </div>
+                      <span className="subject-section-count">
+                        {categorizedSections.universal.length} {lang === 'ar' ? 'مستلزم' : 'supplies'}
+                      </span>
+                    </div>
+                    <p className="subject-section-subtitle">
+                      {lang === 'ar'
+                        ? 'المستلزمات والوقائيات الطبية الأساسية المشتركة في مختلف السنوات والعيادات السنية.'
+                        : 'Essential clinical consumables and PPE used across all academic years.'}
+                    </p>
+                    <div className="subject-products-grid">
+                      {categorizedSections.universal.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </section>
+                )}
               </div>
             )}
           </main>

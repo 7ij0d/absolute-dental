@@ -55,7 +55,15 @@
     "limited": "كمية محدودة",
     "coming_soon": "قريباً",
     "unavailable": "غير متوفر",
-    "discounted_only": "المخفضة فقط"
+    "discounted_only": "المخفضة فقط",
+    "section_specific": "الأدوات والمواد الخاصة بالمادة",
+    "section_specific_badge": "خاص بالمادة",
+    "section_shared": "أدوات مشتركة بين المواد",
+    "section_shared_badge": "مشترك بين المواد",
+    "section_shared_sub": "أدوات مطلوبة لهذه المادة وتُستخدم أيضاً في مادة دراسية أخرى أو أكثر.",
+    "section_universal": "مستلزمات مشتركة بين جميع السنوات",
+    "section_universal_badge": "مستلزمات عامة",
+    "section_universal_sub": "المستلزمات والوقائيات الطبية الأساسية المستخدمة في مختلف السنوات والعيادات السنية."
   },
   "product": {
     "add_to_cart": "أضف إلى السلة",

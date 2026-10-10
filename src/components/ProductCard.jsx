@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -19,8 +19,20 @@ export const ProductCard = ({ product }) => {
       localStorage.getItem('admin_passcode') === '9922'
     ))
   );
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const navigate = useNavigate();
+
+  // Live cart quantity calculation (synchronized across all subject appearances)
+  const currentCartQuantity = useMemo(() => {
+    if (!cartItems || cartItems.length === 0) return 0;
+    return cartItems
+      .filter(item => 
+        item.id === product.id || 
+        item.base_product_id === product.id || 
+        (typeof item.id === 'string' && item.id.startsWith(`${product.id}-`))
+      )
+      .reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
+  }, [cartItems, product.id]);
 
   const [isFav, setIsFav] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
@@ -161,6 +173,38 @@ export const ProductCard = ({ product }) => {
         >
           <Heart size={15} fill={isFav ? '#EF4444' : 'none'} />
         </button>
+
+        {/* Live Cart Quantity Pill (Visible when item is in cart) */}
+        {currentCartQuantity > 0 && (
+          <div
+            className="product-cart-count-pill"
+            style={{
+              position: 'absolute',
+              bottom: '0.6rem',
+              left: isRtl ? 'auto' : '0.6rem',
+              right: isRtl ? '0.6rem' : 'auto',
+              backgroundColor: '#3D352E',
+              color: '#FFFFFF',
+              padding: '0.22rem 0.55rem',
+              borderRadius: '999px',
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.22)',
+              border: '1.5px solid rgba(255,255,255,0.95)',
+              zIndex: 3,
+              pointerEvents: 'none',
+              lineHeight: 1,
+            }}
+            title={lang === 'ar' ? `${currentCartQuantity} في السلة` : `${currentCartQuantity} in cart`}
+          >
+            <ShoppingCart size={11} strokeWidth={2.5} />
+            <span>{currentCartQuantity}</span>
+            <span style={{ fontSize: '0.66rem', opacity: 0.9 }}>{lang === 'ar' ? 'بالسلة' : 'in cart'}</span>
+          </div>
+        )}
 
         {isUnavailable && (
           <div style={{
@@ -342,6 +386,25 @@ export const ProductCard = ({ product }) => {
               <ShoppingCart size={15} strokeWidth={2.2} />
               <span>{lang === 'ar' ? 'أضف للسلة' : 'Add to Cart'}</span>
             </>
+          )}
+
+          {currentCartQuantity > 0 && !isUnavailable && !isComingSoon && (
+            <span
+              style={{
+                marginInlineStart: 'auto',
+                backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                color: '#FFFFFF',
+                padding: '1px 6px',
+                borderRadius: '999px',
+                fontSize: '0.7rem',
+                fontWeight: 800,
+                border: '1px solid rgba(255, 255, 255, 0.35)',
+                lineHeight: 1.2
+              }}
+              title={lang === 'ar' ? `${currentCartQuantity} في السلة` : `${currentCartQuantity} in cart`}
+            >
+              {currentCartQuantity}
+            </span>
           )}
         </button>
       </div>
