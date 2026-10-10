@@ -95,9 +95,12 @@ export const CartProvider = ({ children }) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       const isOffer = isBundleProduct(product.id);
-      const maxAllowed = product.effectiveStock !== undefined
-        ? product.effectiveStock
-        : (isOffer ? 999 : (product.stock_quantity !== undefined ? product.stock_quantity : 999));
+      const isByOrder = product.availability === 'by_order';
+      const maxAllowed = isByOrder
+        ? 999
+        : (product.effectiveStock !== undefined
+          ? product.effectiveStock
+          : (isOffer ? 999 : (product.stock_quantity !== undefined ? product.stock_quantity : 999)));
 
       if (existing) {
         const newQty = existing.quantity + qty;
@@ -122,9 +125,12 @@ export const CartProvider = ({ children }) => {
     setCartItems((prev) =>
       prev.map((item) => {
         if (item.id !== id) return item;
-        const maxAllowed = item.effectiveStock !== undefined
-          ? item.effectiveStock
-          : (isBundleProduct(item.id) ? 999 : (item.stock_quantity !== undefined ? item.stock_quantity : 999));
+        const isByOrder = item.availability === 'by_order';
+        const maxAllowed = isByOrder
+          ? 999
+          : (item.effectiveStock !== undefined
+            ? item.effectiveStock
+            : (isBundleProduct(item.id) ? 999 : (item.stock_quantity !== undefined ? item.stock_quantity : 999)));
         const finalQty = maxAllowed !== undefined && qty > maxAllowed ? maxAllowed : qty;
         return { ...item, quantity: Math.max(1, finalQty) };
       })

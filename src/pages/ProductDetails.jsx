@@ -369,15 +369,16 @@ export const ProductDetails = () => {
   };
 
   // Availability computations
-  const isUnavailable = product?.availability === 'unavailable' || (effectiveStock !== null && effectiveStock <= 0);
-  const isLimited = product?.availability === 'limited_quantity';
+  const isByOrder = product?.availability === 'by_order';
+  const isUnavailable = !isByOrder && (product?.availability === 'unavailable' || (effectiveStock !== null && effectiveStock <= 0));
+  const isLimited = !isByOrder && product?.availability === 'limited_quantity';
   const isComingSoon = product?.availability === 'coming_soon';
   const isOrderable = !isUnavailable && !isComingSoon;
 
   const selectedSizeDef = (sizedConfig && selectedSize) ? sizedConfig.sizes.find(s => s.size === selectedSize) : null;
   const maxStockLimit = selectedSizeDef
     ? selectedSizeDef.stock
-    : (effectiveStock !== null ? Math.max(1, effectiveStock) : (product?.stock_quantity || 99));
+    : (isByOrder ? 99 : (effectiveStock !== null ? Math.max(1, effectiveStock) : (product?.stock_quantity || 99)));
 
   const handleQtyChange = (delta) => {
     setQuantity(prev => {
@@ -713,6 +714,11 @@ export const ProductDetails = () => {
                 <span className="product-status-badge status-coming-soon">
                   <Clock size={14} />
                   <span>{lang === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
+                </span>
+              ) : isByOrder ? (
+                <span className="product-status-badge status-by-order" style={{ backgroundColor: 'rgba(79, 70, 229, 0.1)', color: '#4F46E5', border: '1px solid rgba(79, 70, 229, 0.25)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.8rem', borderRadius: '999px', fontWeight: 800, fontSize: '0.82rem' }}>
+                  <Clock size={14} />
+                  <span>{lang === 'ar' ? 'متوفر بالطلب (يتم تأكيده وتوفيره عبر الإدارة)' : 'Available By Order (Confirmed Upon Request)'}</span>
                 </span>
               ) : isUnavailable ? (
                 <span className="product-status-badge status-unavailable">
@@ -1076,6 +1082,11 @@ export const ProductDetails = () => {
                         <ShoppingCart size={18} />
                         <span>{lang === 'ar' ? `أضف للسلة (مقاس ${selectedSize})` : `Add to Cart (Size ${selectedSize})`}</span>
                       </>
+                    ) : isByOrder ? (
+                      <>
+                        <ShoppingCart size={18} />
+                        <span>{lang === 'ar' ? 'أضف للسلة (متوفر بالطلب)' : 'Add to Cart (By Order)'}</span>
+                      </>
                     ) : (
                       <>
                         <ShoppingCart size={18} />
@@ -1084,6 +1095,29 @@ export const ProductDetails = () => {
                     )}
                   </button>
                 </div>
+
+                {isByOrder && (
+                  <div style={{
+                    marginTop: '0.85rem',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(79, 70, 229, 0.06)',
+                    border: '1px solid rgba(79, 70, 229, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.6rem',
+                    fontSize: '0.83rem',
+                    color: '#4338CA',
+                    lineHeight: 1.45
+                  }}>
+                    <Clock size={16} style={{ flexShrink: 0 }} />
+                    <span>
+                      {lang === 'ar'
+                        ? '📦 هذا المنتج متوفر بالطلب: يمكنك إضافته للسلة وإكمال طلبك بشكل طبيعي، وسيقوم فريق الإدارة بالتأكيد وتوفير المنتج فور استلام الطلب.'
+                        : '📦 This product is available by order: add it to your cart and complete checkout, and our management team will confirm and fulfill it promptly.'}
+                    </span>
+                  </div>
+                )}
               </>
             )}
 
@@ -1122,7 +1156,9 @@ export const ProductDetails = () => {
                 <div className="product-spec-row">
                   <span className="spec-label">{lang === 'ar' ? 'حالة التوفر' : 'Availability'}</span>
                   <span className="spec-value">
-                    {isOrderable
+                    {isByOrder
+                      ? (lang === 'ar' ? 'متوفر بالطلب (By Order)' : 'Available By Order')
+                      : isOrderable
                       ? (lang === 'ar' ? 'متوفر للطلب المباشر' : 'In Stock')
                       : isLimited
                       ? (lang === 'ar' ? 'كمية محدودة' : 'Limited Quantity')

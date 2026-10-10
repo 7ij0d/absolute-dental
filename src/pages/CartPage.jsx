@@ -133,6 +133,11 @@ export const CartPage = () => {
                       </span>
                     )}
                   </p>
+                  {item.availability === 'by_order' && (
+                    <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(79, 70, 229, 0.1)', color: '#4F46E5', border: '1px solid rgba(79, 70, 229, 0.25)', padding: '2px 8px', borderRadius: '6px', fontWeight: 700, width: 'fit-content' }}>
+                      {isRtl ? '📦 متوفر بالطلب' : '📦 By Order'}
+                    </span>
+                  )}
 
                   {/* Quantity adjuster */}
                   <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', width: 'fit-content' }}>

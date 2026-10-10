@@ -653,5 +653,25 @@
     "details_ar": "المنتج: طقم فحص أسنان عيادي معقم للاستخدام مرة واحدة (Disposable Examination Kit)\nالمحتويات: مرآة فحص، مسبار (Probe/Explorer)، ملقط أسنان، كرات قطن طبي، مفرش واقٍ، وصينية فحص\nسعر البيع: 2.25 د.ل\nسعر التكلفة: 2.25 د.ل\nالكمية في المخزون: 10 أطقم\nالمواد الدراسية: علاج الأسنان التحفظي (الكونس)، صناعة الأسنان الثابتة (البرستو)، وصناعة الأسنان المتحركة (الريموفبل)",
     "details_en": "Product: Disposable Sterile Dental Examination Kit\nContents: Mouth mirror, dental probe/explorer, clinical tweezers, sterile cotton rolls, dental bib, organized compartment tray\nSelling Price: 2.25 LYD\nCost Price: 2.25 LYD\nQuantity in Stock: 10 kits\nSubjects: Conservative Dentistry, Fixed Prosthodontics, Removable Prosthodontics",
     "sort_order": 12
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000115",
+    "name_ar": "مطاط سيليكون عيادي لاصقود سيلاكسيل (Lascod Silaxil Putty – 900ml)",
+    "name_en": "Lascod Silaxil Putty – C-Silicone (900 ml)",
+    "price": 192,
+    "compare_at_price": null,
+    "availability": "by_order",
+    "stock_quantity": 0,
+    "subject_id": "33000000-0000-0000-0000-000000000033",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000023"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-silaxil-putty-900ml.png",
+    "description_ar": "مادة طبعة سيليكون تكاثفي عيادية عالية الدقة (C-Silicone Impression Material) من شركة Lascod الإيطالية الرائدة. تركيبة متطورة (Optimized Formula) بلون جديد توفر دقة فائقة في أخذ الطبعات الأولية للتيجان والجسور (Crown & Bridge Impressions) والتعويضات الثابتة. حجم العبوة 900 مل.",
+    "description_en": "High-precision condensation curing silicone (C-Silicone) impression material manufactured by Lascod (Italy). Features an optimized formula with enhanced color contrast and superior dimensional stability for precise primary impressions in crown & bridge prosthodontics. Volume: 900 ml.",
+    "details_ar": "المنتج: سيليكون عيادي لاصقود سيلاكسيل (Lascod Silaxil Putty)\nالنوع: C-Silicone Impression Material\nالحجم: 900 مل\nسعر البيع: 192.00 د.ل\nسعر التكلفة: 185.00 د.ل\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
+    "details_en": "Product: Lascod Silaxil Putty – C-Silicone Impression Material\nVolume: 900 ml\nSelling Price: 192.00 LYD\nCost Price: 185.00 LYD\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
+    "sort_order": 13
   }
 ]

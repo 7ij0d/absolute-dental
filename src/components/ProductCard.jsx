@@ -42,12 +42,13 @@ export const ProductCard = ({ product }) => {
   };
 
   const isOffer = isBundleProduct(product.id);
-  const isOutOfStock = product.effectiveStock !== undefined
+  const isByOrder = product.availability === 'by_order';
+  const isOutOfStock = !isByOrder && (product.effectiveStock !== undefined
     ? product.effectiveStock <= 0
-    : (!isOffer && product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 0 && !product.shared_inventory_product_id);
-  const isUnavailable = product.availability === 'unavailable' || isOutOfStock;
+    : (!isOffer && product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 0 && !product.shared_inventory_product_id));
+  const isUnavailable = !isByOrder && (product.availability === 'unavailable' || isOutOfStock);
   const isComingSoon = product.availability === 'coming_soon';
-  const isLimited = !isUnavailable && (product.availability === 'limited_quantity' || (!isOffer && product.stock_quantity > 0 && product.stock_quantity <= 5));
+  const isLimited = !isByOrder && !isUnavailable && (product.availability === 'limited_quantity' || (!isOffer && product.stock_quantity > 0 && product.stock_quantity <= 5));
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -114,6 +115,7 @@ export const ProductCard = ({ product }) => {
 
         {/* Status Badges */}
         <div className="product-card-badge">
+          {isByOrder && <span className="badge badge-by-order" style={{ background: 'linear-gradient(135deg, #4f46e5, #3730a3)', color: '#fff', boxShadow: '0 2px 6px rgba(79,70,229,0.35)' }}>{lang === 'ar' ? 'بالطلب' : 'By Order'}</span>}
           {isOffer && !isUnavailable && <span className="badge badge-discount" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff' }}>{lang === 'ar' ? 'عرض خاص' : 'Special Offer'}</span>}
           {discountPercent > 0 && <span className="badge badge-discount">-{discountPercent}%</span>}
           {isUnavailable && <span className="badge badge-unavailable">{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>}
@@ -318,6 +320,11 @@ export const ProductCard = ({ product }) => {
             <>
               <ShoppingCart size={15} strokeWidth={2.2} />
               <span>{lang === 'ar' ? `أضف للسلة (${sizedConfig.sizes.find(s => s.size === selectedSize)?.shortLabel || selectedSize})` : `Add to Cart (${sizedConfig.sizes.find(s => s.size === selectedSize)?.shortLabel || selectedSize})`}</span>
+            </>
+          ) : isByOrder ? (
+            <>
+              <ShoppingCart size={15} strokeWidth={2.2} />
+              <span>{lang === 'ar' ? 'أضف للسلة (بالطلب)' : 'Add to Cart (By Order)'}</span>
             </>
           ) : (
             <>
