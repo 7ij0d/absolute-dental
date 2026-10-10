@@ -815,7 +815,7 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
                               {item.is_bundle && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.2rem' }}>
                                   <span style={{ fontSize: '0.72rem', color: '#00a896', backgroundColor: 'rgba(0, 168, 150, 0.1)', padding: '0.1rem 0.4rem', borderRadius: '4px', display: 'inline-block', fontWeight: 700, width: 'fit-content' }}>
-                                    🎁 {isRtl ? 'بكج متكامل (5 بيرات)' : 'Bundle (5 Burs)'}
+                                    🎁 {isRtl ? `بكج متكامل (${item.bundle_components?.length || ''} بيرات)` : `Bundle (${item.bundle_components?.length || ''} Burs)`}
                                   </span>
                                   {Array.isArray(item.bundle_components) && item.bundle_components.length > 0 && (
                                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>

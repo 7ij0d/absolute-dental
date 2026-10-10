@@ -20,6 +20,26 @@
     "sort_order": 1
   },
   {
+    "id": "22000000-0000-0000-0000-000000000202",
+    "name_ar": "بكج بيرات علاج الأسنان التحفظي (Conservative Dentistry Burs Bundle)",
+    "name_en": "Conservative Dentistry Burs Bundle",
+    "description_ar": "حزمة متكاملة تجمع البيرات الأربعة الأساسية لمادة علاج الأسنان التحفظي (CD 52F Red, BR 49 Blue, TF12 Blue, SI 46 Blue) دون الحاجة لطلب كل بير بمفرده.",
+    "description_en": "Complete bundle containing the 4 essential burs for Operative / Conservative Dentistry: CD 52F (Red), BR 49 (Blue), TF12 (Blue), and SI 46 (Blue).",
+    "details_ar": "محتويات البكج:\n1. Fissure Bur – CD 52F (Red)\n2. Round Bur – BR 49 (Blue)\n3. Tapered Fissure Bur – TF12 (Blue)\n4. Inverted Cone Bur – SI 46 (Blue)",
+    "details_en": "Included in bundle:\n1. Fissure Bur – CD 52F (Red)\n2. Round Bur – BR 49 (Blue)\n3. Tapered Fissure Bur – TF12 (Blue)\n4. Inverted Cone Bur – SI 46 (Blue)",
+    "price": 8,
+    "compare_at_price": 8,
+    "stock_quantity": 0,
+    "availability": "available",
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "subject_id": "22000000-0000-0000-0000-000000000021",
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/conservative-burs-bundle.png",
+    "is_featured": true,
+    "is_active": true,
+    "is_archived": false,
+    "sort_order": 1
+  },
+  {
     "id": "8806943f-d3bf-443b-b623-7002b354a355",
     "name_ar": "قبضة توربين أصلية COXO C207 (بنفسجي)",
     "name_en": "COXO High-Speed Handpiece C207 (Purple)",

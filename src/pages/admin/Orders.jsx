@@ -8,6 +8,7 @@ import MapPicker from '../../components/MapPicker';
 import AdminEditOrderModal from '../../components/AdminEditOrderModal';
 import AdminReviewEditModal from '../../components/AdminReviewEditModal';
 import OrderEditHistory from '../../components/OrderEditHistory';
+import { isBundleProduct } from '../../utils/productInventoryEngine';
 import { getOrderStatusMeta, normalizeOrderStatus, createStatusAuditEntry, parseOrderEditHistory } from '../../utils/orderEditHelper';
 import { parseOrderVersioning } from '../../utils/orderVersioning';
 import {
@@ -890,7 +891,7 @@ export const Orders = () => {
                                 (si.productId && i.product_id && String(si.productId) === String(i.product_id))
                               ) || ord.items[idx] || null)
                             : null;
-                          const isBundle = Boolean(snapshotItem?.is_bundle || i.is_bundle || (i.product_id === '22000000-0000-0000-0000-000000000201'));
+                          const isBundle = Boolean(snapshotItem?.is_bundle || i.is_bundle || isBundleProduct(i.product_id) || isBundleProduct(i.id));
                           return (
                             <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap' }}>
                               <span style={{ color: 'var(--secondary)', fontWeight: 800 }}>•</span>
@@ -1433,7 +1434,7 @@ export const Orders = () => {
                   const itemName = item.products?.name_en || item.products?.name_ar || item.name_en || item.name_ar || snapshotItem?.name_en || snapshotItem?.name_ar || 'Dental Box / إكسسوار';
                   const itemImg = item.products?.image_url || item.image_url || snapshotItem?.image_url || null;
                   const itemSellingUnit = item.selling_unit || item.sellingUnit || snapshotItem?.selling_unit || snapshotItem?.sellingUnit || null;
-                  const isBundle = Boolean(item.is_bundle || snapshotItem?.is_bundle || (item.product_id === '22000000-0000-0000-0000-000000000201') || (item.id === '22000000-0000-0000-0000-000000000201'));
+                  const isBundle = Boolean(item.is_bundle || snapshotItem?.is_bundle || isBundleProduct(item.product_id) || isBundleProduct(item.id));
                   const bundleComponents = item.bundle_components || snapshotItem?.bundle_components || null;
                   return (
                     <div

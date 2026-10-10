@@ -76,6 +76,46 @@ export const CANONICAL_BUNDLES = {
         imageUrl: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/d2a56c58-bf46-47aa-b803-6546aa7491c5.jpg'
       }
     ]
+  },
+  '22000000-0000-0000-0000-000000000202': {
+    id: '22000000-0000-0000-0000-000000000202',
+    nameAr: 'بكج بيرات علاج الأسنان التحفظي (Conservative Dentistry Burs Bundle)',
+    nameEn: 'Conservative Dentistry Burs Bundle',
+    bundlePrice: 8,
+    components: [
+      {
+        productId: 'e625888c-c1b0-4479-9117-76a1215a75f4',
+        nameAr: 'Fissure bur - CD 52F (red)',
+        nameEn: 'CD 52F (Red) — Fissure Bur',
+        quantity: 1,
+        normalPrice: 2,
+        imageUrl: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/e625888c-c1b0-4479-9117-76a1215a75f4.jpg'
+      },
+      {
+        productId: '76f62cd7-df40-4e85-97d1-6fb63b09e2f1',
+        nameAr: 'Round bur - BR 49',
+        nameEn: 'BR 49 (Blue) — Round Bur',
+        quantity: 1,
+        normalPrice: 2,
+        imageUrl: 'https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/76f62cd7-df40-4e85-97d1-6fb63b09e2f1.jpg'
+      },
+      {
+        productId: 'c78f57a0-54d0-4602-aa05-d92a82398a2f',
+        nameAr: 'Long taper with flat end - TF12 (blue)',
+        nameEn: 'TF12 (Blue) — Long Taper with Flat End',
+        quantity: 1,
+        normalPrice: 2,
+        imageUrl: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/c78f57a0-54d0-4602-aa05-d92a82398a2f.jpg'
+      },
+      {
+        productId: '2ebc663e-0967-4d6a-b8be-b07b9e84659c',
+        nameAr: 'Inverted cone bur - SI 46',
+        nameEn: 'SI 46 (Blue) — Inverted Cone Bur',
+        quantity: 1,
+        normalPrice: 2,
+        imageUrl: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/2ebc663e-0967-4d6a-b8be-b07b9e84659c.jpg'
+      }
+    ]
   }
 };
 
