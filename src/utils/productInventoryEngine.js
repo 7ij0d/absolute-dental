@@ -419,6 +419,66 @@ export function getBundleDefinition(productId) {
 }
 
 /**
+ * Returns dynamic plural unit label for a bundle's components:
+ * - Bur sets: 'بيرات' (ar) / 'burs' (en)
+ * - General equipment/offers: 'قطع' (ar) / 'items' (en)
+ */
+export function getBundleUnitLabel(bundleOrIdOrName = '', lang = 'ar') {
+  let name = '';
+  if (typeof bundleOrIdOrName === 'object' && bundleOrIdOrName !== null) {
+    name = (bundleOrIdOrName.name_ar || bundleOrIdOrName.nameAr || bundleOrIdOrName.name || '') + ' ' + (bundleOrIdOrName.name_en || bundleOrIdOrName.nameEn || '');
+    if (!name.trim() && (bundleOrIdOrName.id || bundleOrIdOrName.product_id)) {
+      const bId = bundleOrIdOrName.product_id || bundleOrIdOrName.id;
+      if (CANONICAL_BUNDLES[bId]) {
+        name = (CANONICAL_BUNDLES[bId].nameAr || '') + ' ' + (CANONICAL_BUNDLES[bId].nameEn || '');
+      }
+    }
+  } else if (typeof bundleOrIdOrName === 'string') {
+    if (CANONICAL_BUNDLES[bundleOrIdOrName]) {
+      name = (CANONICAL_BUNDLES[bundleOrIdOrName].nameAr || '') + ' ' + (CANONICAL_BUNDLES[bundleOrIdOrName].nameEn || '');
+    } else {
+      name = bundleOrIdOrName;
+    }
+  }
+
+  const isBur = /بيرات|bur/i.test(String(name));
+  if (lang === 'ar') {
+    return isBur ? 'بيرات' : 'قطع';
+  }
+  return isBur ? 'burs' : 'items';
+}
+
+/**
+ * Returns dynamic singular unit label for a bundle's component:
+ * - Bur sets: 'بير' (ar) / 'bur' (en)
+ * - General equipment/offers: 'قطعة' (ar) / 'item' (en)
+ */
+export function getBundleSingleItemLabel(bundleOrIdOrName = '', lang = 'ar') {
+  let name = '';
+  if (typeof bundleOrIdOrName === 'object' && bundleOrIdOrName !== null) {
+    name = (bundleOrIdOrName.name_ar || bundleOrIdOrName.nameAr || bundleOrIdOrName.name || '') + ' ' + (bundleOrIdOrName.name_en || bundleOrIdOrName.nameEn || '');
+    if (!name.trim() && (bundleOrIdOrName.id || bundleOrIdOrName.product_id)) {
+      const bId = bundleOrIdOrName.product_id || bundleOrIdOrName.id;
+      if (CANONICAL_BUNDLES[bId]) {
+        name = (CANONICAL_BUNDLES[bId].nameAr || '') + ' ' + (CANONICAL_BUNDLES[bId].nameEn || '');
+      }
+    }
+  } else if (typeof bundleOrIdOrName === 'string') {
+    if (CANONICAL_BUNDLES[bundleOrIdOrName]) {
+      name = (CANONICAL_BUNDLES[bundleOrIdOrName].nameAr || '') + ' ' + (CANONICAL_BUNDLES[bundleOrIdOrName].nameEn || '');
+    } else {
+      name = bundleOrIdOrName;
+    }
+  }
+
+  const isBur = /بيرات|bur/i.test(String(name));
+  if (lang === 'ar') {
+    return isBur ? 'بير' : 'قطعة';
+  }
+  return isBur ? 'bur' : 'item';
+}
+
+/**
  * Dynamically calculates bundle availability based on component physical stock.
  * Formula: min( Math.floor( component_stock / required_qty ) )
  */

@@ -846,7 +846,7 @@ export const ProductDetails = () => {
                       border: '1px solid rgba(16, 185, 129, 0.15)',
                       fontSize: '0.85rem'
                     }}>
-                      <span style={{ fontWeight: 700, color: '#1F2937' }}>{comp.nameEn} (×{comp.required})</span>
+                      <span style={{ fontWeight: 700, color: '#1F2937' }}>{lang === 'ar' ? (comp.nameAr || comp.nameEn) : (comp.nameEn || comp.nameAr)} (×{comp.required})</span>
                       <span style={{ color: comp.isAvailable ? '#059669' : '#DC2626', fontWeight: 700, fontSize: '0.8rem' }}>
                         {comp.isAvailable ? (lang === 'ar' ? '✓ متوفر بالمخزن' : '✓ In Stock') : (lang === 'ar' ? 'غير متوفر' : 'Out of Stock')}
                       </span>

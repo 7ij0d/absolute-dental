@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { Trash2, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
-import { isBundleProduct, getBundleDefinition } from '../utils/productInventoryEngine';
+import { isBundleProduct, getBundleDefinition, getBundleUnitLabel, getBundleSingleItemLabel } from '../utils/productInventoryEngine';
 
 export const CartPage = () => {
   const { t, isRtl } = useLanguage();
@@ -175,10 +175,10 @@ export const CartPage = () => {
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--primary)' }}>
-                          📦 {isRtl ? `محتويات البكج المشمولة (${bundleComponents.length} بيرات):` : `Included in bundle (${bundleComponents.length} burs):`}
+                          📦 {isRtl ? `محتويات البكج المشمولة (${bundleComponents.length} ${getBundleUnitLabel(item, 'ar')}):` : `Included in bundle (${bundleComponents.length} ${getBundleUnitLabel(item, 'en')}):`}
                         </span>
                         <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                          {item.quantity > 1 ? (isRtl ? `(×${item.quantity} لكل بير)` : `(×${item.quantity} each)`) : ''}
+                          {item.quantity > 1 ? (isRtl ? `(×${item.quantity} لكل ${getBundleSingleItemLabel(item, 'ar')})` : `(×${item.quantity} each)`) : ''}
                         </span>
                       </div>
 
@@ -201,7 +201,7 @@ export const CartPage = () => {
                               {comp.imageUrl && (
                                 <img src={comp.imageUrl} alt="" style={{ width: '24px', height: '24px', objectFit: 'cover', borderRadius: '3px' }} />
                               )}
-                              <span style={{ fontWeight: 600 }}>{isRtl ? (comp.nameAr || comp.nameEn) : comp.nameEn}</span>
+                              <span style={{ fontWeight: 600 }}>{isRtl ? (comp.nameAr || comp.nameEn) : (comp.nameEn || comp.nameAr)}</span>
                               <span style={{ color: 'var(--secondary)', fontWeight: 800, fontSize: '0.75rem' }}>
                                 × {comp.quantity * item.quantity}
                               </span>
@@ -224,7 +224,7 @@ export const CartPage = () => {
                                 fontWeight: 700,
                                 transition: 'all 0.15s ease'
                               }}
-                              title={isRtl ? 'حذف هذا البير وتفكيك البكج إلى منتجات منفردة' : 'Remove this bur from bundle'}
+                              title={isRtl ? `حذف هذا العنصر وتفكيك البكج إلى منتجات منفردة` : 'Remove this item from bundle'}
                             >
                               ✕ {isRtl ? 'حذف من البكج' : 'Remove'}
                             </button>
@@ -234,8 +234,8 @@ export const CartPage = () => {
 
                       <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: '0.2rem 0 0 0', lineHeight: 1.4 }}>
                         💡 {isRtl
-                          ? 'عند إزالة أي بير، يتم فك ارتباط البكج وتبقى البيرات المتبقية في السلة كمنتجات منفردة بأسعارها الطبيعية.'
-                          : 'Removing any bur will dissolve the bundle, keeping the remaining burs in the cart at their individual prices.'}
+                          ? 'عند إزالة أي عنصر مشمول، يتم فك ارتباط البكج وتبقى العناصر المتبقية في السلة كمنتجات منفردة بأسعارها الطبيعية.'
+                          : 'Removing any included item will dissolve the bundle, keeping the remaining items in the cart at their individual prices.'}
                       </p>
                     </div>
                   )}

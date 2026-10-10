@@ -5,6 +5,7 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import brandLogoTrimmed from '../assets/images/brand-logo-trimmed.png';
 import { normalizeOrderItems, paginateInvoiceItems } from '../utils/invoicePaginationEngine';
+import { getBundleUnitLabel } from '../utils/productInventoryEngine';
 
 export { normalizeOrderItems, paginateInvoiceItems };
 
@@ -346,7 +347,7 @@ export const InvoiceView = ({ order }) => {
                               {item.isBundle && Array.isArray(item.bundleComponents) && item.bundleComponents.length > 0 && (
                                 <div style={{ marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                                   <span style={{ fontSize: '0.72rem', color: '#00a896', fontWeight: 700 }}>
-                                    {lang === 'ar' ? 'محتويات البكج (5 بيرات):' : 'Included Components (5 Burs):'}
+                                    {lang === 'ar' ? `محتويات البكج (${item.bundleComponents.length} ${getBundleUnitLabel(item, 'ar')}):` : `Included Components (${item.bundleComponents.length} ${getBundleUnitLabel(item, 'en')}):`}
                                   </span>
                                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                                     {item.bundleComponents.map((comp, cIdx) => (

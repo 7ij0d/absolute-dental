@@ -8,7 +8,7 @@ import MapPicker from '../../components/MapPicker';
 import AdminEditOrderModal from '../../components/AdminEditOrderModal';
 import AdminReviewEditModal from '../../components/AdminReviewEditModal';
 import OrderEditHistory from '../../components/OrderEditHistory';
-import { isBundleProduct } from '../../utils/productInventoryEngine';
+import { isBundleProduct, getBundleDefinition, getBundleUnitLabel } from '../../utils/productInventoryEngine';
 import { getOrderStatusMeta, normalizeOrderStatus, createStatusAuditEntry, parseOrderEditHistory } from '../../utils/orderEditHelper';
 import { parseOrderVersioning } from '../../utils/orderVersioning';
 import {
@@ -1680,7 +1680,13 @@ export const Orders = () => {
                             <span>{itemName}</span>
                             {isBundle && (
                               <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(0, 168, 150, 0.12)', color: '#00a896', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
-                                🎁 بكج متكامل (5 بيرات)
+                                🎁 {(() => {
+                                  const count = bundleComponents?.length || getBundleDefinition(item.product_id || item.id)?.components?.length || '';
+                                  const unit = getBundleUnitLabel(item.product_id || item.id || itemName, isRtl ? 'ar' : 'en');
+                                  return isRtl
+                                    ? `بكج متكامل ${count ? `(${count} ${unit})` : ''}`
+                                    : `Bundle ${count ? `(${count} ${unit})` : ''}`;
+                                })()}
                               </span>
                             )}
                             {itemSellingUnit && !isBundle && (
