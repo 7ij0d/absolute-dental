@@ -673,5 +673,25 @@
     "details_ar": "المنتج: سيليكون عيادي لاصقود سيلاكسيل (Lascod Silaxil Putty)\nالنوع: C-Silicone Impression Material\nالحجم: 900 مل\nسعر البيع: 192.00 د.ل\nسعر التكلفة: 185.00 د.ل\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
     "details_en": "Product: Lascod Silaxil Putty – C-Silicone Impression Material\nVolume: 900 ml\nSelling Price: 192.00 LYD\nCost Price: 185.00 LYD\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
     "sort_order": 13
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000116",
+    "name_ar": "مطاط سيليكون لايت بودي لاصقود سيلاكسيل (Lascod Silaxil Light Body)",
+    "name_en": "Lascod Silaxil Light Body – C-Silicone",
+    "price": 70,
+    "compare_at_price": null,
+    "availability": "by_order",
+    "stock_quantity": 0,
+    "subject_id": "33000000-0000-0000-0000-000000000033",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000023"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-silaxil-light-body.png",
+    "description_ar": "مادة طبعة سيليكون تكاثفي سائلة عالية الدقة (Light Body / Wash Material) من شركة Lascod الإيطالية. مخصصة لتسجيل أدق التفاصيل التشريحية وخطوط الإنهاء (Finishing Lines) في طبعات التيجان والجسور الدقيقة (Crown & Bridge Impressions) بالتوافق مع السيلاكسيل بّتي.",
+    "description_en": "High-precision condensation curing silicone wash material (Light Body) by Lascod (Italy). Formulated for hydro-compatible surface wetting and micro-detail reproduction of preparation margins and finishing lines in crown and bridge impressions.",
+    "details_ar": "المنتج: سيليكون لايت بودي لاصقود سيلاكسيل (Lascod Silaxil Light Body)\nالنوع: C-Silicone Precision Wash\nسعر البيع: 70.00 د.ل\nسعر التكلفة: 62.00 د.ل\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
+    "details_en": "Product: Lascod Silaxil Light Body Precision Wash\nSelling Price: 70.00 LYD\nCost Price: 62.00 LYD\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
+    "sort_order": 14
   }
 ]
