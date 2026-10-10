@@ -32,10 +32,13 @@ export function extractDeliveryTimeSlot(order) {
   const combined = `${order.delivery_notes || ''} ${order.notes || ''}`;
   const match = combined.match(/\[توقيت التسليم المفضل:\s*([^\]]+)\]/);
   if (match && match[1]) return match[1].trim();
-  if (combined.includes('08:00') || combined.includes('8:00')) return '8:00 صباحاً';
-  if (combined.includes('10:00')) return '10:00 صباحاً';
-  if (combined.includes('12:00')) return '12:00 ظهراً';
-  if (combined.includes('02:00') || combined.includes('2:00')) return '2:00 ظهراً';
+  if (combined.includes('أي وقت') || combined.includes('اي وقت')) return 'أي وقت يناسبكم';
+  const detected = [];
+  if (combined.includes('08:00') || combined.includes('8:00')) detected.push('8:00 صباحاً');
+  if (combined.includes('10:00')) detected.push('10:00 صباحاً');
+  if (combined.includes('12:00')) detected.push('12:00 ظهراً');
+  if (combined.includes('02:00') || combined.includes('2:00')) detected.push('2:00 ظهراً');
+  if (detected.length > 0) return detected.join(' أو ');
   return '10:00 صباحاً';
 }
 
@@ -2075,8 +2078,8 @@ export const Orders = () => {
                 <Clock size={14} style={{ color: 'var(--secondary)' }} />
                 <span>الموعد المقترح للتسليم (اختر أو عدّل):</span>
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.45rem' }}>
-                {['8:00 صباحاً', '10:00 صباحاً', '12:00 ظهراً', '2:00 ظهراً'].map((slot) => {
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(95px, 1fr))', gap: '0.45rem', marginBottom: '0.45rem' }}>
+                {['8:00 صباحاً', '10:00 صباحاً', '12:00 ظهراً', '2:00 ظهراً', 'أي وقت يناسبكم'].map((slot) => {
                   const isSelected = whatsappTimeSlot === slot;
                   return (
                     <button
@@ -2085,7 +2088,7 @@ export const Orders = () => {
                       onClick={() => setWhatsappTimeSlot(slot)}
                       style={{
                         padding: '0.5rem 0.25rem',
-                        fontSize: '0.78rem',
+                        fontSize: '0.76rem',
                         fontWeight: isSelected ? 800 : 600,
                         borderRadius: 'var(--radius-sm)',
                         border: isSelected ? '1.5px solid var(--secondary)' : '1px solid var(--border-color)',
@@ -2101,6 +2104,14 @@ export const Orders = () => {
                   );
                 })}
               </div>
+              <input
+                type="text"
+                className="form-input"
+                style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
+                placeholder="أو اكتب/عدل نص الموعد المفضل..."
+                value={whatsappTimeSlot}
+                onChange={(e) => setWhatsappTimeSlot(e.target.value)}
+              />
             </div>
 
             {/* Delivery place & fee customization */}

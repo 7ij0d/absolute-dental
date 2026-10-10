@@ -11,11 +11,49 @@ import { createEditHistoryEntry, buildUpdatedStatusNote } from '../utils/orderEd
 import { isBundleProduct, getBundleDefinition, calculateBundleAvailability, calculateOrderDeductions } from '../utils/productInventoryEngine';
 
 export const DELIVERY_TIME_SLOTS = [
-  { id: '8:00', value: '8:00 صباحاً', labelAr: '8:00 صباحاً', labelEn: '8:00 AM', icon: '🌅' },
-  { id: '10:00', value: '10:00 صباحاً', labelAr: '10:00 صباحاً', labelEn: '10:00 AM', icon: '☀️' },
-  { id: '12:00', value: '12:00 ظهراً', labelAr: '12:00 ظهراً', labelEn: '12:00 PM', icon: '🕛' },
-  { id: '2:00', value: '2:00 ظهراً', labelAr: '2:00 ظهراً', labelEn: '2:00 PM', icon: '🌤️' },
+  { id: '8:00', value: '8:00 صباحاً', labelAr: '8:00 صباحاً', labelEn: '8:00 AM', periodAr: 'الصباح الباكر', periodEn: 'Early Morning', icon: '🌅' },
+  { id: '10:00', value: '10:00 صباحاً', labelAr: '10:00 صباحاً', labelEn: '10:00 AM', periodAr: 'الفترة الصباحية', periodEn: 'Mid-Morning', icon: '☀️' },
+  { id: '12:00', value: '12:00 ظهراً', labelAr: '12:00 ظهراً', labelEn: '12:00 PM', periodAr: 'فترة الظهيرة', periodEn: 'Noon', icon: '🕛' },
+  { id: '2:00', value: '2:00 ظهراً', labelAr: '2:00 ظهراً', labelEn: '2:00 PM', periodAr: 'بعد الظهر', periodEn: 'Afternoon', icon: '🌤️' },
+  { id: 'anytime', value: 'أي وقت يناسبكم', labelAr: 'أي وقت يناسبكم', labelEn: 'Any time suits you', periodAr: 'متاح طوال اليوم', periodEn: 'Flexible all day', icon: '🤝' },
 ];
+
+export const formatSelectedSlots = (slots, lang = 'ar') => {
+  if (!Array.isArray(slots) || slots.length === 0) return lang === 'ar' ? '10:00 صباحاً' : '10:00 AM';
+  if (slots.includes('أي وقت يناسبكم')) return lang === 'ar' ? 'أي وقت يناسبكم' : 'Any time suits you';
+  const sep = lang === 'ar' ? ' أو ' : ' or ';
+  return slots.join(sep);
+};
+
+export const parseDeliveryTimeSlots = (rawString) => {
+  if (!rawString) return ['10:00 صباحاً'];
+  const s = String(rawString).trim();
+  if (s.includes('أي وقت') || s.includes('اي وقت') || s.includes('Any time')) {
+    return ['أي وقت يناسبكم'];
+  }
+  const found = [];
+  if (s.includes('08:00') || s.includes('8:00')) found.push('8:00 صباحاً');
+  if (s.includes('10:00')) found.push('10:00 صباحاً');
+  if (s.includes('12:00')) found.push('12:00 ظهراً');
+  if (s.includes('02:00') || s.includes('2:00')) found.push('2:00 ظهراً');
+  return found.length > 0 ? found : [s];
+};
+
+export const toggleTimeSlotSelection = (currentSlots, slotValue) => {
+  if (slotValue === 'أي وقت يناسبكم') {
+    return ['أي وقت يناسبكم'];
+  }
+  const base = (currentSlots || []).filter(s => s !== 'أي وقت يناسبكم');
+  if (base.includes(slotValue)) {
+    if (base.length <= 1) return base;
+    return base.filter(s => s !== slotValue);
+  } else {
+    const chronological = ['8:00 صباحاً', '10:00 صباحاً', '12:00 ظهراً', '2:00 ظهراً'];
+    const updated = [...base, slotValue];
+    updated.sort((a, b) => chronological.indexOf(a) - chronological.indexOf(b));
+    return updated;
+  }
+};
 
 const TRIPOLI_STREETS = [
   'حي الأندلس',
@@ -81,7 +119,7 @@ export const CheckoutPage = () => {
   const [college, setCollege] = useState('كلية طب الأسنان');
   const [notes, setNotes] = useState('');
   const [shippingOption, setShippingOption] = useState('faculty'); // faculty, tripoli_center, tripoli_suburbs
-  const [deliveryTimeSlot, setDeliveryTimeSlot] = useState('10:00 صباحاً');
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState(['10:00 صباحاً']);
   
   // Searchable street selection & Maps location
   const [selectedStreet, setSelectedStreet] = useState('');
@@ -118,7 +156,7 @@ export const CheckoutPage = () => {
       const combinedOrderNotes = `${editingOrder.delivery_notes || ''} ${editingOrder.notes || ''}`;
       const timeMatch = combinedOrderNotes.match(/\[توقيت التسليم المفضل:\s*([^\]]+)\]/);
       if (timeMatch && timeMatch[1]) {
-        setDeliveryTimeSlot(timeMatch[1].trim());
+        setSelectedTimeSlots(parseDeliveryTimeSlots(timeMatch[1]));
       }
       if (editingOrder.notes) {
         const cleanNotes = editingOrder.notes.replace(/\[توقيت التسليم المفضل:[^\]]+\]\s*/g, '').trim();
@@ -175,7 +213,8 @@ export const CheckoutPage = () => {
 
     try {
       // Format final notes with time slot, street, and location link if available
-      const timeSlotTag = `[توقيت التسليم المفضل: ${deliveryTimeSlot || '10:00 صباحاً'}]`;
+      const formattedTimeSlot = formatSelectedSlots(selectedTimeSlots, 'ar');
+      const timeSlotTag = `[توقيت التسليم المفضل: ${formattedTimeSlot}]`;
       let combinedNotes = notes ? `${timeSlotTag}\n${notes}` : timeSlotTag;
       if (shippingOption !== 'faculty') {
         const locationLink = (latitude && longitude) ? `https://www.google.com/maps?q=${latitude},${longitude}` : null;
@@ -286,7 +325,7 @@ export const CheckoutPage = () => {
           university,
           college,
           notes: combinedNotes || null,
-          delivery_notes: `[توقيت التسليم المفضل: ${deliveryTimeSlot || '10:00 صباحاً'}]`,
+          delivery_notes: `[توقيت التسليم المفضل: ${formattedTimeSlot}]`,
           address_text: shippingOption === 'faculty' ? null : addressText,
           latitude: shippingOption === 'faculty' ? null : latitude,
           longitude: shippingOption === 'faculty' ? null : longitude,
@@ -373,7 +412,7 @@ export const CheckoutPage = () => {
         university,
         college,
         notes: combinedNotes || null,
-        delivery_notes: `[توقيت التسليم المفضل: ${deliveryTimeSlot || '10:00 صباحاً'}]`,
+        delivery_notes: `[توقيت التسليم المفضل: ${formattedTimeSlot}]`,
         address_text: shippingOption === 'faculty' ? null : addressText,
         latitude: shippingOption === 'faculty' ? null : latitude,
         longitude: shippingOption === 'faculty' ? null : longitude,
@@ -835,7 +874,7 @@ export const CheckoutPage = () => {
             </div>
           )}
 
-          {/* Delivery Time Slot Selection (8:00, 10:00, 12:00, 2:00) */}
+          {/* Delivery Time Slot Selection (Multi-select or Anytime) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
               <label className="form-label" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 800 }}>
@@ -843,8 +882,30 @@ export const CheckoutPage = () => {
                 <span>{lang === 'ar' ? 'تحديد التوقيت المفضل للتسليم *' : 'Preferred Delivery / Pickup Time *'}</span>
               </label>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                {lang === 'ar' ? 'اختر الوقت الأنسب لجدولك الدراسي' : 'Select best time for your schedule'}
+                {lang === 'ar' ? 'اختر وقتاً واحداً أو عدة أوقات تناسبك' : 'Choose one or multiple suitable times'}
               </span>
+            </div>
+
+            {/* Informative flexible multi-selection callout */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.65rem',
+              padding: '0.75rem 0.95rem',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'rgba(59, 130, 246, 0.08)',
+              border: '1px solid rgba(59, 130, 246, 0.25)',
+              color: '#1d4ed8',
+              fontSize: '0.82rem',
+              lineHeight: 1.55
+            }}>
+              <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>💡</span>
+              <div>
+                <strong style={{ fontWeight: 800 }}>{lang === 'ar' ? 'مرونة المواعيد:' : 'Flexible Timing:'}</strong>{' '}
+                {lang === 'ar'
+                  ? 'يمكنك اختيار أكثر من توقيت يناسبك (مثلاً: 8:00 و 10:00 صباحاً معاً)، أو اختيار «أي وقت يناسبكم» لتسليمها بالوقت المتاح لفريق العمل.'
+                  : 'You can choose multiple times (e.g. 8:00 AM & 10:00 AM together), or select "Any time suits you".'}
+              </div>
             </div>
 
             <div style={{
@@ -853,12 +914,12 @@ export const CheckoutPage = () => {
               gap: '0.65rem'
             }}>
               {DELIVERY_TIME_SLOTS.map((slot) => {
-                const isSelected = deliveryTimeSlot === slot.value;
+                const isSelected = selectedTimeSlots.includes(slot.value);
                 return (
                   <button
                     key={slot.id}
                     type="button"
-                    onClick={() => setDeliveryTimeSlot(slot.value)}
+                    onClick={() => setSelectedTimeSlots(prev => toggleTimeSlotSelection(prev, slot.value))}
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -879,12 +940,15 @@ export const CheckoutPage = () => {
                   >
                     <span style={{ fontSize: '1.25rem' }}>{slot.icon}</span>
                     <span style={{
-                      fontSize: '0.9rem',
+                      fontSize: '0.88rem',
                       fontWeight: isSelected ? 800 : 600,
                       color: isSelected ? 'var(--primary)' : 'var(--text-main)',
                       whiteSpace: 'nowrap'
                     }}>
                       {lang === 'ar' ? slot.labelAr : slot.labelEn}
+                    </span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      {lang === 'ar' ? slot.periodAr : slot.periodEn}
                     </span>
                     {isSelected && (
                       <span style={{
@@ -901,6 +965,27 @@ export const CheckoutPage = () => {
                   </button>
                 );
               })}
+            </div>
+
+            {/* Selected slots summary indicator */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '0.5rem',
+              padding: '0.55rem 0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              backgroundColor: 'var(--accent)',
+              border: '1px solid var(--border-color)',
+              fontSize: '0.82rem'
+            }}>
+              <span style={{ color: 'var(--text-muted)' }}>
+                {lang === 'ar' ? 'المواعيد المحددة للطلب:' : 'Selected slots for order:'}
+              </span>
+              <strong style={{ color: 'var(--secondary)', fontWeight: 800 }}>
+                {formatSelectedSlots(selectedTimeSlots, lang)}
+              </strong>
             </div>
 
             {/* WhatsApp Confirmation Notice */}

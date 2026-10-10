@@ -14,17 +14,58 @@ export const TRACKING_DELIVERY_TIME_SLOTS = [
   { id: '10:00', value: '10:00 صباحاً', labelAr: '10:00 صباحاً', labelEn: '10:00 AM', periodAr: 'الفترة الصباحية', periodEn: 'Mid-Morning', icon: '☀️' },
   { id: '12:00', value: '12:00 ظهراً', labelAr: '12:00 ظهراً', labelEn: '12:00 PM', periodAr: 'فترة الظهيرة', periodEn: 'Noon', icon: '🕛' },
   { id: '2:00', value: '2:00 ظهراً', labelAr: '2:00 ظهراً', labelEn: '2:00 PM', periodAr: 'بعد الظهر', periodEn: 'Afternoon', icon: '🌤️' },
+  { id: 'anytime', value: 'أي وقت يناسبكم', labelAr: 'أي وقت يناسبكم', labelEn: 'Any time suits you', periodAr: 'متاح طوال اليوم', periodEn: 'Flexible all day', icon: '🤝' },
 ];
+
+export const formatSelectedSlots = (slots, lang = 'ar') => {
+  if (!Array.isArray(slots) || slots.length === 0) return lang === 'ar' ? '10:00 صباحاً' : '10:00 AM';
+  if (slots.includes('أي وقت يناسبكم')) return lang === 'ar' ? 'أي وقت يناسبكم' : 'Any time suits you';
+  const sep = lang === 'ar' ? ' أو ' : ' or ';
+  return slots.join(sep);
+};
+
+export const parseDeliveryTimeSlots = (rawString) => {
+  if (!rawString) return ['10:00 صباحاً'];
+  const s = String(rawString).trim();
+  if (s.includes('أي وقت') || s.includes('اي وقت') || s.includes('Any time')) {
+    return ['أي وقت يناسبكم'];
+  }
+  const found = [];
+  if (s.includes('08:00') || s.includes('8:00')) found.push('8:00 صباحاً');
+  if (s.includes('10:00')) found.push('10:00 صباحاً');
+  if (s.includes('12:00')) found.push('12:00 ظهراً');
+  if (s.includes('02:00') || s.includes('2:00')) found.push('2:00 ظهراً');
+  return found.length > 0 ? found : [s];
+};
+
+export const toggleTimeSlotSelection = (currentSlots, slotValue) => {
+  if (slotValue === 'أي وقت يناسبكم') {
+    return ['أي وقت يناسبكم'];
+  }
+  const base = (currentSlots || []).filter(s => s !== 'أي وقت يناسبكم');
+  if (base.includes(slotValue)) {
+    if (base.length <= 1) return base;
+    return base.filter(s => s !== slotValue);
+  } else {
+    const chronological = ['8:00 صباحاً', '10:00 صباحاً', '12:00 ظهراً', '2:00 ظهراً'];
+    const updated = [...base, slotValue];
+    updated.sort((a, b) => chronological.indexOf(a) - chronological.indexOf(b));
+    return updated;
+  }
+};
 
 export const extractOrderTimeSlot = (order) => {
   if (!order) return null;
   const combined = `${order.delivery_notes || ''} ${order.notes || ''}`;
   const match = combined.match(/\[توقيت التسليم المفضل:\s*([^\]]+)\]/);
   if (match && match[1]) return match[1].trim();
-  if (combined.includes('08:00') || combined.includes('8:00')) return '8:00 صباحاً';
-  if (combined.includes('10:00')) return '10:00 صباحاً';
-  if (combined.includes('12:00')) return '12:00 ظهراً';
-  if (combined.includes('02:00') || combined.includes('2:00')) return '2:00 ظهراً';
+  if (combined.includes('أي وقت') || combined.includes('اي وقت')) return 'أي وقت يناسبكم';
+  const found = [];
+  if (combined.includes('08:00') || combined.includes('8:00')) found.push('8:00 صباحاً');
+  if (combined.includes('10:00')) found.push('10:00 صباحاً');
+  if (combined.includes('12:00')) found.push('12:00 ظهراً');
+  if (combined.includes('02:00') || combined.includes('2:00')) found.push('2:00 ظهراً');
+  if (found.length > 0) return found.join(' أو ');
   return null;
 };
 
@@ -49,7 +90,7 @@ export const OrderTracking = () => {
   const [editNotice, setEditNotice] = useState('');
 
   // Delivery Time Slot Editing State
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState(['10:00 صباحاً']);
   const [isUpdatingSlot, setIsUpdatingSlot] = useState(false);
   const [slotFeedback, setSlotFeedback] = useState(null);
 
@@ -161,21 +202,27 @@ export const OrderTracking = () => {
   useEffect(() => {
     if (order) {
       const existing = extractOrderTimeSlot(order);
-      setSelectedTimeSlot(existing || '10:00 صباحاً');
+      if (existing) {
+        setSelectedTimeSlots(parseDeliveryTimeSlots(existing));
+      } else {
+        setSelectedTimeSlots(['10:00 صباحاً']);
+      }
       setSlotFeedback(null);
     }
   }, [order?.id, order?.delivery_notes, order?.notes]);
 
-  const handleSaveDeliveryTimeSlot = async (slotToSave) => {
-    if (!order || !slotToSave || isUpdatingSlot) return;
+  const handleSaveDeliveryTimeSlot = async (slotsToSave) => {
+    const slotsArray = Array.isArray(slotsToSave) ? slotsToSave : selectedTimeSlots;
+    const formattedSlotStr = formatSelectedSlots(slotsArray, 'ar');
+    if (!order || !formattedSlotStr || isUpdatingSlot) return;
     setIsUpdatingSlot(true);
     setSlotFeedback(null);
 
     try {
       const currentNotes = order.notes || '';
       const cleanedNotes = currentNotes.replace(/\[توقيت التسليم المفضل:[^\]]+\]\s*/g, '').trim();
-      const newNotes = `[توقيت التسليم المفضل: ${slotToSave}]${cleanedNotes ? ` ${cleanedNotes}` : ''}`;
-      const newDeliveryNotes = `[توقيت التسليم المفضل: ${slotToSave}]`;
+      const newNotes = `[توقيت التسليم المفضل: ${formattedSlotStr}]${cleanedNotes ? ` ${cleanedNotes}` : ''}`;
+      const newDeliveryNotes = `[توقيت التسليم المفضل: ${formattedSlotStr}]`;
 
       // 1. Update database orders table
       const { data, error } = await supabase
@@ -208,8 +255,8 @@ export const OrderTracking = () => {
           user_id: null,
           title_ar: `تحديث موعد التسليم للطلب #${orderNum}`,
           title_en: `Delivery Time Slot Updated #${orderNum}`,
-          message_ar: `قام الزبون ${customerName} بتحديد/تعديل موعد التسليم المفضل إلى: ${slotToSave} (الطلب #${orderNum}). يرجى مراجعة الطلب وتأكيد الموعد عبر الواتساب.`,
-          message_en: `Customer ${customerName} set/updated preferred delivery time slot to: ${slotToSave} for order #${orderNum}.`,
+          message_ar: `قام الزبون ${customerName} بتحديد/تعديل موعد التسليم المفضل إلى: ${formattedSlotStr} (الطلب #${orderNum}). يرجى مراجعة الطلب وتأكيد الموعد عبر الواتساب.`,
+          message_en: `Customer ${customerName} set/updated preferred delivery time slot to: ${formattedSlotStr} for order #${orderNum}.`,
           type: 'order_status',
           is_read: false
         });
@@ -232,8 +279,8 @@ export const OrderTracking = () => {
       setSlotFeedback({
         type: 'success',
         text: isRtl
-          ? `✓ تم حفظ موعد التسليم (${slotToSave}) بنجاح! سيتم التواصل معك عبر الواتساب لتأكيد الاستلام.`
-          : `✓ Preferred delivery time (${slotToSave}) saved! We will contact you via WhatsApp to confirm.`
+          ? `✓ تم حفظ وتأكيد موعد التسليم (${formattedSlotStr}) بنجاح! سيتم التواصل معك عبر الواتساب لتأكيد الاستلام.`
+          : `✓ Preferred delivery time (${formattedSlotStr}) saved! We will contact you via WhatsApp to confirm.`
       });
     } catch (err) {
       console.error('Error updating delivery time slot:', err);
@@ -568,7 +615,9 @@ export const OrderTracking = () => {
           {(() => {
             const existingSlot = extractOrderTimeSlot(order);
             const isDeliveredOrCancelled = order.status === 'delivered' || order.status === 'cancelled';
-            const hasChanged = selectedTimeSlot && selectedTimeSlot !== existingSlot;
+            const formattedSelected = formatSelectedSlots(selectedTimeSlots, isRtl ? 'ar' : 'en');
+            const hasChanged = existingSlot ? formattedSelected !== existingSlot : true;
+            const existingSlotsArray = parseDeliveryTimeSlots(existingSlot);
 
             return (
               <div
@@ -606,8 +655,8 @@ export const OrderTracking = () => {
                       </h3>
                       <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0.2rem 0 0 0' }}>
                         {isRtl
-                          ? 'يمكنك تحديد أو تعديل التوقيت المناسب لجدولك، وسيصل إشعار للإدارة لتأكيد الطلب والموعد عبر الواتساب 📲'
-                          : 'Set or update your preferred delivery time; admins will receive an update to confirm via WhatsApp 📲'}
+                          ? 'يمكنك تحديد توقيت واحد أو عدة أوقات تناسبك، وسيصل إشعار للإدارة لتأكيد الطلب والموعد عبر الواتساب 📲'
+                          : 'Set one or multiple preferred times; admins will receive an update to confirm via WhatsApp 📲'}
                       </p>
                     </div>
                   </div>
@@ -627,7 +676,7 @@ export const OrderTracking = () => {
                       fontWeight: 800
                     }}>
                       <CheckCircle2 size={15} />
-                      <span>{isRtl ? `الموعد الحالي: ${existingSlot}` : `Current: ${existingSlot}`}</span>
+                      <span>{isRtl ? `المعتمد: ${existingSlot}` : `Confirmed: ${existingSlot}`}</span>
                     </div>
                   ) : (
                     <div style={{
@@ -648,6 +697,28 @@ export const OrderTracking = () => {
                   )}
                 </div>
 
+                {/* Informative flexible multi-selection callout banner */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                  padding: '0.75rem 0.95rem',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                  border: '1px solid rgba(59, 130, 246, 0.25)',
+                  color: '#1d4ed8',
+                  fontSize: '0.82rem',
+                  lineHeight: 1.55
+                }}>
+                  <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>💡</span>
+                  <div>
+                    <strong style={{ fontWeight: 800 }}>{isRtl ? 'مرونة المواعيد:' : 'Flexible Timing:'}</strong>{' '}
+                    {isRtl
+                      ? 'يمكنك اختيار أكثر من توقيت يناسبك (مثلاً: 8:00 و 10:00 صباحاً معاً)، أو اختيار «أي وقت يناسبكم» لتسليمها بالوقت المتاح لفريق العمل.'
+                      : 'You can choose multiple times (e.g. 8:00 AM & 10:00 AM together), or select "Any time suits you".'}
+                  </div>
+                </div>
+
                 {/* Explanatory banner if not set yet */}
                 {!existingSlot && !isDeliveredOrCancelled && (
                   <div style={{
@@ -665,8 +736,8 @@ export const OrderTracking = () => {
                     <Sparkles size={16} style={{ flexShrink: 0 }} />
                     <span>
                       {isRtl
-                        ? 'لم يتم تحديد موعد تسليم عند تأكيد الطلب مسبقاً. اختر الوقت الأنسب لك من الخيارات أدناه واضغط على "تأكيد موعد التسليم".'
-                        : 'No delivery time was chosen at checkout. Select your preferred slot below and confirm.'}
+                        ? 'لم يتم تحديد موعد تسليم عند تأكيد الطلب مسبقاً. حدد الموعد أو الأوقات الأنسب لك واضغط على "تأكيد موعد التسليم".'
+                        : 'No delivery time was chosen at checkout. Select your preferred slots below and confirm.'}
                     </span>
                   </div>
                 )}
@@ -697,15 +768,15 @@ export const OrderTracking = () => {
                   gap: '0.75rem'
                 }}>
                   {TRACKING_DELIVERY_TIME_SLOTS.map((slot) => {
-                    const isSelected = selectedTimeSlot === slot.value;
-                    const isConfirmed = existingSlot === slot.value;
+                    const isSelected = selectedTimeSlots.includes(slot.value);
+                    const isConfirmed = existingSlotsArray.includes(slot.value);
 
                     return (
                       <button
                         key={slot.id}
                         type="button"
                         disabled={isDeliveredOrCancelled || isUpdatingSlot}
-                        onClick={() => setSelectedTimeSlot(slot.value)}
+                        onClick={() => setSelectedTimeSlots(prev => toggleTimeSlotSelection(prev, slot.value))}
                         style={{
                           display: 'flex',
                           flexDirection: 'column',
@@ -739,7 +810,21 @@ export const OrderTracking = () => {
                           {isRtl ? slot.periodAr : slot.periodEn}
                         </span>
 
-                        {isConfirmed && (
+                        {isSelected && (
+                          <span style={{
+                            fontSize: '0.67rem',
+                            fontWeight: 800,
+                            color: 'var(--secondary)',
+                            backgroundColor: 'rgba(104,72,53,0.12)',
+                            padding: '1px 7px',
+                            borderRadius: '999px',
+                            marginTop: '0.2rem'
+                          }}>
+                            ✓ {isRtl ? 'محدد' : 'Selected'}
+                          </span>
+                        )}
+
+                        {isConfirmed && !isSelected && (
                           <span style={{
                             fontSize: '0.67rem',
                             fontWeight: 800,
@@ -749,12 +834,33 @@ export const OrderTracking = () => {
                             borderRadius: '999px',
                             marginTop: '0.2rem'
                           }}>
-                            {isRtl ? 'المعتمد حالياً' : 'Confirmed'}
+                            {isRtl ? 'المعتمد سابقاً' : 'Previous'}
                           </span>
                         )}
                       </button>
                     );
                   })}
+                </div>
+
+                {/* Selected Slots Summary Indicator */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '0.5rem',
+                  padding: '0.55rem 0.85rem',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--accent)',
+                  border: '1px solid var(--border-color)',
+                  fontSize: '0.82rem'
+                }}>
+                  <span style={{ color: 'var(--text-muted)' }}>
+                    {isRtl ? 'المواعيد المحددة للطلب:' : 'Selected slots for order:'}
+                  </span>
+                  <strong style={{ color: 'var(--secondary)', fontWeight: 800 }}>
+                    {formattedSelected}
+                  </strong>
                 </div>
 
                 {/* Footer Controls & WhatsApp Notice */}
@@ -772,7 +878,7 @@ export const OrderTracking = () => {
                       <span>📲</span>
                       <span>
                         {isRtl
-                          ? 'عند حفظ الموعد، ستتلقى الإدارة إشعاراً لتأكيد طلبك وموعد التسليم عبر الواتساب.'
+                          ? 'عند حفظ الموعد، ستتلقى الإدارة إشعاراً فورياً لتأكيد طلبك وموعد التسليم عبر الواتساب.'
                           : 'When saved, admins receive an update to confirm your order and delivery via WhatsApp.'}
                       </span>
                     </div>
@@ -781,7 +887,7 @@ export const OrderTracking = () => {
                       <button
                         type="button"
                         disabled={isUpdatingSlot}
-                        onClick={() => handleSaveDeliveryTimeSlot(selectedTimeSlot)}
+                        onClick={() => handleSaveDeliveryTimeSlot(selectedTimeSlots)}
                         className="btn btn-secondary"
                         style={{
                           padding: '0.65rem 1.4rem',
@@ -798,8 +904,8 @@ export const OrderTracking = () => {
                             <span>💾</span>
                             <span>
                               {!existingSlot
-                                ? (isRtl ? `تأكيد موعد التسليم (${selectedTimeSlot})` : `Confirm Delivery Time (${selectedTimeSlot})`)
-                                : (isRtl ? `حفظ وتعديل الموعد إلى (${selectedTimeSlot})` : `Save & Update to (${selectedTimeSlot})`)}
+                                ? (isRtl ? `تأكيد موعد التسليم (${formattedSelected})` : `Confirm Delivery Time (${formattedSelected})`)
+                                : (isRtl ? `حفظ وتعديل الموعد إلى (${formattedSelected})` : `Save & Update to (${formattedSelected})`)}
                             </span>
                           </>
                         )}
