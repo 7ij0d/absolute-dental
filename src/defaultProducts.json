@@ -693,5 +693,25 @@
     "details_ar": "المنتج: سيليكون لايت بودي لاصقود سيلاكسيل (Lascod Silaxil Light Body)\nالنوع: C-Silicone Precision Wash\nسعر البيع: 70.00 د.ل\nسعر التكلفة: 62.00 د.ل\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
     "details_en": "Product: Lascod Silaxil Light Body Precision Wash\nSelling Price: 70.00 LYD\nCost Price: 62.00 LYD\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
     "sort_order": 14
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000117",
+    "name_ar": "معجون مصلب سيليكون لاصقود إنرسيل (Lascod Enersyl Activator Paste – 60ml)",
+    "name_en": "Lascod Enersyl Activator Paste – Catalyst (60 ml)",
+    "price": 65,
+    "compare_at_price": null,
+    "availability": "by_order",
+    "stock_quantity": 0,
+    "subject_id": "33000000-0000-0000-0000-000000000033",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000023"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-enersyl-activator-paste-60ml.png",
+    "description_ar": "معجون مصلب ومنشط كيميائي عيادي (Catalyst / Activator Gel-Paste) من شركة Lascod الإيطالية. مخصص لتصلب وتفاعل مطاط السيليكون التكاثفي بنوعيه: سيلاكسيل بّتي (Silaxil Putty) وسيلاكسيل لايت بودي (Silaxil Light Body). يتميز بلونه الأزرق المميز لتسهيل مراقبة تجانس الخلط (Homogeneous Mixing) بدقة. الحجم: 60 مل.",
+    "description_en": "Clinical universal activator paste/gel (Catalyst) by Lascod (Italy) designed for condensation curing silicones. Perfectly formulated to catalyze both Silaxil Putty and Silaxil Light Body. Features high chromatic contrast in blue to easily verify complete and homogeneous mixing. Volume: 60 ml.",
+    "details_ar": "المنتج: مصلب سيليكون لاصقود إنرسيل (Lascod Enersyl Activator Paste)\nالحجم: 60 مل\nالنوع: Universal Catalyst Paste\nسعر البيع: 65.00 د.ل\nسعر التكلفة: 58.00 د.ل\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
+    "details_en": "Product: Lascod Enersyl Activator Paste (Catalyst)\nVolume: 60 ml\nSelling Price: 65.00 LYD\nCost Price: 58.00 LYD\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
+    "sort_order": 15
   }
 ]
