@@ -639,3 +639,44 @@ export function calculateOrderDeductions(orderItems, currentProducts) {
 
   return Array.from(deductionsMap.values());
 }
+
+export const STUDENT_GUIDE_PRODUCTS = {
+  '2a8f9bde-fb3f-485d-a1bd-d62aa0b83556': {
+    id: '2a8f9bde-fb3f-485d-a1bd-d62aa0b83556',
+    type: 'hardware_store',
+    badgeAr: '💡 إرشاد: متوفرة بمحلات مواد البناء',
+    badgeEn: '💡 Guide: Available at Hardware Stores',
+    shortGuideAr: 'غير متوفرة لدينا؛ يمكنك شراؤها كـ (سباطلة / سكينة معجون) من أي محل مواد بناء.',
+    shortGuideEn: 'Not sold on store; available as putty spatula at any hardware store.',
+    noteAr: 'السباطلة العريضة (Wide Spatula) غير متوفرة لدينا في الموقع؛ يمكنك الذهاب لأي محل مواد بناء وطلب (سباطلة / سكينة معجون) وستفي بالغرض تماماً لتدريب العملي وبسعر رمزي واقتصادي.',
+    noteEn: 'Wide Spatula is not sold on our store. You can easily obtain a standard spatula from any local building materials / hardware store, which works perfectly for practical dental training.'
+  },
+  '72e1069c-4319-42ff-a38c-2af8f8e4e546': {
+    id: '72e1069c-4319-42ff-a38c-2af8f8e4e546',
+    type: 'photocopier_lab',
+    badgeAr: '💡 إرشاد: خذها من المصور للعملي مباشرة',
+    badgeEn: '💡 Guide: Obtain Fresh from College Store',
+    shortGuideAr: 'تتأثر بالحرارة والضوء؛ خذها طازجة من مصور الكلية وأنت ذاهب للعملي.',
+    shortGuideEn: 'Heat/light sensitive; best collected fresh from college store right before lab.',
+    noteAr: 'يُفضل شراء شيتات الواكس (Wax Sheets) مباشرة من مصور/مكتبة الكلية وأنت متجه للمعمل العملي؛ لأن صفائح الواكس حساسة جداً وتتأثر بدرجة الحرارة والرطوبة والضوء، فيجب أخذها واستخدامها طازجة في نفس وقت التدريب العملي.',
+    noteEn: 'It is recommended to buy Wax Sheets directly from the college stationery/photocopier on your way to the lab session. Wax is extremely sensitive to ambient temperature, humidity, and light, so it is best collected fresh right before practical training.'
+  },
+  '7eaed4a6-5d82-480e-b35e-0ca2d15c90dc': {
+    id: '7eaed4a6-5d82-480e-b35e-0ca2d15c90dc',
+    type: 'photocopier_lab',
+    badgeAr: '💡 إرشاد: خذها من المصور للعملي مباشرة',
+    badgeEn: '💡 Guide: Obtain Fresh from College Store',
+    shortGuideAr: 'تتأثر بالضوء والحرارة؛ خذها طازجة من مصور الكلية وأنت ذاهب للعملي.',
+    shortGuideEn: 'Light/heat sensitive; best collected fresh from college store right before lab.',
+    noteAr: 'يُفضل شراء صفائح الأكريل الضوئي (Light-Curing Baseplates) من مصور/مكتبة الكلية وأنت متجه للمعمل العملي؛ لأنها مادة حساسة للغاية للضوء والحرارة وتتصلب بالتخزين الطويل، لذا يجب أخذها واستخدامها طازجة في نفس وقت التدريب العملي.',
+    noteEn: 'It is recommended to purchase Light Curing Acrylic Baseplates directly from the college stationery/photocopier on your way to practical training, as they are light/heat sensitive and best used fresh.'
+  }
+};
+
+export function isStudentGuideProduct(productId) {
+  return Boolean(productId && STUDENT_GUIDE_PRODUCTS[productId]);
+}
+
+export function getStudentGuideInfo(productId) {
+  return (productId && STUDENT_GUIDE_PRODUCTS[productId]) || null;
+}

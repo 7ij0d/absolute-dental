@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useStorageImage } from '../utils/storageImage';
-import { isBundleProduct, getBundleDefinition, getProductSizedConfig } from '../utils/productInventoryEngine';
+import { isBundleProduct, getBundleDefinition, getProductSizedConfig, getStudentGuideInfo } from '../utils/productInventoryEngine';
 import { ShoppingCart, Check, Heart, Sparkles } from 'lucide-react';
 
 export const ProductCard = ({ product }) => {
@@ -64,17 +64,21 @@ export const ProductCard = ({ product }) => {
     }
   };
 
+  const guideInfo = getStudentGuideInfo(product.id);
+  const isGuide = Boolean(guideInfo);
   const isOffer = isBundleProduct(product.id);
   const isByOrder = product.availability === 'by_order';
-  const isOutOfStock = !isByOrder && (product.effectiveStock !== undefined
-    ? product.effectiveStock <= 0
-    : (!isOffer && product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 0 && !product.shared_inventory_product_id));
-  const isUnavailable = !isByOrder && (product.availability === 'unavailable' || isOutOfStock);
-  const isComingSoon = product.availability === 'coming_soon';
+  // Per store directive: Keep catalog items available even if stock is zero, except special student guides
+  const isUnavailable = false;
+  const isComingSoon = !isGuide && product.availability === 'coming_soon';
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isGuide) {
+      navigate(`/product/${product.id}`);
+      return;
+    }
     if (isUnavailable || isComingSoon) return;
 
     if (sizedConfig && !selectedSize) {
@@ -137,6 +141,7 @@ export const ProductCard = ({ product }) => {
 
         {/* Status Badges */}
         <div className="product-card-badge">
+          {isGuide && <span className="badge" style={{ background: 'linear-gradient(135deg, #d97706, #b45309)', color: '#fff', boxShadow: '0 2px 6px rgba(217,119,6,0.35)' }}>{lang === 'ar' ? '💡 إرشاد للطلبة' : '💡 Student Guide'}</span>}
           {isByOrder && <span className="badge badge-by-order" style={{ background: 'linear-gradient(135deg, #4f46e5, #3730a3)', color: '#fff', boxShadow: '0 2px 6px rgba(79,70,229,0.35)' }}>{lang === 'ar' ? 'بالطلب' : 'By Order'}</span>}
           {isOffer && !isUnavailable && <span className="badge badge-discount" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff' }}>{lang === 'ar' ? 'عرض خاص' : 'Special Offer'}</span>}
           {discountPercent > 0 && <span className="badge badge-discount">-{discountPercent}%</span>}
@@ -323,6 +328,35 @@ export const ProductCard = ({ product }) => {
         )}
 
         {/* Add to Cart Button (Touch-Friendly & Always Accessible) */}
+        {isGuide ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate(`/product/${product.id}`);
+            }}
+            className="product-add-cart-btn"
+            style={{
+              width: '100%',
+              padding: '0.6rem 0.8rem',
+              borderRadius: '10px',
+              border: '1px solid rgba(217, 119, 6, 0.4)',
+              fontSize: '0.84rem',
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.45rem',
+              cursor: 'pointer',
+              backgroundColor: 'rgba(245, 158, 11, 0.12)',
+              color: '#B45309',
+              boxShadow: '0 2px 6px rgba(217, 119, 6, 0.15)'
+            }}
+          >
+            <span>💡 {lang === 'ar' ? 'عرض توجيه وإرشاد الطلبة' : 'View Student Guide'}</span>
+          </button>
+        ) : (
         <button
           onClick={handleAddToCart}
           disabled={isUnavailable || isComingSoon}
@@ -405,6 +439,7 @@ export const ProductCard = ({ product }) => {
             </span>
           )}
         </button>
+        )}
       </div>
     </div>
   );

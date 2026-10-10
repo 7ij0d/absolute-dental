@@ -14,12 +14,13 @@ import {
   computeEffectiveStock,
   CANONICAL_MULTI_UNITS,
   getPhysicalStockBreakdown,
-  getProductSizedConfig
+  getProductSizedConfig,
+  getStudentGuideInfo
 } from '../utils/productInventoryEngine';
 import {
   ShoppingCart, Heart, Check, Plus, Minus,
   ChevronLeft, ChevronRight, ArrowLeft, ArrowRight,
-  Package, AlertCircle, CheckCircle2, Clock, XCircle,
+  Package, AlertCircle, CheckCircle2, Clock, XCircle, Info,
   Sparkles, Layers, Box, Tag, ArrowLeftRight, ShieldAlert
 } from 'lucide-react';
 
@@ -402,15 +403,18 @@ export const ProductDetails = () => {
   };
 
   // Availability computations
+  const guideInfo = getStudentGuideInfo(product?.id);
+  const isGuide = Boolean(guideInfo);
   const isByOrder = product?.availability === 'by_order';
-  const isUnavailable = !isByOrder && (product?.availability === 'unavailable' || (effectiveStock !== null && effectiveStock <= 0));
-  const isComingSoon = product?.availability === 'coming_soon';
-  const isOrderable = !isUnavailable && !isComingSoon;
+  // Per store directive: Keep catalog items available even if stock is zero, except student guides
+  const isUnavailable = false;
+  const isComingSoon = !isGuide && product?.availability === 'coming_soon';
+  const isOrderable = !isGuide && !isUnavailable && !isComingSoon;
 
   const selectedSizeDef = (sizedConfig && selectedSize) ? sizedConfig.sizes.find(s => s.size === selectedSize) : null;
   const maxStockLimit = selectedSizeDef
     ? selectedSizeDef.stock
-    : (isByOrder ? 99 : (effectiveStock !== null ? Math.max(1, effectiveStock) : (product?.stock_quantity || 99)));
+    : 99;
 
   const handleQtyChange = (delta) => {
     setQuantity(prev => {
@@ -742,7 +746,12 @@ export const ProductDetails = () => {
 
             {/* Availability Status Badge (Requirement 8) */}
             <div className="product-status-row">
-              {isComingSoon ? (
+              {isGuide ? (
+                <span className="product-status-badge" style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#D97706', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.8rem', borderRadius: '999px', fontWeight: 800, fontSize: '0.82rem' }}>
+                  <Info size={14} />
+                  <span>{lang === 'ar' ? guideInfo.badgeAr : guideInfo.badgeEn}</span>
+                </span>
+              ) : isComingSoon ? (
                 <span className="product-status-badge status-coming-soon">
                   <Clock size={14} />
                   <span>{lang === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
@@ -764,6 +773,26 @@ export const ProductDetails = () => {
                 </span>
               )}
             </div>
+
+            {/* Student Guide Advisory Card */}
+            {guideInfo && (
+              <div style={{
+                margin: '1.25rem 0',
+                padding: '1.25rem 1.5rem',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(217, 119, 6, 0.05))',
+                border: '1.5px solid rgba(245, 158, 11, 0.4)',
+                boxShadow: '0 4px 16px rgba(245, 158, 11, 0.08)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem', color: '#92400E', fontWeight: 900, fontSize: '1.02rem' }}>
+                  <Info size={20} color="#D97706" />
+                  <span>{lang === 'ar' ? '💡 دليل وتوجيه عملي لطلبة الأسنان' : '💡 Student Practical Advisory'}</span>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.92rem', color: '#78350F', lineHeight: 1.75, fontWeight: 500 }}>
+                  {lang === 'ar' ? guideInfo.noteAr : guideInfo.noteEn}
+                </p>
+              </div>
+            )}
 
             {/* Admin-Only Inventory Indicator */}
             {isUserAdmin && (
@@ -962,6 +991,28 @@ export const ProductDetails = () => {
                 <p style={{ fontSize: '0.82rem', color: '#8C7E72', margin: 0 }}>
                   {lang === 'ar' ? 'تابع الموقع لمعرفة مواعيد الوصول والتسليم' : 'Check back for arrival and delivery schedule'}
                 </p>
+              </div>
+            ) : isGuide ? (
+              <div
+                style={{
+                  padding: '1.25rem',
+                  borderRadius: '16px',
+                  backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                  border: '1.5px solid rgba(245, 158, 11, 0.35)',
+                  color: '#92400E',
+                  fontWeight: 800,
+                  fontSize: '0.92rem',
+                  textAlign: 'center',
+                  marginTop: '0.5rem',
+                  lineHeight: 1.6
+                }}
+              >
+                <div style={{ fontSize: '1.05rem', fontWeight: 900, marginBottom: '0.35rem' }}>
+                  {lang === 'ar' ? guideInfo.badgeAr : guideInfo.badgeEn}
+                </div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#B45309' }}>
+                  {lang === 'ar' ? guideInfo.shortGuideAr : guideInfo.shortGuideEn}
+                </div>
               </div>
             ) : isUnavailable ? (
               <div
@@ -1229,7 +1280,9 @@ export const ProductDetails = () => {
                 <div className="product-spec-row">
                   <span className="spec-label">{lang === 'ar' ? 'حالة التوفر' : 'Availability'}</span>
                   <span className="spec-value">
-                    {isByOrder
+                    {isGuide
+                      ? (lang === 'ar' ? '💡 إرشاد وتوجيه للطلبة' : '💡 Student Advisory Guide')
+                      : isByOrder
                       ? (lang === 'ar' ? 'متوفر بالطلب (By Order)' : 'Available By Order')
                       : isComingSoon
                       ? (lang === 'ar' ? 'قريباً' : 'Coming Soon')

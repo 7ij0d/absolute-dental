@@ -175,39 +175,35 @@
   },
   {
     "id": "72e1069c-4319-42ff-a38c-2af8f8e4e546",
-    "name_ar": "Wax sheet",
-    "name_en": "Wax sheet",
+    "name_ar": "شيتات الواكس (Wax Sheets)",
+    "name_en": "Dental Wax Sheets",
     "price": 0,
     "compare_at_price": null,
-    "availability": "coming_soon",
+    "availability": "available",
     "stock_quantity": 0,
     "subject_id": "22000000-0000-0000-0000-000000000022",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/72e1069c-4319-42ff-a38c-2af8f8e4e546.jpg",
-    "sort_order": 0
-  },
-  {
-    "id": "76f62cd7-df40-4e85-97d1-6fb63b09e2f1",
-    "name_ar": "Round bur - BR 49",
-    "name_en": "Round bur - BR 49",
-    "price": 2,
-    "compare_at_price": null,
-    "availability": "unavailable",
-    "stock_quantity": 0,
-    "subject_id": "22000000-0000-0000-0000-000000000021",
-    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/76f62cd7-df40-4e85-97d1-6fb63b09e2f1.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "description_ar": "💡 دليل وإرشاد للطلبة: خذها مباشرة من مصور/مكتبة الكلية وأنت متجه للمعمل العملي؛ لأن صفائح الواكس حساسة جداً وتتأثر بدرجة الحرارة والرطوبة والضوء، فيجب أخذها واستخدامها طازجة في نفس وقت التدريب العملي.",
+    "description_en": "💡 Student Practical Guide: Please obtain Wax Sheets directly from the college photocopier/stationery on your way to the lab session. Wax is extremely sensitive to ambient temperature, humidity, and light, so it is best collected fresh right before practical training.",
+    "details_ar": "دليل إرشادي للطلبة:\nشيتات الواكس (Wax Sheets) مادة شديدة الحساسية للعوامل الجوية (الحرارة، الرطوبة، والضوء) وقد تفقد قوامها المثالي بالتخزين والنقل المسبق. لذلك ننصح جميع الطلبة بشرائها مباشرة من مصور الكلية في نفس اليوم وأنت ذاهب للمعمل العملي لاستخدامها وهي طازجة ومثالية للتشكيل.",
+    "details_en": "Student Advisory Guide:\nDental wax sheets are highly sensitive to temperature, humidity, and light exposure. For optimal workability, students are strongly advised to purchase them directly from the college store immediately prior to attending practical lab sessions."
   },
   {
     "id": "2a8f9bde-fb3f-485d-a1bd-d62aa0b83556",
-    "name_ar": "Wide spatula",
+    "name_ar": "السباطلة العريضة (Wide Spatula)",
     "name_en": "Wide spatula",
     "price": 0,
     "compare_at_price": null,
-    "availability": "coming_soon",
+    "availability": "available",
     "stock_quantity": 0,
     "subject_id": "22000000-0000-0000-0000-000000000022",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/2a8f9bde-fb3f-485d-a1bd-d62aa0b83556.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "description_ar": "💡 ملاحظة وإرشاد للطلبة: هذه الأداة غير متوفرة لدينا في الموقع؛ يمكنك الذهاب لأي محل مواد بناء وطلب (سباطلة / سكينة معجون) وستفي بالغرض تماماً لتدريب العملي وبسعر رمزي.",
+    "description_en": "💡 Student Guide: This tool is not sold on our store. You can easily obtain a standard spatula from any local building materials / hardware store, which works perfectly for practical dental training.",
+    "details_ar": "ملاحظة هامة للطلبة:\nالسباطلة العريضة (Wide Spatula) ليست متوفرة لدينا في المتجر، ولكن يمكنك شراؤها بسهولة من أي محل مواد بناء قريب (اطلب منه سباطلة / سكينة معجون) وستؤدي الغرض تماماً وبأقل تكلفة.",
+    "details_en": "Important Student Note:\nWide Spatula is not sold on our platform. Students can readily purchase a standard putty spatula from any hardware / building materials shop, which serves the exact same practical purpose."
   },
   {
     "id": "e009eaf4-f041-4706-b27d-daa394e512d3",
@@ -286,15 +282,19 @@
   },
   {
     "id": "7eaed4a6-5d82-480e-b35e-0ca2d15c90dc",
-    "name_ar": "Light Curing Acrylic Resin Baseplates",
+    "name_ar": "صفائح الأكريل الضوئي (Light-Curing Baseplates)",
     "name_en": "Light Curing Acrylic Resin Baseplates",
     "price": 0,
     "compare_at_price": null,
-    "availability": "coming_soon",
+    "availability": "available",
     "stock_quantity": 0,
     "subject_id": "22000000-0000-0000-0000-000000000022",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/7eaed4a6-5d82-480e-b35e-0ca2d15c90dc.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "description_ar": "💡 دليل وإرشاد للطلبة: خذها مباشرة من مصور/مكتبة الكلية وأنت متجه للمعمل العملي؛ لأنها مادة حساسة للغاية للضوء والحرارة وتتصلب بالتخزين الطويل، لذا يجب أخذها طازجة واستخدامها في نفس وقت التدريب العملي.",
+    "description_en": "💡 Student Practical Guide: Please obtain Light-Curing Acrylic Baseplates directly from the college stationery/photocopier on your way to practicals. Acrylic baseplates polymerize upon exposure to light and heat, so they must be taken fresh immediately before lab training.",
+    "details_ar": "دليل إرشادي للطلبة:\nصفائح الأكريل المعالجة ضوئياً (Light Curing Baseplates) تتأثر سريعاً بأشعة الضوء الطبيعي والحرارة والرطوبة مما قد يسبب تصلبها قبل الاستخدام. لهذا السبب، يُنصح الطلبة بأخذها طازجة من مصور الكلية في نفس توقيت المعمل العملي للحفاظ على مرونتها ودقتها في العمل.",
+    "details_en": "Student Advisory Guide:\nLight-curing baseplates are extremely light and heat sensitive, causing premature hardening if stored improperly. Students should collect them directly from the college provider on the day of the lab session for maximum precision."
   },
   {
     "id": "4caab5ef-1c9c-411e-8b6e-76781a07fd97",

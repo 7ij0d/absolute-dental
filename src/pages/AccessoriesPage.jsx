@@ -43,6 +43,7 @@ const FALLBACK_BOXES = [
     name_ar: '16" Dental Tool Box',
     name_en: '16" Dental Tool Box',
     price: 65,
+    stock_quantity: 0,
     desc_ar: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
     desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
     features_ar: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
@@ -63,6 +64,7 @@ const FALLBACK_BOXES = [
     name_ar: '16.5" Organizer Box',
     name_en: '16.5" Organizer Box',
     price: 75,
+    stock_quantity: 0,
     desc_ar: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
     desc_en: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
     features_ar: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
@@ -85,6 +87,7 @@ const FALLBACK_BOXES = [
     name_ar: '17" Professional Box — GT-MAX',
     name_en: '17" Professional Box — GT-MAX',
     price: 95,
+    stock_quantity: 0,
     desc_ar: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a 4-compartment clear organizer and wide main storage.',
     desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a 4-compartment clear organizer and wide main storage.',
     features_ar: ['4-compartment clear lid organizer', 'Wide main storage space', 'Two side + one front latch', 'Strong & Durable plastic'],
@@ -203,24 +206,8 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
   const activeImage = getActiveViewImage();
 
   const handleAddToCart = () => {
-    const cleanColorEn = (selectedColor.label_en || selectedColor.label_ar || 'Standard').replace(/\s*\[(out_of_stock|coming_soon)\]/gi, '').trim();
-    const cleanColorAr = (selectedColor.label_ar || selectedColor.label_en || 'قياسي').replace(/\s*\[(out_of_stock|coming_soon)\]/gi, '').trim();
-    const productNameEn = `${box.name_en || box.name_ar || 'Dental Box'} (${box.size}) — ${cleanColorEn}`;
-    const productNameAr = `${box.name_ar || box.name_en || 'Dental Box'} (${box.size}) — ${cleanColorAr}`;
-    
-    addToCart({
-      id: `${box.id}-${selectedColor.id || 'std'}`,
-      accessory_product_id: box.id,
-      is_accessory: true,
-      name_ar: productNameAr,
-      name_en: productNameEn,
-      price: parseFloat(box.price || 0),
-      image_url: activeImage,
-      stock_quantity: 100
-    }, 1);
-
-    setAddedNotice(true);
-    setTimeout(() => setAddedNotice(false), 2500);
+    // Dental box ordering is temporarily paused
+    return;
   };
 
   const buildWhatsappUrl = () => {
@@ -384,9 +371,14 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
         {/* Title & Size */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
-              {box.size}
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+                {box.size}
+              </h3>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#D97706', background: 'rgba(245, 158, 11, 0.12)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                ⏳ {lang === 'ar' ? 'متوقف مؤقتاً' : 'Paused'}
+              </span>
+            </div>
             {box.price > 0 && (
               <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--secondary)', flexShrink: 0 }}>
                 {box.price} LYD
@@ -486,85 +478,29 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
         {/* ── ORDER BUTTONS (DIRECT SITE CHECKOUT + WHATSAPP) ── */}
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           
-          {/* Direct Add to Cart */}
-          {getColorStatus(selectedColor) === 'out_of_stock' ? (
-            <button
-              type="button"
-              disabled
-              style={{
-                width: '100%',
-                padding: '0.85rem',
-                fontWeight: 800,
-                fontSize: '0.92rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.6rem',
-                minHeight: '44px',
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: 'rgba(239,68,68,0.12)',
-                color: '#EF4444',
-                border: '1px solid rgba(239,68,68,0.3)',
-                cursor: 'not-allowed'
-              }}
-            >
-              <X size={18} />
-              <span>{lang === 'ar' ? 'نفذت الكمية لهذا اللون' : 'Out of Stock for this Color'}</span>
-            </button>
-          ) : getColorStatus(selectedColor) === 'coming_soon' ? (
-            <button
-              type="button"
-              disabled
-              style={{
-                width: '100%',
-                padding: '0.85rem',
-                fontWeight: 800,
-                fontSize: '0.92rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.6rem',
-                minHeight: '44px',
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: 'rgba(245,158,11,0.12)',
-                color: '#F59E0B',
-                border: '1px solid rgba(245,158,11,0.3)',
-                cursor: 'not-allowed'
-              }}
-            >
-              <Info size={18} />
-              <span>{lang === 'ar' ? 'قريباً جداً' : 'Coming Soon'}</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              className="btn btn-secondary"
-              style={{
-                width: '100%',
-                padding: '0.85rem',
-                fontWeight: 800,
-                fontSize: '0.92rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.6rem',
-                minHeight: '44px'
-              }}
-            >
-              {addedNotice ? (
-                <>
-                  <Check size={18} />
-                  <span>{lang === 'ar' ? 'تمت الإضافة للسلة!' : 'Added to Cart!'}</span>
-                </>
-              ) : (
-                <>
-                  <ShoppingCart size={18} />
-                  <span>{lang === 'ar' ? 'إضافة إلى السلة والطلب مباشرة' : 'Add to Cart / Order'}</span>
-                </>
-              )}
-            </button>
-          )}
+          {/* Direct Add to Cart - Temporarily Paused */}
+          <button
+            type="button"
+            disabled
+            style={{
+              width: '100%',
+              padding: '0.85rem',
+              fontWeight: 800,
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.6rem',
+              minHeight: '44px',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'rgba(245, 158, 11, 0.12)',
+              color: '#D97706',
+              border: '1.5px solid rgba(245, 158, 11, 0.35)',
+              cursor: 'not-allowed'
+            }}
+          >
+            <span>⏳ {lang === 'ar' ? 'الطلب متوقف مؤقتاً — سيعاود الفتح قريباً' : 'Temporarily Paused — Reopening Soon'}</span>
+          </button>
 
           {/* Optional WhatsApp Inquiry */}
           <a
@@ -840,7 +776,7 @@ export const AccessoriesPage = () => {
                       padding: '1.25rem'
                     }}>
                       <span style={{
-                        background: 'var(--secondary)',
+                        background: cat.slug === 'dental-boxes' ? '#D97706' : 'var(--secondary)',
                         color: '#ffffff',
                         fontSize: '0.75rem',
                         fontWeight: 800,
@@ -848,7 +784,7 @@ export const AccessoriesPage = () => {
                         borderRadius: '999px',
                         textTransform: 'uppercase'
                       }}>
-                        {cat.slug === 'dental-boxes' ? 'Featured' : 'Category'}
+                        {cat.slug === 'dental-boxes' ? (lang === 'ar' ? 'متوقف مؤقتاً ⏳' : 'Paused ⏳') : 'Category'}
                       </span>
                     </div>
                   </div>
@@ -898,6 +834,43 @@ export const AccessoriesPage = () => {
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
                   Dental Boxes Selection
                 </h2>
+              </div>
+            </div>
+
+            {/* Prominent Temporary Paused Notice Banner */}
+            <div className="card animate-fade-in" style={{
+              padding: '1.25rem 1.5rem',
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(217, 119, 6, 0.05))',
+              border: '1.5px solid rgba(245, 158, 11, 0.35)',
+              borderRadius: 'var(--radius-lg)',
+              marginBottom: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.2rem',
+              boxShadow: '0 4px 16px rgba(245, 158, 11, 0.08)'
+            }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: '50%',
+                background: 'rgba(245, 158, 11, 0.18)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.5rem',
+                flexShrink: 0
+              }}>
+                ⏳
+              </div>
+              <div style={{ flex: 1 }}>
+                <h4 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 900, color: '#92400E' }}>
+                  {lang === 'ar' ? 'طلب البوكسات متوقف مؤقتاً — سنعاود الفتح قريباً جداً 📦✨' : 'Dental Box Orders Temporarily Paused — Reopening Very Soon 📦✨'}
+                </h4>
+                <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.88rem', color: '#B45309', lineHeight: 1.6 }}>
+                  {lang === 'ar'
+                    ? 'نعمل حالياً على فحص وتجهيز الدفعة القادمة من البوكسات وحقائب تنظيم الأدوات، وسيتم إعادة فتح استقبال الطلبات المباشرة قريباً جداً بإذن الله.'
+                    : 'We are currently restocking and preparing the next batch of dental tool boxes. Direct orders will be reopened very soon!'}
+                </p>
               </div>
             </div>
 
