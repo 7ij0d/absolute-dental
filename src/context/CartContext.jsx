@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { isBundleProduct } from '../utils/productInventoryEngine';
+import { isBundleProduct, getBundleDefinition } from '../utils/productInventoryEngine';
+import defaultProductsList from '../defaultProducts.json';
 
 const CartContext = createContext();
 
@@ -93,8 +94,12 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, qty = 1) => {
     setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
       const isOffer = isBundleProduct(product.id);
+      const bundleDef = isOffer ? getBundleDefinition(product.id) : null;
+
+      const cartLineId = product.cart_line_id || (isOffer ? `bundle_${product.id}` : product.id);
+      const existing = prev.find((item) => (item.cart_line_id ? item.cart_line_id === cartLineId : item.id === product.id));
+
       const isByOrder = product.availability === 'by_order';
       const maxAllowed = isByOrder
         ? 999
@@ -105,32 +110,111 @@ export const CartProvider = ({ children }) => {
       if (existing) {
         const newQty = existing.quantity + qty;
         const finalQty = maxAllowed !== undefined && newQty > maxAllowed ? maxAllowed : newQty;
-        return prev.map((item) =>
-          item.id === product.id ? { ...item, ...product, quantity: Math.max(1, finalQty) } : item
-        );
+        return prev.map((item) => {
+          const match = item.cart_line_id ? item.cart_line_id === cartLineId : item.id === product.id;
+          return match ? { ...item, ...product, quantity: Math.max(1, finalQty) } : item;
+        });
       }
-      return [...prev, { ...product, quantity: Math.max(1, qty) }];
+
+      const bundleComponents = bundleDef ? bundleDef.components.map(c => ({
+        productId: c.productId,
+        nameAr: c.nameAr,
+        nameEn: c.nameEn,
+        quantity: c.quantity,
+        normalPrice: c.normalPrice,
+        imageUrl: c.imageUrl
+      })) : null;
+
+      const newItem = {
+        ...product,
+        cart_line_id: cartLineId,
+        is_bundle: Boolean(isOffer),
+        bundle_id: isOffer ? product.id : null,
+        bundle_components: bundleComponents,
+        quantity: Math.max(1, qty),
+        price: isOffer && bundleDef?.bundlePrice !== undefined ? bundleDef.bundlePrice : product.price
+      };
+
+      return [...prev, newItem];
     });
   };
 
-  const removeFromCart = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  /**
+   * Smart synchronization: When an individual component bur belonging to a bundle is removed,
+   * dissolve that bundle representation, remove the component, and keep the remaining components
+   * as individual items in the cart at their individual prices.
+   */
+  const removeBundleComponent = (cartLineId, componentProductId) => {
+    setCartItems((prev) => {
+      const bundleItem = prev.find(it => (it.cart_line_id === cartLineId || it.id === cartLineId) && (it.is_bundle || isBundleProduct(it.id)));
+      if (!bundleItem) return prev;
+
+      const bundleDef = getBundleDefinition(bundleItem.bundle_id || bundleItem.id);
+      if (!bundleDef) {
+        return prev.filter(it => (it.cart_line_id ? it.cart_line_id !== cartLineId : it.id !== cartLineId));
+      }
+
+      // Remaining components of this bundle instance (excluding the removed component)
+      const remainingComponents = bundleDef.components.filter(c => c.productId !== componentProductId);
+
+      // 1. Remove the intact bundle line item
+      const listWithoutBundle = prev.filter(it => (it.cart_line_id ? it.cart_line_id !== cartLineId : it.id !== cartLineId));
+
+      // 2. Add each remaining component as an individual cart item
+      const newItems = [...listWithoutBundle];
+
+      remainingComponents.forEach(comp => {
+        const compQty = comp.quantity * bundleItem.quantity;
+        const existingCompIndex = newItems.findIndex(it => (it.id === comp.productId || it.cart_line_id === comp.productId) && !it.is_bundle);
+
+        if (existingCompIndex >= 0) {
+          // Merge quantity into existing standalone bur
+          newItems[existingCompIndex] = {
+            ...newItems[existingCompIndex],
+            quantity: newItems[existingCompIndex].quantity + compQty
+          };
+        } else {
+          // Find canonical product details from default catalog
+          const catalogProd = defaultProductsList.find(p => p.id === comp.productId) || {};
+          newItems.push({
+            id: comp.productId,
+            cart_line_id: comp.productId,
+            name_ar: comp.nameAr || catalogProd.name_ar || comp.nameEn,
+            name_en: comp.nameEn || catalogProd.name_en,
+            price: comp.normalPrice || catalogProd.price || 2,
+            compare_at_price: catalogProd.compare_at_price || null,
+            image_url: comp.imageUrl || catalogProd.image_url || '',
+            quantity: compQty,
+            is_bundle: false
+          });
+        }
+      });
+
+      return newItems;
+    });
   };
 
-  const updateQuantity = (id, qty) => {
+  const removeFromCart = (idOrCartLineId) => {
+    setCartItems((prev) => prev.filter((item) => (item.cart_line_id ? item.cart_line_id !== idOrCartLineId : item.id !== idOrCartLineId) && item.id !== idOrCartLineId));
+  };
+
+  const updateQuantity = (idOrCartLineId, qty) => {
     if (qty <= 0) {
-      removeFromCart(id);
+      removeFromCart(idOrCartLineId);
       return;
     }
     setCartItems((prev) =>
       prev.map((item) => {
-        if (item.id !== id) return item;
+        const match = item.cart_line_id ? item.cart_line_id === idOrCartLineId : item.id === idOrCartLineId;
+        if (!match) return item;
+
         const isByOrder = item.availability === 'by_order';
+        const isOffer = item.is_bundle || isBundleProduct(item.bundle_id || item.id);
         const maxAllowed = isByOrder
           ? 999
           : (item.effectiveStock !== undefined
             ? item.effectiveStock
-            : (isBundleProduct(item.id) ? 999 : (item.stock_quantity !== undefined ? item.stock_quantity : 999)));
+            : (isOffer ? 999 : (item.stock_quantity !== undefined ? item.stock_quantity : 999)));
         const finalQty = maxAllowed !== undefined && qty > maxAllowed ? maxAllowed : qty;
         return { ...item, quantity: Math.max(1, finalQty) };
       })
@@ -157,6 +241,7 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         updateQuantity,
+        removeBundleComponent,
         clearCart,
         subtotal,
         totalComparePrice,

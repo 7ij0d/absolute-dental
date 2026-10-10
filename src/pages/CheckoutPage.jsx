@@ -8,6 +8,7 @@ import InvoiceView from '../components/InvoiceView';
 import { CheckCircle2, FileText, MapPin, Truck, HelpCircle, Phone } from 'lucide-react';
 import MapPicker from '../components/MapPicker';
 import { createEditHistoryEntry, buildUpdatedStatusNote } from '../utils/orderEditHelper';
+import { isBundleProduct, getBundleDefinition, calculateBundleAvailability, calculateOrderDeductions } from '../utils/productInventoryEngine';
 
 const TRIPOLI_STREETS = [
   'حي الأندلس',
@@ -171,9 +172,23 @@ export const CheckoutPage = () => {
       }
 
       const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      const productIds = cartItems
+      const productIdsSet = new Set();
+      cartItems
         .filter(item => !item.is_accessory && UUID_REGEX.test(String(item.id || '')))
-        .map(item => item.id);
+        .forEach(item => productIdsSet.add(item.id));
+
+      // Also gather all bundle component IDs so component stocks are fetched
+      cartItems.forEach(item => {
+        const bId = item.bundle_id || item.id;
+        if (isBundleProduct(bId)) {
+          const bDef = getBundleDefinition(bId);
+          if (bDef && Array.isArray(bDef.components)) {
+            bDef.components.forEach(c => productIdsSet.add(c.productId));
+          }
+        }
+      });
+
+      const productIds = Array.from(productIdsSet);
 
       const dbProductsMap = new Map();
       const masterMap = new Map();
@@ -206,8 +221,19 @@ export const CheckoutPage = () => {
           }
         }
 
-        // Validate each item
+        // Validate each item (including dynamic bundle component stock)
         for (const item of cartItems) {
+          const bId = item.bundle_id || item.id;
+          if (isBundleProduct(bId)) {
+            const bundleRes = calculateBundleAvailability(bId, dbProductsMap);
+            if (bundleRes.availableCount < item.quantity) {
+              throw new Error(lang === 'ar'
+                ? `❌ المخزون الحالي لا يكفي لتجهيز ${item.quantity} من "${item.name_ar || item.name_en}". المتوفر حالياً كبكدجات: ${bundleRes.availableCount}`
+                : `❌ Insufficient component stock for ${item.quantity} units of "${item.name_en}". Available bundles: ${bundleRes.availableCount}`);
+            }
+            continue;
+          }
+
           const prodData = dbProductsMap.get(item.id);
           if (!prodData) continue;
 
@@ -251,15 +277,23 @@ export const CheckoutPage = () => {
           total_price: finalTotal,
           discount_amount: totalDiscount,
           shipping_fee: getShippingFee(),
-          items: cartItems.map((item) => ({
-            id: item.id,
-            name_ar: item.name_ar,
-            name_en: item.name_en,
-            quantity: item.quantity,
-            price: item.price,
-            image_url: item.image_url,
-            is_accessory: Boolean(item.is_accessory || !dbProductsMap.has(item.id))
-          })),
+          items: cartItems.map((item) => {
+            const isBundle = Boolean(item.is_bundle || isBundleProduct(item.bundle_id || item.id));
+            const bDef = isBundle ? getBundleDefinition(item.bundle_id || item.id) : null;
+            return {
+              id: item.id,
+              productId: item.productId || item.id,
+              name_ar: item.name_ar,
+              name_en: item.name_en,
+              quantity: item.quantity,
+              price: item.price,
+              image_url: item.image_url,
+              is_bundle: isBundle,
+              bundle_id: isBundle ? (item.bundle_id || item.id) : null,
+              bundle_components: isBundle ? (item.bundle_components || bDef?.components || []) : null,
+              is_accessory: Boolean(item.is_accessory || (!dbProductsMap.has(item.id) && !isBundle))
+            };
+          }),
           status_note: updatedStatusNote,
           updated_at: new Date().toISOString()
         };
@@ -328,15 +362,23 @@ export const CheckoutPage = () => {
         total_price: finalTotal,
         discount_amount: totalDiscount,
         shipping_fee: getShippingFee(),
-        items: cartItems.map((item) => ({
-          id: item.id,
-          name_ar: item.name_ar,
-          name_en: item.name_en,
-          quantity: item.quantity,
-          price: item.price,
-          image_url: item.image_url,
-          is_accessory: Boolean(item.is_accessory || !dbProductsMap.has(item.id))
-        })),
+        items: cartItems.map((item) => {
+          const isBundle = Boolean(item.is_bundle || isBundleProduct(item.bundle_id || item.id));
+          const bDef = isBundle ? getBundleDefinition(item.bundle_id || item.id) : null;
+          return {
+            id: item.id,
+            productId: item.productId || item.id,
+            name_ar: item.name_ar,
+            name_en: item.name_en,
+            quantity: item.quantity,
+            price: item.price,
+            image_url: item.image_url,
+            is_bundle: isBundle,
+            bundle_id: isBundle ? (item.bundle_id || item.id) : null,
+            bundle_components: isBundle ? (item.bundle_components || bDef?.components || []) : null,
+            is_accessory: Boolean(item.is_accessory || (!dbProductsMap.has(item.id) && !isBundle))
+          };
+        }),
         created_at: new Date().toISOString()
       };
 
@@ -380,19 +422,22 @@ export const CheckoutPage = () => {
       clearCart();
       setPlacedOrder({ ...newOrder, order_items: cartItems });
 
-      // 4. Background Sync: stock deduction & admin notification (non-blocking)
+      // 4. Background Sync: atomic stock deduction & admin notification (non-blocking)
       (async () => {
         try {
           const syncTasks = [];
-          for (const item of cartItems) {
-            const prodData = dbProductsMap.get(item.id);
+          // Use authoritative deduction engine: bundles deduct strictly from individual component burs!
+          const deductions = calculateOrderDeductions(cartItems, dbProductsMap);
+
+          for (const d of deductions) {
+            const prodData = dbProductsMap.get(d.productId);
             if (!prodData) continue;
 
             if (prodData.shared_inventory_product_id) {
               const master = masterMap.get(prodData.shared_inventory_product_id);
               if (master) {
                 const mult = prodData.unit_multiplier || 1;
-                const deduct = item.quantity * mult;
+                const deduct = d.deductUnits * mult;
                 const newMasterQty = Math.max(0, (master.stock_quantity || 0) - deduct);
                 master.stock_quantity = newMasterQty;
                 const availability = newMasterQty < 5 * mult ? 'limited_quantity' : 'available';
@@ -401,10 +446,10 @@ export const CheckoutPage = () => {
                 );
               }
             } else {
-              const newQty = Math.max(0, (prodData.stock_quantity || 0) - item.quantity);
+              const newQty = Math.max(0, (prodData.stock_quantity || 0) - d.deductUnits);
               const availability = newQty < 5 ? 'limited_quantity' : 'available';
               syncTasks.push(
-                supabase.from('products').update({ stock_quantity: newQty, availability }).eq('id', item.id)
+                supabase.from('products').update({ stock_quantity: newQty, availability }).eq('id', d.productId)
               );
             }
           }

@@ -8,6 +8,8 @@
  * 4. Guaranteeing Totals render ONLY on the final page of the invoice.
  */
 
+import { isBundleProduct, getBundleDefinition } from './productInventoryEngine.js';
+
 /**
  * Normalizes order items into an immutable array with stable line item IDs.
  * Guarantees that the original order.items / order.order_items array is NEVER mutated.
@@ -36,6 +38,10 @@ export function normalizeOrderItems(order) {
     const imageUrl = item.products?.main_image_url || item.products?.image_url || item.image_url || snapshotItem?.image_url || '';
     const sellingUnit = item.selling_unit || item.sellingUnit || snapshotItem?.selling_unit || snapshotItem?.sellingUnit || null;
 
+    const isBundle = Boolean(item.is_bundle || snapshotItem?.is_bundle || isBundleProduct(item.bundle_id || snapshotItem?.bundle_id || productId));
+    const bundleDef = isBundle ? getBundleDefinition(item.bundle_id || snapshotItem?.bundle_id || productId) : null;
+    const bundleComponents = item.bundle_components || snapshotItem?.bundle_components || bundleDef?.components || null;
+
     return {
       lineItemId: `line_${index}_${productId}`,
       index,
@@ -46,7 +52,9 @@ export function normalizeOrderItems(order) {
       quantity,
       lineTotal: price * quantity,
       imageUrl,
-      sellingUnit
+      sellingUnit,
+      isBundle,
+      bundleComponents
     };
   });
 }

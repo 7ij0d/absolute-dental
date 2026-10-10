@@ -1,5 +1,25 @@
 [
   {
+    "id": "22000000-0000-0000-0000-000000000201",
+    "name_ar": "بكج بيرات الفكسد (Fixed Prosthodontics Burs Bundle)",
+    "name_en": "Fixed Prosthodontics Burs Bundle",
+    "description_ar": "حزمة متكاملة تجمع البيرات الخمسة الأساسية لمادة صناعة الأسنان الثابتة (TC 10, TF12 Blue, TF12 Yellow, FO 32, WR 13) دون الحاجة لطلب كل بير بمفرده.",
+    "description_en": "Complete bundle containing the 5 essential burs for Fixed Prosthodontics: TC 10 (Blue), TF12 (Blue), TF12 (Yellow), FO 32 (Yellow), WR 13 (Wheel Round).",
+    "details_ar": "محتويات البكج:\n1. TC 10 (Blue) — Needle Bur\n2. TF12 (Blue) — Long Taper with Flat End\n3. TF12 (Yellow) — Long Taper with Flat End\n4. FO 32 (Yellow) — Diamond Flame Bur\n5. WR 13 — Wheel Round Bur",
+    "details_en": "Included in bundle:\n1. TC 10 (Blue) — Needle Bur\n2. TF12 (Blue) — Long Taper with Flat End\n3. TF12 (Yellow) — Long Taper with Flat End\n4. FO 32 (Yellow) — Diamond Flame Bur\n5. WR 13 — Wheel Round Bur",
+    "price": 10,
+    "compare_at_price": 10,
+    "stock_quantity": 0,
+    "availability": "available",
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "subject_id": "22000000-0000-0000-0000-000000000023",
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/fixed-prostho-burs-bundle.png",
+    "is_featured": true,
+    "is_active": true,
+    "is_archived": false,
+    "sort_order": 1
+  },
+  {
     "id": "8806943f-d3bf-443b-b623-7002b354a355",
     "name_ar": "قبضة توربين أصلية COXO C207 (بنفسجي)",
     "name_en": "COXO High-Speed Handpiece C207 (Purple)",

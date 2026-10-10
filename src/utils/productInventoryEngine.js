@@ -28,6 +28,54 @@ export const CANONICAL_BUNDLES = {
         normalPrice: 125
       }
     ]
+  },
+  '22000000-0000-0000-0000-000000000201': {
+    id: '22000000-0000-0000-0000-000000000201',
+    nameAr: 'بكج بيرات الفكسد (Fixed Prosthodontics Burs Bundle)',
+    nameEn: 'Fixed Prosthodontics Burs Bundle',
+    bundlePrice: 10,
+    components: [
+      {
+        productId: '627bdb62-3364-497b-8aa6-3b911ad78f26',
+        nameAr: 'niddle bur - TC 10 (Blue)',
+        nameEn: 'TC 10 (Blue) — Needle Bur',
+        quantity: 1,
+        normalPrice: 2,
+        imageUrl: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/627bdb62-3364-497b-8aa6-3b911ad78f26.jpg'
+      },
+      {
+        productId: 'c78f57a0-54d0-4602-aa05-d92a82398a2f',
+        nameAr: 'Long taper with flat end - TF12 (blue)',
+        nameEn: 'TF12 (Blue) — Long Taper with Flat End',
+        quantity: 1,
+        normalPrice: 2,
+        imageUrl: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/c78f57a0-54d0-4602-aa05-d92a82398a2f.jpg'
+      },
+      {
+        productId: '36e0d204-3613-44b0-b74e-0ba7869420c4',
+        nameAr: 'Long taper with flat end - TF12 (yellow)',
+        nameEn: 'TF12 (Yellow) — Long Taper with Flat End',
+        quantity: 1,
+        normalPrice: 2,
+        imageUrl: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/36e0d204-3613-44b0-b74e-0ba7869420c4.jpg'
+      },
+      {
+        productId: '187f6429-fee1-4f50-8edc-2a18bac1de35',
+        nameAr: 'diamond flame bur - FO 32 (yellow)',
+        nameEn: 'FO 32 (Yellow) — Diamond Flame Bur',
+        quantity: 1,
+        normalPrice: 2,
+        imageUrl: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/187f6429-fee1-4f50-8edc-2a18bac1de35.jpg'
+      },
+      {
+        productId: 'd2a56c58-bf46-47aa-b803-6546aa7491c5',
+        nameAr: 'Wheel Round Bur - WR 13',
+        nameEn: 'WR 13 — Wheel Round Bur',
+        quantity: 1,
+        normalPrice: 2,
+        imageUrl: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/d2a56c58-bf46-47aa-b803-6546aa7491c5.jpg'
+      }
+    ]
   }
 };
 
@@ -373,6 +421,7 @@ export function calculateBundleAvailability(bundleId, allProducts) {
     normalTotalPrice,
     savings,
     availableCount,
+    availableQuantity: availableCount,
     isAvailable,
     componentsStatus
   };
@@ -489,12 +538,17 @@ export function calculateOrderDeductions(orderItems, currentProducts) {
   };
 
   (orderItems || []).forEach(item => {
-    const pId = item.id;
+    const rawId = item.id || item.productId;
     const qty = Number(item.qty || item.quantity) || 1;
 
     // A. Check if item is a commercial bundle/offer
-    if (isBundleProduct(pId)) {
-      const bundle = CANONICAL_BUNDLES[pId];
+    const bundleId = (item.is_bundle && item.bundle_id) ||
+      (isBundleProduct(rawId) ? rawId :
+      (isBundleProduct(item.bundle_id) ? item.bundle_id :
+      (isBundleProduct(item.productId) ? item.productId : null)));
+
+    if (bundleId && isBundleProduct(bundleId)) {
+      const bundle = CANONICAL_BUNDLES[bundleId];
       bundle.components.forEach(comp => {
         const componentDeductUnits = comp.quantity * qty;
         recordDeduction(
@@ -505,6 +559,8 @@ export function calculateOrderDeductions(orderItems, currentProducts) {
       });
       return;
     }
+
+    const pId = rawId;
 
     // B. Check if item is a multi-unit pack (e.g. Wax Full Box)
     const multiMeta = CANONICAL_MULTI_UNITS[pId];

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useLanguage } from '../context/LanguageContext';
 import supabase from '../supabaseClient';
 import { createEditHistoryEntry, buildUpdatedStatusNote } from '../utils/orderEditHelper';
-import { CANONICAL_MULTI_UNITS } from '../utils/productInventoryEngine';
+import { CANONICAL_MULTI_UNITS, isBundleProduct, getBundleDefinition } from '../utils/productInventoryEngine';
 import {
   X,
   Save,
@@ -66,36 +66,52 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
   // Items State with strict canonical product identity retention
   const initialItems = useMemo(() => {
     if (Array.isArray(order.items) && order.items.length > 0) {
-      return order.items.map((it, idx) => ({
-        lineId: it.lineId || `line_${idx}_${it.id || it.productId || idx}`,
-        id: it.productId || it.id,
-        productId: it.productId || it.id,
-        name_ar: it.name_ar,
-        name_en: it.name_en,
-        price: parseFloat(it.price) || 0,
-        quantity: Math.max(1, parseInt(it.quantity) || 1),
-        image_url: it.image_url || '',
-        selling_unit: it.selling_unit || it.sellingUnit || null,
-        selling_unit_id: it.selling_unit_id || it.sellingUnitId || (it.selling_unit?.includes('علبة') ? 'box' : 'piece'),
-        unit_multiplier: parseInt(it.unit_multiplier || it.unitMultiplier) || 1,
-        is_accessory: Boolean(it.is_accessory)
-      }));
+      return order.items.map((it, idx) => {
+        const pId = it.productId || it.id;
+        const isBundle = Boolean(it.is_bundle || isBundleProduct(it.bundle_id || pId));
+        const bDef = isBundle ? getBundleDefinition(it.bundle_id || pId) : null;
+        return {
+          lineId: it.lineId || `line_${idx}_${pId || idx}`,
+          id: pId,
+          productId: pId,
+          name_ar: it.name_ar,
+          name_en: it.name_en,
+          price: parseFloat(it.price) || 0,
+          quantity: Math.max(1, parseInt(it.quantity) || 1),
+          image_url: it.image_url || '',
+          selling_unit: it.selling_unit || it.sellingUnit || (isBundle ? 'بكج متكامل' : null),
+          selling_unit_id: it.selling_unit_id || it.sellingUnitId || (isBundle ? 'bundle' : (it.selling_unit?.includes('علبة') ? 'box' : 'piece')),
+          unit_multiplier: parseInt(it.unit_multiplier || it.unitMultiplier) || 1,
+          is_accessory: Boolean(it.is_accessory),
+          is_bundle: isBundle,
+          bundle_id: isBundle ? (it.bundle_id || pId) : null,
+          bundle_components: isBundle ? (it.bundle_components || bDef?.components || []) : null
+        };
+      });
     }
     if (Array.isArray(order.order_items)) {
-      return order.order_items.map((oi, idx) => ({
-        lineId: oi.lineId || `line_${idx}_${oi.product_id || oi.id}`,
-        id: oi.product_id || oi.id,
-        productId: oi.product_id || oi.id,
-        name_ar: oi.products?.name_ar || oi.name_ar || 'منتج',
-        name_en: oi.products?.name_en || oi.name_en || 'Product',
-        price: parseFloat(oi.price) || 0,
-        quantity: Math.max(1, parseInt(oi.quantity) || 1),
-        image_url: oi.products?.image_url || oi.image_url || '',
-        selling_unit: oi.selling_unit || null,
-        selling_unit_id: oi.selling_unit_id || (oi.selling_unit?.includes('علبة') ? 'box' : 'piece'),
-        unit_multiplier: parseInt(oi.unit_multiplier) || 1,
-        is_accessory: false
-      }));
+      return order.order_items.map((oi, idx) => {
+        const pId = oi.product_id || oi.id;
+        const isBundle = Boolean(oi.is_bundle || isBundleProduct(oi.bundle_id || pId));
+        const bDef = isBundle ? getBundleDefinition(oi.bundle_id || pId) : null;
+        return {
+          lineId: oi.lineId || `line_${idx}_${pId}`,
+          id: pId,
+          productId: pId,
+          name_ar: oi.products?.name_ar || oi.name_ar || 'منتج',
+          name_en: oi.products?.name_en || oi.name_en || 'Product',
+          price: parseFloat(oi.price) || 0,
+          quantity: Math.max(1, parseInt(oi.quantity) || 1),
+          image_url: oi.products?.image_url || oi.image_url || '',
+          selling_unit: oi.selling_unit || (isBundle ? 'بكج متكامل' : null),
+          selling_unit_id: oi.selling_unit_id || (isBundle ? 'bundle' : (oi.selling_unit?.includes('علبة') ? 'box' : 'piece')),
+          unit_multiplier: parseInt(oi.unit_multiplier) || 1,
+          is_accessory: false,
+          is_bundle: isBundle,
+          bundle_id: isBundle ? (oi.bundle_id || pId) : null,
+          bundle_components: isBundle ? (oi.bundle_components || bDef?.components || []) : null
+        };
+      });
     }
     return [];
   }, [order]);
@@ -119,6 +135,17 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
    */
   const getAvailableSellingUnits = (item, catalogList) => {
     const prodId = item.productId || item.id;
+    if (item.is_bundle || isBundleProduct(prodId) || isBundleProduct(item.bundle_id)) {
+      return [
+        {
+          id: 'bundle',
+          nameAr: 'بكج متكامل',
+          nameEn: 'Complete Bundle',
+          multiplier: 1,
+          defaultPrice: item.price
+        }
+      ];
+    }
     const units = [];
 
     // 1. Check CANONICAL_MULTI_UNITS (Wax etc.)
@@ -300,6 +327,8 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
   };
 
   const handleAddProductFromCatalog = (product) => {
+    const isBundle = Boolean(product.is_bundle || isBundleProduct(product.id));
+    const bDef = isBundle ? getBundleDefinition(product.id) : null;
     const existingIndex = items.findIndex((it) => (it.productId || it.id) === product.id);
     if (existingIndex >= 0) {
       handleUpdateItemQuantity(existingIndex, items[existingIndex].quantity + 1);
@@ -315,10 +344,13 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
           price: parseFloat(product.price) || 0,
           quantity: 1,
           image_url: product.image_url || product.main_image_url || '',
-          selling_unit: 'قطعة',
-          selling_unit_id: 'piece',
+          selling_unit: isBundle ? (isRtl ? 'بكج متكامل' : 'Bundle') : 'قطعة',
+          selling_unit_id: isBundle ? 'bundle' : 'piece',
           unit_multiplier: 1,
-          is_accessory: false
+          is_accessory: false,
+          is_bundle: isBundle,
+          bundle_id: isBundle ? product.id : null,
+          bundle_components: isBundle ? (bDef?.components || []) : null
         }
       ]);
     }
@@ -362,7 +394,7 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
         last_admin_edit_at: new Date().toISOString()
       });
 
-      // 2. Update orders table (same order ID, preserving canonical productId)
+      // 2. Update orders table (same order ID, preserving canonical productId & bundle metadata)
       const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const orderPayload = {
         customer_name: customerName,
@@ -378,19 +410,26 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
         discount_amount: parseFloat(discountAmount) || 0,
         subtotal: subtotal,
         total_price: grandTotal,
-        items: items.map((it) => ({
-          id: it.productId || it.id,
-          productId: it.productId || it.id,
-          name_ar: it.name_ar,
-          name_en: it.name_en,
-          price: it.price,
-          quantity: it.quantity,
-          image_url: it.image_url,
-          selling_unit: it.selling_unit || null,
-          selling_unit_id: it.selling_unit_id || null,
-          unit_multiplier: it.unit_multiplier || 1,
-          is_accessory: Boolean(it.is_accessory)
-        })),
+        items: items.map((it) => {
+          const isBundle = Boolean(it.is_bundle || isBundleProduct(it.bundle_id || it.productId || it.id));
+          const bDef = isBundle ? getBundleDefinition(it.bundle_id || it.productId || it.id) : null;
+          return {
+            id: it.productId || it.id,
+            productId: it.productId || it.id,
+            name_ar: it.name_ar,
+            name_en: it.name_en,
+            price: it.price,
+            quantity: it.quantity,
+            image_url: it.image_url,
+            selling_unit: it.selling_unit || null,
+            selling_unit_id: it.selling_unit_id || null,
+            unit_multiplier: it.unit_multiplier || 1,
+            is_accessory: Boolean(it.is_accessory),
+            is_bundle: isBundle,
+            bundle_id: isBundle ? (it.bundle_id || it.productId || it.id) : null,
+            bundle_components: isBundle ? (it.bundle_components || bDef?.components || []) : null
+          };
+        }),
         status_note: updatedStatusNote,
         updated_at: new Date().toISOString()
       };
@@ -768,10 +807,22 @@ export const AdminEditOrderModal = ({ order, onClose, onOrderUpdated }) => {
                               <p style={{ fontWeight: 700, margin: 0, fontSize: '0.88rem' }}>
                                 {isRtl ? (item.name_ar || item.name_en) : (item.name_en || item.name_ar)}
                               </p>
-                              {item.selling_unit && (
+                              {item.selling_unit && !item.is_bundle && (
                                 <span style={{ fontSize: '0.72rem', color: '#b45309', backgroundColor: 'rgba(245, 158, 11, 0.1)', padding: '0.1rem 0.4rem', borderRadius: '4px', display: 'inline-block', marginTop: '0.15rem' }}>
                                   {item.selling_unit}
                                 </span>
+                              )}
+                              {item.is_bundle && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.2rem' }}>
+                                  <span style={{ fontSize: '0.72rem', color: '#00a896', backgroundColor: 'rgba(0, 168, 150, 0.1)', padding: '0.1rem 0.4rem', borderRadius: '4px', display: 'inline-block', fontWeight: 700, width: 'fit-content' }}>
+                                    🎁 {isRtl ? 'بكج متكامل (5 بيرات)' : 'Bundle (5 Burs)'}
+                                  </span>
+                                  {Array.isArray(item.bundle_components) && item.bundle_components.length > 0 && (
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                                      {item.bundle_components.map(c => isRtl ? (c.nameAr || c.nameEn) : (c.nameEn || c.nameAr)).join(' • ')}
+                                    </div>
+                                  )}
+                                </div>
                               )}
                             </div>
                           </div>

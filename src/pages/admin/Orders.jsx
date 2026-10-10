@@ -883,13 +883,27 @@ export const Orders = () => {
                     </div>
                     {ord.order_items?.length > 0 && (
                       <div style={{ fontSize: '0.78rem', color: 'var(--text-main)', marginTop: '0.35rem', lineHeight: '1.4' }}>
-                        {ord.order_items.map((i, idx) => (
-                          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            <span style={{ color: 'var(--secondary)', fontWeight: 800 }}>•</span>
-                            <span>{i.products?.name_ar || i.products?.name_en || i.name_ar || i.name_en || 'منتج'}</span>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>(×{i.quantity})</span>
-                          </div>
-                        ))}
+                        {ord.order_items.map((i, idx) => {
+                          const snapshotItem = Array.isArray(ord.items)
+                            ? (ord.items.find((si) =>
+                                (si.id && i.product_id && String(si.id) === String(i.product_id)) ||
+                                (si.productId && i.product_id && String(si.productId) === String(i.product_id))
+                              ) || ord.items[idx] || null)
+                            : null;
+                          const isBundle = Boolean(snapshotItem?.is_bundle || i.is_bundle || (i.product_id === '22000000-0000-0000-0000-000000000201'));
+                          return (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap' }}>
+                              <span style={{ color: 'var(--secondary)', fontWeight: 800 }}>•</span>
+                              <span>{i.products?.name_ar || i.products?.name_en || i.name_ar || i.name_en || 'منتج'}</span>
+                              {isBundle && (
+                                <span style={{ fontSize: '0.68rem', backgroundColor: 'rgba(0, 168, 150, 0.12)', color: '#00a896', padding: '0.05rem 0.35rem', borderRadius: '3px', fontWeight: 700 }}>
+                                  🎁 بكج
+                                </span>
+                              )}
+                              <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>(×{i.quantity})</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </td>
@@ -1419,6 +1433,8 @@ export const Orders = () => {
                   const itemName = item.products?.name_en || item.products?.name_ar || item.name_en || item.name_ar || snapshotItem?.name_en || snapshotItem?.name_ar || 'Dental Box / إكسسوار';
                   const itemImg = item.products?.image_url || item.image_url || snapshotItem?.image_url || null;
                   const itemSellingUnit = item.selling_unit || item.sellingUnit || snapshotItem?.selling_unit || snapshotItem?.sellingUnit || null;
+                  const isBundle = Boolean(item.is_bundle || snapshotItem?.is_bundle || (item.product_id === '22000000-0000-0000-0000-000000000201') || (item.id === '22000000-0000-0000-0000-000000000201'));
+                  const bundleComponents = item.bundle_components || snapshotItem?.bundle_components || null;
                   return (
                     <div
                       key={item.id || idx}
@@ -1458,14 +1474,26 @@ export const Orders = () => {
                             <ClipboardList size={18} style={{ color: 'var(--text-muted)' }} />
                           )}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                          <span>{itemName}</span>
-                          {itemSellingUnit && (
-                            <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#b45309', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 600 }}>
-                              {itemSellingUnit}
-                            </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            <span>{itemName}</span>
+                            {isBundle && (
+                              <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(0, 168, 150, 0.12)', color: '#00a896', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
+                                🎁 بكج متكامل (5 بيرات)
+                              </span>
+                            )}
+                            {itemSellingUnit && !isBundle && (
+                              <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#b45309', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 600 }}>
+                                {itemSellingUnit}
+                              </span>
+                            )}
+                            <strong style={{ color: 'var(--secondary)' }}>x{item.quantity}</strong>
+                          </div>
+                          {isBundle && Array.isArray(bundleComponents) && bundleComponents.length > 0 && (
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                              {bundleComponents.map(c => c.nameAr || c.nameEn).join(' • ')}
+                            </div>
                           )}
-                          <strong style={{ color: 'var(--secondary)' }}>x{item.quantity}</strong>
                         </div>
                       </div>
                       <span style={{ fontWeight: 700 }}>

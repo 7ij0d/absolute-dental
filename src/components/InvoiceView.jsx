@@ -332,11 +332,45 @@ export const InvoiceView = ({ order }) => {
                                     {item.sellingUnit}
                                   </span>
                                 )}
+                                {item.isBundle && (
+                                  <span style={{ fontSize: '0.7rem', backgroundColor: 'rgba(0, 168, 150, 0.12)', color: '#00a896', padding: '0.1rem 0.45rem', borderRadius: '4px', fontWeight: 700 }}>
+                                    🎁 {lang === 'ar' ? 'بكج متكامل' : 'Bundle'}
+                                  </span>
+                                )}
                               </div>
                               {secondaryName && secondaryName !== primaryName && (
                                 <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
                                   {secondaryName}
                                 </span>
+                              )}
+                              {item.isBundle && Array.isArray(item.bundleComponents) && item.bundleComponents.length > 0 && (
+                                <div style={{ marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                  <span style={{ fontSize: '0.72rem', color: '#00a896', fontWeight: 700 }}>
+                                    {lang === 'ar' ? 'محتويات البكج (5 بيرات):' : 'Included Components (5 Burs):'}
+                                  </span>
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                                    {item.bundleComponents.map((comp, cIdx) => (
+                                      <span
+                                        key={comp.productId || cIdx}
+                                        style={{
+                                          fontSize: '0.68rem',
+                                          backgroundColor: '#f1f5f9',
+                                          border: '1px solid #e2e8f0',
+                                          color: '#334155',
+                                          padding: '0.15rem 0.4rem',
+                                          borderRadius: '4px',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '0.25rem'
+                                        }}
+                                      >
+                                        <span style={{ color: '#10b981', fontWeight: 'bold' }}>✓</span>
+                                        <span>{lang === 'ar' ? (comp.nameAr || comp.nameEn) : (comp.nameEn || comp.nameAr)}</span>
+                                        <span style={{ color: '#64748b', fontWeight: 600 }}>({(comp.quantity || 1) * item.quantity}×)</span>
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
                               )}
                             </div>
                           </div>
