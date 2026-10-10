@@ -440,14 +440,14 @@ export const CheckoutPage = () => {
                 const deduct = d.deductUnits * mult;
                 const newMasterQty = Math.max(0, (master.stock_quantity || 0) - deduct);
                 master.stock_quantity = newMasterQty;
-                const availability = newMasterQty < 5 * mult ? 'limited_quantity' : 'available';
+                const availability = newMasterQty <= 0 ? 'unavailable' : 'available';
                 syncTasks.push(
                   supabase.from('products').update({ stock_quantity: newMasterQty, availability }).eq('id', master.id)
                 );
               }
             } else {
               const newQty = Math.max(0, (prodData.stock_quantity || 0) - d.deductUnits);
-              const availability = newQty < 5 ? 'limited_quantity' : 'available';
+              const availability = newQty <= 0 ? 'unavailable' : 'available';
               syncTasks.push(
                 supabase.from('products').update({ stock_quantity: newQty, availability }).eq('id', d.productId)
               );

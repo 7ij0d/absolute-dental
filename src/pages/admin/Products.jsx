@@ -1005,7 +1005,6 @@ export const Products = () => {
                   <label className="form-label">{t('subject.filter_availability')} *</label>
                   <select className="form-input" value={availability} onChange={(e) => setAvailability(e.target.value)}>
                     <option value="available">متوفر / Available</option>
-                    <option value="limited_quantity">كمية محدودة / Limited Qty</option>
                     <option value="coming_soon">قريباً / Coming Soon</option>
                     <option value="unavailable">غير متوفر / Out of Stock</option>
                   </select>

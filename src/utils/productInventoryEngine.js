@@ -92,12 +92,12 @@ export const CANONICAL_BUNDLES = {
         imageUrl: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/e625888c-c1b0-4479-9117-76a1215a75f4.jpg'
       },
       {
-        productId: '76f62cd7-df40-4e85-97d1-6fb63b09e2f1',
-        nameAr: 'Round bur - BR 49',
-        nameEn: 'BR 49 (Blue) — Round Bur',
+        productId: '4caab5ef-1c9c-411e-8b6e-76781a07fd97',
+        nameAr: 'Round burr - BR 46',
+        nameEn: 'BR 46 (Blue) — Round Bur',
         quantity: 1,
         normalPrice: 2,
-        imageUrl: 'https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/76f62cd7-df40-4e85-97d1-6fb63b09e2f1.jpg'
+        imageUrl: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/4caab5ef-1c9c-411e-8b6e-76781a07fd97.jpg'
       },
       {
         productId: 'c78f57a0-54d0-4602-aa05-d92a82398a2f',

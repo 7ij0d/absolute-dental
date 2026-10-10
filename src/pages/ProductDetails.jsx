@@ -404,7 +404,6 @@ export const ProductDetails = () => {
   // Availability computations
   const isByOrder = product?.availability === 'by_order';
   const isUnavailable = !isByOrder && (product?.availability === 'unavailable' || (effectiveStock !== null && effectiveStock <= 0));
-  const isLimited = isUserAdmin && !isByOrder && product?.availability === 'limited_quantity';
   const isComingSoon = product?.availability === 'coming_soon';
   const isOrderable = !isUnavailable && !isComingSoon;
 
@@ -758,11 +757,6 @@ export const ProductDetails = () => {
                   <XCircle size={14} />
                   <span>{lang === 'ar' ? 'غير متوفر حالياً' : 'Out of Stock'}</span>
                 </span>
-              ) : isLimited ? (
-                <span className="product-status-badge status-limited">
-                  <AlertCircle size={14} />
-                  <span>{lang === 'ar' ? 'كمية محدودة' : 'Limited Quantity'}</span>
-                </span>
               ) : (
                 <span className="product-status-badge status-available">
                   <CheckCircle2 size={14} />
@@ -789,7 +783,7 @@ export const ProductDetails = () => {
                 <span>
                   <strong>{lang === 'ar' ? 'لوحة الإدارة (خاص بالمسؤول): ' : 'Admin Only: '}</strong>
                   {lang === 'ar'
-                    ? `حالة المخزون: ${product?.availability === 'limited_quantity' ? 'كمية محدودة' : (product?.availability === 'by_order' ? 'بالطلب' : 'متوفر')} | الكمية المسجلة: ${product?.stock_quantity ?? 'غير محدد'}`
+                    ? `حالة المخزون: ${product?.availability === 'by_order' ? 'بالطلب' : (isUnavailable ? 'غير متوفر' : 'متوفر')} | الكمية المسجلة: ${product?.stock_quantity ?? 'غير محدد'}`
                     : `Stock State: ${product?.availability} | Quantity: ${product?.stock_quantity ?? 'N/A'}`}
                 </span>
               </div>
@@ -1237,8 +1231,6 @@ export const ProductDetails = () => {
                   <span className="spec-value">
                     {isByOrder
                       ? (lang === 'ar' ? 'متوفر بالطلب (By Order)' : 'Available By Order')
-                      : isLimited
-                      ? (lang === 'ar' ? 'كمية محدودة' : 'Limited Quantity')
                       : isComingSoon
                       ? (lang === 'ar' ? 'قريباً' : 'Coming Soon')
                       : isUnavailable

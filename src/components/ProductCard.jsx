@@ -71,7 +71,6 @@ export const ProductCard = ({ product }) => {
     : (!isOffer && product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 0 && !product.shared_inventory_product_id));
   const isUnavailable = !isByOrder && (product.availability === 'unavailable' || isOutOfStock);
   const isComingSoon = product.availability === 'coming_soon';
-  const isLimited = isUserAdmin && !isByOrder && !isUnavailable && (product.availability === 'limited_quantity' || (!isOffer && product.stock_quantity > 0 && product.stock_quantity <= 5));
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -142,7 +141,6 @@ export const ProductCard = ({ product }) => {
           {isOffer && !isUnavailable && <span className="badge badge-discount" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff' }}>{lang === 'ar' ? 'عرض خاص' : 'Special Offer'}</span>}
           {discountPercent > 0 && <span className="badge badge-discount">-{discountPercent}%</span>}
           {isUnavailable && <span className="badge badge-unavailable">{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>}
-          {isLimited && <span className="badge badge-limited">{lang === 'ar' ? 'كمية محدودة' : 'Limited'}</span>}
           {isComingSoon && <span className="badge badge-unavailable">{lang === 'ar' ? 'قريباً' : 'Soon'}</span>}
         </div>
 

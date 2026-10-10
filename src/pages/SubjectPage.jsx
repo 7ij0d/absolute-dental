@@ -362,7 +362,7 @@ export const SubjectPage = () => {
       if (selectedStock === 'discount') {
         list = list.filter(p => p.compare_at_price && p.compare_at_price > p.price);
       } else if (selectedStock === 'available') {
-        list = list.filter(p => p.availability === 'available' || p.availability === 'limited_quantity');
+        list = list.filter(p => p.availability === 'available');
       } else {
         list = list.filter(p => p.availability === selectedStock);
       }
@@ -428,7 +428,6 @@ export const SubjectPage = () => {
   const filterOptions = [
     { key: 'all', label_ar: 'الكل', label_en: 'All' },
     { key: 'available', label_ar: 'متوفر', label_en: 'Available' },
-    ...(isUserAdmin ? [{ key: 'limited_quantity', label_ar: 'كمية محدودة', label_en: 'Limited Qty' }] : []),
     { key: 'coming_soon', label_ar: 'قريباً', label_en: 'Coming Soon' },
     { key: 'discount', label_ar: 'عليه خصم', label_en: 'On Sale' },
   ];
