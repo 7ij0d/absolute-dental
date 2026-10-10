@@ -418,9 +418,7 @@
     "subject_id": "33000000-0000-0000-0000-000000000034",
     "year_id": "30000000-0000-0000-0000-000000000003",
     "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000033",
-      "22000000-0000-0000-0000-000000000022",
-      "22000000-0000-0000-0000-000000000023"
+      "33000000-0000-0000-0000-000000000033"
     ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/surgical-blades-lf-support.png",
     "description_ar": "شفرات جراحية معقمة من الفولاذ الكربوني (Carbon Steel) مقاس 22، مغلفة بشكل فردي ومعقمة بأشعة غاما، مثالية لأعمال التشميع والنحت وتعديل الطبعات في معمل صناعة الأسنان الثابتة والمتحركة.",
@@ -461,9 +459,6 @@
     "stock_quantity": 9,
     "subject_id": "33000000-0000-0000-0000-000000000034",
     "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "22000000-0000-0000-0000-000000000022"
-    ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/zhermack-alginate-impression-material-50g.png",
     "description_ar": "مادة أخذ طبعات الجينات عالية الدقة من شركة Zhermack الإيطالية (عبوة معملية مخصصة للطلاب 50 جرام). سريعة التصلب ومرنة، مثالية لأخذ الطبعات التشخيصية والدراسية وقوالب الأطقم في معمل صناعة الأسنان المتحركة.",
     "description_en": "High-precision Zhermack dental alginate impression material (Student 50g lab portion). Fast setting and high elastic recovery, ideal for study models and preliminary impressions in Removable Prosthodontics.",
@@ -481,9 +476,6 @@
     "stock_quantity": 9,
     "subject_id": "33000000-0000-0000-0000-000000000034",
     "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "22000000-0000-0000-0000-000000000022"
-    ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/iq-alginate-impression-material-50g.png",
     "description_ar": "مادة أخذ طبعات الجينات سريعة التصلب وعالية المرونة IQ Alginate (عبوة معملية مخصصة للطلاب 50 جرام). تتميز بدقة عالية وسهولة الخلط ومرونة ممتازة لأخذ طبعات الأسنان ودراسة النماذج في معمل صناعة الأسنان المتحركة.",
     "description_en": "High-elasticity fast-setting IQ Alginate dental impression material (Student 50g lab portion). Excellent detail reproduction and tear strength for diagnostic casts and preliminary impressions in Removable Prosthodontics.",
@@ -502,8 +494,7 @@
     "subject_id": "33000000-0000-0000-0000-000000000034",
     "year_id": "30000000-0000-0000-0000-000000000003",
     "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000033",
-      "22000000-0000-0000-0000-000000000022"
+      "33000000-0000-0000-0000-000000000033"
     ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-iq-alginate-impression-material-450g.png",
     "description_ar": "مادة أخذ طبعات الجينات الإيطالية الشهيرة Lascod iQ Alginate (عبوة كاملة 450 جرام). تتميز بتغير لوني إرشادي لمراحل التصلب (Chromatic indicator)، ونكهة النعناع المنعشة، وسرعة فائقة في التصلب ومرونة استثنائية لأخذ طبعات غاية في الدقة في معامل وعيادات صناعة الأسنان.",
@@ -578,9 +569,6 @@
     "stock_quantity": 5,
     "subject_id": "33000000-0000-0000-0000-000000000034",
     "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "22000000-0000-0000-0000-000000000022"
-    ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-barrier-wrapping-roll-blue.png",
     "description_ar": "رول تغليف وعزل عيادي واقي عالي الجودة باللون الأزرق (Dental Barrier Film Roll)، مخصص لتغطية وعزل مقابض الأجهزة، رؤوس الإضاءة، لوحات التحكم، وخراطيم الوحدات العيادية لمنع انتقال العدوى وضمان أعلى معايير التعقيم أثناء العمل السريري والمعملي في صناعة الأسنان المتحركة.",
     "description_en": "Premium medical dental barrier film wrapping roll in blue. Designed for surface infection control, protecting equipment handles, light handles, control panels, and clinic tubing during clinical and lab procedures in Removable Prosthodontics.",
@@ -599,8 +587,7 @@
     "subject_id": "33000000-0000-0000-0000-000000000033",
     "year_id": "30000000-0000-0000-0000-000000000003",
     "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000034",
-      "22000000-0000-0000-0000-000000000023"
+      "33000000-0000-0000-0000-000000000034"
     ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/rubber-dam-heavy-blue.png",
     "description_ar": "شيتات حاجز مطاطي عيادي Rubber Dam قياس 6×6 بوصة (Natural Latex Dental Rubber Dams) عالي المرونة ومقاوم للتمزق. متوفر بموديلين: هيفي (Heavy) باللون الأزرق لثبات وعزل محكم فائق، وميد (Mid/Medium) باللون الأخضر للمرونة العالية أثناء العزل في عيادات البرستو والتحفظي.",
@@ -642,10 +629,7 @@
     "year_id": "30000000-0000-0000-0000-000000000003",
     "extra_subject_ids": [
       "33000000-0000-0000-0000-000000000033",
-      "33000000-0000-0000-0000-000000000034",
-      "22000000-0000-0000-0000-000000000021",
-      "22000000-0000-0000-0000-000000000023",
-      "22000000-0000-0000-0000-000000000022"
+      "33000000-0000-0000-0000-000000000034"
     ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/disposable-dental-examination-kit.png",
     "description_ar": "طقم فحص أسنان عيادي معقم ومغلف للاستخدام الفردي لمرة واحدة (Single-use Sterile Kit). يحتوي على صينية بلاستيكية مدمجة، مرآة فحص أسنان، مسبار فحص/بروب، ملقط طبي معدني، كرات قطنية، ومفرش طبي واقٍ (Bib). أساسي لجلسات الفحص والتشخيص السريري في عيادات العلاج التحفظي (الكونس) وصناعة الأسنان الثابتة (البرستو) والمتحركة (الريموفبل).",
@@ -664,9 +648,6 @@
     "stock_quantity": 0,
     "subject_id": "33000000-0000-0000-0000-000000000033",
     "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "22000000-0000-0000-0000-000000000023"
-    ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-silaxil-putty-900ml.png",
     "description_ar": "مادة طبعة سيليكون تكاثفي عيادية عالية الدقة (C-Silicone Impression Material) من شركة Lascod الإيطالية الرائدة. تركيبة متطورة (Optimized Formula) بلون جديد توفر دقة فائقة في أخذ الطبعات الأولية للتيجان والجسور (Crown & Bridge Impressions) والتعويضات الثابتة. حجم العبوة 900 مل.",
     "description_en": "High-precision condensation curing silicone (C-Silicone) impression material manufactured by Lascod (Italy). Features an optimized formula with enhanced color contrast and superior dimensional stability for precise primary impressions in crown & bridge prosthodontics. Volume: 900 ml.",
@@ -684,9 +665,6 @@
     "stock_quantity": 0,
     "subject_id": "33000000-0000-0000-0000-000000000033",
     "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "22000000-0000-0000-0000-000000000023"
-    ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-silaxil-light-body.png",
     "description_ar": "مادة طبعة سيليكون تكاثفي سائلة عالية الدقة (Light Body / Wash Material) من شركة Lascod الإيطالية. مخصصة لتسجيل أدق التفاصيل التشريحية وخطوط الإنهاء (Finishing Lines) في طبعات التيجان والجسور الدقيقة (Crown & Bridge Impressions) بالتوافق مع السيلاكسيل بّتي.",
     "description_en": "High-precision condensation curing silicone wash material (Light Body) by Lascod (Italy). Formulated for hydro-compatible surface wetting and micro-detail reproduction of preparation margins and finishing lines in crown and bridge impressions.",
@@ -704,9 +682,6 @@
     "stock_quantity": 0,
     "subject_id": "33000000-0000-0000-0000-000000000033",
     "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "22000000-0000-0000-0000-000000000023"
-    ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-enersyl-activator-paste-60ml.png",
     "description_ar": "معجون مصلب ومنشط كيميائي عيادي (Catalyst / Activator Gel-Paste) من شركة Lascod الإيطالية. مخصص لتصلب وتفاعل مطاط السيليكون التكاثفي بنوعيه: سيلاكسيل بّتي (Silaxil Putty) وسيلاكسيل لايت بودي (Silaxil Light Body). يتميز بلونه الأزرق المميز لتسهيل مراقبة تجانس الخلط (Homogeneous Mixing) بدقة. الحجم: 60 مل.",
     "description_en": "Clinical universal activator paste/gel (Catalyst) by Lascod (Italy) designed for condensation curing silicones. Perfectly formulated to catalyze both Silaxil Putty and Silaxil Light Body. Features high chromatic contrast in blue to easily verify complete and homogeneous mixing. Volume: 60 ml.",

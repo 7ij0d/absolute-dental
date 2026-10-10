@@ -143,7 +143,7 @@ export const SubjectPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const CACHE_KEY = `subject_v24:${slug}`;
+    const CACHE_KEY = `subject_v25:${slug}`;
 
     const applyData = ({ subject, year, prods }) => {
       setSubjectData(subject);
@@ -212,6 +212,17 @@ export const SubjectPage = () => {
             existingIds.add(dp.id);
           }
         }
+
+        // Year boundary guard: Prevent cross-year leakage unless explicitly an all_subjects / universal item
+        allProds = allProds.filter(p => {
+          if (!p || !p.id) return false;
+          if (p.all_subjects || p.all_years) return true;
+          if (subject.year_id && p.year_id && String(p.year_id) !== String(subject.year_id)) {
+            const hasExplicitExtra = Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.includes(subject.id);
+            if (!hasExplicitExtra) return false;
+          }
+          return true;
+        });
 
         // Strictly deduplicate by product id
         const seenIds = new Set();
