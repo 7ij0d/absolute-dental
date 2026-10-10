@@ -215,9 +215,12 @@ export const SubjectPage = () => {
         if (Array.isArray(universalProds)) {
           for (const up of universalProds) {
             const isRelevant = 
+              up.discount_label_en === 'universal' ||
+              up.is_universal === true ||
+              up.all_subjects === true ||
+              up.all_years === true ||
               junctionIdSet.has(up.id) || 
               up.subject_id === subject.id || 
-              up.all_subjects === true || 
               CANONICAL_UNIVERSAL_IDS.has(up.id);
             if (isRelevant) {
               allProds.push(up);
@@ -266,15 +269,34 @@ export const SubjectPage = () => {
           }
         }
 
-        // Populate assigned_subject_ids for each product
+        // Populate assigned_subject_ids for each product (junction table is authoritative if configured)
         for (const p of allProds) {
-          const subsSet = new Set(junctionMap[p.id] || []);
-          if (p.subject_id) subsSet.add(p.subject_id);
-          if (Array.isArray(p.extra_subject_ids)) {
-            p.extra_subject_ids.forEach(id => subsSet.add(id));
+          const junctionSubs = junctionMap[p.id];
+          let subsSet;
+          if (junctionSubs && junctionSubs.size > 0) {
+            subsSet = new Set(junctionSubs);
+          } else {
+            subsSet = new Set();
+            if (p.subject_id) subsSet.add(p.subject_id);
+            if (Array.isArray(p.extra_subject_ids)) {
+              p.extra_subject_ids.forEach(id => subsSet.add(id));
+            }
           }
           p.assigned_subject_ids = Array.from(subsSet);
         }
+
+        // Strictly keep only products that are universal OR explicitly assigned to this subject
+        allProds = allProds.filter(p => {
+          const isUniv = Boolean(
+            p.is_universal === true ||
+            p.discount_label_en === 'universal' ||
+            p.all_subjects === true ||
+            p.all_years === true ||
+            CANONICAL_UNIVERSAL_IDS.has(p.id)
+          );
+          if (isUniv) return true;
+          return Array.isArray(p.assigned_subject_ids) && p.assigned_subject_ids.includes(subject.id);
+        });
 
         const bundle = { subject, year: year || null, prods: allProds };
         cacheSet(CACHE_KEY, bundle, 60);

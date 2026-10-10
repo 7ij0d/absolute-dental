@@ -90,3 +90,17 @@ export function cacheDelete(key) {
   memCache.delete(key);
   try { sessionStorage.removeItem(`${CACHE_PREFIX}${key}`); } catch {}
 }
+
+export function clearSubjectCaches() {
+  for (const k of memCache.keys()) {
+    if (k.startsWith('subj:') || k.includes('subj')) memCache.delete(k);
+  }
+  try {
+    const toRemove = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      if (k && (k.includes('subj:') || k.includes('subj'))) toRemove.push(k);
+    }
+    toRemove.forEach(k => sessionStorage.removeItem(k));
+  } catch {}
+}

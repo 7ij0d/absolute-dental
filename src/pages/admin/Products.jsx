@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
 import { uploadProductImageToStorage } from '../../utils/storageImage';
+import { clearSubjectCaches } from '../../cache';
 import {
   isBundleProduct,
   calculateBundleAvailability,
   CANONICAL_MULTI_UNITS,
   getPhysicalStockBreakdown
 } from '../../utils/productInventoryEngine';
-import { Plus, Edit, Trash2, Archive, Check, X, FileEdit, PlusCircle, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Archive, Check, X, FileEdit, PlusCircle, Search, Layers, Globe, Sparkles, BookOpen, AlertCircle, Info } from 'lucide-react';
 
 export const Products = () => {
   const { t, lang } = useLanguage();
@@ -46,6 +47,8 @@ export const Products = () => {
   const [unitMultiplier, setUnitMultiplier] = useState(1);
   const [sharedInventoryProductId, setSharedInventoryProductId] = useState('');
   const [isUniversal, setIsUniversal] = useState(false);
+  const [subjectSelectionMode, setSubjectSelectionMode] = useState('custom'); // 'all' or 'custom'
+  const [subjectSearchInModal, setSubjectSearchInModal] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
   const [uploadingMain, setUploadingMain] = useState(false);
@@ -58,6 +61,105 @@ export const Products = () => {
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioChunks, setAudioChunks] = useState([]);
   const [recordedBlobUrl, setRecordedBlobUrl] = useState('');
+
+  // Live calculation of product classification
+  const classificationMeta = useMemo(() => {
+    if (subjectSelectionMode === 'all') {
+      return {
+        type: 'universal',
+        labelAr: 'مستلزم عام (Universal Supplies)',
+        labelEn: 'Universal Supplies',
+        badgeColor: '#059669',
+        badgeBg: 'rgba(16, 185, 129, 0.12)',
+        badgeBorder: 'rgba(16, 185, 129, 0.3)',
+        icon: '🌐',
+        sectionAr: 'قسم «مستلزمات مشتركة بين جميع السنوات»',
+        descriptionAr: 'سيظهر المنتج تلقائياً في قسم المستلزمات العامة داخل صفحات كافة المواد والسنوات الدراسية (مثل: Gloves, Face Mask, Cover Sheet).'
+      };
+    }
+    if (selectedSubjectIds.length === 1) {
+      const sub = subjects.find(s => s.id === selectedSubjectIds[0]);
+      const subName = sub ? sub.name_ar : 'المادة المحددة';
+      return {
+        type: 'specific',
+        labelAr: 'منتج خاص بالمادة (Subject-Specific)',
+        labelEn: 'Subject-Specific Tool',
+        badgeColor: 'var(--secondary)',
+        badgeBg: 'rgba(128, 0, 32, 0.08)',
+        badgeBorder: 'rgba(128, 0, 32, 0.25)',
+        icon: '📌',
+        sectionAr: `«القسم الرئيسي للأدوات الخاصة» داخل صفحة [${subName}] فقط`,
+        descriptionAr: `سيظهر المنتج في القسم الأساسي الخاص بمادة ${subName} فقط، ولن يظهر في قسم الأدوات المشتركة أو أي مادة أخرى.`
+      };
+    }
+    if (selectedSubjectIds.length >= 2) {
+      const selectedNames = selectedSubjectIds
+        .map(id => subjects.find(s => s.id === id)?.name_ar)
+        .filter(Boolean)
+        .join(' و ');
+      return {
+        type: 'shared',
+        labelAr: `منتج مشترك بين المواد (Shared Across ${selectedSubjectIds.length} Subjects)`,
+        labelEn: `Shared Across ${selectedSubjectIds.length} Subjects`,
+        badgeColor: '#0E7490',
+        badgeBg: 'rgba(14, 116, 144, 0.12)',
+        badgeBorder: 'rgba(14, 116, 144, 0.3)',
+        icon: '🔄',
+        sectionAr: `قسم «أدوات مشتركة بين المواد» داخل صفحات المواد المحددة فقط (${selectedSubjectIds.length} مواد)`,
+        descriptionAr: `سيظهر المنتج تلقائياً في قسم الأدوات المشتركة داخل (${selectedNames})، ولن يظهر في القسم الرئيسي الخاص بأي منها أو في أي مادة غير محددة.`
+      };
+    }
+    return {
+      type: 'none',
+      labelAr: 'غير مصنف (يرجى التحديد)',
+      labelEn: 'Unclassified',
+      badgeColor: '#D97706',
+      badgeBg: 'rgba(245, 158, 11, 0.12)',
+      badgeBorder: 'rgba(245, 158, 11, 0.3)',
+      icon: '⚠️',
+      sectionAr: 'لم يتم تحديد مكان الظهور بعد',
+      descriptionAr: 'يرجى تحديد مادة دراسية واحدة على الأقل أو تفعيل خيار «جميع المواد» ليتم تصنيف المنتج تلقائياً.'
+    };
+  }, [subjectSelectionMode, selectedSubjectIds, subjects]);
+
+  // Group subjects by academic year for organized multi-select UI
+  const groupedSubjects = useMemo(() => {
+    const groups = [];
+    const query = (subjectSearchInModal || '').trim().toLowerCase();
+    const sortedYears = [...years].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+    sortedYears.forEach(year => {
+      let yearSubs = subjects.filter(s => String(s.year_id) === String(year.id));
+      if (query) {
+        yearSubs = yearSubs.filter(s => 
+          (s.name_ar || '').toLowerCase().includes(query) ||
+          (s.name_en || '').toLowerCase().includes(query)
+        );
+      }
+      if (yearSubs.length > 0) {
+        groups.push({
+          year,
+          subjects: yearSubs
+        });
+      }
+    });
+
+    let otherSubs = subjects.filter(s => !s.year_id || !years.some(y => String(y.id) === String(s.year_id)));
+    if (query) {
+      otherSubs = otherSubs.filter(s => 
+        (s.name_ar || '').toLowerCase().includes(query) ||
+        (s.name_en || '').toLowerCase().includes(query)
+      );
+    }
+    if (otherSubs.length > 0) {
+      groups.push({
+        year: { id: 'other', name_ar: 'مواد عامة / أخرى', name_en: 'Other Subjects' },
+        subjects: otherSubs
+      });
+    }
+
+    return groups;
+  }, [subjects, years, subjectSearchInModal]);
 
   const compressImage = (file) => {
     return new Promise((resolve) => {
@@ -318,6 +420,9 @@ export const Products = () => {
     setYearId(years.length > 0 ? years[0].id : '');
     setSubjectId('');
     setSelectedSubjectIds([]);
+    setSubjectSelectionMode('custom');
+    setSubjectSearchInModal('');
+    setIsUniversal(false);
     setMainImageUrl('');
     setExtraImageUrls([]);
     setUsageVideoUrl('');
@@ -325,7 +430,6 @@ export const Products = () => {
     setIsActive(true);
     setUnitMultiplier(1);
     setSharedInventoryProductId('');
-    setIsUniversal(false);
     setAudioUrl('');
     setRecordedBlobUrl('');
     setAudioChunks([]);
@@ -347,12 +451,29 @@ export const Products = () => {
     setYearId(prod.year_id || '');
     setSubjectId(prod.subject_id || '');
 
+    const isUniv = Boolean(prod.discount_label_en === 'universal' || prod.all_subjects === true || prod.is_universal === true);
+    setIsUniversal(isUniv);
+    setSubjectSelectionMode(isUniv ? 'all' : 'custom');
+    setSubjectSearchInModal('');
+
     // Fetch assigned subjects from junction table
     const { data: ps } = await supabase
       .from('product_subjects')
       .select('subject_id')
       .eq('product_id', prod.id);
-    setSelectedSubjectIds(ps ? ps.map(r => r.subject_id) : (prod.subject_id ? [prod.subject_id] : []));
+
+    let initialSubjectIds = [];
+    if (ps && ps.length > 0) {
+      initialSubjectIds = ps.map(r => r.subject_id);
+    } else if (Array.isArray(prod.product_subjects) && prod.product_subjects.length > 0) {
+      initialSubjectIds = prod.product_subjects.map(r => r.subject_id);
+    } else {
+      const sIds = new Set();
+      if (prod.subject_id) sIds.add(prod.subject_id);
+      if (Array.isArray(prod.extra_subject_ids)) prod.extra_subject_ids.forEach(id => sIds.add(id));
+      initialSubjectIds = Array.from(sIds);
+    }
+    setSelectedSubjectIds(initialSubjectIds);
 
     setMainImageUrl(prod.image_url || '');
     setUsageVideoUrl(prod.usage_video_url || '');
@@ -360,7 +481,6 @@ export const Products = () => {
     setIsActive(prod.is_active !== false);
     setUnitMultiplier(prod.unit_multiplier || 1);
     setSharedInventoryProductId(prod.shared_inventory_product_id || '');
-    setIsUniversal(Boolean(prod.discount_label_en === 'universal' || prod.all_subjects === true || prod.is_universal === true));
     setAudioUrl(prod.audio_url || '');
     setRecordedBlobUrl('');
     setAudioChunks([]);
@@ -388,11 +508,22 @@ export const Products = () => {
 
     // Check name is provided
     if (!nameArTrimmed) {
-      alert('يجب إدخال اسم المنتج!');
+      alert(lang === 'ar' ? 'يجب إدخال اسم المنتج!' : 'Product name is required!');
+      return;
+    }
+
+    const isUniv = subjectSelectionMode === 'all';
+
+    if (!isUniv && selectedSubjectIds.length === 0) {
+      alert(lang === 'ar' ? 'يرجى تحديد مادة دراسية واحدة على الأقل أو اختيار «جميع المواد»!' : 'Please select at least one subject or choose "All Subjects"!');
       return;
     }
 
     setSubmitting(true);
+
+    const primarySubjectId = isUniv ? null : (selectedSubjectIds[0] || null);
+    const primarySubObj = subjects.find(s => s.id === primarySubjectId);
+    const resolvedYearId = isUniv ? null : (primarySubObj?.year_id || yearId || null);
 
     const productPayload = {
       name_ar: nameArTrimmed,
@@ -401,13 +532,13 @@ export const Products = () => {
       description_en: descriptionEn.trim() || null,
       details_ar: detailsAr.trim() || null,
       details_en: detailsEn.trim() || null,
-      price: parseFloat(price),
+      price: parseFloat(price) || 0,
       compare_at_price: comparePrice ? parseFloat(comparePrice) : null,
       stock_quantity: stockQuantity !== '' ? parseInt(stockQuantity) : 0,
       availability,
-      year_id: yearId || null,
-      subject_id: selectedSubjectIds[0] || null, // primary subject for backward compat
-      discount_label_en: isUniversal ? 'universal' : (editingProduct?.discount_label_en === 'universal' ? null : editingProduct?.discount_label_en || null),
+      year_id: resolvedYearId,
+      subject_id: primarySubjectId,
+      discount_label_en: isUniv ? 'universal' : (editingProduct?.discount_label_en === 'universal' ? null : (editingProduct?.discount_label_en || null)),
       image_url: mainImageUrl.trim(),
       usage_video_url: usageVideoUrl.trim() || null,
       audio_url: audioUrl.trim() || null,
@@ -444,7 +575,14 @@ export const Products = () => {
       // Save multi-subject links in junction table
       if (productId) {
         await supabase.from('product_subjects').delete().eq('product_id', productId);
-        if (selectedSubjectIds.length > 0) {
+        if (isUniv) {
+          // If universal, link to all active subjects so relational joins find it everywhere
+          if (subjects.length > 0) {
+            await supabase.from('product_subjects').insert(
+              subjects.map(s => ({ product_id: productId, subject_id: s.id }))
+            );
+          }
+        } else if (selectedSubjectIds.length > 0) {
           await supabase.from('product_subjects').insert(
             selectedSubjectIds.map(sid => ({ product_id: productId, subject_id: sid }))
           );
@@ -453,11 +591,8 @@ export const Products = () => {
 
       // Add supplementary images
       if (productId) {
-        // Clear old ones first
         await supabase.from('product_images').delete().eq('product_id', productId);
-        
         const extraUrls = extraImageUrls.filter(Boolean);
-
         if (extraUrls.length > 0) {
           const insertPayload = extraUrls.map((url, index) => ({
             product_id: productId,
@@ -467,6 +602,9 @@ export const Products = () => {
           await supabase.from('product_images').insert(insertPayload);
         }
       }
+
+      // Invalidate subject caches so storefront updates immediately
+      clearSubjectCaches();
 
       setShowFormModal(false);
       fetchData();
@@ -775,98 +913,400 @@ export const Products = () => {
                 )}
               </div>
 
-              {/* Universal Dental Supplies Toggle */}
-              <div className="form-group" style={{
-                marginBottom: 0,
-                padding: '0.85rem',
-                backgroundColor: isUniversal ? 'rgba(16, 185, 129, 0.08)' : 'var(--accent)',
-                border: `1px solid ${isUniversal ? '#10B981' : 'var(--border-color)'}`,
-                borderRadius: 'var(--radius-md)',
-                transition: 'all 0.2s ease'
-              }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', fontWeight: 800, fontSize: '0.88rem', color: isUniversal ? '#047857' : 'var(--text-main)', margin: 0 }}>
-                  <input
-                    type="checkbox"
-                    checked={isUniversal}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      setIsUniversal(checked);
-                      if (checked && subjects.length > 0 && selectedSubjectIds.length === 0) {
-                        setSelectedSubjectIds(subjects.map(s => s.id));
-                      }
+              {/* =============================================================
+                  SUBJECT SELECTION & AUTOMATIC CLASSIFICATION SYSTEM
+                  ============================================================= */}
+              <div className="form-group" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div>
+                    <label className="form-label" style={{ marginBottom: '0.2rem', fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <BookOpen size={16} style={{ color: 'var(--secondary)' }} />
+                      <span>{lang === 'ar' ? 'المواد الدراسية المرتبط بها المنتج' : 'Subject(s) Associated with Product'} *</span>
+                    </label>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
+                      {lang === 'ar'
+                        ? 'مادة واحدة = أداة خاصة بالمادة | مادتان فأكثر = أداة مشتركة | جميع المواد = مستلزم عام لكل السنوات'
+                        : '1 Subject = Specific Tool | 2+ Subjects = Shared Tool | All Subjects = Universal Supplies'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Segmented Mode Selector Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+                  {/* Mode Card 1: Specific / Custom Subjects */}
+                  <div
+                    onClick={() => {
+                      setSubjectSelectionMode('custom');
+                      setIsUniversal(false);
                     }}
-                    style={{ accentColor: '#10B981', width: '18px', height: '18px', cursor: 'pointer' }}
-                  />
-                  <span>🌐 {lang === 'ar' ? 'مستلزمات عامة لجميع السنوات (Universal Dental Supplies)' : 'Universal Supplies (All Years)'}</span>
-                </label>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.35rem', marginInlineStart: '1.75rem', marginBottom: 0 }}>
-                  {lang === 'ar'
-                    ? 'سيتم تصنيف هذا المنتج وعرضه في القسم الثالث «مستلزمات مشتركة بين جميع السنوات» في المواد الدراسية المرتبطة.'
-                    : 'This product will appear in Section 3 "Universal Dental Supplies" across linked subjects.'}
-                </p>
+                    style={{
+                      border: subjectSelectionMode === 'custom' ? '2px solid var(--secondary)' : '1px solid var(--border-color)',
+                      backgroundColor: subjectSelectionMode === 'custom' ? 'rgba(128, 0, 32, 0.05)' : 'var(--accent)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '0.75rem 1rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      boxShadow: subjectSelectionMode === 'custom' ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 6px rgba(128,0,32,0.1)' : 'none',
+                      transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                    }}
+                  >
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      border: subjectSelectionMode === 'custom' ? '5px solid var(--secondary)' : '2px solid var(--border-color)',
+                      backgroundColor: 'var(--surface-color)',
+                      flexShrink: 0
+                    }} />
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '0.85rem', color: subjectSelectionMode === 'custom' ? 'var(--secondary)' : 'var(--text-main)' }}>
+                        📚 {lang === 'ar' ? 'مواد دراسية محددة' : 'Specific Subjects'}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        {lang === 'ar' ? 'اختيار مادة واحدة أو عدة مواد' : 'Select one or more subjects'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mode Card 2: Universal (All Subjects) */}
+                  <div
+                    onClick={() => {
+                      setSubjectSelectionMode('all');
+                      setIsUniversal(true);
+                    }}
+                    style={{
+                      border: subjectSelectionMode === 'all' ? '2px solid #059669' : '1px solid var(--border-color)',
+                      backgroundColor: subjectSelectionMode === 'all' ? 'rgba(16, 185, 129, 0.08)' : 'var(--accent)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '0.75rem 1rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      boxShadow: subjectSelectionMode === 'all' ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 6px rgba(16,185,129,0.15)' : 'none',
+                      transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                    }}
+                  >
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      border: subjectSelectionMode === 'all' ? '5px solid #059669' : '2px solid var(--border-color)',
+                      backgroundColor: 'var(--surface-color)',
+                      flexShrink: 0
+                    }} />
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '0.85rem', color: subjectSelectionMode === 'all' ? '#047857' : 'var(--text-main)' }}>
+                        🌐 {lang === 'ar' ? 'جميع المواد (مستلزم عام)' : 'All Subjects (Universal)'}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        {lang === 'ar' ? 'قفازات، كمامات، كافر شيت لكافة السنوات' : 'Gloves, masks, covers for all years'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content when Universal is selected */}
+                {subjectSelectionMode === 'all' && (
+                  <div style={{
+                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '0.85rem 1rem',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.65rem'
+                  }}>
+                    <Globe size={18} style={{ color: '#059669', flexShrink: 0, marginTop: '2px' }} />
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                      <strong>{lang === 'ar' ? 'تم اختيار: مستلزم عام لجميع المواد والسنوات' : 'Selected: Universal Supplies'}</strong>
+                      <p style={{ margin: '0.2rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.75rem', lineHeight: 1.45 }}>
+                        {lang === 'ar'
+                          ? 'سيتم تصنيف هذا المنتج تلقائياً وعرضه في «القسم الثالث: مستلزمات مشتركة بين جميع السنوات» داخل كافة صفحات المواد، مع توحيد المخزون والسعر دون تكرار في النظام.'
+                          : 'This product will automatically appear in Section 3 across all subject pages with unified stock and pricing.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Content when Specific / Custom Subjects is selected */}
+                {subjectSelectionMode === 'custom' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {/* Search and Action Toolbar */}
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <div style={{ position: 'relative', flex: 1, minWidth: '180px' }}>
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder={lang === 'ar' ? '🔍 ابحث في المواد الدراسية...' : '🔍 Search subjects...'}
+                          value={subjectSearchInModal}
+                          onChange={(e) => setSubjectSearchInModal(e.target.value)}
+                          style={{ paddingInlineStart: '2.2rem', fontSize: '0.8rem', height: '36px' }}
+                        />
+                        <Search size={14} style={{ position: 'absolute', insetInlineStart: '0.75rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSubjectIds(subjects.map(s => s.id))}
+                        className="btn btn-outline"
+                        style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', height: '36px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                      >
+                        <Check size={13} />
+                        {lang === 'ar' ? 'تحديد الكل' : 'Select All'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSubjectIds([])}
+                        className="btn btn-outline"
+                        style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', height: '36px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                      >
+                        <X size={13} />
+                        {lang === 'ar' ? 'إلغاء التحديد' : 'Clear'}
+                      </button>
+                    </div>
+
+                    {/* Selected Subjects Chips */}
+                    {selectedSubjectIds.length > 0 && (
+                      <div style={{
+                        backgroundColor: 'var(--accent)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.5rem 0.75rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.35rem'
+                      }}>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                          {lang === 'ar' ? `المواد المحددة (${selectedSubjectIds.length}):` : `Selected Subjects (${selectedSubjectIds.length}):`}
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                          {selectedSubjectIds.map(sid => {
+                            const sub = subjects.find(s => s.id === sid);
+                            if (!sub) return null;
+                            return (
+                              <span
+                                key={sid}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.3rem',
+                                  padding: '2px 8px',
+                                  borderRadius: '9999px',
+                                  backgroundColor: 'rgba(128, 0, 32, 0.08)',
+                                  border: '1px solid rgba(128, 0, 32, 0.25)',
+                                  color: 'var(--secondary)',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700
+                                }}
+                              >
+                                {sub.name_ar}
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedSubjectIds(prev => prev.filter(id => id !== sid))}
+                                  style={{
+                                    border: 'none',
+                                    background: 'none',
+                                    padding: 0,
+                                    cursor: 'pointer',
+                                    color: 'var(--danger)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                  title={lang === 'ar' ? 'إلغاء المادة' : 'Remove subject'}
+                                >
+                                  <X size={12} />
+                                </button>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Grouped Checkboxes by Academic Year */}
+                    <div style={{
+                      maxHeight: '260px',
+                      overflowY: 'auto',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: 'var(--accent)',
+                      padding: '0.5rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.65rem'
+                    }}>
+                      {groupedSubjects.map((grp) => {
+                        const allGroupSelected = grp.subjects.every(s => selectedSubjectIds.includes(s.id));
+                        return (
+                          <div
+                            key={grp.year.id}
+                            style={{
+                              backgroundColor: 'var(--surface-color)',
+                              border: '1px solid var(--border-color)',
+                              borderRadius: 'var(--radius-sm)',
+                              overflow: 'hidden'
+                            }}
+                          >
+                            {/* Academic Year Header with quick toggle */}
+                            <div style={{
+                              padding: '0.45rem 0.75rem',
+                              backgroundColor: 'var(--accent)',
+                              borderBottom: '1px solid var(--border-color)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between'
+                            }}>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                                🎓 {grp.year.name_ar} <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>({grp.subjects.length} مواد)</span>
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (allGroupSelected) {
+                                    const grpIds = new Set(grp.subjects.map(s => s.id));
+                                    setSelectedSubjectIds(prev => prev.filter(id => !grpIds.has(id)));
+                                  } else {
+                                    const grpIds = grp.subjects.map(s => s.id);
+                                    setSelectedSubjectIds(prev => Array.from(new Set([...prev, ...grpIds])));
+                                  }
+                                }}
+                                className="btn btn-outline"
+                                style={{ padding: '0.15rem 0.45rem', fontSize: '0.68rem', height: 'auto', fontWeight: 600 }}
+                              >
+                                {allGroupSelected ? (lang === 'ar' ? 'إلغاء مواد السنة' : 'Deselect Year') : (lang === 'ar' ? 'تحديد مواد السنة' : 'Select Year')}
+                              </button>
+                            </div>
+
+                            {/* Subjects checkboxes in this year */}
+                            <div style={{
+                              display: 'grid',
+                              gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
+                              gap: '0.4rem',
+                              padding: '0.6rem'
+                            }}>
+                              {grp.subjects.map((s) => {
+                                const isChecked = selectedSubjectIds.includes(s.id);
+                                return (
+                                  <label
+                                    key={s.id}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '0.5rem',
+                                      padding: '0.35rem 0.5rem',
+                                      borderRadius: 'var(--radius-sm)',
+                                      backgroundColor: isChecked ? 'rgba(128, 0, 32, 0.05)' : 'transparent',
+                                      border: isChecked ? '1px solid rgba(128, 0, 32, 0.25)' : '1px solid transparent',
+                                      cursor: 'pointer',
+                                      fontSize: '0.82rem',
+                                      fontWeight: isChecked ? 700 : 400,
+                                      transition: 'all 0.15s ease'
+                                    }}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          setSelectedSubjectIds(prev => [...prev, s.id]);
+                                        } else {
+                                          setSelectedSubjectIds(prev => prev.filter(id => id !== s.id));
+                                        }
+                                      }}
+                                      style={{ accentColor: 'var(--secondary)', width: '15px', height: '15px', cursor: 'pointer' }}
+                                    />
+                                    <span style={{ lineHeight: 1.2 }}>{s.name_ar}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {groupedSubjects.length === 0 && (
+                        <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                          {lang === 'ar' ? 'لا توجد مواد دراسية مطابقة للبحث' : 'No subjects matched your search'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* -------------------------------------------------------------
+                    LIVE AUTO-CLASSIFICATION PREVIEW CARD
+                    ------------------------------------------------------------- */}
+                <div style={{
+                  border: `1.5px solid ${classificationMeta.badgeBorder}`,
+                  backgroundColor: classificationMeta.badgeBg,
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.9rem 1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.6rem',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <span style={{ fontSize: '1.3rem' }}>{classificationMeta.icon}</span>
+                      <div>
+                        <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', fontWeight: 700 }}>
+                          {lang === 'ar' ? 'التصنيف التلقائي الذكي للنظام' : 'Automatic System Classification'}
+                        </div>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 800, color: classificationMeta.badgeColor }}>
+                          {classificationMeta.labelAr}
+                        </div>
+                      </div>
+                    </div>
+                    <span style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      padding: '3px 10px',
+                      borderRadius: '9999px',
+                      backgroundColor: classificationMeta.badgeColor,
+                      color: '#ffffff',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
+                    }}>
+                      {classificationMeta.type === 'universal' ? (lang === 'ar' ? 'القسم الثالث' : 'Section 3') :
+                       classificationMeta.type === 'shared' ? (lang === 'ar' ? 'القسم الثاني' : 'Section 2') :
+                       classificationMeta.type === 'specific' ? (lang === 'ar' ? 'القسم الأول' : 'Section 1') : (lang === 'ar' ? 'غير مصنف' : 'Pending')}
+                    </span>
+                  </div>
+
+                  <div style={{
+                    backgroundColor: 'var(--surface-color)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.6rem 0.8rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.25rem',
+                    fontSize: '0.8rem'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, color: 'var(--text-main)', flexWrap: 'wrap' }}>
+                      <Layers size={14} style={{ color: classificationMeta.badgeColor, flexShrink: 0 }} />
+                      <span>{lang === 'ar' ? 'مكان الظهور في الموقع:' : 'Storefront Display Location:'}</span>
+                      <span style={{ color: classificationMeta.badgeColor }}>{classificationMeta.sectionAr}</span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+                      💡 {classificationMeta.descriptionAr}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">{t('admin.year')}</label>
+                <label className="form-label">{t('admin.year')} <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-muted)' }}>({lang === 'ar' ? 'يتم تحديده تلقائياً من المادة المختارة' : 'Auto-detected from subject'})</span></label>
                 <select className="form-input" value={yearId} onChange={(e) => setYearId(e.target.value)}>
-                  <option value="">اختر السنة الدراسية</option>
+                  <option value="">{lang === 'ar' ? 'اختر السنة الدراسية (تلقائي)' : 'Select Year (Auto)'}</option>
                   {years.map((y) => (
                     <option key={y.id} value={y.id}>{y.name_ar}</option>
                   ))}
                 </select>
-              </div>
-
-              {/* Multi-subject checkboxes */}
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <label className="form-label" style={{ marginBottom: 0 }}>المواد الدراسية (يمكن اختيار أكثر من مادة)</label>
-                  <div style={{ display: 'flex', gap: '0.4rem' }}>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedSubjectIds(subjects.map(s => s.id))}
-                      className="btn btn-outline"
-                      style={{ padding: '0.2rem 0.55rem', fontSize: '0.72rem', height: 'auto', fontWeight: 600 }}
-                    >
-                      {lang === 'ar' ? 'تحديد جميع المواد' : 'Select All'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedSubjectIds([])}
-                      className="btn btn-outline"
-                      style={{ padding: '0.2rem 0.55rem', fontSize: '0.72rem', height: 'auto', fontWeight: 600 }}
-                    >
-                      {lang === 'ar' ? 'إلغاء التحديد' : 'Clear All'}
-                    </button>
-                  </div>
-                </div>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                  gap: '0.5rem',
-                  padding: '0.75rem',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-md)',
-                  backgroundColor: 'var(--accent)'
-                }}>
-                  {subjects.map((s) => (
-                    <label key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', fontWeight: selectedSubjectIds.includes(s.id) ? 700 : 400 }}>
-                      <input
-                        type="checkbox"
-                        checked={selectedSubjectIds.includes(s.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedSubjectIds(prev => [...prev, s.id]);
-                          } else {
-                            setSelectedSubjectIds(prev => prev.filter(id => id !== s.id));
-                          }
-                        }}
-                        style={{ accentColor: 'var(--primary)', width: '15px', height: '15px' }}
-                      />
-                      {s.name_ar}
-                    </label>
-                  ))}
-                  {subjects.length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>لا توجد مواد</span>}
-                </div>
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
