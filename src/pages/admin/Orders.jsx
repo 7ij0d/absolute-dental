@@ -14,8 +14,84 @@ import { parseOrderVersioning } from '../../utils/orderVersioning';
 import {
   Search, Eye, RefreshCw, Printer, X, ClipboardList, CheckCircle,
   Trash2, Pencil, Save, Check, AlertCircle, ArrowUpDown, Calendar,
-  TrendingUp, Clock, ChevronLeft, ChevronRight, Filter, AlertTriangle, Layers, Plus
+  TrendingUp, Clock, ChevronLeft, ChevronRight, Filter, AlertTriangle, Layers, Plus, MessageCircle
 } from 'lucide-react';
+
+export function formatLibyanPhoneForWhatsapp(phone) {
+  if (!phone) return '';
+  let cleaned = String(phone).replace(/[^\d+]/g, '');
+  if (cleaned.startsWith('+')) cleaned = cleaned.slice(1);
+  if (cleaned.startsWith('00')) cleaned = cleaned.slice(2);
+  if (cleaned.startsWith('0')) cleaned = '218' + cleaned.slice(1);
+  if (!cleaned.startsWith('218') && cleaned.length === 9) cleaned = '218' + cleaned;
+  return cleaned;
+}
+
+export function extractDeliveryTimeSlot(order) {
+  if (!order) return '10:00 صباحاً';
+  const combined = `${order.delivery_notes || ''} ${order.notes || ''}`;
+  const match = combined.match(/\[توقيت التسليم المفضل:\s*([^\]]+)\]/);
+  if (match && match[1]) return match[1].trim();
+  if (combined.includes('08:00') || combined.includes('8:00')) return '8:00 صباحاً';
+  if (combined.includes('10:00')) return '10:00 صباحاً';
+  if (combined.includes('12:00')) return '12:00 ظهراً';
+  if (combined.includes('02:00') || combined.includes('2:00')) return '2:00 ظهراً';
+  return '10:00 صباحاً';
+}
+
+export function buildOrderWhatsappMessage(order, options = {}) {
+  if (!order) return '';
+  const studentName = (options.studentName || order.customer_name || 'دكتور/ة').trim();
+  const orderNumber = (order.order_number || order.id || '').replace(/-/g, '').slice(0, 8);
+  const timeSlot = options.timeSlot || extractDeliveryTimeSlot(order);
+
+  // Items list
+  const itemsList = (order.order_items?.length > 0 ? order.order_items : (order.items || []));
+  const itemsFormatted = itemsList.map((item, idx) => {
+    const snapshotItem = Array.isArray(order.items)
+      ? (order.items.find((si) =>
+          (si.id && item.product_id && String(si.id) === String(item.product_id)) ||
+          (si.productId && item.product_id && String(si.productId) === String(item.product_id)) ||
+          (si.id && item.id && String(si.id) === String(item.id))
+        ) || order.items[idx] || null)
+      : null;
+    const name = item.products?.name_ar || item.products?.name_en || item.name_ar || item.name_en || snapshotItem?.name_ar || snapshotItem?.name_en || 'أداة أسنان';
+    const qty = item.quantity || 1;
+    const price = item.price ? ` — ${item.price} د.ل` : '';
+    return `• ${name} × ${qty}${price}`;
+  }).join('\n');
+
+  // Delivery place and fee
+  let deliveryPlace = '';
+  let deliveryFeeText = '';
+
+  if (options.deliveryType === 'faculty') {
+    deliveryPlace = `تسليم مباشر بالكلية (${order.university || 'جامعة طرابلس'} - ${order.college || 'كلية طب الأسنان'}) 🎓`;
+    deliveryFeeText = 'مجاني (تسليم مباشر بالكلية)';
+  } else {
+    const customLoc = options.customLocation || order.address_text || 'العنوان المتفق عليه';
+    const mapLink = (order.latitude && order.longitude) ? `\n   📍 موقع الخريطة: https://www.google.com/maps?q=${order.latitude},${order.longitude}` : '';
+    deliveryPlace = `${customLoc}${mapLink}`;
+    const feeVal = Number(options.customFee ?? order.shipping_fee ?? 0);
+    deliveryFeeText = feeVal > 0 ? `${feeVal} د.ل` : (options.customFee === '0' || options.customFee === 0 ? 'مجاني' : 'حسب الاتفاق');
+  }
+
+  const finalTotal = options.totalPrice !== undefined ? options.totalPrice : order.total_price;
+  const totalFormatted = (Number(finalTotal) || 0).toFixed(2).replace(/\.00$/, '');
+
+  return (
+    `السلام عليكم ورحمة الله دكتور/ة ${studentName} 🦷✨\n` +
+    `من متجر Absolute Dental، نود إعلامك بأنه:\n\n` +
+    `✅ *تمت الموافقة على طلبيتك رقم #${orderNumber}*\n\n` +
+    `📦 *قائمة الأدوات والمعدات المطلوبة:*\n` +
+    `${itemsFormatted || '• تم اعتماد كافة الأدوات المسجلة'}\n\n` +
+    `🕒 *الموعد المفضل للتسليم:* ${timeSlot}\n` +
+    `📍 *مكان التسليم:* ${deliveryPlace}\n` +
+    `🚚 *رسوم التوصيل:* ${deliveryFeeText}\n` +
+    `💰 *إجمالي الفاتورة:* ${totalFormatted} د.ل\n\n` +
+    `سيتم التنسيق معك بخصوص التسليم، بالتوفيق في دراستك وتدريبك العملي! 🤍`
+  );
+}
 
 export const Orders = () => {
   const { t, lang, isRtl } = useLanguage();
@@ -65,6 +141,53 @@ export const Orders = () => {
   // Add Order Modal
   const [showAddOrderModal, setShowAddOrderModal] = useState(false);
   const [availableProducts, setAvailableProducts] = useState([]);
+
+  // WhatsApp Approval Modal
+  const [whatsappModalOrder, setWhatsappModalOrder] = useState(null);
+  const [whatsappStudentName, setWhatsappStudentName] = useState('');
+  const [whatsappPhone, setWhatsappPhone] = useState('');
+  const [whatsappTimeSlot, setWhatsappTimeSlot] = useState('10:00 صباحاً');
+  const [whatsappDeliveryType, setWhatsappDeliveryType] = useState('faculty');
+  const [whatsappCustomLocation, setWhatsappCustomLocation] = useState('');
+  const [whatsappCustomFee, setWhatsappCustomFee] = useState('0');
+  const [whatsappAutoAccept, setWhatsappAutoAccept] = useState(true);
+
+  const openWhatsappModal = (order) => {
+    if (!order) return;
+    setWhatsappModalOrder(order);
+    setWhatsappStudentName(order.customer_name || '');
+    setWhatsappPhone(order.customer_phone || '');
+    setWhatsappTimeSlot(extractDeliveryTimeSlot(order));
+    const isFaculty = !order.address_text || order.address_text.includes('الكلية') || !order.latitude;
+    setWhatsappDeliveryType(isFaculty ? 'faculty' : 'custom');
+    setWhatsappCustomLocation(order.address_text || '');
+    setWhatsappCustomFee(String(order.shipping_fee || 0));
+    setWhatsappAutoAccept(true);
+  };
+
+  const handleLaunchWhatsapp = () => {
+    if (!whatsappModalOrder) return;
+    const formattedPhone = formatLibyanPhoneForWhatsapp(whatsappPhone);
+    const message = buildOrderWhatsappMessage(whatsappModalOrder, {
+      studentName: whatsappStudentName,
+      timeSlot: whatsappTimeSlot,
+      deliveryType: whatsappDeliveryType,
+      customLocation: whatsappCustomLocation,
+      customFee: whatsappCustomFee
+    });
+
+    const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+
+    if (whatsappAutoAccept) {
+      const currentNorm = normalizeOrderStatus(whatsappModalOrder.status);
+      if (currentNorm === 'pending_review' || currentNorm === 'edited_pending') {
+        handleUpdateStatus(whatsappModalOrder.id, 'accepted');
+      }
+    }
+
+    setWhatsappModalOrder(null);
+  };
   const [newOrderForm, setNewOrderForm] = useState({
     customerName: '',
     phone: '',
@@ -1059,6 +1182,28 @@ export const Orders = () => {
                       >
                         <Pencil size={12} />
                       </button>
+                      {/* WhatsApp Quick Approval Action */}
+                      <button
+                        onClick={() => openWhatsappModal(ord)}
+                        title="إرسال رسالة الموافقة وتفاصيل الطلبية عبر واتساب"
+                        style={{
+                          padding: '0.3rem 0.55rem',
+                          fontSize: '0.72rem',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid rgba(16, 185, 129, 0.45)',
+                          backgroundColor: '#10b981',
+                          color: '#ffffff',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          fontWeight: 700,
+                          boxShadow: '0 1px 3px rgba(16, 185, 129, 0.25)'
+                        }}
+                      >
+                        <MessageCircle size={13} />
+                        <span>واتساب</span>
+                      </button>
                       {/* View details */}
                       <button
                         onClick={() => setSelectedOrder(ord)}
@@ -1376,6 +1521,27 @@ export const Orders = () => {
                   <Printer size={16} />
                   الفاتورة
                 </button>
+                <button
+                  onClick={() => openWhatsappModal(selectedOrder)}
+                  style={{
+                    padding: '0.5rem 0.95rem',
+                    borderRadius: 'var(--radius-sm)',
+                    gap: '0.35rem',
+                    backgroundColor: '#10b981',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    boxShadow: '0 2px 5px rgba(16, 185, 129, 0.25)'
+                  }}
+                  title="إرسال الموافقة وتفاصيل الطلبية للزبون عبر واتساب"
+                >
+                  <MessageCircle size={15} />
+                  <span>موافقة عبر واتساب 📲</span>
+                </button>
               </div>
             </div>
 
@@ -1388,6 +1554,20 @@ export const Orders = () => {
                 <p>رقم الهاتف: <strong style={{ color: 'var(--text-main)' }}>{selectedOrder.customer_phone}</strong></p>
                 {selectedOrder.customer_phone_secondary && <p>الهاتف الاحتياطي: <strong style={{ color: 'var(--text-main)' }}>{selectedOrder.customer_phone_secondary}</strong></p>}
                 <p>الكلية والجامعة: <strong style={{ color: 'var(--text-main)' }}>{selectedOrder.university} - {selectedOrder.college}</strong></p>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
+                  <span>التوقيت المفضل للتسليم:</span>
+                  <span style={{
+                    backgroundColor: 'var(--accent)',
+                    color: 'var(--secondary)',
+                    fontWeight: 800,
+                    padding: '2px 8px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-color)',
+                    fontSize: '0.82rem'
+                  }}>
+                    🕒 {extractDeliveryTimeSlot(selectedOrder)}
+                  </span>
+                </p>
               </div>
             </div>
 
@@ -1780,6 +1960,261 @@ export const Orders = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      , document.body)}
+
+      {/* WhatsApp Approval Modal */}
+      {whatsappModalOrder && createPortal(
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0,0,0,0.65)',
+          backdropFilter: 'blur(5px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
+          padding: '1rem'
+        }}>
+          <div className="card animate-fade-in" style={{
+            width: '100%',
+            maxWidth: '620px',
+            maxHeight: '92vh',
+            overflowY: 'auto',
+            backgroundColor: 'var(--surface-color)',
+            padding: '1.75rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.25rem',
+            boxShadow: 'var(--shadow-xl)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-lg)'
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                  color: '#10b981',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <MessageCircle size={20} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.12rem', fontWeight: 800, margin: 0, color: 'var(--primary)' }}>
+                    إرسال تأكيد وموافقة عبر واتساب
+                  </h3>
+                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    طلب #{whatsappModalOrder.order_number?.replace(/-/g, '').slice(0, 8)}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWhatsappModalOrder(null)}
+                className="action-btn"
+                style={{ padding: '0.35rem' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Recipient details */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '0.78rem' }}>اسم الطالب / الطبيب</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={whatsappStudentName}
+                  onChange={(e) => setWhatsappStudentName(e.target.value)}
+                  style={{ fontSize: '0.85rem' }}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '0.78rem' }}>رقم هاتف الواتساب</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  dir="ltr"
+                  value={whatsappPhone}
+                  onChange={(e) => setWhatsappPhone(e.target.value)}
+                  placeholder="091XXXXXXX"
+                  style={{ fontSize: '0.85rem' }}
+                />
+              </div>
+            </div>
+
+            {/* Delivery Time Slot selector */}
+            <div>
+              <label className="form-label" style={{ fontSize: '0.78rem', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <Clock size={14} style={{ color: 'var(--secondary)' }} />
+                <span>الموعد المقترح للتسليم (اختر أو عدّل):</span>
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.45rem' }}>
+                {['8:00 صباحاً', '10:00 صباحاً', '12:00 ظهراً', '2:00 ظهراً'].map((slot) => {
+                  const isSelected = whatsappTimeSlot === slot;
+                  return (
+                    <button
+                      key={slot}
+                      type="button"
+                      onClick={() => setWhatsappTimeSlot(slot)}
+                      style={{
+                        padding: '0.5rem 0.25rem',
+                        fontSize: '0.78rem',
+                        fontWeight: isSelected ? 800 : 600,
+                        borderRadius: 'var(--radius-sm)',
+                        border: isSelected ? '1.5px solid var(--secondary)' : '1px solid var(--border-color)',
+                        backgroundColor: isSelected ? 'var(--accent)' : 'var(--surface-color)',
+                        color: isSelected ? 'var(--primary)' : 'var(--text-main)',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'var(--transition-fast)'
+                      }}
+                    >
+                      {slot}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Delivery place & fee customization */}
+            <div style={{ padding: '0.85rem', backgroundColor: 'var(--accent)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <label className="form-label" style={{ fontSize: '0.78rem', marginBottom: 0 }}>مكان ورسوم التوصيل:</label>
+              <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600 }}>
+                  <input
+                    type="radio"
+                    name="waDeliveryType"
+                    checked={whatsappDeliveryType === 'faculty'}
+                    onChange={() => setWhatsappDeliveryType('faculty')}
+                    style={{ accentColor: 'var(--secondary)' }}
+                  />
+                  <span>تسليم مباشر بالكلية (مجاني) 🎓</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600 }}>
+                  <input
+                    type="radio"
+                    name="waDeliveryType"
+                    checked={whatsappDeliveryType === 'custom'}
+                    onChange={() => setWhatsappDeliveryType('custom')}
+                    style={{ accentColor: 'var(--secondary)' }}
+                  />
+                  <span>مكان آخر / توصيل خارجي 📍</span>
+                </label>
+              </div>
+
+              {whatsappDeliveryType === 'custom' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.6rem', marginTop: '0.35rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>عنوان أو مكان التوصيل:</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={whatsappCustomLocation}
+                      onChange={(e) => setWhatsappCustomLocation(e.target.value)}
+                      placeholder="مثال: شارع النصر، جنزور، أو الاتفاق هاتفياً"
+                      style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>سعر التوصيل (د.ل):</label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="form-input"
+                      value={whatsappCustomFee}
+                      onChange={(e) => setWhatsappCustomFee(e.target.value)}
+                      placeholder="0"
+                      style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Live WhatsApp message preview bubble */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', marginBottom: 0 }}>معاينة الرسالة كما ستظهر في واتساب:</label>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>نص مهيأ تلقائياً 📲</span>
+              </div>
+              <div style={{
+                backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                border: '1.5px solid rgba(16, 185, 129, 0.25)',
+                borderRadius: 'var(--radius-md)',
+                padding: '0.9rem',
+                fontSize: '0.8rem',
+                color: 'var(--text-main)',
+                lineHeight: 1.6,
+                maxHeight: '190px',
+                overflowY: 'auto',
+                whiteSpace: 'pre-wrap',
+                fontFamily: 'inherit'
+              }}>
+                {buildOrderWhatsappMessage(whatsappModalOrder, {
+                  studentName: whatsappStudentName,
+                  timeSlot: whatsappTimeSlot,
+                  deliveryType: whatsappDeliveryType,
+                  customLocation: whatsappCustomLocation,
+                  customFee: whatsappCustomFee
+                })}
+              </div>
+            </div>
+
+            {/* Auto Accept toggle */}
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-main)' }}>
+              <input
+                type="checkbox"
+                checked={whatsappAutoAccept}
+                onChange={(e) => setWhatsappAutoAccept(e.target.checked)}
+                style={{ accentColor: '#10b981' }}
+              />
+              <span>تحديث حالة الطلب تلقائياً إلى «تم قبول الطلب» فور الإرسال ✓</span>
+            </label>
+
+            {/* Modal Actions */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+              <button
+                type="button"
+                onClick={() => setWhatsappModalOrder(null)}
+                className="btn btn-outline"
+                style={{ fontSize: '0.85rem' }}
+              >
+                إلغاء
+              </button>
+              <button
+                type="button"
+                onClick={handleLaunchWhatsapp}
+                style={{
+                  backgroundColor: '#10b981',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '0.65rem 1.4rem',
+                  borderRadius: 'var(--radius-sm)',
+                  fontWeight: 800,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  boxShadow: '0 2px 8px rgba(16, 185, 129, 0.35)',
+                  transition: 'transform 0.15s ease'
+                }}
+              >
+                <MessageCircle size={17} />
+                <span>فتح المحادثة في واتساب الآن 📲</span>
+              </button>
+            </div>
+
           </div>
         </div>
       , document.body)}
