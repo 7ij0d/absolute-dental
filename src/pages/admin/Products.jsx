@@ -126,17 +126,27 @@ export const Products = () => {
   const groupedSubjects = useMemo(() => {
     const groups = [];
     const query = (subjectSearchInModal || '').trim().toLowerCase();
-    const sortedYears = [...years].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    const sortedYears = [...years].sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
 
     sortedYears.forEach(year => {
-      let yearSubs = subjects.filter(s => String(s.year_id) === String(year.id));
+      let yearSubs = subjects
+        .filter(s => String(s.year_id) === String(year.id))
+        .sort((a, b) => {
+          const orderA = a.sort_order != null ? Number(a.sort_order) : 999;
+          const orderB = b.sort_order != null ? Number(b.sort_order) : 999;
+          if (orderA !== orderB) return orderA - orderB;
+          return (a.name_ar || '').localeCompare(b.name_ar || '', 'ar');
+        });
+
       if (query) {
         yearSubs = yearSubs.filter(s => 
           (s.name_ar || '').toLowerCase().includes(query) ||
           (s.name_en || '').toLowerCase().includes(query)
         );
       }
-      if (yearSubs.length > 0) {
+
+      // Always display all academic years when not filtering by search, or when search matches
+      if (!query || yearSubs.length > 0) {
         groups.push({
           year,
           subjects: yearSubs
@@ -144,7 +154,15 @@ export const Products = () => {
       }
     });
 
-    let otherSubs = subjects.filter(s => !s.year_id || !years.some(y => String(y.id) === String(s.year_id)));
+    let otherSubs = subjects
+      .filter(s => !s.year_id || !years.some(y => String(y.id) === String(s.year_id)))
+      .sort((a, b) => {
+        const orderA = a.sort_order != null ? Number(a.sort_order) : 999;
+        const orderB = b.sort_order != null ? Number(b.sort_order) : 999;
+        if (orderA !== orderB) return orderA - orderB;
+        return (a.name_ar || '').localeCompare(b.name_ar || '', 'ar');
+      });
+
     if (query) {
       otherSubs = otherSubs.filter(s => 
         (s.name_ar || '').toLowerCase().includes(query) ||
@@ -153,7 +171,7 @@ export const Products = () => {
     }
     if (otherSubs.length > 0) {
       groups.push({
-        year: { id: 'other', name_ar: 'مواد عامة / أخرى', name_en: 'Other Subjects' },
+        year: { id: 'other', name_ar: 'مواد عامة / غير مصنفة', name_en: 'General / Other Subjects' },
         subjects: otherSubs
       });
     }
@@ -387,12 +405,29 @@ export const Products = () => {
         setProducts(loadedProds);
       }
 
-      // Load years and subjects for form dropdown selectors
-      const { data: yrs } = await supabase.from('years').select('*').order('slug');
-      if (yrs) setYears(yrs);
+      // Load years ordered by academic progression
+      const { data: yrs, error: yrsErr } = await supabase
+        .from('years')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      if (yrs && !yrsErr && yrs.length > 0) {
+        setYears(yrs);
+      } else {
+        const { data: fallbackYrs } = await supabase.from('years').select('*').order('slug');
+        if (fallbackYrs) setYears(fallbackYrs);
+      }
 
-      const { data: subs } = await supabase.from('subjects').select('*').order('slug');
-      if (subs) setSubjects(subs);
+      // Load all subjects ordered by sort_order
+      const { data: subs, error: subsErr } = await supabase
+        .from('subjects')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      if (subs && !subsErr && subs.length > 0) {
+        setSubjects(subs);
+      } else {
+        const { data: fallbackSubs } = await supabase.from('subjects').select('*').order('name_ar');
+        if (fallbackSubs) setSubjects(fallbackSubs);
+      }
 
     } catch (err) {
       console.error('Error fetching admin product catalog', err);
@@ -405,7 +440,25 @@ export const Products = () => {
     }
   };
 
-  const openAddModal = () => {
+  const ensureMetadataLoaded = async () => {
+    try {
+      if (years.length === 0 || subjects.length === 0) {
+        const [{ data: liveYrs }, { data: liveSubs }] = await Promise.all([
+          supabase.from('years').select('*').order('sort_order', { ascending: true }),
+          supabase.from('subjects').select('*').order('sort_order', { ascending: true })
+        ]);
+        if (liveYrs && liveYrs.length > 0) setYears(liveYrs);
+        if (liveSubs && liveSubs.length > 0) setSubjects(liveSubs);
+        return { years: liveYrs || years, subjects: liveSubs || subjects };
+      }
+    } catch (e) {
+      console.warn('Could not re-verify academic metadata:', e);
+    }
+    return { years, subjects };
+  };
+
+  const openAddModal = async () => {
+    const meta = await ensureMetadataLoaded();
     setEditingProduct(null);
     setNameAr('');
     setNameEn('');
@@ -417,7 +470,8 @@ export const Products = () => {
     setComparePrice('');
     setStockQuantity(10);
     setAvailability('available');
-    setYearId(years.length > 0 ? years[0].id : '');
+    const availableYears = meta.years || years;
+    setYearId(availableYears.length > 0 ? availableYears[0].id : '');
     setSubjectId('');
     setSelectedSubjectIds([]);
     setSubjectSelectionMode('custom');
@@ -437,6 +491,7 @@ export const Products = () => {
   };
 
   const openEditModal = async (prod) => {
+    await ensureMetadataLoaded();
     setEditingProduct(prod);
     setNameAr(prod.name_ar || '');
     setNameEn(prod.name_en || '');
@@ -456,24 +511,26 @@ export const Products = () => {
     setSubjectSelectionMode(isUniv ? 'all' : 'custom');
     setSubjectSearchInModal('');
 
-    // Fetch assigned subjects from junction table
+    // Fetch assigned subjects from junction table and combine with legacy fields
     const { data: ps } = await supabase
       .from('product_subjects')
       .select('subject_id')
       .eq('product_id', prod.id);
 
-    let initialSubjectIds = [];
+    const sIds = new Set();
     if (ps && ps.length > 0) {
-      initialSubjectIds = ps.map(r => r.subject_id);
-    } else if (Array.isArray(prod.product_subjects) && prod.product_subjects.length > 0) {
-      initialSubjectIds = prod.product_subjects.map(r => r.subject_id);
-    } else {
-      const sIds = new Set();
-      if (prod.subject_id) sIds.add(prod.subject_id);
-      if (Array.isArray(prod.extra_subject_ids)) prod.extra_subject_ids.forEach(id => sIds.add(id));
-      initialSubjectIds = Array.from(sIds);
+      ps.forEach(r => { if (r.subject_id) sIds.add(r.subject_id); });
     }
-    setSelectedSubjectIds(initialSubjectIds);
+    if (Array.isArray(prod.product_subjects) && prod.product_subjects.length > 0) {
+      prod.product_subjects.forEach(r => { if (r.subject_id) sIds.add(r.subject_id); });
+    }
+    if (prod.subject_id) {
+      sIds.add(prod.subject_id);
+    }
+    if (Array.isArray(prod.extra_subject_ids)) {
+      prod.extra_subject_ids.forEach(id => { if (id) sIds.add(id); });
+    }
+    setSelectedSubjectIds(Array.from(sIds));
 
     setMainImageUrl(prod.image_url || '');
     setUsageVideoUrl(prod.usage_video_url || '');
@@ -815,7 +872,7 @@ export const Products = () => {
             className="card animate-fade-in"
             style={{
               width: '100%',
-              maxWidth: '650px',
+              maxWidth: '700px',
               maxHeight: '90vh',
               overflowY: 'auto',
               backgroundColor: 'var(--surface-color)',
@@ -1033,41 +1090,54 @@ export const Products = () => {
 
                 {/* Content when Specific / Custom Subjects is selected */}
                 {subjectSelectionMode === 'custom' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                     {/* Search and Action Toolbar */}
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                      <div style={{ position: 'relative', flex: 1, minWidth: '180px' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ position: 'relative', flex: '1 1 220px', minWidth: '180px' }}>
                         <input
                           type="text"
                           className="form-input"
                           placeholder={lang === 'ar' ? '🔍 ابحث في المواد الدراسية...' : '🔍 Search subjects...'}
                           value={subjectSearchInModal}
                           onChange={(e) => setSubjectSearchInModal(e.target.value)}
-                          style={{ paddingInlineStart: '2.2rem', fontSize: '0.8rem', height: '36px' }}
+                          style={{ paddingInlineStart: '2.2rem', paddingInlineEnd: subjectSearchInModal ? '2rem' : '0.75rem', fontSize: '0.82rem', height: '36px' }}
                         />
-                        <Search size={14} style={{ position: 'absolute', insetInlineStart: '0.75rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+                        <Search size={14} style={{ position: 'absolute', insetInlineStart: '0.75rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, pointerEvents: 'none' }} />
+                        {subjectSearchInModal && (
+                          <button
+                            type="button"
+                            onClick={() => setSubjectSearchInModal('')}
+                            style={{ position: 'absolute', insetInlineEnd: '0.6rem', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                            title={lang === 'ar' ? 'مسح البحث' : 'Clear search'}
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedSubjectIds(subjects.map(s => s.id))}
-                        className="btn btn-outline"
-                        style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', height: '36px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
-                      >
-                        <Check size={13} />
-                        {lang === 'ar' ? 'تحديد الكل' : 'Select All'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedSubjectIds([])}
-                        className="btn btn-outline"
-                        style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', height: '36px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
-                      >
-                        <X size={13} />
-                        {lang === 'ar' ? 'إلغاء التحديد' : 'Clear'}
-                      </button>
+
+                      <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSubjectIds(subjects.map(s => s.id))}
+                          className="btn btn-outline"
+                          style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', height: '36px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                        >
+                          <Check size={13} />
+                          {lang === 'ar' ? 'تحديد الكل' : 'Select All'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSubjectIds([])}
+                          className="btn btn-outline"
+                          style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', height: '36px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                        >
+                          <X size={13} />
+                          {lang === 'ar' ? 'إلغاء التحديد' : 'Clear'}
+                        </button>
+                      </div>
                     </div>
 
-                    {/* Selected Subjects Chips */}
+                    {/* Selected Subjects Chips & Counter */}
                     {selectedSubjectIds.length > 0 && (
                       <div style={{
                         backgroundColor: 'var(--accent)',
@@ -1076,12 +1146,21 @@ export const Products = () => {
                         padding: '0.5rem 0.75rem',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '0.35rem'
+                        gap: '0.4rem'
                       }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-                          {lang === 'ar' ? `المواد المحددة (${selectedSubjectIds.length}):` : `Selected Subjects (${selectedSubjectIds.length}):`}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                          <span>
+                            {lang === 'ar' ? `المواد المحددة (${selectedSubjectIds.length} من أصل ${subjects.length}):` : `Selected (${selectedSubjectIds.length} of ${subjects.length}):`}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSubjectIds([])}
+                            style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '0.72rem', fontWeight: 600 }}
+                          >
+                            {lang === 'ar' ? 'مسح الكل' : 'Clear all'}
+                          </button>
                         </div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', maxHeight: '90px', overflowY: 'auto' }}>
                           {selectedSubjectIds.map(sid => {
                             const sub = subjects.find(s => s.id === sid);
                             if (!sub) return null;
@@ -1128,108 +1207,185 @@ export const Products = () => {
 
                     {/* Grouped Checkboxes by Academic Year */}
                     <div style={{
-                      maxHeight: '260px',
+                      maxHeight: 'min(420px, 48vh)',
                       overflowY: 'auto',
                       border: '1px solid var(--border-color)',
                       borderRadius: 'var(--radius-md)',
                       backgroundColor: 'var(--accent)',
-                      padding: '0.5rem',
+                      padding: '0.65rem',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '0.65rem'
+                      gap: '0.75rem',
+                      boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.02)',
+                      overscrollBehavior: 'contain'
                     }}>
                       {groupedSubjects.map((grp) => {
-                        const allGroupSelected = grp.subjects.every(s => selectedSubjectIds.includes(s.id));
+                        const grpSubjectIds = grp.subjects.map(s => s.id);
+                        const selectedInGroup = grp.subjects.filter(s => selectedSubjectIds.includes(s.id)).length;
+                        const allGroupSelected = grp.subjects.length > 0 && selectedInGroup === grp.subjects.length;
+
                         return (
                           <div
                             key={grp.year.id}
                             style={{
                               backgroundColor: 'var(--surface-color)',
                               border: '1px solid var(--border-color)',
-                              borderRadius: 'var(--radius-sm)',
+                              borderRadius: 'var(--radius-md)',
+                              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
                               overflow: 'hidden'
                             }}
                           >
                             {/* Academic Year Header with quick toggle */}
                             <div style={{
-                              padding: '0.45rem 0.75rem',
+                              padding: '0.55rem 0.85rem',
                               backgroundColor: 'var(--accent)',
                               borderBottom: '1px solid var(--border-color)',
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'space-between'
+                              justifyContent: 'space-between',
+                              gap: '0.5rem',
+                              flexWrap: 'wrap'
                             }}>
-                              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                                🎓 {grp.year.name_ar} <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>({grp.subjects.length} مواد)</span>
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (allGroupSelected) {
-                                    const grpIds = new Set(grp.subjects.map(s => s.id));
-                                    setSelectedSubjectIds(prev => prev.filter(id => !grpIds.has(id)));
-                                  } else {
-                                    const grpIds = grp.subjects.map(s => s.id);
-                                    setSelectedSubjectIds(prev => Array.from(new Set([...prev, ...grpIds])));
-                                  }
-                                }}
-                                className="btn btn-outline"
-                                style={{ padding: '0.15rem 0.45rem', fontSize: '0.68rem', height: 'auto', fontWeight: 600 }}
-                              >
-                                {allGroupSelected ? (lang === 'ar' ? 'إلغاء مواد السنة' : 'Deselect Year') : (lang === 'ar' ? 'تحديد مواد السنة' : 'Select Year')}
-                              </button>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                                  🎓 {grp.year.name_ar}
+                                </span>
+                                {grp.subjects.length > 0 ? (
+                                  selectedInGroup > 0 ? (
+                                    <span style={{
+                                      fontSize: '0.7rem',
+                                      color: 'var(--secondary)',
+                                      fontWeight: 700,
+                                      backgroundColor: 'rgba(128, 0, 32, 0.08)',
+                                      padding: '2px 7px',
+                                      borderRadius: '4px',
+                                      border: '1px solid rgba(128, 0, 32, 0.2)'
+                                    }}>
+                                      {lang === 'ar' ? `(${selectedInGroup} من ${grp.subjects.length} محددة)` : `(${selectedInGroup}/${grp.subjects.length} selected)`}
+                                    </span>
+                                  ) : (
+                                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                      ({grp.subjects.length} {lang === 'ar' ? 'مواد' : 'subjects'})
+                                    </span>
+                                  )
+                                ) : (
+                                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                    (0 {lang === 'ar' ? 'مواد' : 'subjects'})
+                                  </span>
+                                )}
+                              </div>
+
+                              {grp.subjects.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (allGroupSelected) {
+                                      setSelectedSubjectIds(prev => prev.filter(id => !grpSubjectIds.includes(id)));
+                                    } else {
+                                      setSelectedSubjectIds(prev => Array.from(new Set([...prev, ...grpSubjectIds])));
+                                    }
+                                  }}
+                                  className="btn btn-outline"
+                                  style={{
+                                    padding: '0.2rem 0.55rem',
+                                    fontSize: '0.7rem',
+                                    height: 'auto',
+                                    fontWeight: 600,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem'
+                                  }}
+                                >
+                                  {allGroupSelected ? (
+                                    <>
+                                      <X size={12} />
+                                      {lang === 'ar' ? 'إلغاء مواد السنة' : 'Deselect Year'}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Check size={12} />
+                                      {lang === 'ar' ? 'تحديد مواد السنة' : 'Select Year'}
+                                    </>
+                                  )}
+                                </button>
+                              )}
                             </div>
 
                             {/* Subjects checkboxes in this year */}
-                            <div style={{
-                              display: 'grid',
-                              gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
-                              gap: '0.4rem',
-                              padding: '0.6rem'
-                            }}>
-                              {grp.subjects.map((s) => {
-                                const isChecked = selectedSubjectIds.includes(s.id);
-                                return (
-                                  <label
-                                    key={s.id}
-                                    style={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      gap: '0.5rem',
-                                      padding: '0.35rem 0.5rem',
-                                      borderRadius: 'var(--radius-sm)',
-                                      backgroundColor: isChecked ? 'rgba(128, 0, 32, 0.05)' : 'transparent',
-                                      border: isChecked ? '1px solid rgba(128, 0, 32, 0.25)' : '1px solid transparent',
-                                      cursor: 'pointer',
-                                      fontSize: '0.82rem',
-                                      fontWeight: isChecked ? 700 : 400,
-                                      transition: 'all 0.15s ease'
-                                    }}
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      onChange={(e) => {
-                                        if (e.target.checked) {
-                                          setSelectedSubjectIds(prev => [...prev, s.id]);
-                                        } else {
-                                          setSelectedSubjectIds(prev => prev.filter(id => id !== s.id));
-                                        }
+                            {grp.subjects.length === 0 ? (
+                              <div style={{
+                                padding: '0.85rem 1rem',
+                                fontSize: '0.8rem',
+                                color: 'var(--text-muted)',
+                                textAlign: 'center',
+                                fontStyle: 'italic'
+                              }}>
+                                {lang === 'ar' ? 'لا توجد مواد دراسية مسجلة لهذه السنة حتى الآن' : 'No subjects registered under this academic year yet'}
+                              </div>
+                            ) : (
+                              <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                                gap: '0.5rem',
+                                padding: '0.65rem',
+                                backgroundColor: 'var(--surface-color)'
+                              }}>
+                                {grp.subjects.map((s) => {
+                                  const isChecked = selectedSubjectIds.includes(s.id);
+                                  return (
+                                    <label
+                                      key={s.id}
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.6rem',
+                                        padding: '0.45rem 0.65rem',
+                                        borderRadius: 'var(--radius-sm)',
+                                        backgroundColor: isChecked ? 'rgba(128, 0, 32, 0.06)' : 'var(--accent)',
+                                        border: isChecked ? '1.5px solid var(--secondary)' : '1px solid var(--border-color)',
+                                        cursor: 'pointer',
+                                        fontSize: '0.84rem',
+                                        fontWeight: isChecked ? 700 : 500,
+                                        color: isChecked ? 'var(--secondary)' : 'var(--text-main)',
+                                        transition: 'all 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
+                                        userSelect: 'none'
                                       }}
-                                      style={{ accentColor: 'var(--secondary)', width: '15px', height: '15px', cursor: 'pointer' }}
-                                    />
-                                    <span style={{ lineHeight: 1.2 }}>{s.name_ar}</span>
-                                  </label>
-                                );
-                              })}
-                            </div>
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={(e) => {
+                                          if (e.target.checked) {
+                                            setSelectedSubjectIds(prev => Array.from(new Set([...prev, s.id])));
+                                          } else {
+                                            setSelectedSubjectIds(prev => prev.filter(id => id !== s.id));
+                                          }
+                                        }}
+                                        style={{ accentColor: 'var(--secondary)', width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
+                                      />
+                                      <span style={{ lineHeight: 1.3, flexGrow: 1 }}>{s.name_ar}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
 
                       {groupedSubjects.length === 0 && (
-                        <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                          {lang === 'ar' ? 'لا توجد مواد دراسية مطابقة للبحث' : 'No subjects matched your search'}
+                        <div style={{ textAlign: 'center', padding: '1.75rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                          <p style={{ margin: 0 }}>{lang === 'ar' ? 'لا توجد مواد دراسية مطابقة للبحث' : 'No subjects matched your search'}</p>
+                          {subjectSearchInModal && (
+                            <button
+                              type="button"
+                              onClick={() => setSubjectSearchInModal('')}
+                              className="btn btn-outline"
+                              style={{ marginTop: '0.5rem', padding: '0.25rem 0.75rem', fontSize: '0.75rem' }}
+                            >
+                              {lang === 'ar' ? 'إعادة ضبط البحث' : 'Reset search'}
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
