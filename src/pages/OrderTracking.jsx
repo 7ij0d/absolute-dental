@@ -9,6 +9,25 @@ import { getOrderStatusMeta, normalizeOrderStatus } from '../utils/orderEditHelp
 import { parseOrderVersioning, isOrderEditable } from '../utils/orderVersioning';
 import { Search, MapPin, ClipboardList, CheckCircle2, Clock, Truck, ShieldAlert, ArrowRight, ArrowLeft, Edit3, AlertCircle, ShoppingCart, X, Send, Sparkles } from 'lucide-react';
 
+export const TRACKING_DELIVERY_TIME_SLOTS = [
+  { id: '8:00', value: '8:00 صباحاً', labelAr: '8:00 صباحاً', labelEn: '8:00 AM', periodAr: 'الصباح الباكر', periodEn: 'Early Morning', icon: '🌅' },
+  { id: '10:00', value: '10:00 صباحاً', labelAr: '10:00 صباحاً', labelEn: '10:00 AM', periodAr: 'الفترة الصباحية', periodEn: 'Mid-Morning', icon: '☀️' },
+  { id: '12:00', value: '12:00 ظهراً', labelAr: '12:00 ظهراً', labelEn: '12:00 PM', periodAr: 'فترة الظهيرة', periodEn: 'Noon', icon: '🕛' },
+  { id: '2:00', value: '2:00 ظهراً', labelAr: '2:00 ظهراً', labelEn: '2:00 PM', periodAr: 'بعد الظهر', periodEn: 'Afternoon', icon: '🌤️' },
+];
+
+export const extractOrderTimeSlot = (order) => {
+  if (!order) return null;
+  const combined = `${order.delivery_notes || ''} ${order.notes || ''}`;
+  const match = combined.match(/\[توقيت التسليم المفضل:\s*([^\]]+)\]/);
+  if (match && match[1]) return match[1].trim();
+  if (combined.includes('08:00') || combined.includes('8:00')) return '8:00 صباحاً';
+  if (combined.includes('10:00')) return '10:00 صباحاً';
+  if (combined.includes('12:00')) return '12:00 ظهراً';
+  if (combined.includes('02:00') || combined.includes('2:00')) return '2:00 ظهراً';
+  return null;
+};
+
 export const OrderTracking = () => {
   const { t, lang, isRtl } = useLanguage();
   const location = useLocation();
@@ -28,6 +47,11 @@ export const OrderTracking = () => {
   // Direct Order Editor State
   const [showDirectEditor, setShowDirectEditor] = useState(false);
   const [editNotice, setEditNotice] = useState('');
+
+  // Delivery Time Slot Editing State
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+  const [isUpdatingSlot, setIsUpdatingSlot] = useState(false);
+  const [slotFeedback, setSlotFeedback] = useState(null);
 
   // Auto query if parameters exist in URL (e.g. /track?order=SD-12&phone=091)
   useEffect(() => {
@@ -131,6 +155,97 @@ export const OrderTracking = () => {
   const handleModificationSubmitted = (updatedOrder) => {
     setOrder(updatedOrder);
     setEditNotice(isRtl ? 'تم إرسال تعديل الطلبية للمراجعة بنجاح' : 'Order modification submitted for review');
+  };
+
+  // Synchronize preferred delivery time slot when order loads or changes
+  useEffect(() => {
+    if (order) {
+      const existing = extractOrderTimeSlot(order);
+      setSelectedTimeSlot(existing || '10:00 صباحاً');
+      setSlotFeedback(null);
+    }
+  }, [order?.id, order?.delivery_notes, order?.notes]);
+
+  const handleSaveDeliveryTimeSlot = async (slotToSave) => {
+    if (!order || !slotToSave || isUpdatingSlot) return;
+    setIsUpdatingSlot(true);
+    setSlotFeedback(null);
+
+    try {
+      const currentNotes = order.notes || '';
+      const cleanedNotes = currentNotes.replace(/\[توقيت التسليم المفضل:[^\]]+\]\s*/g, '').trim();
+      const newNotes = `[توقيت التسليم المفضل: ${slotToSave}]${cleanedNotes ? ` ${cleanedNotes}` : ''}`;
+      const newDeliveryNotes = `[توقيت التسليم المفضل: ${slotToSave}]`;
+
+      // 1. Update database orders table
+      const { data, error } = await supabase
+        .from('orders')
+        .update({
+          delivery_notes: newDeliveryNotes,
+          notes: newNotes,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', order.id)
+        .select(`
+          *,
+          order_items (
+            *,
+            products (*)
+          )
+        `)
+        .single();
+
+      if (error) throw error;
+
+      // 2. Dispatch admin notification
+      const orderNum = order.order_number
+        ? String(order.order_number).replace(/-/g, '').slice(0, 8)
+        : String(order.id).slice(0, 8);
+      const customerName = order.customer_name || (isRtl ? 'الزبون' : 'Customer');
+
+      try {
+        await supabase.from('notifications').insert({
+          user_id: null,
+          title_ar: `تحديث موعد التسليم للطلب #${orderNum}`,
+          title_en: `Delivery Time Slot Updated #${orderNum}`,
+          message_ar: `قام الزبون ${customerName} بتحديد/تعديل موعد التسليم المفضل إلى: ${slotToSave} (الطلب #${orderNum}). يرجى مراجعة الطلب وتأكيد الموعد عبر الواتساب.`,
+          message_en: `Customer ${customerName} set/updated preferred delivery time slot to: ${slotToSave} for order #${orderNum}.`,
+          type: 'order_status',
+          is_read: false
+        });
+      } catch (notifErr) {
+        console.warn('Admin notification insert error:', notifErr);
+      }
+
+      // 3. Update local state
+      if (data) {
+        setOrder(data);
+      } else {
+        setOrder((prev) => ({
+          ...prev,
+          delivery_notes: newDeliveryNotes,
+          notes: newNotes,
+          updated_at: new Date().toISOString()
+        }));
+      }
+
+      setSlotFeedback({
+        type: 'success',
+        text: isRtl
+          ? `✓ تم حفظ موعد التسليم (${slotToSave}) بنجاح! سيتم التواصل معك عبر الواتساب لتأكيد الاستلام.`
+          : `✓ Preferred delivery time (${slotToSave}) saved! We will contact you via WhatsApp to confirm.`
+      });
+    } catch (err) {
+      console.error('Error updating delivery time slot:', err);
+      setSlotFeedback({
+        type: 'error',
+        text: isRtl
+          ? 'حدث خطأ أثناء حفظ موعد التسليم. يرجى المحاولة مرة أخرى.'
+          : 'Failed to update delivery time slot. Please try again.'
+      });
+    } finally {
+      setIsUpdatingSlot(false);
+    }
   };
 
   // Status mapping to timeline steps (0-5 index)
@@ -448,6 +563,262 @@ export const OrderTracking = () => {
               <span>{editNotice}</span>
             </div>
           )}
+
+          {/* DELIVERY TIME SLOT REVIEW & UPDATE CARD */}
+          {(() => {
+            const existingSlot = extractOrderTimeSlot(order);
+            const isDeliveredOrCancelled = order.status === 'delivered' || order.status === 'cancelled';
+            const hasChanged = selectedTimeSlot && selectedTimeSlot !== existingSlot;
+
+            return (
+              <div
+                className="card animate-fade-in"
+                style={{
+                  padding: '1.5rem',
+                  backgroundColor: 'var(--surface-color)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-lg)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), var(--shadow-sm)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.2rem'
+                }}
+              >
+                {/* Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.85rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                    <div style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '10px',
+                      backgroundColor: 'var(--accent)',
+                      color: 'var(--secondary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid var(--border-color)'
+                    }}>
+                      <Clock size={20} />
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--primary)', margin: 0 }}>
+                        {isRtl ? 'موعد التسليم المفضل' : 'Preferred Delivery Time Slot'}
+                      </h3>
+                      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0.2rem 0 0 0' }}>
+                        {isRtl
+                          ? 'يمكنك تحديد أو تعديل التوقيت المناسب لجدولك، وسيصل إشعار للإدارة لتأكيد الطلب والموعد عبر الواتساب 📲'
+                          : 'Set or update your preferred delivery time; admins will receive an update to confirm via WhatsApp 📲'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Status Badge */}
+                  {existingSlot ? (
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      padding: '0.35rem 0.85rem',
+                      borderRadius: '999px',
+                      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                      border: '1px solid rgba(16, 185, 129, 0.3)',
+                      color: '#059669',
+                      fontSize: '0.82rem',
+                      fontWeight: 800
+                    }}>
+                      <CheckCircle2 size={15} />
+                      <span>{isRtl ? `الموعد الحالي: ${existingSlot}` : `Current: ${existingSlot}`}</span>
+                    </div>
+                  ) : (
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      padding: '0.35rem 0.85rem',
+                      borderRadius: '999px',
+                      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                      border: '1px solid rgba(245, 158, 11, 0.3)',
+                      color: '#d97706',
+                      fontSize: '0.82rem',
+                      fontWeight: 700
+                    }}>
+                      <AlertCircle size={15} />
+                      <span>{isRtl ? '⚠️ لم يتم تحديد موعد مسبقاً' : '⚠️ No slot set yet'}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Explanatory banner if not set yet */}
+                {!existingSlot && !isDeliveredOrCancelled && (
+                  <div style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                    border: '1px solid rgba(245, 158, 11, 0.25)',
+                    color: '#b45309',
+                    fontSize: '0.83rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    lineHeight: 1.5
+                  }}>
+                    <Sparkles size={16} style={{ flexShrink: 0 }} />
+                    <span>
+                      {isRtl
+                        ? 'لم يتم تحديد موعد تسليم عند تأكيد الطلب مسبقاً. اختر الوقت الأنسب لك من الخيارات أدناه واضغط على "تأكيد موعد التسليم".'
+                        : 'No delivery time was chosen at checkout. Select your preferred slot below and confirm.'}
+                    </span>
+                  </div>
+                )}
+
+                {/* Feedback Message */}
+                {slotFeedback && (
+                  <div style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: '8px',
+                    backgroundColor: slotFeedback.type === 'success' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.1)',
+                    border: `1px solid ${slotFeedback.type === 'success' ? '#10b981' : '#ef4444'}`,
+                    color: slotFeedback.type === 'success' ? '#059669' : '#dc2626',
+                    fontWeight: 700,
+                    fontSize: '0.86rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }} className="animate-fade-in">
+                    {slotFeedback.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                    <span>{slotFeedback.text}</span>
+                  </div>
+                )}
+
+                {/* Slots Grid */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                  gap: '0.75rem'
+                }}>
+                  {TRACKING_DELIVERY_TIME_SLOTS.map((slot) => {
+                    const isSelected = selectedTimeSlot === slot.value;
+                    const isConfirmed = existingSlot === slot.value;
+
+                    return (
+                      <button
+                        key={slot.id}
+                        type="button"
+                        disabled={isDeliveredOrCancelled || isUpdatingSlot}
+                        onClick={() => setSelectedTimeSlot(slot.value)}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.35rem',
+                          padding: '1rem 0.6rem',
+                          borderRadius: 'var(--radius-md)',
+                          border: isSelected ? '2px solid var(--secondary)' : '1px solid var(--border-color)',
+                          backgroundColor: isSelected ? 'var(--accent)' : 'var(--bg-color)',
+                          boxShadow: isSelected
+                            ? 'inset 0 1px 0 rgba(255,255,255,0.6), 0 3px 10px rgba(104,72,53,0.12)'
+                            : 'none',
+                          cursor: isDeliveredOrCancelled ? 'not-allowed' : 'pointer',
+                          opacity: isDeliveredOrCancelled ? 0.6 : 1,
+                          transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                          transform: isSelected ? 'translateY(-2px)' : 'none',
+                          position: 'relative'
+                        }}
+                      >
+                        <span style={{ fontSize: '1.35rem' }}>{slot.icon}</span>
+                        <span style={{
+                          fontSize: '0.92rem',
+                          fontWeight: isSelected ? 800 : 600,
+                          color: isSelected ? 'var(--primary)' : 'var(--text-main)',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {isRtl ? slot.labelAr : slot.labelEn}
+                        </span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                          {isRtl ? slot.periodAr : slot.periodEn}
+                        </span>
+
+                        {isConfirmed && (
+                          <span style={{
+                            fontSize: '0.67rem',
+                            fontWeight: 800,
+                            color: '#059669',
+                            backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                            padding: '1px 7px',
+                            borderRadius: '999px',
+                            marginTop: '0.2rem'
+                          }}>
+                            {isRtl ? 'المعتمد حالياً' : 'Confirmed'}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Footer Controls & WhatsApp Notice */}
+                {!isDeliveredOrCancelled ? (
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '0.85rem',
+                    paddingTop: '0.6rem',
+                    borderTop: '1px solid var(--border-color)'
+                  }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span>📲</span>
+                      <span>
+                        {isRtl
+                          ? 'عند حفظ الموعد، ستتلقى الإدارة إشعاراً لتأكيد طلبك وموعد التسليم عبر الواتساب.'
+                          : 'When saved, admins receive an update to confirm your order and delivery via WhatsApp.'}
+                      </span>
+                    </div>
+
+                    {hasChanged || !existingSlot ? (
+                      <button
+                        type="button"
+                        disabled={isUpdatingSlot}
+                        onClick={() => handleSaveDeliveryTimeSlot(selectedTimeSlot)}
+                        className="btn btn-secondary"
+                        style={{
+                          padding: '0.65rem 1.4rem',
+                          fontSize: '0.88rem',
+                          fontWeight: 800,
+                          gap: '0.5rem',
+                          boxShadow: '0 2px 8px rgba(104,72,53,0.2)'
+                        }}
+                      >
+                        {isUpdatingSlot ? (
+                          <span>{isRtl ? 'جاري الحفظ...' : 'Saving...'}</span>
+                        ) : (
+                          <>
+                            <span>💾</span>
+                            <span>
+                              {!existingSlot
+                                ? (isRtl ? `تأكيد موعد التسليم (${selectedTimeSlot})` : `Confirm Delivery Time (${selectedTimeSlot})`)
+                                : (isRtl ? `حفظ وتعديل الموعد إلى (${selectedTimeSlot})` : `Save & Update to (${selectedTimeSlot})`)}
+                            </span>
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <CheckCircle2 size={16} />
+                        <span>{isRtl ? `موعدك الحالي (${existingSlot}) معتمد ومسجل` : `Current time (${existingSlot}) confirmed`}</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', paddingTop: '0.4rem', borderTop: '1px solid var(--border-color)' }}>
+                    {isRtl ? 'لا يمكن تعديل موعد التسليم لأن الطلب تم تسليمه أو إلغاؤه.' : 'Delivery time slot cannot be modified for delivered or cancelled orders.'}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* DIRECT ORDER EDITING & VERSIONING WORKFLOW */}
           <div

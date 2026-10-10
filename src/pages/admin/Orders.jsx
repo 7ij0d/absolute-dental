@@ -1034,6 +1034,23 @@ export const Orders = () => {
                   <td style={{ padding: '1rem 0.75rem' }}>
                     <p style={{ fontWeight: 600 }}>{ord.customer_name}</p>
                     <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{ord.customer_phone}</p>
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      marginTop: '0.35rem',
+                      fontSize: '0.72rem',
+                      color: 'var(--secondary)',
+                      backgroundColor: 'var(--accent)',
+                      padding: '2px 7px',
+                      borderRadius: '4px',
+                      border: '1px solid var(--border-color)',
+                      fontWeight: 700,
+                      whiteSpace: 'nowrap'
+                    }}>
+                      <Clock size={11} />
+                      <span>{extractDeliveryTimeSlot(ord)}</span>
+                    </div>
                   </td>
                   <td style={{ padding: '1rem 0.75rem', color: 'var(--text-muted)' }}>
                     {new Date(ord.created_at).toLocaleDateString()}
