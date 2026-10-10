@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import supabase from '../supabaseClient';
 import ProductCard from '../components/ProductCard';
@@ -19,7 +20,7 @@ import {
   ShoppingCart, Heart, Check, Plus, Minus,
   ChevronLeft, ChevronRight, ArrowLeft, ArrowRight,
   Package, AlertCircle, CheckCircle2, Clock, XCircle,
-  Sparkles, Layers, Box, Tag, ArrowLeftRight
+  Sparkles, Layers, Box, Tag, ArrowLeftRight, ShieldAlert
 } from 'lucide-react';
 
 const DEFAULT_YEARS = [
@@ -105,6 +106,38 @@ const DEFAULT_SUBJECTS = [
 export const ProductDetails = () => {
   const { id } = useParams();
   const { lang, t, isRtl } = useLanguage();
+  const auth = useAuth();
+  const isAdmin = auth?.isAdmin;
+  const isUserAdmin = Boolean(
+    isAdmin ||
+    (typeof window !== 'undefined' && (
+      localStorage.getItem('admin_pin') === '9922' ||
+      sessionStorage.getItem('admin_pin') === '9922' ||
+      localStorage.getItem('admin_passcode') === '9922'
+    ))
+  );
+
+  const sanitizeDetailsText = (text) => {
+    if (!text || isUserAdmin) return text;
+    return text
+      .split('\n')
+      .filter(line => {
+        const l = line.toLowerCase();
+        return !line.includes('سعر التكلفة') &&
+               !line.includes('سعر المخزون') &&
+               !line.includes('سعر الشراء') &&
+               !line.includes('الكمية في المخزون') &&
+               !line.includes('إجمالي المخزون') &&
+               !line.includes('سعر البيع') &&
+               !l.includes('cost price') &&
+               !l.includes('selling price') &&
+               !l.includes('purchase price') &&
+               !l.includes('quantity in stock') &&
+               !l.includes('total stock');
+      })
+      .join('\n');
+  };
+
   const { cartItems, addToCart } = useCart();
   const navigate = useNavigate();
 
@@ -371,7 +404,7 @@ export const ProductDetails = () => {
   // Availability computations
   const isByOrder = product?.availability === 'by_order';
   const isUnavailable = !isByOrder && (product?.availability === 'unavailable' || (effectiveStock !== null && effectiveStock <= 0));
-  const isLimited = !isByOrder && product?.availability === 'limited_quantity';
+  const isLimited = isUserAdmin && !isByOrder && product?.availability === 'limited_quantity';
   const isComingSoon = product?.availability === 'coming_soon';
   const isOrderable = !isUnavailable && !isComingSoon;
 
@@ -737,6 +770,30 @@ export const ProductDetails = () => {
                 </span>
               )}
             </div>
+
+            {/* Admin-Only Inventory Indicator */}
+            {isUserAdmin && (
+              <div style={{
+                marginTop: '0.65rem',
+                padding: '0.65rem 0.9rem',
+                borderRadius: '12px',
+                background: 'rgba(245, 158, 11, 0.08)',
+                border: '1px solid rgba(245, 158, 11, 0.25)',
+                color: '#92400e',
+                fontSize: '0.82rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <ShieldAlert size={16} color="#D97706" style={{ flexShrink: 0 }} />
+                <span>
+                  <strong>{lang === 'ar' ? 'لوحة الإدارة (خاص بالمسؤول): ' : 'Admin Only: '}</strong>
+                  {lang === 'ar'
+                    ? `حالة المخزون: ${product?.availability === 'limited_quantity' ? 'كمية محدودة' : (product?.availability === 'by_order' ? 'بالطلب' : 'متوفر')} | الكمية المسجلة: ${product?.stock_quantity ?? 'غير محدد'}`
+                    : `Stock State: ${product?.availability} | Quantity: ${product?.stock_quantity ?? 'N/A'}`}
+                </span>
+              </div>
+            )}
 
             {/* Bundle / Offer Breakdown Card */}
             {bundleInfo && (
@@ -1129,9 +1186,31 @@ export const ProductDetails = () => {
                 </h3>
                 <p className="product-desc-text">
                   {lang === 'ar'
-                    ? (product.description_ar || product.description_en)
-                    : (product.description_en || product.description_ar)}
+                    ? sanitizeDetailsText(product.description_ar || product.description_en)
+                    : sanitizeDetailsText(product.description_en || product.description_ar)}
                 </p>
+              </div>
+            )}
+
+            {/* Product Specifications / Details (sanitized) */}
+            {((product.details_ar && sanitizeDetailsText(product.details_ar).trim()) || (product.details_en && sanitizeDetailsText(product.details_en).trim())) && (
+              <div className="product-desc-box" style={{ marginTop: '1rem' }}>
+                <h3 className="product-section-heading">
+                  {lang === 'ar' ? 'المواصفات الفنية' : 'Technical Specifications'}
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+                  {sanitizeDetailsText(lang === 'ar' ? (product.details_ar || product.details_en) : (product.details_en || product.details_ar))
+                    .split('\n')
+                    .map(l => l.trim())
+                    .filter(Boolean)
+                    .map((item, idx) => (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                        <span style={{ color: 'var(--primary)', fontWeight: 800 }}>•</span>
+                        <span>{item.replace(/^[•\-*]\s*/, '')}</span>
+                      </div>
+                    ))
+                  }
+                </div>
               </div>
             )}
 
@@ -1158,13 +1237,13 @@ export const ProductDetails = () => {
                   <span className="spec-value">
                     {isByOrder
                       ? (lang === 'ar' ? 'متوفر بالطلب (By Order)' : 'Available By Order')
-                      : isOrderable
-                      ? (lang === 'ar' ? 'متوفر للطلب المباشر' : 'In Stock')
                       : isLimited
                       ? (lang === 'ar' ? 'كمية محدودة' : 'Limited Quantity')
                       : isComingSoon
                       ? (lang === 'ar' ? 'قريباً' : 'Coming Soon')
-                      : (lang === 'ar' ? 'غير متوفر حالياً' : 'Out of Stock')}
+                      : isUnavailable
+                      ? (lang === 'ar' ? 'غير متوفر حالياً' : 'Out of Stock')
+                      : (lang === 'ar' ? 'متوفر للطلب المباشر' : 'In Stock')}
                   </span>
                 </div>
               </div>

@@ -386,8 +386,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-impression-tray-blue.png",
     "description_ar": "قالب أخذ الطبعات السنية البلاستيكي المثقب بلون أزرق عالي الجودة لمادتي صناعة الأسنان الثابتة والمتحركة 2. المقاسات المتوفرة: M و L.",
     "description_en": "Perforated blue plastic dental impression tray for Fixed and Removable Prosthodontics 2. Available in sizes M and L.",
-    "details_ar": "اللون: أزرق\nالمقاسات المتوفرة: M و L\nالكمية: 24 مقاس كبير (L) + 24 مقاس متوسط (M)\nسعر البيع: 2 د.ل",
-    "details_en": "Color: Blue\nAvailable Sizes: M & L\nIn Stock: 24 Large (L) + 24 Mid (M)\nSelling Price: 2 LYD",
+    "details_ar": "اللون: أزرق\nالمقاسات المتوفرة: M و L\nالكمية: 24 مقاس كبير (L) + 24 مقاس متوسط (M)",
+    "details_en": "Color: Blue\nAvailable Sizes: M & L",
     "sort_order": 1
   },
   {
@@ -403,8 +403,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-medprotect-blue.png",
     "description_ar": "كمامات طبية جراحية ثلاثية الطبقات عالية الكفاءة مع حلقات أذن مطاطية مريحة، خالية تماماً من اللاتكس والنيكل والكادميوم لحماية قصوى في المعامل والعيادات. متوفرة باللونين الأزرق والأسود.",
     "description_en": "Latex-free, nickel-free and cadmium-free. High-filtration 3-ply surgical face mask with comfortable elastic ear loops. Available in Blue and Black.",
-    "details_ar": "الماركة: MedProtect\nالنوع: خالية من اللاتكس والنيكل والكادميوم (latex-free, nickel-free, cadmium-free)\nالألوان المتوفرة:\n• أزرق (Blue): متوفر 50 قطعة (سعر التكلفة: 0.12 د.ل)\n• أسود (Black): متوفر 100 قطعة (سعر التكلفة: 0.13 د.ل)\nسعر البيع: 0.5 د.ل للقطعة\nالمواد الدراسية: جميع المواد",
-    "details_en": "Brand: MedProtect\nFeatures: Latex-free, nickel-free, cadmium-free\nAvailable Colors:\n• Blue: 50 pcs (Cost: 0.12 LYD)\n• Black: 100 pcs (Cost: 0.13 LYD)\nSelling Price: 0.5 LYD per piece\nAcademic Year: All Subjects",
+    "details_ar": "الماركة: MedProtect\nالنوع: خالية من اللاتكس والنيكل والكادميوم (latex-free, nickel-free, cadmium-free)\nالألوان المتوفرة:\n• أزرق (Blue)\n• أسود (Black)\nالمواد الدراسية: جميع المواد",
+    "details_en": "Brand: MedProtect\nFeatures: Latex-free, nickel-free, cadmium-free\nAvailable Colors:\n• Blue: 50 pcs (Cost: 0.12 LYD)\n• Black: 100 pcs (Cost: 0.13 LYD)\nAcademic Year: All Subjects",
     "sort_order": 1
   },
   {
@@ -425,8 +425,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/surgical-blades-lf-support.png",
     "description_ar": "شفرات جراحية معقمة من الفولاذ الكربوني (Carbon Steel) مقاس 22، مغلفة بشكل فردي ومعقمة بأشعة غاما، مثالية لأعمال التشميع والنحت وتعديل الطبعات في معمل صناعة الأسنان الثابتة والمتحركة.",
     "description_en": "Gamma sterile carbon steel surgical blades (Size 22), individually foil-wrapped. Ideal for waxing, carving, and impression trimming in Fixed and Removable Prosthodontics.",
-    "details_ar": "الماركة: L+F Support\nالمقاس: 22 (Size 22)\nالمادة: كربون ستيل معقم (Carbon Steel - Sterile R)\nسعر البيع: 0.50 د.ل للقطعة\nسعر التكلفة: 0.20 د.ل\nالكمية في المخزون: 300 قطعة\nالاستخدام: صناعة الأسنان الثابتة والمتحركة",
-    "details_en": "Brand: L+F Support\nSize: 22\nMaterial: Carbon Steel (Sterile R)\nSelling Price: 0.50 LYD\nCost Price: 0.20 LYD\nStock Quantity: 300 pieces\nDepartment: Fixed & Removable Prosthodontics",
+    "details_ar": "الماركة: L+F Support\nالمقاس: 22 (Size 22)\nالمادة: كربون ستيل معقم (Carbon Steel - Sterile R)\nالاستخدام: صناعة الأسنان الثابتة والمتحركة",
+    "details_en": "Brand: L+F Support\nSize: 22\nMaterial: Carbon Steel (Sterile R)\nStock Quantity: 300 pieces\nDepartment: Fixed & Removable Prosthodontics",
     "sort_order": 2
   },
   {
@@ -447,8 +447,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-pink.png",
     "description_ar": "مفرش طبي واقي للاستخدام لمرة واحدة (Waterproof Dental Bib) مصنوع من طبقات ورقية ماصة عالية الجودة مدعمة بطبقة بولي إيثيلين عازلة ومقاومة للماء تماماً لحماية ملابس المرضى وأسطح العمل في العيادات. متوفر باللونين الوردي والأزرق.",
     "description_en": "Disposable waterproof dental bib / cover sheet. 2-ply absorbent paper backing laminated with 1-ply waterproof PE film to protect patients and clinic trays from liquids. Available in Pink and Blue.",
-    "details_ar": "الألوان المتوفرة:\n• وردي (Pink): متوفر 375 قطعة\n• أزرق (Blue): متوفر 125 قطعة\nالنوع: مفرش واقي عازل ومقاوم للماء (Waterproof Dental Bib)\nسعر البيع: 0.5 د.ل للقطعة\nسعر التكلفة: 0.11 د.ل\nالسنة الدراسية: السنة الثالثة (جميع المواد)",
-    "details_en": "Available Colors:\n• Pink: 375 pieces in stock\n• Blue: 125 pieces in stock\nType: Disposable Waterproof Dental Bib / Cover Sheet\nSelling Price: 0.5 LYD\nCost Price: 0.11 LYD\nAcademic Year: 3rd Year (All Subjects)",
+    "details_ar": "الألوان المتوفرة:\n• وردي (Pink)\n• أزرق (Blue)\nالنوع: مفرش واقي عازل ومقاوم للماء (Waterproof Dental Bib)\nالسنة الدراسية: السنة الثالثة (جميع المواد)",
+    "details_en": "Available Colors:\n• Pink\n• Blue\nType: Disposable Waterproof Dental Bib / Cover Sheet\nAcademic Year: 3rd Year (All Subjects)",
     "sort_order": 3
   },
   {
@@ -467,8 +467,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/zhermack-alginate-impression-material-50g.png",
     "description_ar": "مادة أخذ طبعات الجينات عالية الدقة من شركة Zhermack الإيطالية (عبوة معملية مخصصة للطلاب 50 جرام). سريعة التصلب ومرنة، مثالية لأخذ الطبعات التشخيصية والدراسية وقوالب الأطقم في معمل صناعة الأسنان المتحركة.",
     "description_en": "High-precision Zhermack dental alginate impression material (Student 50g lab portion). Fast setting and high elastic recovery, ideal for study models and preliminary impressions in Removable Prosthodontics.",
-    "details_ar": "الماركة: Zhermack (إيطاليا)\nالوزن: 50 جرام (50g Student Pack)\nالنوع: مادة طبعة الجينات عالية المرونة (Impression Material)\nسعر البيع: 10 د.ل\nسعر التكلفة: 7.52 د.ل\nالكمية في المخزون: 9 عبوات\nالمادة الدراسية: صناعة الأسنان المتحركة",
-    "details_en": "Brand: Zhermack (Italy)\nWeight: 50g Student Pack\nType: High Elasticity Alginate Impression Material\nSelling Price: 10 LYD\nCost Price: 7.52 LYD\nQuantity in Stock: 9 packs\nSubject: Removable Prosthodontics",
+    "details_ar": "الماركة: Zhermack (إيطاليا)\nالوزن: 50 جرام (50g Student Pack)\nالنوع: مادة طبعة الجينات عالية المرونة (Impression Material)\nالمادة الدراسية: صناعة الأسنان المتحركة",
+    "details_en": "Brand: Zhermack (Italy)\nWeight: 50g Student Pack\nType: High Elasticity Alginate Impression Material\nSubject: Removable Prosthodontics",
     "sort_order": 5
   },
   {
@@ -487,8 +487,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/iq-alginate-impression-material-50g.png",
     "description_ar": "مادة أخذ طبعات الجينات سريعة التصلب وعالية المرونة IQ Alginate (عبوة معملية مخصصة للطلاب 50 جرام). تتميز بدقة عالية وسهولة الخلط ومرونة ممتازة لأخذ طبعات الأسنان ودراسة النماذج في معمل صناعة الأسنان المتحركة.",
     "description_en": "High-elasticity fast-setting IQ Alginate dental impression material (Student 50g lab portion). Excellent detail reproduction and tear strength for diagnostic casts and preliminary impressions in Removable Prosthodontics.",
-    "details_ar": "الماركة: IQ Alginate\nالوزن: 50 جرام (50g Student Pack)\nالنوع: مادة طبعة الجينات معملية (Impression Material)\nسعر البيع: 7 د.ل\nسعر التكلفة: 6.125 د.ل\nالكمية في المخزون: 9 عبوات\nالمادة الدراسية: صناعة الأسنان المتحركة",
-    "details_en": "Brand: IQ Alginate\nWeight: 50g Student Pack\nType: Dental Alginate Impression Material\nSelling Price: 7 LYD\nCost Price: 6.125 LYD\nQuantity in Stock: 9 packs\nSubject: Removable Prosthodontics",
+    "details_ar": "الماركة: IQ Alginate\nالوزن: 50 جرام (50g Student Pack)\nالنوع: مادة طبعة الجينات معملية (Impression Material)\nالمادة الدراسية: صناعة الأسنان المتحركة",
+    "details_en": "Brand: IQ Alginate\nWeight: 50g Student Pack\nType: Dental Alginate Impression Material\nSubject: Removable Prosthodontics",
     "sort_order": 6
   },
   {
@@ -508,8 +508,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-iq-alginate-impression-material-450g.png",
     "description_ar": "مادة أخذ طبعات الجينات الإيطالية الشهيرة Lascod iQ Alginate (عبوة كاملة 450 جرام). تتميز بتغير لوني إرشادي لمراحل التصلب (Chromatic indicator)، ونكهة النعناع المنعشة، وسرعة فائقة في التصلب ومرونة استثنائية لأخذ طبعات غاية في الدقة في معامل وعيادات صناعة الأسنان.",
     "description_en": "World-renowned Italian Chromatic Alginate impression material by Lascod (Full 450g bag). Features visual chromatic phase indicator, mint flavor, fast setting, and high elastic recovery for precision impressions in Prosthodontics.",
-    "details_ar": "الماركة: Lascod (إيطاليا)\nالوزن: 450 جرام (Full Bag 450g)\nالنوع: مادة طبعة الجينات متغيرة الألوان (Chromatic Alginate)\nسعر البيع: 50 د.ل\nسعر التكلفة: 45 د.ل\nالكمية في المخزون: 1 عبوة\nالمادة الدراسية: صناعة الأسنان (Prosthodontics)",
-    "details_en": "Brand: Lascod (Italy)\nWeight: 450g Full Bag\nType: Chromatic Alginate Impression Material (Mint Flavor)\nSelling Price: 50 LYD\nCost Price: 45 LYD\nQuantity in Stock: 1 pack\nSubject: Prosthodontics",
+    "details_ar": "الماركة: Lascod (إيطاليا)\nالوزن: 450 جرام (Full Bag 450g)\nالنوع: مادة طبعة الجينات متغيرة الألوان (Chromatic Alginate)\nالمادة الدراسية: صناعة الأسنان (Prosthodontics)",
+    "details_en": "Brand: Lascod (Italy)\nWeight: 450g Full Bag\nType: Chromatic Alginate Impression Material (Mint Flavor)\nSubject: Prosthodontics",
     "sort_order": 7
   },
   {
@@ -525,8 +525,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/life-support-sterile-gauze-swab.png",
     "description_ar": "شاش طبي قطني نقي معقم بأكسيد الإيثيلين (Sterile EO) عالي الامتصاص من Life Support. متعدد الطبقات بمقاس 10cm × 10cm، مثالي للتحكم في اللعاب والعزل ومسح وتجفيف الأسنان وتطبيق محاليل الفلورايد في عيادات طب الأسنان الوقائي وطب أسنان الأطفال.",
     "description_en": "Life Support ethylene oxide sterilized (Sterile EO) 100% cotton gauze swab (10cm x 10cm, 4-ply / 12-ply). Highly absorbent and lint-free, essential for isolation, moisture control, cleaning, and topical fluoride applications in Preventive & Pediatric Dentistry.",
-    "details_ar": "الماركة: Life Support (IPC)\nالمقاس: 10cm × 10cm (40S, 4PLY, 12PLY)\nالنوع: شاش قطني طبي معقم (Sterile Gauze Swab)\nسعر البيع: 0.50 د.ل للقطعة\nسعر التكلفة: 0.20 د.ل\nالكمية في المخزون: 200 قطعة\nالمادة الدراسية: طب أسنان الأطفال والوقائي 1 (البريفنشن)",
-    "details_en": "Brand: Life Support (IPC)\nSize: 10cm x 10cm (40S, 4PLY, 12PLY)\nType: Sterile Cotton Gauze Swab (EO Sterilized)\nSelling Price: 0.50 LYD\nCost Price: 0.20 LYD\nQuantity in Stock: 200 pcs\nSubject: Pediatric & Preventive Dentistry 1",
+    "details_ar": "الماركة: Life Support (IPC)\nالمقاس: 10cm × 10cm (40S, 4PLY, 12PLY)\nالنوع: شاش قطني طبي معقم (Sterile Gauze Swab)\nالمادة الدراسية: طب أسنان الأطفال والوقائي 1 (البريفنشن)",
+    "details_en": "Brand: Life Support (IPC)\nSize: 10cm x 10cm (40S, 4PLY, 12PLY)\nType: Sterile Cotton Gauze Swab (EO Sterilized)\nSubject: Pediatric & Preventive Dentistry 1",
     "sort_order": 8
   },
   {
@@ -547,8 +547,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/overseasglove-nitrile-gloves-black-s.png",
     "description_ar": "قفازات فحص طبية نايتريل خالية من البودرة واللاتكس من OverseasGlove للاستخدام لمرة واحدة (حماية فائقة وملمس مريح). متوفرة بمقاسات وألوان متعددة (أسود مقاس S، أزرق مقاس M). أساسية لجميع عيادات ومعامل السنة الثالثة.",
     "description_en": "Premium OverseasGlove disposable non-sterile nitrile examination gloves (Powder-free & Latex-free). Available in multiple colors and sizes (Black Size S, Blue Size M). Essential protection across all 3rd-year dental clinics and laboratories.",
-    "details_ar": "الماركة: OverseasGlove\nالنوع: قفازات نايتريل طبية غير معقمة (Disposable Nitrile Examination Gloves)\nالألوان والمقاسات المتوفرة:\n• أسود (Black) - مقاس Small (S) - متوفر: 50 زوج\n• أزرق (Blue) - مقاس Medium (M) - متوفر: 50 زوج\nسعر البيع: 1.00 د.ل للزوج\nسعر التكلفة: 0.56 د.ل\nالمواد الدراسية: السنة الثالثة (جميع المواد الأربعة الأساسية)",
-    "details_en": "Brand: OverseasGlove\nType: Disposable Non-Sterile Nitrile Gloves\nAvailable Colors & Sizes:\n• Black - Size Small (S) - In Stock: 50 pairs\n• Blue - Size Medium (M) - In Stock: 50 pairs\nSelling Price: 1.00 LYD per pair\nCost Price: 0.56 LYD\nAcademic Year: 3rd Year (All 4 Subjects)",
+    "details_ar": "الماركة: OverseasGlove\nالنوع: قفازات نايتريل طبية غير معقمة (Disposable Nitrile Examination Gloves)\nالألوان والمقاسات المتوفرة:\n• أسود (Black) - مقاس Small (S)\n• أزرق (Blue) - مقاس Medium (M)\nالمواد الدراسية: السنة الثالثة (جميع المواد الأربعة الأساسية)",
+    "details_en": "Brand: OverseasGlove\nType: Disposable Non-Sterile Nitrile Gloves\nAvailable Colors & Sizes:\n• Black - Size Small (S)\n• Blue - Size Medium (M)\nAcademic Year: 3rd Year (All 4 Subjects)",
     "sort_order": 9
   },
   {
@@ -564,8 +564,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/gauze-roll-500g.png",
     "description_ar": "رول شاش طبي قطني نقي 100% عالي الجودة والامتصاص من GM (عبوة كبيرة 500 جرام، قياس 36 بوصة × 100 ياردة، 4 طبقات). مخصص لإعداد ومسح وتجهيز مسحات الشاش المعملية والعيادية والتحكم في الرطوبة في عيادات طب الأسنان الوقائي.",
     "description_en": "GM Medical 100% pure cotton absorbent gauze roll (500g roll, 36 inch x 100Y, 4-ply, 40s/12x8 mesh, 8 threads, Latex-free). High absorbency for custom swabs, isolation, and clinical procedures in Preventive Dentistry.",
-    "details_ar": "الماركة: GM (Al Gohay International Medical Equipment)\nالوزن: 500 جرام (500G Roll)\nالمواصفات: 100% قطن نقي، 36 بوصة × 100 ياردة، 4PLY، خالٍ من اللاتكس (Latex Free)\nسعر البيع: 26.00 د.ل\nسعر التكلفة: 22.00 د.ل\nالكمية في المخزون: 2 رول\nالمادة الدراسية: طب أسنان الأطفال والوقائي 1 (البريفنشن)",
-    "details_en": "Brand: GM\nWeight: 500g Roll\nSpecifications: 100% Cotton, 36 inch x 100Y, 4-ply, Latex Free, CE certified\nSelling Price: 26.00 LYD\nCost Price: 22.00 LYD\nQuantity in Stock: 2 rolls\nSubject: Pediatric & Preventive Dentistry 1",
+    "details_ar": "الماركة: GM (Al Gohay International Medical Equipment)\nالوزن: 500 جرام (500G Roll)\nالمواصفات: 100% قطن نقي، 36 بوصة × 100 ياردة، 4PLY، خالٍ من اللاتكس (Latex Free)\nالمادة الدراسية: طب أسنان الأطفال والوقائي 1 (البريفنشن)",
+    "details_en": "Brand: GM\nWeight: 500g Roll\nSpecifications: 100% Cotton, 36 inch x 100Y, 4-ply, Latex Free, CE certified\nSubject: Pediatric & Preventive Dentistry 1",
     "sort_order": 10
   },
   {
@@ -584,8 +584,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-barrier-wrapping-roll-blue.png",
     "description_ar": "رول تغليف وعزل عيادي واقي عالي الجودة باللون الأزرق (Dental Barrier Film Roll)، مخصص لتغطية وعزل مقابض الأجهزة، رؤوس الإضاءة، لوحات التحكم، وخراطيم الوحدات العيادية لمنع انتقال العدوى وضمان أعلى معايير التعقيم أثناء العمل السريري والمعملي في صناعة الأسنان المتحركة.",
     "description_en": "Premium medical dental barrier film wrapping roll in blue. Designed for surface infection control, protecting equipment handles, light handles, control panels, and clinic tubing during clinical and lab procedures in Removable Prosthodontics.",
-    "details_ar": "المادة: رول عزل وتغليف عيادي (Barrier Film Wrapping Roll)\nاللون: أزرق (Blue)\nالاستخدام: عزل أسطح الأجهزة ومقابض الإنارة والعيادات لمنع التلوث المتبادل\nسعر البيع: 28.00 د.ل\nسعر التكلفة: 23.00 د.ل\nالكمية في المخزون: 5 رول\nالمادة الدراسية: صناعة الأسنان المتحركة (Removable Prosthodontics)",
-    "details_en": "Product: Dental Barrier Film Wrapping Roll\nColor: Blue\nApplication: Clinical surface isolation, cross-contamination prevention, equipment protection\nSelling Price: 28.00 LYD\nCost Price: 23.00 LYD\nQuantity in Stock: 5 rolls\nSubject: Removable Prosthodontics",
+    "details_ar": "المادة: رول عزل وتغليف عيادي (Barrier Film Wrapping Roll)\nاللون: أزرق (Blue)\nالاستخدام: عزل أسطح الأجهزة ومقابض الإنارة والعيادات لمنع التلوث المتبادل\nالمادة الدراسية: صناعة الأسنان المتحركة (Removable Prosthodontics)",
+    "details_en": "Product: Dental Barrier Film Wrapping Roll\nColor: Blue\nApplication: Clinical surface isolation, cross-contamination prevention, equipment protection\nSubject: Removable Prosthodontics",
     "sort_order": 10
   },
   {
@@ -605,8 +605,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/rubber-dam-heavy-blue.png",
     "description_ar": "شيتات حاجز مطاطي عيادي Rubber Dam قياس 6×6 بوصة (Natural Latex Dental Rubber Dams) عالي المرونة ومقاوم للتمزق. متوفر بموديلين: هيفي (Heavy) باللون الأزرق لثبات وعزل محكم فائق، وميد (Mid/Medium) باللون الأخضر للمرونة العالية أثناء العزل في عيادات البرستو والتحفظي.",
     "description_en": "High-grade 6x6 inch natural latex dental rubber dam sheets for superior clinical isolation and moisture control. Available in Heavy model (Blue) for maximum tear-resistance and seal, and Mid/Medium model (Green) for optimal flexibility during restorative and prosthodontic procedures.",
-    "details_ar": "النوع: حاجز مطاطي طبي لعزل الأسنان (Natural Latex Dental Rubber Dam)\nالمقاس: 6×6 بوصة (6x6)\nالموديلات والألوان المتوفرة:\n• هيفي - Heavy (أزرق - Blue): متوفر 35 شيت\n• ميد - Mid / Medium (أخضر - Green): متوفر 36 شيت\nسعر البيع: 2.50 د.ل\nسعر التكلفة: 2.285 د.ل\nإجمالي المخزون: 71 شيت\nالمادة الدراسية: صناعة الأسنان الثابتة 2 (البرستو)",
-    "details_en": "Type: Natural Latex Dental Rubber Dam Sheets\nSize: 6x6 inches\nAvailable Models & Colors:\n• Heavy - Blue: In Stock 35 sheets\n• Mid / Medium - Green: In Stock 36 sheets\nSelling Price: 2.50 LYD\nCost Price: 2.285 LYD\nTotal Stock: 71 sheets\nSubject: Fixed Prosthodontics 2 (Prostho)",
+    "details_ar": "النوع: حاجز مطاطي طبي لعزل الأسنان (Natural Latex Dental Rubber Dam)\nالمقاس: 6×6 بوصة (6x6)\nالموديلات والألوان المتوفرة:\n• هيفي - Heavy (أزرق - Blue)\n• ميد - Mid / Medium (أخضر - Green)\nالمادة الدراسية: صناعة الأسنان الثابتة 2 (البرستو)",
+    "details_en": "Type: Natural Latex Dental Rubber Dam Sheets\nSize: 6x6 inches\nAvailable Models & Colors:\n• Heavy - Blue\n• Mid / Medium - Green\nSubject: Fixed Prosthodontics 2 (Prostho)",
     "sort_order": 11
   },
   {
@@ -626,8 +626,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-floss-dispenser.png",
     "description_ar": "خيط أسنان طبي عيادي عالي المتانة داخل علبة موزع شفافة مع قاطع معدني مدمج. مخصص لتنظيف المسافات بين الأسنان (Interdental cleaning)، إزالة البلاك، وفحص نقاط التماس (Contact points) أثناء الإجراءات السريرية والتدريب في طب الأسنان الوقائي والتحفظي.",
     "description_en": "Professional clinical dental floss in a compact dispenser box with integrated stainless steel cutter. Ideal for interdental cleaning, plaque removal, checking restorative contact points, and clinical procedures in Preventive and Conservative Dentistry.",
-    "details_ar": "المنتج: خيط أسنان طبي عيادي مع علبة موزع (Dental Floss Dispenser)\nالمواصفات: خيط مشمع عالي القوة ومقاوم للقطع، علبة شفافة مع شفرة قطع معدنية\nسعر البيع: 10.00 د.ل\nسعر التكلفة: 8.00 د.ل\nالكمية في المخزون: 10 علب\nالمادة الدراسية: طب الأسنان الوقائي 1 (البريفنشن)",
-    "details_en": "Product: Clinical Dental Floss Dispenser\nFeatures: High-tensile strength waxed floss, transparent protective case with cutting blade\nSelling Price: 10.00 LYD\nCost Price: 8.00 LYD\nQuantity in Stock: 10 boxes\nSubject: Preventive Dentistry",
+    "details_ar": "المنتج: خيط أسنان طبي عيادي مع علبة موزع (Dental Floss Dispenser)\nالمواصفات: خيط مشمع عالي القوة ومقاوم للقطع، علبة شفافة مع شفرة قطع معدنية\nالمادة الدراسية: طب الأسنان الوقائي 1 (البريفنشن)",
+    "details_en": "Product: Clinical Dental Floss Dispenser\nFeatures: High-tensile strength waxed floss, transparent protective case with cutting blade\nSubject: Preventive Dentistry",
     "sort_order": 11
   },
   {
@@ -650,8 +650,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/disposable-dental-examination-kit.png",
     "description_ar": "طقم فحص أسنان عيادي معقم ومغلف للاستخدام الفردي لمرة واحدة (Single-use Sterile Kit). يحتوي على صينية بلاستيكية مدمجة، مرآة فحص أسنان، مسبار فحص/بروب، ملقط طبي معدني، كرات قطنية، ومفرش طبي واقٍ (Bib). أساسي لجلسات الفحص والتشخيص السريري في عيادات العلاج التحفظي (الكونس) وصناعة الأسنان الثابتة (البرستو) والمتحركة (الريموفبل).",
     "description_en": "Professional disposable sterile dental examination kit for single-patient clinical procedures. Includes a rigid examination tray, dental mouth mirror, double-ended dental probe/explorer, stainless steel clinical tweezers, cotton rolls, and protective dental bib. Essential for clinical diagnosis and practice in Conservative Dentistry, Fixed Prosthodontics, and Removable Prosthodontics.",
-    "details_ar": "المنتج: طقم فحص أسنان عيادي معقم للاستخدام مرة واحدة (Disposable Examination Kit)\nالمحتويات: مرآة فحص، مسبار (Probe/Explorer)، ملقط أسنان، كرات قطن طبي، مفرش واقٍ، وصينية فحص\nسعر البيع: 2.50 د.ل\nسعر التكلفة: 2.25 د.ل\nالكمية في المخزون: 10 أطقم\nالمواد الدراسية: علاج الأسنان التحفظي (الكونس)، صناعة الأسنان الثابتة (البرستو)، وصناعة الأسنان المتحركة (الريموفبل)",
-    "details_en": "Product: Disposable Sterile Dental Examination Kit\nContents: Mouth mirror, dental probe/explorer, clinical tweezers, sterile cotton rolls, dental bib, organized compartment tray\nSelling Price: 2.50 LYD\nCost Price: 2.25 LYD\nQuantity in Stock: 10 kits\nSubjects: Conservative Dentistry, Fixed Prosthodontics, Removable Prosthodontics",
+    "details_ar": "المنتج: طقم فحص أسنان عيادي معقم للاستخدام مرة واحدة (Disposable Examination Kit)\nالمحتويات: مرآة فحص، مسبار (Probe/Explorer)، ملقط أسنان، كرات قطن طبي، مفرش واقٍ، وصينية فحص\nالمواد الدراسية: علاج الأسنان التحفظي (الكونس)، صناعة الأسنان الثابتة (البرستو)، وصناعة الأسنان المتحركة (الريموفبل)",
+    "details_en": "Product: Disposable Sterile Dental Examination Kit\nContents: Mouth mirror, dental probe/explorer, clinical tweezers, sterile cotton rolls, dental bib, organized compartment tray\nSubjects: Conservative Dentistry, Fixed Prosthodontics, Removable Prosthodontics",
     "sort_order": 12
   },
   {
@@ -670,8 +670,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-silaxil-putty-900ml.png",
     "description_ar": "مادة طبعة سيليكون تكاثفي عيادية عالية الدقة (C-Silicone Impression Material) من شركة Lascod الإيطالية الرائدة. تركيبة متطورة (Optimized Formula) بلون جديد توفر دقة فائقة في أخذ الطبعات الأولية للتيجان والجسور (Crown & Bridge Impressions) والتعويضات الثابتة. حجم العبوة 900 مل.",
     "description_en": "High-precision condensation curing silicone (C-Silicone) impression material manufactured by Lascod (Italy). Features an optimized formula with enhanced color contrast and superior dimensional stability for precise primary impressions in crown & bridge prosthodontics. Volume: 900 ml.",
-    "details_ar": "المنتج: سيليكون عيادي لاصقود سيلاكسيل (Lascod Silaxil Putty)\nالنوع: C-Silicone Impression Material\nالحجم: 900 مل\nسعر البيع: 192.00 د.ل\nسعر التكلفة: 185.00 د.ل\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
-    "details_en": "Product: Lascod Silaxil Putty – C-Silicone Impression Material\nVolume: 900 ml\nSelling Price: 192.00 LYD\nCost Price: 185.00 LYD\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
+    "details_ar": "المنتج: سيليكون عيادي لاصقود سيلاكسيل (Lascod Silaxil Putty)\nالنوع: C-Silicone Impression Material\nالحجم: 900 مل\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
+    "details_en": "Product: Lascod Silaxil Putty – C-Silicone Impression Material\nVolume: 900 ml\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
     "sort_order": 13
   },
   {
@@ -690,8 +690,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-silaxil-light-body.png",
     "description_ar": "مادة طبعة سيليكون تكاثفي سائلة عالية الدقة (Light Body / Wash Material) من شركة Lascod الإيطالية. مخصصة لتسجيل أدق التفاصيل التشريحية وخطوط الإنهاء (Finishing Lines) في طبعات التيجان والجسور الدقيقة (Crown & Bridge Impressions) بالتوافق مع السيلاكسيل بّتي.",
     "description_en": "High-precision condensation curing silicone wash material (Light Body) by Lascod (Italy). Formulated for hydro-compatible surface wetting and micro-detail reproduction of preparation margins and finishing lines in crown and bridge impressions.",
-    "details_ar": "المنتج: سيليكون لايت بودي لاصقود سيلاكسيل (Lascod Silaxil Light Body)\nالنوع: C-Silicone Precision Wash\nسعر البيع: 70.00 د.ل\nسعر التكلفة: 62.00 د.ل\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
-    "details_en": "Product: Lascod Silaxil Light Body Precision Wash\nSelling Price: 70.00 LYD\nCost Price: 62.00 LYD\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
+    "details_ar": "المنتج: سيليكون لايت بودي لاصقود سيلاكسيل (Lascod Silaxil Light Body)\nالنوع: C-Silicone Precision Wash\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
+    "details_en": "Product: Lascod Silaxil Light Body Precision Wash\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
     "sort_order": 14
   },
   {
@@ -710,8 +710,8 @@
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-enersyl-activator-paste-60ml.png",
     "description_ar": "معجون مصلب ومنشط كيميائي عيادي (Catalyst / Activator Gel-Paste) من شركة Lascod الإيطالية. مخصص لتصلب وتفاعل مطاط السيليكون التكاثفي بنوعيه: سيلاكسيل بّتي (Silaxil Putty) وسيلاكسيل لايت بودي (Silaxil Light Body). يتميز بلونه الأزرق المميز لتسهيل مراقبة تجانس الخلط (Homogeneous Mixing) بدقة. الحجم: 60 مل.",
     "description_en": "Clinical universal activator paste/gel (Catalyst) by Lascod (Italy) designed for condensation curing silicones. Perfectly formulated to catalyze both Silaxil Putty and Silaxil Light Body. Features high chromatic contrast in blue to easily verify complete and homogeneous mixing. Volume: 60 ml.",
-    "details_ar": "المنتج: مصلب سيليكون لاصقود إنرسيل (Lascod Enersyl Activator Paste)\nالحجم: 60 مل\nالنوع: Universal Catalyst Paste\nسعر البيع: 65.00 د.ل\nسعر التكلفة: 58.00 د.ل\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
-    "details_en": "Product: Lascod Enersyl Activator Paste (Catalyst)\nVolume: 60 ml\nSelling Price: 65.00 LYD\nCost Price: 58.00 LYD\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
+    "details_ar": "المنتج: مصلب سيليكون لاصقود إنرسيل (Lascod Enersyl Activator Paste)\nالحجم: 60 مل\nالنوع: Universal Catalyst Paste\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
+    "details_en": "Product: Lascod Enersyl Activator Paste (Catalyst)\nVolume: 60 ml\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
     "sort_order": 15
   }
 ]

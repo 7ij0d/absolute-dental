@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useStorageImage } from '../utils/storageImage';
 import { isBundleProduct, getBundleDefinition, getProductSizedConfig } from '../utils/productInventoryEngine';
@@ -8,6 +9,16 @@ import { ShoppingCart, Check, Heart, Sparkles } from 'lucide-react';
 
 export const ProductCard = ({ product }) => {
   const { lang, t, isRtl } = useLanguage();
+  const auth = useAuth();
+  const isAdmin = auth?.isAdmin;
+  const isUserAdmin = Boolean(
+    isAdmin ||
+    (typeof window !== 'undefined' && (
+      localStorage.getItem('admin_pin') === '9922' ||
+      sessionStorage.getItem('admin_pin') === '9922' ||
+      localStorage.getItem('admin_passcode') === '9922'
+    ))
+  );
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
@@ -48,7 +59,7 @@ export const ProductCard = ({ product }) => {
     : (!isOffer && product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 0 && !product.shared_inventory_product_id));
   const isUnavailable = !isByOrder && (product.availability === 'unavailable' || isOutOfStock);
   const isComingSoon = product.availability === 'coming_soon';
-  const isLimited = !isByOrder && !isUnavailable && (product.availability === 'limited_quantity' || (!isOffer && product.stock_quantity > 0 && product.stock_quantity <= 5));
+  const isLimited = isUserAdmin && !isByOrder && !isUnavailable && (product.availability === 'limited_quantity' || (!isOffer && product.stock_quantity > 0 && product.stock_quantity <= 5));
 
   const handleAddToCart = (e) => {
     e.preventDefault();

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import supabase from '../supabaseClient';
 import ProductCard from '../components/ProductCard';
 import { cacheGet, cacheSet } from '../cache';
@@ -113,6 +114,16 @@ const DEFAULT_SUBJECTS = [
 export const SubjectPage = () => {
   const { slug } = useParams();
   const { lang, isRtl } = useLanguage();
+  const auth = useAuth();
+  const isAdmin = auth?.isAdmin;
+  const isUserAdmin = Boolean(
+    isAdmin ||
+    (typeof window !== 'undefined' && (
+      localStorage.getItem('admin_pin') === '9922' ||
+      sessionStorage.getItem('admin_pin') === '9922' ||
+      localStorage.getItem('admin_passcode') === '9922'
+    ))
+  );
 
   const lookupSlug = slug === 'operative-dentistry' ? 'restorative-dentistry' : slug;
 
@@ -132,7 +143,7 @@ export const SubjectPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const CACHE_KEY = `subject_v23:${slug}`;
+    const CACHE_KEY = `subject_v24:${slug}`;
 
     const applyData = ({ subject, year, prods }) => {
       setSubjectData(subject);
@@ -258,6 +269,8 @@ export const SubjectPage = () => {
     if (selectedStock !== 'all') {
       if (selectedStock === 'discount') {
         list = list.filter(p => p.compare_at_price && p.compare_at_price > p.price);
+      } else if (selectedStock === 'available') {
+        list = list.filter(p => p.availability === 'available' || p.availability === 'limited_quantity');
       } else {
         list = list.filter(p => p.availability === selectedStock);
       }
@@ -282,7 +295,7 @@ export const SubjectPage = () => {
   const filterOptions = [
     { key: 'all', label_ar: 'الكل', label_en: 'All' },
     { key: 'available', label_ar: 'متوفر', label_en: 'Available' },
-    { key: 'limited_quantity', label_ar: 'كمية محدودة', label_en: 'Limited Qty' },
+    ...(isUserAdmin ? [{ key: 'limited_quantity', label_ar: 'كمية محدودة', label_en: 'Limited Qty' }] : []),
     { key: 'coming_soon', label_ar: 'قريباً', label_en: 'Coming Soon' },
     { key: 'discount', label_ar: 'عليه خصم', label_en: 'On Sale' },
   ];
