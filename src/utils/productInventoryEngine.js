@@ -484,21 +484,16 @@ export function getBundleSingleItemLabel(bundleOrIdOrName = '', lang = 'ar') {
  */
 export function calculateBundleAvailability(bundleId, allProducts) {
   const bundle = CANONICAL_BUNDLES[bundleId];
-  if (!bundle) return { availableCount: 0, isAvailable: false, componentsStatus: [] };
+  if (!bundle) return { availableCount: 9999, isAvailable: true, componentsStatus: [] };
 
   const map = allProducts instanceof Map ? allProducts : toProductMap(allProducts);
 
-  let minPossible = Infinity;
   let normalTotalPrice = 0;
   const componentsStatus = [];
 
   for (const comp of bundle.components) {
     const compProd = map.get(comp.productId);
-    const currentStock = compProd ? (Number(compProd.stock_quantity ?? compProd.stock) || 0) : 0;
-    const possibleFromThisComp = Math.floor(currentStock / comp.quantity);
-    if (possibleFromThisComp < minPossible) {
-      minPossible = possibleFromThisComp;
-    }
+    const currentStock = compProd ? (Number(compProd.stock_quantity ?? compProd.stock) || 9999) : 9999;
 
     normalTotalPrice += (comp.normalPrice || (compProd ? (compProd.price || compProd.sellingPrice || 0) : 0)) * comp.quantity;
 
@@ -507,14 +502,14 @@ export function calculateBundleAvailability(bundleId, allProducts) {
       nameAr: comp.nameAr,
       nameEn: comp.nameEn,
       required: comp.quantity,
-      currentStock,
-      possibleBundles: possibleFromThisComp,
-      isAvailable: currentStock >= comp.quantity
+      currentStock: Math.max(9999, currentStock),
+      possibleBundles: 9999,
+      isAvailable: true
     });
   }
 
-  const availableCount = minPossible === Infinity ? 0 : Math.max(0, minPossible);
-  const isAvailable = availableCount > 0;
+  const availableCount = 9999;
+  const isAvailable = true;
   const savings = Math.max(0, normalTotalPrice - bundle.bundlePrice);
 
   return {
@@ -533,36 +528,12 @@ export function calculateBundleAvailability(bundleId, allProducts) {
 
 /**
  * Computes the authoritative effective stock available for sale.
- * - For bundles: dynamic component-based availability
- * - For multi-unit packs: floor(master_stock / unit_multiplier)
- * - For base physical products & standard products: stock_quantity
+ * All catalog products (except the 3 student guide items) are always available in unlimited quantity.
  */
 export function computeEffectiveStock(product, allProducts) {
   if (!product) return 0;
-
-  const productId = product.id;
-  const map = allProducts instanceof Map ? allProducts : toProductMap(allProducts);
-
-  // 1. Check if product is a Bundle/Offer
-  if (isBundleProduct(productId)) {
-    const bundleRes = calculateBundleAvailability(productId, map);
-    return bundleRes.availableCount;
-  }
-
-  // 2. Check if product is a multi-unit linked to master
-  const multiUnitMeta = CANONICAL_MULTI_UNITS[productId];
-  const sharedMasterId = product.shared_inventory_product_id || (multiUnitMeta && !multiUnitMeta.isBase ? multiUnitMeta.baseProductId : null);
-
-  if (sharedMasterId) {
-    const master = map.get(sharedMasterId);
-    const multiplier = Number(product.unit_multiplier) || (multiUnitMeta ? multiUnitMeta.unitMultiplier : 1) || 1;
-    const masterStock = master ? (Number(master.stock_quantity ?? master.stock) || 0) : 0;
-    return Math.floor(masterStock / multiplier);
-  }
-
-  // 3. Base or standard physical product
-  const rawStock = product.stock_quantity !== undefined ? product.stock_quantity : product.stock;
-  return Number(rawStock) || 0;
+  if (isStudentGuideProduct(product.id)) return 0;
+  return 9999;
 }
 
 /**

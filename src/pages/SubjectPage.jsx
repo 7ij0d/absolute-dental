@@ -143,7 +143,7 @@ export const SubjectPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const CACHE_KEY = `subject_v26:${slug}`;
+    const CACHE_KEY = `subject_v27:${slug}`;
 
     const applyData = ({ subject, year, prods }) => {
       setSubjectData(subject);
@@ -362,7 +362,7 @@ export const SubjectPage = () => {
       if (selectedStock === 'discount') {
         list = list.filter(p => p.compare_at_price && p.compare_at_price > p.price);
       } else if (selectedStock === 'available') {
-        list = list.filter(p => p.availability === 'available');
+        list = list.filter(p => p.availability === 'available' || p.availability === 'by_order' || !p.availability || p.availability === 'unavailable');
       } else {
         list = list.filter(p => p.availability === selectedStock);
       }

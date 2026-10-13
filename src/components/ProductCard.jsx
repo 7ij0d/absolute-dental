@@ -70,7 +70,7 @@ export const ProductCard = ({ product }) => {
   const isByOrder = product.availability === 'by_order';
   // Per store directive: Keep catalog items available even if stock is zero, except special student guides
   const isUnavailable = false;
-  const isComingSoon = !isGuide && product.availability === 'coming_soon';
+  const isComingSoon = false;
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -101,15 +101,15 @@ export const ProductCard = ({ product }) => {
         selected_color: sizeDef?.color || product.color,
         image_url: sizeDef?.image || product.image_url,
         quantity: 1,
-        stock_quantity: sizeDef ? sizeDef.stock : 24,
-        effectiveStock: sizeDef ? sizeDef.stock : 24
+        stock_quantity: 9999,
+        effectiveStock: 9999
       });
       setJustAdded(true);
       setTimeout(() => setJustAdded(false), 1800);
       return;
     }
 
-    addToCart({ ...product, quantity: 1, isOffer });
+    addToCart({ ...product, quantity: 1, isOffer, stock_quantity: 9999, effectiveStock: 9999 });
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1800);
   };

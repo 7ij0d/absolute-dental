@@ -17,6 +17,12 @@ import {
   getProductSizedConfig,
   getStudentGuideInfo
 } from '../utils/productInventoryEngine';
+import BoxColorVariantSelector from '../components/BoxColorVariantSelector';
+import {
+  isBoxProduct,
+  splitBoxColorsByAvailability,
+  cleanColorLabel
+} from '../utils/boxInventoryEngine';
 import {
   ShoppingCart, Heart, Check, Plus, Minus,
   ChevronLeft, ChevronRight, ArrowLeft, ArrowRight,
@@ -163,6 +169,9 @@ export const ProductDetails = () => {
   const [siblingProduct, setSiblingProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [sizeError, setSizeError] = useState(false);
+  const [isBoxProductState, setIsBoxProductState] = useState(false);
+  const [boxColors, setBoxColors] = useState({ availableColors: [], unavailableColors: [], allUnavailable: true });
+  const [selectedBoxColor, setSelectedBoxColor] = useState(null);
   const sizedConfig = getProductSizedConfig(product?.id || id);
   const resolvedActiveImage = useStorageImage(
     activeImage,
@@ -282,6 +291,54 @@ export const ProductDetails = () => {
               if (breakdown) setPhysicalBreakdown(breakdown);
             }
           }
+        }
+
+        // 3. Fallback to accessory_products (Dental Boxes & Storage gear)
+        let isBox = Boolean(fetchedProd && (fetchedProd.is_box || isBoxProduct(fetchedProd.id) || isBoxProduct(id)));
+        if (!fetchedProd) {
+          try {
+            const { data: accProd } = await supabase
+              .from('accessory_products')
+              .select('*, colors:accessory_product_colors(*)')
+              .eq('id', id)
+              .maybeSingle();
+
+            if (accProd) {
+              isBox = true;
+              fetchedProd = {
+                ...accProd,
+                is_box: true,
+                image_url: accProd.main_image || accProd.image_url
+              };
+              fetchedImages = [accProd.main_image, accProd.inside_image].filter(Boolean);
+            }
+          } catch (accErr) {
+            console.warn('Accessory product check notice:', accErr);
+          }
+        }
+
+        if (isBox && fetchedProd) {
+          setIsBoxProductState(true);
+          try {
+            const { data: invSetting } = await supabase
+              .from('settings')
+              .select('value')
+              .eq('key', 'box_variants_inventory')
+              .maybeSingle();
+
+            const invMap = invSetting?.value?.variants || {};
+            const split = splitBoxColorsByAvailability(fetchedProd.colors || [], invMap);
+            setBoxColors(split);
+            const initColor = split.availableColors[0] || split.unavailableColors[0] || null;
+            setSelectedBoxColor(initColor);
+            if (initColor?.image_url) {
+              setActiveImage(initColor.image_url);
+            }
+          } catch (invErr) {
+            console.warn('Box inventory load notice:', invErr);
+          }
+        } else {
+          setIsBoxProductState(false);
         }
 
         if (!fetchedProd) {
@@ -413,13 +470,11 @@ export const ProductDetails = () => {
   const isByOrder = product?.availability === 'by_order';
   // Per store directive: Keep catalog items available even if stock is zero, except student guides
   const isUnavailable = false;
-  const isComingSoon = !isGuide && product?.availability === 'coming_soon';
-  const isOrderable = !isGuide && !isUnavailable && !isComingSoon;
+  const isComingSoon = false;
+  const isOrderable = !isGuide;
 
   const selectedSizeDef = (sizedConfig && selectedSize) ? sizedConfig.sizes.find(s => s.size === selectedSize) : null;
-  const maxStockLimit = selectedSizeDef
-    ? selectedSizeDef.stock
-    : 99;
+  const maxStockLimit = 9999;
 
   const handleQtyChange = (delta) => {
     setQuantity(prev => {
@@ -431,7 +486,34 @@ export const ProductDetails = () => {
   };
 
   const handleAddToCart = () => {
-    if (!product || !isOrderable) return;
+    if (!product) return;
+
+    if (isBoxProductState) {
+      if (!selectedBoxColor || selectedBoxColor.available_stock <= 0) {
+        return;
+      }
+      const variantNameEn = `${product.name_en} (${cleanColorLabel(selectedBoxColor, 'en')})`;
+      const variantNameAr = `${product.name_ar} (${cleanColorLabel(selectedBoxColor, 'ar')})`;
+      addToCart({
+        ...product,
+        id: `${product.id}-${selectedBoxColor.color_id || selectedBoxColor.id}`,
+        base_product_id: product.id,
+        name_en: variantNameEn,
+        name_ar: variantNameAr,
+        price: selectedBoxColor.price || product.price,
+        selected_color: cleanColorLabel(selectedBoxColor, 'ar'),
+        image_url: selectedBoxColor.image_url || activeImage,
+        is_box: true,
+        is_accessory: true,
+        availableStock: 9999,
+        stock_quantity: 9999
+      }, quantity);
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 1800);
+      return;
+    }
+
+    if (!isOrderable) return;
 
     if (sizedConfig && !selectedSize) {
       setSizeError(true);
@@ -453,8 +535,8 @@ export const ProductDetails = () => {
         selected_size: sizeDef?.code || selectedSize,
         selected_color: sizeDef?.color || product.color,
         image_url: sizeDef?.image || product.image_url,
-        stock_quantity: sizeDef ? sizeDef.stock : 24,
-        effectiveStock: sizeDef ? sizeDef.stock : 24
+        stock_quantity: 9999,
+        effectiveStock: 9999
       }, quantity);
       setJustAdded(true);
       setTimeout(() => setJustAdded(false), 1800);
@@ -847,8 +929,8 @@ export const ProductDetails = () => {
                       fontSize: '0.85rem'
                     }}>
                       <span style={{ fontWeight: 700, color: '#1F2937' }}>{lang === 'ar' ? (comp.nameAr || comp.nameEn) : (comp.nameEn || comp.nameAr)} (×{comp.required})</span>
-                      <span style={{ color: comp.isAvailable ? '#059669' : '#DC2626', fontWeight: 700, fontSize: '0.8rem' }}>
-                        {comp.isAvailable ? (lang === 'ar' ? '✓ متوفر بالمخزن' : '✓ In Stock') : (lang === 'ar' ? 'غير متوفر' : 'Out of Stock')}
+                      <span style={{ color: '#059669', fontWeight: 700, fontSize: '0.8rem' }}>
+                        {lang === 'ar' ? '✓ متوفر' : '✓ In Stock'}
                       </span>
                     </div>
                   ))}
@@ -866,14 +948,14 @@ export const ProductDetails = () => {
                     {lang === 'ar' ? `السعر المنفصل: ${bundleInfo.normalTotalPrice} د.ل` : `Separate Total: ${bundleInfo.normalTotalPrice} LYD`}
                   </span>
                   <span style={{ fontWeight: 800, color: '#065F46', fontSize: '0.95rem' }}>
-                    {lang === 'ar' ? `المتوفر كعروض: ${bundleInfo.availableCount}` : `Available Offers: ${bundleInfo.availableCount}`}
+                    {lang === 'ar' ? '✓ العرض متوفر للطلب المباشر' : '✓ Offer Available'}
                   </span>
                 </div>
               </div>
             )}
 
-            {/* Multiple Selling Units & Physical Stock Breakdown */}
-            {(siblingProduct || physicalBreakdown) && (
+            {/* Multiple Selling Units Switcher */}
+            {siblingProduct && (
               <div style={{
                 margin: '1rem 0',
                 padding: '1rem 1.15rem',
@@ -887,13 +969,8 @@ export const ProductDetails = () => {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, fontSize: '0.88rem', color: '#92400E' }}>
                     <Box size={16} color="#D97706" />
-                    <span>{lang === 'ar' ? 'خيارات الوحدات ومخزون القطع:' : 'Selling Units & Stock:'}</span>
+                    <span>{lang === 'ar' ? 'خيارات الوحدات المتوفرة:' : 'Available Selling Units:'}</span>
                   </div>
-                  {physicalBreakdown && (
-                    <span style={{ fontSize: '0.8rem', color: '#B45309', fontWeight: 700, backgroundColor: 'rgba(245, 158, 11, 0.15)', padding: '2px 8px', borderRadius: '6px' }}>
-                      {lang === 'ar' ? physicalBreakdown.displayAr : physicalBreakdown.displayEn}
-                    </span>
-                  )}
                 </div>
 
                 {siblingProduct && (
@@ -1013,6 +1090,22 @@ export const ProductDetails = () => {
               </div>
             ) : (
               <>
+                {/* Dedicated Box Color Availability System (Requirements 3, 4, 11) */}
+                {isBoxProductState && (
+                  <div style={{ margin: '1.25rem 0' }}>
+                    <BoxColorVariantSelector
+                      availableColors={boxColors.availableColors}
+                      unavailableColors={boxColors.unavailableColors}
+                      selectedColor={selectedBoxColor}
+                      onSelectColor={(c) => {
+                        setSelectedBoxColor(c);
+                        if (c.image_url) setActiveImage(c.image_url);
+                      }}
+                      boxName={displayName}
+                    />
+                  </div>
+                )}
+
                 {/* Mandatory Size Selection Box for Sized Dental Products */}
                 {sizedConfig && (
                   <div
@@ -1102,7 +1195,7 @@ export const ProductDetails = () => {
                               background: isSelected ? 'rgba(255, 255, 255, 0.2)' : '#F1F5F9',
                               color: isSelected ? '#FFFFFF' : '#64748B'
                             }}>
-                              {lang === 'ar' ? `المتوفر: ${s.stock} ${s.unitNameAr || (s.size.includes('s') || s.size.includes('m') ? 'زوج' : 'قطعة')}` : `Stock: ${s.stock} ${s.size.includes('s') || s.size.includes('m') ? 'pairs' : 'pcs'}`}
+                              {lang === 'ar' ? '✓ متوفر للطلب' : '✓ Available'}
                             </span>
                           </button>
                         );
@@ -1139,16 +1232,43 @@ export const ProductDetails = () => {
                   <button
                     type="button"
                     onClick={handleAddToCart}
+                    disabled={isBoxProductState ? (!selectedBoxColor || selectedBoxColor.available_stock <= 0) : false}
                     className={`product-detail-add-cart-btn ${justAdded ? 'just-added' : ''}`}
                     style={{
-                      background: sizeError ? '#DC2626' : undefined,
+                      background: (isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0))
+                        ? 'rgba(239, 68, 68, 0.08)'
+                        : (sizeError ? '#DC2626' : undefined),
+                      color: (isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0))
+                        ? '#991B1B'
+                        : undefined,
+                      border: (isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0))
+                        ? '1.5px solid rgba(239, 68, 68, 0.25)'
+                        : undefined,
+                      cursor: (isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0))
+                        ? 'not-allowed'
+                        : 'pointer',
                       boxShadow: sizeError ? '0 4px 14px rgba(220, 38, 38, 0.35)' : undefined
                     }}
                   >
                     {justAdded ? (
                       <>
                         <Check size={18} strokeWidth={2.5} />
-                        <span>{lang === 'ar' ? (selectedSize ? `تمت إضافة (${selectedSize}) للسلة ✓` : 'تمت الإضافة للسلة ✓') : (selectedSize ? `Added (${selectedSize}) to Cart ✓` : 'Added to Cart ✓')}</span>
+                        <span>{lang === 'ar' ? (selectedSize ? `تمت إضافة (${selectedSize}) للسلة ✓` : (selectedBoxColor ? `تمت إضافة (${cleanColorLabel(selectedBoxColor, 'ar')}) للسلة ✓` : 'تمت الإضافة للسلة ✓')) : (selectedSize ? `Added (${selectedSize}) to Cart ✓` : 'Added to Cart ✓')}</span>
+                      </>
+                    ) : isBoxProductState && boxColors.allUnavailable ? (
+                      <>
+                        <AlertCircle size={18} />
+                        <span>{lang === 'ar' ? 'جميع الألوان غير متوفرة حالياً' : 'All Colors Unavailable'}</span>
+                      </>
+                    ) : isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0) ? (
+                      <>
+                        <AlertCircle size={18} />
+                        <span>{lang === 'ar' ? 'هذا اللون غير متوفر حالياً بالمخزن' : 'This Color is Out of Stock'}</span>
+                      </>
+                    ) : isBoxProductState && selectedBoxColor && selectedBoxColor.available_stock > 0 ? (
+                      <>
+                        <ShoppingCart size={18} />
+                        <span>{lang === 'ar' ? `أضف للسلة (${cleanColorLabel(selectedBoxColor, 'ar')})` : `Add to Cart (${cleanColorLabel(selectedBoxColor, 'en')})`}</span>
                       </>
                     ) : sizeError ? (
                       <>

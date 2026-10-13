@@ -1,10 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-let supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://api.kurofangs.id.ly';
+let supabaseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || 'https://api.kurofangs.id.ly';
 if (!supabaseUrl || supabaseUrl.includes('vqrpodmnzubpcsvqohwj') || supabaseUrl.includes('102-203-202-115')) {
   supabaseUrl = 'https://api.kurofangs.id.ly';
 }
-const supabaseKey = import.meta.env.VITE_SUPABASE_SECRET_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_bISG70YeoKP4mu8BKlgsuQ_xPprjcc1';
+const supabaseKey = (typeof import.meta !== 'undefined' && (import.meta.env?.VITE_SUPABASE_SECRET_KEY || import.meta.env?.VITE_SUPABASE_ANON_KEY)) || 'sb_publishable_bISG70YeoKP4mu8BKlgsuQ_xPprjcc1';
 const supabaseAnonKey = supabaseKey;
 
 // Use Mock ONLY if credentials are explicitly missing

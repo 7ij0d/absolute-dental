@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { isBundleProduct, getBundleDefinition } from '../utils/productInventoryEngine';
+import { isBoxProduct } from '../utils/boxInventoryEngine';
 import defaultProductsList from '../defaultProducts.json';
 
 const CartContext = createContext();
@@ -94,25 +95,31 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, qty = 1) => {
     setCartItems((prev) => {
+      // 1. Strict box product stock check: Zero stock box variants can NEVER be added to cart
+      const isBox = Boolean(product.is_box || isBoxProduct(product) || isBoxProduct(product.base_product_id));
+      if (isBox) {
+        const boxStock = product.availableStock !== undefined
+          ? product.availableStock
+          : (product.available_stock !== undefined
+            ? product.available_stock
+            : (product.stock_quantity !== undefined ? product.stock_quantity : 0));
+        if (boxStock <= 0) {
+          console.warn('Blocked adding zero-stock dental box variant to cart:', product);
+          return prev;
+        }
+      }
+
       const isOffer = isBundleProduct(product.id);
       const bundleDef = isOffer ? getBundleDefinition(product.id) : null;
 
       const cartLineId = product.cart_line_id || (isOffer ? `bundle_${product.id}` : product.id);
       const existing = prev.find((item) => (item.cart_line_id ? item.cart_line_id === cartLineId : item.id === product.id));
 
-      const isByOrder = product.availability === 'by_order';
-      const maxAllowed = isByOrder
-        ? 999
-        : (product.effectiveStock !== undefined
-          ? product.effectiveStock
-          : (isOffer ? 999 : (product.stock_quantity !== undefined ? product.stock_quantity : 999)));
-
       if (existing) {
         const newQty = existing.quantity + qty;
-        const finalQty = maxAllowed !== undefined && newQty > maxAllowed ? maxAllowed : newQty;
         return prev.map((item) => {
           const match = item.cart_line_id ? item.cart_line_id === cartLineId : item.id === product.id;
-          return match ? { ...item, ...product, quantity: Math.max(1, finalQty) } : item;
+          return match ? { ...item, ...product, quantity: Math.max(1, newQty) } : item;
         });
       }
 
@@ -207,16 +214,7 @@ export const CartProvider = ({ children }) => {
       prev.map((item) => {
         const match = item.cart_line_id ? item.cart_line_id === idOrCartLineId : item.id === idOrCartLineId;
         if (!match) return item;
-
-        const isByOrder = item.availability === 'by_order';
-        const isOffer = item.is_bundle || isBundleProduct(item.bundle_id || item.id);
-        const maxAllowed = isByOrder
-          ? 999
-          : (item.effectiveStock !== undefined
-            ? item.effectiveStock
-            : (isOffer ? 999 : (item.stock_quantity !== undefined ? item.stock_quantity : 999)));
-        const finalQty = maxAllowed !== undefined && qty > maxAllowed ? maxAllowed : qty;
-        return { ...item, quantity: Math.max(1, finalQty) };
+        return { ...item, quantity: Math.max(1, qty) };
       })
     );
   };

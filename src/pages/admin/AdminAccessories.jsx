@@ -15,8 +15,19 @@ import {
   Palette,
   Settings,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  RotateCcw,
+  AlertTriangle,
+  ShieldCheck
 } from 'lucide-react';
+import {
+  isBoxProduct,
+  cleanColorLabel,
+  computeVariantAvailableStock,
+  fetchCanonicalBoxInventory,
+  saveBoxVariantInventoryRecord,
+  resetAllBoxStockToZero
+} from '../../utils/boxInventoryEngine';
 
 export const AdminAccessories = () => {
   const { isRtl } = useLanguage();
@@ -26,6 +37,7 @@ export const AdminAccessories = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [colors, setColors] = useState([]);
+  const [boxInventory, setBoxInventory] = useState({});
   const [selectedProductId, setSelectedProductId] = useState('');
   const [backgrounds, setBackgrounds] = useState({
     accessories_page_bg: '',
@@ -34,6 +46,8 @@ export const AdminAccessories = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [resettingStock, setResettingStock] = useState(false);
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   // Modal states
@@ -47,7 +61,39 @@ export const AdminAccessories = () => {
 
   const [showColorModal, setShowColorModal] = useState(false);
   const [editingColor, setEditingColor] = useState(null);
-  const [colorForm, setColorForm] = useState({ product_id: '', color_id: '', label_ar: '', label_en: '', status: 'in_stock', hex_code: '#E02020', image_url: '', sort_order: 0 });
+  const [colorForm, setColorForm] = useState({
+    product_id: '',
+    color_id: '',
+    label_ar: '',
+    label_en: '',
+    status: 'out_of_stock',
+    hex_code: '#E02020',
+    image_url: '',
+    sort_order: 0,
+    physical_stock: 0,
+    reserved_stock: 0,
+    price: '',
+    size: ''
+  });
+
+  // Helper to extract inventory details for any color variant
+  const getVariantStockInfo = (colorItem) => {
+    if (!colorItem) return { physical: 0, reserved: 0, available: 0, status: 'out_of_stock', price: null, size: null };
+    const inv = boxInventory[colorItem.id] || boxInventory[colorItem.color_id] || {};
+    const physical = inv.physical_stock !== undefined ? inv.physical_stock : (colorItem.stock_quantity || 0);
+    const reserved = inv.reserved_stock !== undefined ? inv.reserved_stock : 0;
+    const available = inv.available_stock !== undefined ? inv.available_stock : computeVariantAvailableStock(physical, reserved);
+    const status = available > 0 ? 'in_stock' : 'out_of_stock';
+    return {
+      physical,
+      reserved,
+      available,
+      status,
+      price: inv.price !== undefined ? inv.price : (colorItem.price || null),
+      size: inv.size || colorItem.size || null,
+      image_url: inv.image_url || colorItem.image_url || null
+    };
+  };
 
   // 1. Fetch initial data
   const loadAllData = async () => {
@@ -76,6 +122,14 @@ export const AdminAccessories = () => {
         .select('*')
         .order('sort_order', { ascending: true });
       setColors(colorData || []);
+
+      // Canonical Box Variants Inventory
+      try {
+        const inv = await fetchCanonicalBoxInventory();
+        setBoxInventory(inv.variants || {});
+      } catch (invErr) {
+        console.warn('Notice loading box variants inventory:', invErr);
+      }
 
       // Backgrounds settings
       const { data: bgSetting } = await supabase
@@ -233,11 +287,8 @@ export const AdminAccessories = () => {
   /* ── COLOR HANDLERS ── */
   const getStatusFromColor = (c) => {
     if (!c) return 'in_stock';
-    if (c.status) return c.status;
-    const label = `${c.label_ar || ''} ${c.label_en || ''}`;
-    if (label.includes('[out_of_stock]') || label.includes('نفذت الكمية')) return 'out_of_stock';
-    if (label.includes('[coming_soon]') || label.includes('قريبا')) return 'coming_soon';
-    return 'in_stock';
+    const info = getVariantStockInfo(c);
+    return info.status;
   };
 
   const handleSaveColor = async (e) => {
@@ -246,10 +297,20 @@ export const AdminAccessories = () => {
     try {
       const cleanAr = (colorForm.label_ar || colorForm.label_en || '').replace(/\[out_of_stock\]|\[coming_soon\]|\[in_stock\]/g, '').trim();
       const cleanEn = (colorForm.label_en || colorForm.label_ar || '').replace(/\[out_of_stock\]|\[coming_soon\]|\[in_stock\]/g, '').trim();
+      const isBox = isBoxProduct(colorForm.product_id || selectedProductId);
+
+      const physicalStock = Math.max(0, parseInt(colorForm.physical_stock, 10) || 0);
+      const reservedStock = Math.max(0, parseInt(colorForm.reserved_stock, 10) || 0);
+      const availableStock = computeVariantAvailableStock(physicalStock, reservedStock);
+
+      let effectiveStatus = colorForm.status || 'in_stock';
+      if (isBox) {
+        effectiveStatus = availableStock > 0 ? 'in_stock' : 'out_of_stock';
+      }
 
       let statusSuffix = '';
-      if (colorForm.status === 'out_of_stock') statusSuffix = ' [out_of_stock]';
-      else if (colorForm.status === 'coming_soon') statusSuffix = ' [coming_soon]';
+      if (effectiveStatus === 'out_of_stock') statusSuffix = ' [out_of_stock]';
+      else if (effectiveStatus === 'coming_soon') statusSuffix = ' [coming_soon]';
 
       const payload = {
         product_id: colorForm.product_id || selectedProductId,
@@ -261,13 +322,41 @@ export const AdminAccessories = () => {
         sort_order: parseInt(colorForm.sort_order || 0)
       };
 
+      let targetId = editingColor ? editingColor.id : null;
+
       if (editingColor) {
         await supabase.from('accessory_product_colors').update(payload).eq('id', editingColor.id);
         showMsg('success', isRtl ? 'تم تحديث اللون بنجاح' : 'Color updated successfully');
       } else {
-        await supabase.from('accessory_product_colors').insert(payload);
+        const { data: insData, error: insErr } = await supabase
+          .from('accessory_product_colors')
+          .insert(payload)
+          .select()
+          .single();
+        if (insErr) throw insErr;
+        targetId = insData.id;
         showMsg('success', isRtl ? 'تم إضافة اللون بنجاح' : 'Color added successfully');
       }
+
+      // If box product, sync canonical box_variants_inventory record
+      if (isBox && targetId) {
+        const priceVal = colorForm.price !== '' && !isNaN(parseFloat(colorForm.price)) ? parseFloat(colorForm.price) : null;
+        const sizeVal = colorForm.size ? colorForm.size.trim() : null;
+
+        await saveBoxVariantInventoryRecord(targetId, {
+          product_id: colorForm.product_id || selectedProductId,
+          color_id: colorForm.color_id || cleanEn.toLowerCase().replace(/\s+/g, '-'),
+          label_ar: cleanAr,
+          label_en: cleanEn,
+          hex_code: colorForm.hex_code,
+          image_url: colorForm.image_url,
+          physical_stock: physicalStock,
+          reserved_stock: reservedStock,
+          price: priceVal,
+          size: sizeVal
+        });
+      }
+
       setShowColorModal(false);
       loadAllData();
     } catch (err) {
@@ -290,23 +379,63 @@ export const AdminAccessories = () => {
 
   const handleQuickStatusChange = async (colorItem, newStatus) => {
     try {
-      const cleanAr = (colorItem.label_ar || colorItem.label_en || '').replace(/\[out_of_stock\]|\[coming_soon\]|\[in_stock\]/g, '').trim();
-      const cleanEn = (colorItem.label_en || colorItem.label_ar || '').replace(/\[out_of_stock\]|\[coming_soon\]|\[in_stock\]/g, '').trim();
-      let statusSuffix = '';
-      if (newStatus === 'out_of_stock') statusSuffix = ' [out_of_stock]';
-      else if (newStatus === 'coming_soon') statusSuffix = ' [coming_soon]';
+      const isBox = isBoxProduct(colorItem.product_id || selectedProductId);
+      const cleanAr = cleanColorLabel(colorItem, 'ar');
+      const cleanEn = cleanColorLabel(colorItem, 'en');
+      const invInfo = getVariantStockInfo(colorItem);
 
-      const payload = {
-        label_ar: cleanAr + statusSuffix,
-        label_en: cleanEn + statusSuffix
-      };
+      if (isBox) {
+        let newPhysical = invInfo.physical;
+        let newReserved = invInfo.reserved;
 
-      const { error } = await supabase.from('accessory_product_colors').update(payload).eq('id', colorItem.id);
-      if (error) throw error;
+        if (newStatus === 'in_stock') {
+          if (newPhysical <= 0) newPhysical = 1;
+        } else {
+          newPhysical = 0;
+          newReserved = 0;
+        }
+
+        await saveBoxVariantInventoryRecord(colorItem.id, {
+          physical_stock: newPhysical,
+          reserved_stock: newReserved,
+          hex_code: colorItem.hex_code,
+          image_url: colorItem.image_url,
+          label_ar: cleanAr,
+          label_en: cleanEn
+        });
+      } else {
+        let statusSuffix = '';
+        if (newStatus === 'out_of_stock') statusSuffix = ' [out_of_stock]';
+        else if (newStatus === 'coming_soon') statusSuffix = ' [coming_soon]';
+
+        const payload = {
+          label_ar: cleanAr + statusSuffix,
+          label_en: cleanEn + statusSuffix
+        };
+        const { error } = await supabase.from('accessory_product_colors').update(payload).eq('id', colorItem.id);
+        if (error) throw error;
+      }
+
       showMsg('success', isRtl ? 'تم تحديث حالة التوفر بنجاح' : 'Status updated successfully');
       loadAllData();
     } catch (err) {
       showMsg('error', err.message);
+    }
+  };
+
+  const handleResetAllBoxStock = async () => {
+    setResettingStock(true);
+    try {
+      await resetAllBoxStockToZero();
+      showMsg('success', isRtl
+        ? 'تم تصفير مخزون جميع ألوان البوكسات بنجاح إلى 0 مع الحفاظ التام على البيانات والكتالوج!'
+        : 'All box variants reset to 0 stock successfully with catalog integrity preserved!');
+      setShowResetConfirmModal(false);
+      await loadAllData();
+    } catch (err) {
+      showMsg('error', err.message);
+    } finally {
+      setResettingStock(false);
     }
   };
 
@@ -593,10 +722,10 @@ export const AdminAccessories = () => {
       {activeTab === 'colors' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           
-          {/* Select Target Product */}
+          {/* Select Target Product & Quick Actions */}
           <div className="card" style={{ padding: '1.25rem', backgroundColor: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             <label style={{ fontWeight: 800, fontSize: '0.9rem' }}>
-              {isRtl ? 'اختر المنتج لإدارة ألوانه وصوره:' : 'Select Product to Manage Colors:'}
+              {isRtl ? 'اختر المنتج لإدارة ألوانه ومخزونه:' : 'Select Product to Manage Colors & Inventory:'}
             </label>
             <select
               className="form-input"
@@ -611,94 +740,220 @@ export const AdminAccessories = () => {
               ))}
             </select>
 
-            <button
-              onClick={() => {
-                setEditingColor(null);
-                setColorForm({ product_id: selectedProductId, color_id: '', label_ar: '', label_en: '', hex_code: '#1565C0', image_url: '', sort_order: filteredColors.length + 1 });
-                setShowColorModal(true);
-              }}
-              className="btn btn-secondary"
-              style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-            >
-              <Plus size={18} />
-              <span>{isRtl ? 'إضافة لون جديد وصورة' : 'Add Color & Image'}</span>
-            </button>
+            <div style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              {/* Safe Reset All Box Stock to Zero Button */}
+              <button
+                type="button"
+                onClick={() => setShowResetConfirmModal(true)}
+                className="btn btn-outline"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  color: '#EF4444',
+                  borderColor: 'rgba(239, 68, 68, 0.4)',
+                  background: 'rgba(239, 68, 68, 0.06)',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  padding: '0.55rem 0.95rem'
+                }}
+                title={isRtl ? 'تصفير مخزون جميع البوكسات إلى صفر بأمان' : 'Safely reset all box stock to zero'}
+              >
+                <RotateCcw size={15} />
+                <span>{isRtl ? 'تصفير مخزون البوكسات (0)' : 'Reset All Box Stock to 0'}</span>
+              </button>
+
+              {/* Add Color & Image Button */}
+              <button
+                onClick={() => {
+                  const currProd = products.find(p => p.id === selectedProductId);
+                  setEditingColor(null);
+                  setColorForm({
+                    product_id: selectedProductId,
+                    color_id: '',
+                    label_ar: '',
+                    label_en: '',
+                    hex_code: '#1565C0',
+                    image_url: '',
+                    sort_order: filteredColors.length + 1,
+                    status: 'out_of_stock',
+                    physical_stock: 0,
+                    reserved_stock: 0,
+                    price: currProd?.price || '',
+                    size: currProd?.size || ''
+                  });
+                  setShowColorModal(true);
+                }}
+                className="btn btn-secondary"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <Plus size={18} />
+                <span>{isRtl ? 'إضافة لون جديد ومخزون' : 'Add Color & Stock'}</span>
+              </button>
+            </div>
           </div>
 
-          {/* Colors Table */}
+          {/* Dental Box Info Banner */}
+          {isBoxProduct(selectedProductId) && (
+            <div style={{
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'rgba(59, 130, 246, 0.08)',
+              border: '1px solid rgba(59, 130, 246, 0.25)',
+              fontSize: '0.84rem',
+              color: 'var(--text-main)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.6rem'
+            }}>
+              <ShieldCheck size={18} color="#3B82F6" />
+              <span>
+                {isRtl
+                  ? '💡 منتج بوكس أسنان: التوفر محسوب ديناميكياً (المتوفر للبيع = الكمية بالمخزن - المحجوز). إذا كان المتوفر 0 يظهر اللون تلقائياً تحت "الألوان غير المتوفرة حالياً".'
+                  : '💡 Dental Box product: Availability is strictly calculated (Available = Physical - Reserved). When Available is 0, the color automatically appears under "Currently Unavailable".'}
+              </span>
+            </div>
+          )}
+
+          {/* Colors & Inventory Table */}
           <div className="card" style={{ overflowX: 'auto', backgroundColor: 'var(--surface-color)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem', textAlign: 'start' }}>
               <thead>
                 <tr style={{ backgroundColor: 'var(--accent)', borderBottom: '2px solid var(--border-color)', color: 'var(--text-main)', fontWeight: 800 }}>
-                  <th style={{ padding: '1rem' }}>{isRtl ? 'اللون (Hex)' : 'Color Dot'}</th>
-                  <th style={{ padding: '1rem' }}>{isRtl ? 'اسم اللون' : 'Color Label'}</th>
-                  <th style={{ padding: '1rem' }}>{isRtl ? 'حالة المعروض' : 'Availability Status'}</th>
-                  <th style={{ padding: '1rem' }}>{isRtl ? 'الصورة التابعة للون' : 'Color Image'}</th>
-                  <th style={{ padding: '1rem', textAlign: 'end' }}>{isRtl ? 'الإجراءات (حذف/تعديل)' : 'Actions'}</th>
+                  <th style={{ padding: '0.85rem' }}>{isRtl ? 'اللون (كود Hex)' : 'Color Dot'}</th>
+                  <th style={{ padding: '0.85rem' }}>{isRtl ? 'اسم اللون' : 'Color Label'}</th>
+                  <th style={{ padding: '0.85rem' }}>{isRtl ? 'المقاس / الأبعاد' : 'Size / Dimensions'}</th>
+                  <th style={{ padding: '0.85rem' }}>{isRtl ? 'السعر (د.ل)' : 'Price (LYD)'}</th>
+                  <th style={{ padding: '0.85rem' }}>{isRtl ? 'الكمية بالمخزن' : 'Physical Stock'}</th>
+                  <th style={{ padding: '0.85rem' }}>{isRtl ? 'المحجوز' : 'Reserved'}</th>
+                  <th style={{ padding: '0.85rem' }}>{isRtl ? 'المتوفر للبيع' : 'Available'}</th>
+                  <th style={{ padding: '0.85rem' }}>{isRtl ? 'حالة التوفر' : 'Availability Status'}</th>
+                  <th style={{ padding: '0.85rem' }}>{isRtl ? 'الصورة' : 'Image'}</th>
+                  <th style={{ padding: '0.85rem', textAlign: 'end' }}>{isRtl ? 'الإجراءات' : 'Actions'}</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredColors.length === 0 ? (
                   <tr>
-                    <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    <td colSpan={10} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                       {isRtl ? 'لا توجد ألوان مضافة لهذا المنتج بعد' : 'No color variants added for this product yet.'}
                     </td>
                   </tr>
                 ) : (
                   filteredColors.map(c => {
-                    const st = getStatusFromColor(c);
-                    const cleanLabel = (c.label_ar || c.label_en || '').replace(/\[out_of_stock\]|\[coming_soon\]|\[in_stock\]/g, '').trim();
+                    const stockInfo = getVariantStockInfo(c);
+                    const cleanLabel = cleanColorLabel(c, isRtl ? 'ar' : 'en') || c.label_en || c.label_ar;
+                    const currProd = products.find(p => p.id === selectedProductId);
+
                     return (
                       <tr key={c.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                        <td style={{ padding: '1rem' }}>
+                        {/* 1. Color Dot & Hex */}
+                        <td style={{ padding: '0.85rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                            <span style={{ width: 28, height: 28, borderRadius: '50%', background: c.hex_code, border: '2px solid rgba(0,0,0,0.1)', display: 'inline-block' }} />
-                            <code style={{ fontSize: '0.8rem' }}>{c.hex_code}</code>
+                            <span style={{ width: 26, height: 26, borderRadius: '50%', background: c.hex_code, border: '2px solid rgba(0,0,0,0.12)', display: 'inline-block' }} />
+                            <code style={{ fontSize: '0.8rem', opacity: 0.85 }}>{c.hex_code}</code>
                           </div>
                         </td>
-                        <td style={{ padding: '1rem', fontWeight: 800 }}>{cleanLabel}</td>
-                        <td style={{ padding: '1rem' }}>
+
+                        {/* 2. Color Label */}
+                        <td style={{ padding: '0.85rem', fontWeight: 800 }}>{cleanLabel}</td>
+
+                        {/* 3. Dimensions / Size */}
+                        <td style={{ padding: '0.85rem', color: 'var(--text-muted)' }}>
+                          {stockInfo.size || currProd?.size || '—'}
+                        </td>
+
+                        {/* 4. Price (LYD) */}
+                        <td style={{ padding: '0.85rem', fontWeight: 700 }}>
+                          {stockInfo.price !== null && stockInfo.price !== undefined ? `${stockInfo.price} د.ل` : (currProd?.price ? `${currProd.price} د.ل` : '—')}
+                        </td>
+
+                        {/* 5. Physical Stock */}
+                        <td style={{ padding: '0.85rem', fontWeight: 800 }}>
+                          {stockInfo.physical}
+                        </td>
+
+                        {/* 6. Reserved Stock */}
+                        <td style={{ padding: '0.85rem' }}>
+                          <span style={{
+                            fontWeight: 700,
+                            color: stockInfo.reserved > 0 ? '#F59E0B' : 'var(--text-muted)',
+                            background: stockInfo.reserved > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
+                            padding: stockInfo.reserved > 0 ? '0.2rem 0.5rem' : 0,
+                            borderRadius: 'var(--radius-sm)'
+                          }}>
+                            {stockInfo.reserved}
+                          </span>
+                        </td>
+
+                        {/* 7. Available Stock */}
+                        <td style={{ padding: '0.85rem' }}>
+                          <span style={{
+                            padding: '0.25rem 0.65rem',
+                            borderRadius: 'var(--radius-sm)',
+                            fontWeight: 900,
+                            fontSize: '0.88rem',
+                            backgroundColor: stockInfo.available > 0 ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+                            color: stockInfo.available > 0 ? '#10B981' : '#EF4444',
+                            border: `1px solid ${stockInfo.available > 0 ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'}`
+                          }}>
+                            {stockInfo.available > 0 ? `${stockInfo.available} متوفر` : '0 (نفذ)'}
+                          </span>
+                        </td>
+
+                        {/* 8. Availability Status Quick Dropdown */}
+                        <td style={{ padding: '0.85rem' }}>
                           <select
-                            value={st}
+                            value={stockInfo.status}
                             onChange={(e) => handleQuickStatusChange(c, e.target.value)}
                             style={{
-                              padding: '0.4rem 0.75rem',
+                              padding: '0.35rem 0.65rem',
                               borderRadius: 'var(--radius-sm)',
                               fontSize: '0.82rem',
                               fontWeight: 800,
                               border: '1px solid var(--border-color)',
-                              background: st === 'out_of_stock' ? 'rgba(239,68,68,0.12)' : st === 'coming_soon' ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.12)',
-                              color: st === 'out_of_stock' ? '#EF4444' : st === 'coming_soon' ? '#F59E0B' : '#10B981',
+                              background: stockInfo.status === 'out_of_stock' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+                              color: stockInfo.status === 'out_of_stock' ? '#EF4444' : '#10B981',
                               cursor: 'pointer'
                             }}
                           >
                             <option value="in_stock">🟢 {isRtl ? 'متوفر' : 'In Stock'}</option>
-                            <option value="out_of_stock">🔴 {isRtl ? 'نفذت الكمية' : 'Out of Stock'}</option>
-                            <option value="coming_soon">🟧 {isRtl ? 'قريباً' : 'Coming Soon'}</option>
+                            <option value="out_of_stock">🔴 {isRtl ? 'غير متوفر' : 'Out of Stock'}</option>
                           </select>
                         </td>
-                        <td style={{ padding: '1rem' }}>
-                          {c.image_url ? (
-                            <img src={c.image_url} alt={cleanLabel} style={{ width: 50, height: 40, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />
+
+                        {/* 9. Image Thumbnail */}
+                        <td style={{ padding: '0.85rem' }}>
+                          {stockInfo.image_url ? (
+                            <img src={stockInfo.image_url} alt={cleanLabel} style={{ width: 44, height: 36, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />
                           ) : (
-                            <span style={{ color: 'var(--text-muted)' }}>Placeholder</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>No image</span>
                           )}
                         </td>
-                        <td style={{ padding: '1rem', textAlign: 'end' }}>
+
+                        {/* 10. Actions */}
+                        <td style={{ padding: '0.85rem', textAlign: 'end' }}>
                           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                             <button
                               onClick={() => {
                                 setEditingColor(c);
                                 setColorForm({
                                   ...c,
-                                  label_ar: cleanLabel,
-                                  label_en: (c.label_en || '').replace(/\[out_of_stock\]|\[coming_soon\]|\[in_stock\]/g, '').trim(),
-                                  status: st
+                                  product_id: c.product_id || selectedProductId,
+                                  label_ar: cleanColorLabel(c, 'ar'),
+                                  label_en: cleanColorLabel(c, 'en'),
+                                  status: stockInfo.status,
+                                  hex_code: c.hex_code || '#1565C0',
+                                  image_url: stockInfo.image_url || c.image_url || '',
+                                  physical_stock: stockInfo.physical,
+                                  reserved_stock: stockInfo.reserved,
+                                  price: stockInfo.price !== null && stockInfo.price !== undefined ? stockInfo.price : (currProd?.price || ''),
+                                  size: stockInfo.size || currProd?.size || ''
                                 });
                                 setShowColorModal(true);
                               }}
                               className="action-btn"
-                              title="Edit Color"
+                              title="Edit Color & Inventory"
                             >
                               <Edit size={16} />
                             </button>
@@ -899,56 +1154,259 @@ export const AdminAccessories = () => {
         document.body
       )}
 
-      {/* ── COLOR MODAL ── */}
+      {/* ── COLOR & INVENTORY MODAL ── */}
       {showColorModal && createPortal(
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem' }}>
-          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 500, backgroundColor: 'var(--surface-color)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 540, backgroundColor: 'var(--surface-color)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', maxHeight: '92vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 900 }}>
-                {editingColor ? (isRtl ? 'تعديل لون وصورة' : 'Edit Color Variant') : (isRtl ? 'إضافة لون وصورة للمنتج' : 'Add Color & Image Variant')}
-              </h3>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, margin: 0 }}>
+                  {editingColor ? (isRtl ? 'تعديل اللون ومخزونه' : 'Edit Color Variant & Inventory') : (isRtl ? 'إضافة لون ومخزون جديد' : 'Add Color & Inventory')}
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0.2rem 0 0 0' }}>
+                  {isRtl ? 'التحكم بالكمية الفعلية والمحجوزة والسعر وصورة هذا اللون بالتحديد' : 'Manage physical stock, reservations, pricing, and variant image'}
+                </p>
+              </div>
               <button onClick={() => setShowColorModal(false)} className="action-btn"><X size={18} /></button>
             </div>
-            <form onSubmit={handleSaveColor} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div className="form-group">
-                <label className="form-label">{isRtl ? 'اسم اللون (مثل Red, Blue, أحمر)' : 'Color Name'}</label>
-                <input type="text" className="form-input" required value={colorForm.label_en} onChange={e => setColorForm({ ...colorForm, label_en: e.target.value, label_ar: e.target.value })} />
+
+            <form onSubmit={handleSaveColor} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+              {/* Color Name (EN & AR) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'اسم اللون (English)' : 'Color Name (EN)'}</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    placeholder="e.g. Cobalt Blue"
+                    value={colorForm.label_en}
+                    onChange={e => setColorForm({ ...colorForm, label_en: e.target.value, label_ar: colorForm.label_ar || e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'اسم اللون (عربي)' : 'Color Name (AR)'}</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="مثال: أزرق ملكي"
+                    value={colorForm.label_ar}
+                    onChange={e => setColorForm({ ...colorForm, label_ar: e.target.value })}
+                  />
+                </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">{isRtl ? 'حالة المعروض والتصميم (Availability Status)' : 'Stock Availability Status'}</label>
-                <select
-                  className="form-input"
-                  value={colorForm.status || 'in_stock'}
-                  onChange={e => setColorForm({ ...colorForm, status: e.target.value })}
-                  style={{ fontWeight: 800, padding: '0.6rem' }}
-                >
-                  <option value="in_stock">🟢 {isRtl ? 'متوفر (In Stock)' : 'In Stock'}</option>
-                  <option value="out_of_stock">🔴 {isRtl ? 'نفذت الكمية (Out of Stock)' : 'Out of Stock'}</option>
-                  <option value="coming_soon">🟧 {isRtl ? 'قريباً (Coming Soon)' : 'Coming Soon'}</option>
-                </select>
+
+              {/* Dimensions/Size & Price */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'المقاس / الأبعاد' : 'Size / Dimensions'}</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. 16 inch / 40x20x18 cm"
+                    value={colorForm.size || ''}
+                    onChange={e => setColorForm({ ...colorForm, size: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">{isRtl ? 'السعر (د.ل)' : 'Price (LYD)'}</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    className="form-input"
+                    placeholder="e.g. 65"
+                    value={colorForm.price ?? ''}
+                    onChange={e => setColorForm({ ...colorForm, price: e.target.value })}
+                  />
+                </div>
               </div>
+
+              {/* Stock Management Box (Physical & Reserved) */}
+              <div style={{
+                padding: '1rem',
+                borderRadius: 'var(--radius-md)',
+                backgroundColor: 'var(--accent)',
+                border: '1px solid var(--border-color)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)' }}>
+                    📦 {isRtl ? 'إدارة المخزون والتوافر' : 'Stock & Availability Engine'}
+                  </span>
+                  {/* Realtime Available Stock Calculation */}
+                  {(() => {
+                    const phys = Math.max(0, parseInt(colorForm.physical_stock, 10) || 0);
+                    const res = Math.max(0, parseInt(colorForm.reserved_stock, 10) || 0);
+                    const avail = Math.max(0, phys - res);
+                    return (
+                      <span style={{
+                        padding: '0.2rem 0.55rem',
+                        borderRadius: 'var(--radius-sm)',
+                        fontSize: '0.8rem',
+                        fontWeight: 900,
+                        backgroundColor: avail > 0 ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+                        color: avail > 0 ? '#10B981' : '#EF4444'
+                      }}>
+                        {avail > 0 ? `🟢 المتوفر للبيع: ${avail}` : '🔴 غير متوفر للبيع (0)'}
+                      </span>
+                    );
+                  })()}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>
+                      {isRtl ? 'الكمية الإجمالية بالمخزن (Physical)' : 'Physical Stock'}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="form-input"
+                      value={colorForm.physical_stock ?? 0}
+                      onChange={e => setColorForm({ ...colorForm, physical_stock: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>
+                      {isRtl ? 'الكمية المحجوزة للطلبات (Reserved)' : 'Reserved Stock'}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="form-input"
+                      value={colorForm.reserved_stock ?? 0}
+                      onChange={e => setColorForm({ ...colorForm, reserved_stock: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  {isRtl
+                    ? '* تظهر الألوان ذات المخزون المتوفر > 0 تلقائياً تحت "الألوان المتوفرة"، بينما تظهر ذات المخزون 0 تحت "الألوان غير المتوفرة حالياً".'
+                    : '* Variants with available stock > 0 display under "Available Colors". Zero-stock variants display under "Currently Unavailable".'}
+                </p>
+              </div>
+
+              {/* Color Hex Picker */}
               <div className="form-group">
                 <label className="form-label">{isRtl ? 'كود اللون (Hex Color)' : 'Hex Color Picker'}</label>
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                  <input type="color" value={colorForm.hex_code} onChange={e => setColorForm({ ...colorForm, hex_code: e.target.value })} style={{ width: 44, height: 44, border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }} />
-                  <input type="text" className="form-input" value={colorForm.hex_code} onChange={e => setColorForm({ ...colorForm, hex_code: e.target.value })} style={{ flex: 1 }} />
+                  <input
+                    type="color"
+                    value={colorForm.hex_code || '#1565C0'}
+                    onChange={e => setColorForm({ ...colorForm, hex_code: e.target.value })}
+                    style={{ width: 44, height: 44, border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}
+                  />
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={colorForm.hex_code}
+                    onChange={e => setColorForm({ ...colorForm, hex_code: e.target.value })}
+                    style={{ flex: 1 }}
+                  />
                 </div>
               </div>
+
+              {/* Image URL & Upload */}
               <div className="form-group">
-                <label className="form-label">{isRtl ? 'صورة المنتج لهذا اللون بالتحديد (Color → Image)' : 'Specific Image for this Color:'}</label>
+                <label className="form-label">{isRtl ? 'صورة المنتج لهذا اللون بالتحديد (Color Image)' : 'Specific Image for this Color:'}</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input type="text" className="form-input" required placeholder="Upload image placeholder" value={colorForm.image_url} onChange={e => setColorForm({ ...colorForm, image_url: e.target.value })} />
-                  <label className="btn btn-outline" style={{ cursor: 'pointer' }}>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="https://... or upload below"
+                    value={colorForm.image_url}
+                    onChange={e => setColorForm({ ...colorForm, image_url: e.target.value })}
+                  />
+                  <label className="btn btn-outline" style={{ cursor: 'pointer', padding: '0.6rem 0.9rem' }}>
                     <Upload size={16} />
                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload(e.target.files[0], url => setColorForm({ ...colorForm, image_url: url }))} />
                   </label>
                 </div>
+                {colorForm.image_url && (
+                  <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <img src={colorForm.image_url} alt="Preview" style={{ width: 60, height: 50, borderRadius: 'var(--radius-sm)', objectFit: 'cover', border: '1px solid var(--border-color)' }} />
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{isRtl ? 'معاينة صورة اللون' : 'Variant Image Preview'}</span>
+                  </div>
+                )}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <button type="button" onClick={() => setShowColorModal(false)} className="btn btn-outline">{isRtl ? 'إلغاء' : 'Cancel'}</button>
-                <button type="submit" disabled={saving} className="btn btn-secondary">{isRtl ? 'حفظ' : 'Save'}</button>
+                <button type="submit" disabled={saving} className="btn btn-secondary">{isRtl ? 'حفظ البيانات' : 'Save Changes'}</button>
               </div>
             </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── RESET CONFIRMATION MODAL ── */}
+      {showResetConfirmModal && createPortal(
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem' }}>
+          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 460, backgroundColor: 'var(--surface-color)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', border: '1px solid rgba(239, 68, 68, 0.3)', boxShadow: 'var(--shadow-xl)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#EF4444' }}>
+              <div style={{ width: 44, height: 44, borderRadius: '50%', backgroundColor: 'rgba(239, 68, 68, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <AlertTriangle size={24} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0, color: '#EF4444' }}>
+                  {isRtl ? 'تأكيد تصفير مخزون البوكسات' : 'Confirm Box Inventory Reset'}
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.2rem 0 0 0' }}>
+                  {isRtl ? 'إجراء أمان المخزون الأولي' : 'Initial Inventory Safety Action'}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ fontSize: '0.88rem', lineHeight: 1.6, color: 'var(--text-main)', background: 'var(--accent)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
+              <p style={{ margin: 0, fontWeight: 700 }}>
+                {isRtl
+                  ? 'سيتم ضبط المخزون المتوفر لجميع ألوان البوكسات إلى صفر (0)، ونقل كافة الألوان إلى قسم "الألوان غير المتوفرة حالياً" مع تعطيل الشراء لحين إدخال الكميات الفعلية.'
+                  : 'All box variants will have their available stock set to 0 and moved to "Currently Unavailable" with purchases disabled until confirmed.'}
+              </p>
+              <ul style={{ margin: '0.75rem 0 0 0', paddingInlineStart: '1.25rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                <li>{isRtl ? 'لن يتم حذف أي منتج أو لون أو صورة.' : 'No products, colors, or images will be deleted.'}</li>
+                <li>{isRtl ? 'لن يتم التأثير على الطلبات السابقة أو الحجوزات القائمة.' : 'Historical orders and invoices remain untouched.'}</li>
+                <li>{isRtl ? 'يمكنك تحديث مخزون كل لون وتفعيله فور توفره.' : 'You can enter real stock per variant anytime.'}</li>
+              </ul>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                type="button"
+                disabled={resettingStock}
+                onClick={() => setShowResetConfirmModal(false)}
+                className="btn btn-outline"
+              >
+                {isRtl ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                disabled={resettingStock}
+                onClick={handleResetAllBoxStock}
+                className="btn btn-danger"
+                style={{
+                  backgroundColor: '#EF4444',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontWeight: 800
+                }}
+              >
+                {resettingStock ? (
+                  <span>{isRtl ? 'جاري التصفير...' : 'Resetting...'}</span>
+                ) : (
+                  <>
+                    <RotateCcw size={16} />
+                    <span>{isRtl ? 'تأكيد التصفير إلى 0' : 'Confirm Reset to 0'}</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>,
         document.body

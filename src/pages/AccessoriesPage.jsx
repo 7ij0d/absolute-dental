@@ -16,8 +16,15 @@ import {
   ShoppingCart,
   Maximize2,
   X,
-  Check
+  Check,
+  Ban
 } from 'lucide-react';
+import BoxColorVariantSelector from '../components/BoxColorVariantSelector';
+import {
+  splitBoxColorsByAvailability,
+  cleanColorLabel,
+  fetchCanonicalBoxInventory
+} from '../utils/boxInventoryEngine';
 
 const BASE = import.meta.env.BASE_URL || '/';
 
@@ -38,6 +45,23 @@ const FALLBACK_CATEGORIES = [
 
 const FALLBACK_BOXES = [
   {
+    id: 'box-14',
+    size: '14 inch',
+    name_ar: '14" Dental Tool Box',
+    name_en: '14" Dental Tool Box',
+    price: 45,
+    stock_quantity: 1,
+    desc_ar: 'Compact Arradent dental toolbox with a colored lid, top organizer compartments, and durable carry handle.',
+    desc_en: 'Compact Arradent dental toolbox with a colored lid, top organizer compartments, and durable carry handle.',
+    features_ar: ['Top organizer compartments', 'Single front latch', 'Compact portable size', 'Comfortable carry handle'],
+    features_en: ['Top organizer compartments', 'Single front latch', 'Compact portable size', 'Comfortable carry handle'],
+    main_image: `${BASE}accessories/box14-pink.jpg`,
+    inside_image: `${BASE}accessories/box14-pink.jpg`,
+    colors: [
+      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 1, physical_stock: 1, reserved_stock: 0, image_url: `${BASE}accessories/box14-pink.jpg` }
+    ]
+  },
+  {
     id: 'box-16',
     size: '16 inch',
     name_ar: '16" Dental Tool Box',
@@ -48,14 +72,15 @@ const FALLBACK_BOXES = [
     desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
     features_ar: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
     features_en: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
-    main_image: `${BASE}accessories/box16-blue.jpg`,
+    main_image: `${BASE}accessories/box16-purple.jpg`,
     inside_image: `${BASE}accessories/box16-inside-blue.jpg`,
     colors: [
-      { id: 'blue',   hex_code: '#1565C0', label_ar: 'أزرق', label_en: 'Blue', status: 'in_stock', image_url: `${BASE}accessories/box16-blue.jpg`, inside_image_url: `${BASE}accessories/box16-inside-blue.jpg`, base_image_url: `${BASE}accessories/box16-base-blue.jpg` },
-      { id: 'red',    hex_code: '#E02020', label_ar: 'أحمر', label_en: 'Red', status: 'in_stock', image_url: `${BASE}accessories/box16-red.jpg`, inside_image_url: `${BASE}accessories/box16-inside-red.jpg`, base_image_url: `${BASE}accessories/box16-base-red.jpg` },
-      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', image_url: `${BASE}accessories/box16-purple.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
-      { id: 'yellow', hex_code: '#F5C518', label_ar: 'أصفر [out_of_stock]', label_en: 'Yellow [out_of_stock]', status: 'out_of_stock', image_url: `${BASE}accessories/box16-yellow.jpg`, inside_image_url: `${BASE}accessories/box16-inside-yellow.jpg`, base_image_url: `${BASE}accessories/box16-base-yellow.jpg` },
-      { id: 'maroon', hex_code: '#800020', label_ar: 'خمري / عنابي [out_of_stock]', label_en: 'Maroon [out_of_stock]', status: 'out_of_stock', image_url: `${BASE}accessories/box16-maroon.jpg`, inside_image_url: `${BASE}accessories/box16-inside-maroon.jpg`, base_image_url: `${BASE}accessories/box16-base-maroon.jpg` },
+      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي',                     label_en: 'Purple',                     status: 'in_stock',     available_stock: 6, physical_stock: 6, reserved_stock: 0, image_url: `${BASE}accessories/box16-purple.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
+      { id: 'pink',   hex_code: '#F48FB1', label_ar: 'وردي',                       label_en: 'Pink',                       status: 'in_stock',     available_stock: 6, physical_stock: 6, reserved_stock: 0, image_url: `${BASE}accessories/box16-pink.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
+      { id: 'blue',   hex_code: '#1565C0', label_ar: 'أزرق [out_of_stock]',         label_en: 'Blue [out_of_stock]',       status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-blue.jpg`, inside_image_url: `${BASE}accessories/box16-inside-blue.jpg`, base_image_url: `${BASE}accessories/box16-base-blue.jpg` },
+      { id: 'red',    hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]',          label_en: 'Red [out_of_stock]',        status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-red.jpg`, inside_image_url: `${BASE}accessories/box16-inside-red.jpg`, base_image_url: `${BASE}accessories/box16-base-red.jpg` },
+      { id: 'yellow', hex_code: '#F5C518', label_ar: 'أصفر [out_of_stock]',         label_en: 'Yellow [out_of_stock]',     status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-yellow.jpg`, inside_image_url: `${BASE}accessories/box16-inside-yellow.jpg`, base_image_url: `${BASE}accessories/box16-base-yellow.jpg` },
+      { id: 'maroon', hex_code: '#800020', label_ar: 'خمري / عنابي',               label_en: 'Maroon',                     status: 'in_stock',     available_stock: 1, physical_stock: 1, reserved_stock: 0, image_url: `${BASE}accessories/box16-maroon.jpg`, inside_image_url: `${BASE}accessories/box16-inside-maroon.jpg`, base_image_url: `${BASE}accessories/box16-base-maroon.jpg` },
     ]
   },
   {
@@ -63,46 +88,47 @@ const FALLBACK_BOXES = [
     size: '16.5 inch',
     name_ar: '16.5" Organizer Box',
     name_en: '16.5" Organizer Box',
-    price: 75,
-    stock_quantity: 0,
+    price: 85,
+    stock_quantity: 4,
     desc_ar: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
     desc_en: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
     features_ar: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
     features_en: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
-    main_image: `${BASE}accessories/box16_5-colors.png`,
+    main_image: `${BASE}accessories/box16_5-real.jpg`,
     inside_image: `${BASE}accessories/box16_5-inside.png`,
     colors: [
-      { id: 'red',    hex_code: '#D32F2F', label_ar: 'أحمر',              label_en: 'Red',                 status: 'in_stock',     image_url: `${BASE}accessories/box16_5-red.jpg`,    inside_image_url: `${BASE}accessories/box16_5-inside-red.jpg` },
-      { id: 'blue',   hex_code: '#2196F3', label_ar: 'أزرق فاتح',         label_en: 'Light Blue',          status: 'in_stock',     image_url: `${BASE}accessories/box16_5-blue.png`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
-      { id: 'navy',   hex_code: '#0D47A1', label_ar: 'أزرق داكن',         label_en: 'Dark Navy Blue',      status: 'in_stock',     image_url: `${BASE}accessories/box16_5-blue.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
-      { id: 'purple', hex_code: '#6A3093', label_ar: 'بنفسجي',            label_en: 'Purple',              status: 'in_stock',     image_url: `${BASE}accessories/box16_5-purple.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-purple.jpg` },
-      { id: 'teal',   hex_code: '#00ACC1', label_ar: 'تركوازي [out_of_stock]',     label_en: 'Teal [out_of_stock]',       status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-teal.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-teal.jpg` },
-      { id: 'green',  hex_code: '#7CB342', label_ar: 'أخضر [out_of_stock]',        label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-green.jpg`,  inside_image_url: `${BASE}accessories/box16_5-inside-green.jpg` },
-      { id: 'orange', hex_code: '#F57C00', label_ar: 'برتقالي [out_of_stock]',     label_en: 'Orange [out_of_stock]',     status: 'out_of_stock', image_url: `${BASE}accessories/box16_5-orange.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-orange.jpg` },
+      { id: 'black',  hex_code: '#1F2937', label_ar: 'أسود',                             label_en: 'Black',                              status: 'in_stock',     available_stock: 4, physical_stock: 4, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-black.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside.png` },
+      { id: 'red',    hex_code: '#D32F2F', label_ar: 'أحمر [out_of_stock]',              label_en: 'Red [out_of_stock]',                 status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-red.jpg`,    inside_image_url: `${BASE}accessories/box16_5-inside-red.jpg` },
+      { id: 'blue',   hex_code: '#2196F3', label_ar: 'أزرق فاتح [out_of_stock]',         label_en: 'Light Blue [out_of_stock]',          status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-blue.png`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
+      { id: 'navy',   hex_code: '#0D47A1', label_ar: 'أزرق داكن [out_of_stock]',         label_en: 'Dark Navy Blue [out_of_stock]',      status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-blue.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
+      { id: 'purple', hex_code: '#6A3093', label_ar: 'بنفسجي [out_of_stock]',            label_en: 'Purple [out_of_stock]',              status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-purple.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-purple.jpg` },
+      { id: 'teal',   hex_code: '#00ACC1', label_ar: 'تركوازي [out_of_stock]',     label_en: 'Teal [out_of_stock]',       status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-teal.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-teal.jpg` },
+      { id: 'green',  hex_code: '#7CB342', label_ar: 'أخضر [out_of_stock]',        label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-green.jpg`,  inside_image_url: `${BASE}accessories/box16_5-inside-green.jpg` },
+      { id: 'orange', hex_code: '#F57C00', label_ar: 'برتقالي [out_of_stock]',     label_en: 'Orange [out_of_stock]',     status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-orange.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-orange.jpg` },
     ]
   },
   {
     id: 'box-17',
-    size: '17 inch',
-    name_ar: '17" Professional Box — GT-MAX',
-    name_en: '17" Professional Box — GT-MAX',
+    size: '17.5 inch',
+    name_ar: '17.5" Professional Box — GT-MAX',
+    name_en: '17.5" Professional Box — GT-MAX',
     price: 95,
-    stock_quantity: 0,
-    desc_ar: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a 4-compartment clear organizer and wide main storage.',
-    desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a 4-compartment clear organizer and wide main storage.',
-    features_ar: ['4-compartment clear lid organizer', 'Wide main storage space', 'Two side + one front latch', 'Strong & Durable plastic'],
-    features_en: ['4-compartment clear lid organizer', 'Wide main storage space', 'Two side + one front latch', 'Strong & Durable plastic'],
-    main_image: `${BASE}accessories/box17-black.jpg`,
+    stock_quantity: 10,
+    desc_ar: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
+    desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
+    features_ar: ['Clear lid organizer', 'Wide main storage space', 'Two side + front latches', 'Strong & Durable plastic'],
+    features_en: ['Clear lid organizer', 'Wide main storage space', 'Two side + front latches', 'Strong & Durable plastic'],
+    main_image: `${BASE}accessories/box17_5-dark-blue.jpg`,
     inside_image: `${BASE}accessories/box17-inside-black.jpg`,
     colors: [
-      { id: 'black',  hex_code: '#111111', label_ar: 'أسود',       label_en: 'Black',      status: 'in_stock',     image_url: `${BASE}accessories/box17-black.jpg`, inside_image_url: `${BASE}accessories/box17-inside-black.jpg` },
-      { id: 'purple', hex_code: '#A880C8', label_ar: 'بنفسجي',     label_en: 'Purple',     status: 'in_stock',     image_url: `${BASE}accessories/box17-purple.jpg`, inside_image_url: `${BASE}accessories/box17-inside-purple.jpg` },
-      { id: 'blue',   hex_code: '#1565C0', label_ar: 'أزرق [out_of_stock]',       label_en: 'Blue [out_of_stock]',       status: 'out_of_stock', image_url: `${BASE}accessories/box17-blue.jpg`, inside_image_url: `${BASE}accessories/box17-inside-blue.jpg` },
-      { id: 'red',    hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]',        label_en: 'Red [out_of_stock]',        status: 'out_of_stock', image_url: `${BASE}accessories/box17-red.jpg`, inside_image_url: `${BASE}accessories/box17-inside-red.jpg` },
-      { id: 'pink',   hex_code: '#F48FB1', label_ar: 'وردي [out_of_stock]',        label_en: 'Pink [out_of_stock]',       status: 'out_of_stock', image_url: `${BASE}accessories/box17-pink.jpg`, inside_image_url: `${BASE}accessories/box17-inside-pink.jpg` },
-      { id: 'beige',  hex_code: '#C8A882', label_ar: 'بيج [out_of_stock]',        label_en: 'Beige [out_of_stock]',      status: 'out_of_stock', image_url: `${BASE}accessories/box17-beige.jpg`, inside_image_url: `${BASE}accessories/box17-inside-beige.jpg` },
-      { id: 'teal',   hex_code: '#00897B', label_ar: 'تركوازي [out_of_stock]',     label_en: 'Teal [out_of_stock]',       status: 'out_of_stock', image_url: `${BASE}accessories/box17-colors.png` },
-      { id: 'lime',   hex_code: '#7CB342', label_ar: 'أخضر فسفوري [out_of_stock]', label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', image_url: `${BASE}accessories/box17-colors.png` },
+      { id: 'blue',   hex_code: '#0D47A1', label_ar: 'أزرق داكن',                   label_en: 'Dark Blue',                  status: 'in_stock',     available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: `${BASE}accessories/box17_5-dark-blue.jpg`, inside_image_url: `${BASE}accessories/box17-inside-blue.jpg` },
+      { id: 'black',  hex_code: '#111111', label_ar: 'أسود [out_of_stock]',         label_en: 'Black [out_of_stock]',       status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-black.jpg`, inside_image_url: `${BASE}accessories/box17-inside-black.jpg` },
+      { id: 'purple', hex_code: '#A880C8', label_ar: 'بنفسجي [out_of_stock]',       label_en: 'Purple [out_of_stock]',      status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-purple.jpg`, inside_image_url: `${BASE}accessories/box17-inside-purple.jpg` },
+      { id: 'red',    hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]',          label_en: 'Red [out_of_stock]',         status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-red.jpg`, inside_image_url: `${BASE}accessories/box17-inside-red.jpg` },
+      { id: 'pink',   hex_code: '#F48FB1', label_ar: 'وردي [out_of_stock]',          label_en: 'Pink [out_of_stock]',        status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-pink.jpg`, inside_image_url: `${BASE}accessories/box17-inside-pink.jpg` },
+      { id: 'beige',  hex_code: '#C8A882', label_ar: 'بيج [out_of_stock]',          label_en: 'Beige [out_of_stock]',       status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-beige.jpg`, inside_image_url: `${BASE}accessories/box17-inside-beige.jpg` },
+      { id: 'teal',   hex_code: '#00897B', label_ar: 'تركوازي [out_of_stock]',       label_en: 'Teal [out_of_stock]',        status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-colors.png` },
+      { id: 'lime',   hex_code: '#7CB342', label_ar: 'أخضر فسفوري [out_of_stock]',   label_en: 'Lime Green [out_of_stock]',  status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-colors.png` },
     ]
   }
 ];
@@ -139,23 +165,38 @@ const getCleanLabel = (c, lang) => {
 };
 
 /* ─── SINGLE DENTAL BOX PRODUCT CARD ────────────────────── */
-const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
+const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} }) => {
   const { addToCart } = useCart();
-  const { lang } = useLanguage();
-  const rawColors = box.colors && box.colors.length > 0
-    ? box.colors
-    : [{ id: 'default', hex_code: '#CDBFA6', label_en: 'Standard', image_url: box.main_image || box.image_url }];
-  const colorsList = sortColorsByAvailability(rawColors);
+  const { lang, isRtl } = useLanguage();
 
-  const [selectedColor, setSelectedColor] = useState(colorsList[0]);
+  const { availableColors, unavailableColors, allUnavailable } = splitBoxColorsByAvailability(
+    box.colors && box.colors.length > 0
+      ? box.colors
+      : [{ id: 'default', hex_code: '#CDBFA6', label_en: 'Standard', image_url: box.main_image || box.image_url }],
+    inventoryMap
+  );
+
+  const colorsList = [...availableColors, ...unavailableColors];
+
+  const [selectedColor, setSelectedColor] = useState(
+    availableColors[0] || unavailableColors[0] || colorsList[0] || null
+  );
   const [viewMode, setViewMode] = useState('outside'); // 'outside', 'inside', 'base'
   const [addedNotice, setAddedNotice] = useState(false);
 
   useEffect(() => {
-    if (colorsList && colorsList.length > 0) {
-      setSelectedColor(colorsList[0]);
+    if (availableColors.length > 0) {
+      setSelectedColor(prev => {
+        const stillAvailable = prev && availableColors.find(c => c.id === prev.id || c.color_id === prev.color_id);
+        return stillAvailable || availableColors[0];
+      });
+    } else if (unavailableColors.length > 0) {
+      setSelectedColor(prev => {
+        const stillMatch = prev && unavailableColors.find(c => c.id === prev.id || c.color_id === prev.color_id);
+        return stillMatch || unavailableColors[0];
+      });
     }
-  }, [box]);
+  }, [box, inventoryMap]);
 
   // ── Preload all color variant images silently into memory for 0ms instant switching ──
   useEffect(() => {
@@ -205,13 +246,39 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
 
   const activeImage = getActiveViewImage();
 
+  const isSelectedColorAvailable = Boolean(
+    selectedColor && selectedColor.available_stock > 0
+  );
+
+  const effectivePrice = selectedColor?.price || box.price || 0;
+
   const handleAddToCart = () => {
-    // Dental box ordering is temporarily paused
-    return;
+    if (!selectedColor || !isSelectedColorAvailable) return;
+
+    const variantColorLabel = cleanColorLabel(selectedColor, 'ar');
+    const variantColorLabelEn = cleanColorLabel(selectedColor, 'en');
+
+    addToCart({
+      ...box,
+      id: `${box.id}-${selectedColor.color_id || selectedColor.id}`,
+      base_product_id: box.id,
+      name_ar: `${box.name_ar} (${variantColorLabel})`,
+      name_en: `${box.name_en} (${variantColorLabelEn})`,
+      price: effectivePrice,
+      is_box: true,
+      is_accessory: true,
+      selected_color: variantColorLabel,
+      image_url: selectedColor.image_url || activeImage,
+      availableStock: selectedColor.available_stock,
+      stock_quantity: selectedColor.available_stock
+    }, 1);
+
+    setAddedNotice(true);
+    setTimeout(() => setAddedNotice(false), 2000);
   };
 
   const buildWhatsappUrl = () => {
-    const colorLabel = selectedColor.label_en || selectedColor.label_ar || 'Standard';
+    const colorLabel = cleanColorLabel(selectedColor, 'en') || 'Standard';
     const productName = box.name_en || box.name_ar || `Dental Box ${box.size}`;
     const msg = `Hi, I'd like to inquire about: ${productName} (${box.size}) — Color: ${colorLabel} 🎨`;
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
@@ -375,13 +442,19 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
               <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
                 {box.size}
               </h3>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#D97706', background: 'rgba(245, 158, 11, 0.12)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-                ⏳ {lang === 'ar' ? 'متوقف مؤقتاً' : 'Paused'}
-              </span>
+              {allUnavailable ? (
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#DC2626', background: 'rgba(239, 68, 68, 0.1)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
+                  ⏳ {lang === 'ar' ? 'جميع الألوان غير متوفرة حالياً' : 'All Colors Unavailable'}
+                </span>
+              ) : (
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#059669', background: 'rgba(16, 185, 129, 0.1)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+                  ✓ {lang === 'ar' ? `${availableColors.length} ألوان متوفرة` : `${availableColors.length} Colors Available`}
+                </span>
+              )}
             </div>
-            {box.price > 0 && (
+            {effectivePrice > 0 && (
               <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--secondary)', flexShrink: 0 }}>
-                {box.price} LYD
+                {effectivePrice} LYD
               </span>
             )}
           </div>
@@ -390,78 +463,14 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
           </p>
         </div>
 
-        {/* ── COLOR SELECTOR ── */}
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.4rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              {lang === 'ar' ? 'الألوان:' : 'Colors:'}
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--primary)' }}>
-                {getCleanLabel(selectedColor, lang)}
-              </span>
-              {getColorStatus(selectedColor) === 'out_of_stock' && (
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#EF4444', background: 'rgba(239,68,68,0.12)', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
-                  🔴 {lang === 'ar' ? 'نفذت الكمية' : 'Out of Stock'}
-                </span>
-              )}
-              {getColorStatus(selectedColor) === 'coming_soon' && (
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#F59E0B', background: 'rgba(245,158,11,0.12)', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
-                  🟧 {lang === 'ar' ? 'قريباً' : 'Coming Soon'}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            {colorsList.map(color => {
-              const isSelected = selectedColor.id === color.id || selectedColor.color_id === color.color_id;
-              const colorSt = getColorStatus(color);
-              const cleanName = getCleanLabel(color, lang);
-              return (
-                <button
-                  key={color.id || color.color_id}
-                  type="button"
-                  title={`${cleanName} ${colorSt === 'out_of_stock' ? '(Out of Stock)' : colorSt === 'coming_soon' ? '(Coming Soon)' : ''}`}
-                  onClick={() => setSelectedColor(color)}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    background: color.hex_code || '#888',
-                    border: isSelected ? '3px solid var(--secondary)' : '2px solid transparent',
-                    boxShadow: isSelected ? '0 0 0 2px var(--secondary)' : '0 1px 3px rgba(0,0,0,0.15)',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                    transform: isSelected ? 'scale(1.15)' : 'scale(1)',
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    opacity: colorSt === 'out_of_stock' ? 0.65 : 1
-                  }}
-                >
-                  {isSelected && (
-                    <CheckCircle2
-                      size={16}
-                      style={{
-                        color: '#ffffff',
-                        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))'
-                      }}
-                    />
-                  )}
-                  {colorSt === 'out_of_stock' && !isSelected && (
-                    <span style={{ position: 'absolute', top: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: '#EF4444', border: '1.5px solid #fff' }} />
-                  )}
-                  {colorSt === 'coming_soon' && !isSelected && (
-                    <span style={{ position: 'absolute', top: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: '#F59E0B', border: '1.5px solid #fff' }} />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {/* ── DUAL-ROW COLOR VARIANT SELECTOR (Section A & Section B) ── */}
+        <BoxColorVariantSelector
+          availableColors={availableColors}
+          unavailableColors={unavailableColors}
+          selectedColor={selectedColor}
+          onSelectColor={setSelectedColor}
+          boxName={box.name_en || box.size}
+        />
 
         {/* ── FEATURES LIST ── */}
         {features.length > 0 && (
@@ -478,10 +487,11 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
         {/* ── ORDER BUTTONS (DIRECT SITE CHECKOUT + WHATSAPP) ── */}
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           
-          {/* Direct Add to Cart - Temporarily Paused */}
+          {/* Add to Cart Button (Strictly inventory driven) */}
           <button
             type="button"
-            disabled
+            onClick={handleAddToCart}
+            disabled={!isSelectedColorAvailable}
             style={{
               width: '100%',
               padding: '0.85rem',
@@ -493,13 +503,47 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
               gap: '0.6rem',
               minHeight: '44px',
               borderRadius: 'var(--radius-md)',
-              backgroundColor: 'rgba(245, 158, 11, 0.12)',
-              color: '#D97706',
-              border: '1.5px solid rgba(245, 158, 11, 0.35)',
-              cursor: 'not-allowed'
+              backgroundColor: addedNotice
+                ? 'var(--success, #10B981)'
+                : isSelectedColorAvailable
+                  ? 'var(--primary, #3D352E)'
+                  : 'rgba(239, 68, 68, 0.08)',
+              color: isSelectedColorAvailable || addedNotice
+                ? '#FFFFFF'
+                : '#991B1B',
+              border: isSelectedColorAvailable
+                ? 'none'
+                : '1.5px solid rgba(239, 68, 68, 0.25)',
+              cursor: isSelectedColorAvailable ? 'pointer' : 'not-allowed',
+              boxShadow: isSelectedColorAvailable ? '0 2px 8px rgba(61, 53, 46, 0.2)' : 'none',
+              transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
           >
-            <span>⏳ {lang === 'ar' ? 'الطلب متوقف مؤقتاً — سيعاود الفتح قريباً' : 'Temporarily Paused — Reopening Soon'}</span>
+            {addedNotice ? (
+              <>
+                <Check size={18} strokeWidth={2.5} />
+                <span>{lang === 'ar' ? 'تمت الإضافة للسلة ✓' : 'Added to Cart ✓'}</span>
+              </>
+            ) : allUnavailable ? (
+              <>
+                <Ban size={18} />
+                <span>{lang === 'ar' ? 'جميع الألوان غير متوفرة حالياً' : 'All Colors Unavailable'}</span>
+              </>
+            ) : !isSelectedColorAvailable ? (
+              <>
+                <Ban size={18} />
+                <span>{lang === 'ar' ? 'هذا اللون غير متوفر حالياً بالمخزن' : 'This Color is Currently Out of Stock'}</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart size={18} />
+                <span>
+                  {lang === 'ar'
+                    ? `أضف إلى السلة (${cleanColorLabel(selectedColor, 'ar')})`
+                    : `Add to Cart (${cleanColorLabel(selectedColor, 'en')})`}
+                </span>
+              </>
+            )}
           </button>
 
           {/* Optional WhatsApp Inquiry */}
@@ -510,7 +554,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage }) => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              justify: 'center',
+              justifyContent: 'center',
               gap: '0.5rem',
               background: 'transparent',
               color: '#25D366',
@@ -542,6 +586,7 @@ export const AccessoriesPage = () => {
   const [boxesProducts, setBoxesProducts] = useState(FALLBACK_BOXES);
   const [loading, setLoading] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState('218946859163');
+  const [boxInventory, setBoxInventory] = useState({});
   const [accessoriesBg, setAccessoriesBg] = useState('');
   const [dentalBoxesBg, setDentalBoxesBg] = useState('');
 
@@ -556,11 +601,12 @@ export const AccessoriesPage = () => {
 
     const fetchData = async () => {
       try {
-        const [contactRes, bgRes, catRes, prodRes] = await Promise.all([
+        const [contactRes, bgRes, catRes, prodRes, boxInvRes] = await Promise.all([
           supabase.from('settings').select('value').eq('key', 'contact_links').single(),
           supabase.from('settings').select('value').eq('key', 'accessories_bgs').single(),
           supabase.from('accessory_categories').select('*').eq('is_active', true).order('sort_order', { ascending: true }),
-          supabase.from('accessory_products').select('*, colors:accessory_product_colors(*)').eq('is_active', true).order('sort_order', { ascending: true })
+          supabase.from('accessory_products').select('*, colors:accessory_product_colors(*)').eq('is_active', true).order('sort_order', { ascending: true }),
+          supabase.from('settings').select('value').eq('key', 'box_variants_inventory').maybeSingle()
         ]);
 
         if (!isMounted) return;
@@ -575,16 +621,16 @@ export const AccessoriesPage = () => {
           if (bgRes.data.value.dental_boxes_page_bg) setDentalBoxesBg(bgRes.data.value.dental_boxes_page_bg);
         }
 
+        if (boxInvRes.data?.value?.variants) {
+          setBoxInventory(boxInvRes.data.value.variants);
+        }
+
         if (!catRes.error && catRes.data && catRes.data.length > 0) {
           setCategories(catRes.data);
         }
 
         if (!prodRes.error && prodRes.data && prodRes.data.length > 0) {
-          const prodsWithColors = prodRes.data.map(prod => ({
-            ...prod,
-            colors: (prod.colors && prod.colors.length > 0) ? sortColorsByAvailability(prod.colors) : []
-          }));
-          setBoxesProducts(prodsWithColors);
+          setBoxesProducts(prodRes.data);
         }
       } catch (err) {
         console.warn('Background accessories sync fallback active:', err);
@@ -885,6 +931,7 @@ export const AccessoriesPage = () => {
                   key={box.id}
                   box={box}
                   whatsappNumber={whatsappNumber}
+                  inventoryMap={boxInventory}
                   onZoomImage={(url, title) => setLightboxImg({ url, title })}
                 />
               ))}

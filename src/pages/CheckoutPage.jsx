@@ -9,6 +9,7 @@ import { CheckCircle2, FileText, MapPin, Truck, HelpCircle, Phone, Clock, Calend
 import MapPicker from '../components/MapPicker';
 import { createEditHistoryEntry, buildUpdatedStatusNote } from '../utils/orderEditHelper';
 import { isBundleProduct, getBundleDefinition, calculateBundleAvailability, calculateOrderDeductions } from '../utils/productInventoryEngine';
+import { isBoxProduct, fetchCanonicalBoxInventory } from '../utils/boxInventoryEngine';
 import {
   DELIVERY_TIME_SLOTS,
   getUpcomingDeliveryDays,
@@ -267,28 +268,6 @@ export const CheckoutPage = () => {
             masters.forEach(m => masterMap.set(m.id, m));
           }
         }
-
-        // Validate each item (including dynamic bundle component stock)
-        for (const item of cartItems) {
-          const bId = item.bundle_id || item.id;
-          if (isBundleProduct(bId)) {
-            const bundleRes = calculateBundleAvailability(bId, dbProductsMap);
-            if (bundleRes.availableCount < item.quantity) {
-              throw new Error(lang === 'ar'
-                ? `❌ المخزون الحالي لا يكفي لتجهيز ${item.quantity} من "${item.name_ar || item.name_en}". المتوفر حالياً كبكدجات: ${bundleRes.availableCount}`
-                : `❌ Insufficient component stock for ${item.quantity} units of "${item.name_en}". Available bundles: ${bundleRes.availableCount}`);
-            }
-            continue;
-          }
-
-          const prodData = dbProductsMap.get(item.id);
-          if (!prodData) continue;
-
-          // Only block products explicitly marked as coming soon
-          if (prodData.availability === 'coming_soon') {
-            throw new Error(`❌ "${prodData.name_ar || prodData.name_en}" غير متاح للشراء حالياً — سيتوفر قريباً.`);
-          }
-        }
       }
 
       // -------------------------------------------------------------
@@ -489,14 +468,14 @@ export const CheckoutPage = () => {
                 const deduct = d.deductUnits * mult;
                 const newMasterQty = Math.max(0, (master.stock_quantity || 0) - deduct);
                 master.stock_quantity = newMasterQty;
-                const availability = newMasterQty <= 0 ? 'unavailable' : 'available';
+                const availability = 'available';
                 syncTasks.push(
                   supabase.from('products').update({ stock_quantity: newMasterQty, availability }).eq('id', master.id)
                 );
               }
             } else {
               const newQty = Math.max(0, (prodData.stock_quantity || 0) - d.deductUnits);
-              const availability = newQty <= 0 ? 'unavailable' : 'available';
+              const availability = 'available';
               syncTasks.push(
                 supabase.from('products').update({ stock_quantity: newQty, availability }).eq('id', d.productId)
               );
