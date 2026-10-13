@@ -38,11 +38,13 @@ export const ProductCard = ({ product }) => {
   const [justAdded, setJustAdded] = useState(false);
   const [selectedSize, setSelectedSize] = useState(null);
   const [sizePrompt, setSizePrompt] = useState(false);
-  const sizedConfig = getProductSizedConfig(product.id);
+  const sizedConfig = getProductSizedConfig(product);
   const currentImageUrl = (sizedConfig && selectedSize && sizedConfig.sizes.find(s => s.size === selectedSize)?.image) || product.image_url;
   const resolvedImageSrc = useStorageImage(currentImageUrl);
 
   useEffect(() => {
+    setSelectedSize(null);
+    setSizePrompt(false);
     try {
       const favs = JSON.parse(localStorage.getItem('smylodent_favs') || '[]');
       setIsFav(favs.includes(product.id));

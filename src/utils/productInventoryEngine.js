@@ -222,8 +222,8 @@ export const CANONICAL_SIZED_PRODUCTS = {
       }
     ]
   },
-  '33000000-0000-0000-0000-000000000112': {
-    productId: '33000000-0000-0000-0000-000000000112',
+  '33000000-0000-0000-0000-000000000118': {
+    productId: '33000000-0000-0000-0000-000000000118',
     nameAr: 'حاجز مطاطي عيادي Rubber Dam 6×6 (موديلات وألوان متعددة)',
     nameEn: 'Dental Rubber Dam Sheets 6×6 (Multiple Models & Colors)',
     hasColorAndSize: true,
@@ -372,18 +372,43 @@ export const CANONICAL_SIZED_PRODUCTS = {
 };
 
 /**
- * Checks if a given product ID is a product with mandatory sizing.
+ * Checks if a given product ID or product object is a product with mandatory sizing.
  */
-export function isSizedProduct(productId) {
-  return Boolean(productId && CANONICAL_SIZED_PRODUCTS[productId]);
+export function isSizedProduct(productOrId) {
+  if (!productOrId) return false;
+  return Boolean(getProductSizedConfig(productOrId));
 }
 
 /**
- * Returns sized product configuration.
+ * Returns sized product configuration bound strictly to its canonical product ID.
  */
-export function getProductSizedConfig(productId) {
-  if (!productId) return null;
-  return CANONICAL_SIZED_PRODUCTS[productId] || null;
+export function getProductSizedConfig(productOrId) {
+  if (!productOrId) return null;
+  const pId = typeof productOrId === 'object' ? productOrId.id : String(productOrId);
+  if (!pId) return null;
+
+  // Strict anti-leak guard: Isolation Gown has NO variants (sold as a standard single model)
+  if (typeof productOrId === 'object') {
+    const text = `${productOrId.name_en || ''} ${productOrId.name_ar || ''}`.toLowerCase();
+    if (text.includes('gown') || text.includes('جاون')) {
+      return null;
+    }
+  }
+
+  const config = CANONICAL_SIZED_PRODUCTS[pId];
+  if (!config) return null;
+
+  // Additional integrity check when product object is provided
+  if (typeof productOrId === 'object') {
+    const text = `${productOrId.name_en || ''} ${productOrId.name_ar || ''}`.toLowerCase();
+    if (config.productId === '33000000-0000-0000-0000-000000000118') {
+      if (!text.includes('rubber') && !text.includes('مطاطي')) {
+        return null;
+      }
+    }
+  }
+
+  return config;
 }
 
 /**

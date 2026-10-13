@@ -172,7 +172,7 @@ export const ProductDetails = () => {
   const [isBoxProductState, setIsBoxProductState] = useState(false);
   const [boxColors, setBoxColors] = useState({ availableColors: [], unavailableColors: [], allUnavailable: true });
   const [selectedBoxColor, setSelectedBoxColor] = useState(null);
-  const sizedConfig = getProductSizedConfig(product?.id || id);
+  const sizedConfig = getProductSizedConfig(product || id);
   const resolvedActiveImage = useStorageImage(
     activeImage,
     'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format'
@@ -186,6 +186,8 @@ export const ProductDetails = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setQuantity(1);
     setJustAdded(false);
+    setSelectedSize(null);
+    setSizeError(false);
   }, [id]);
 
   // Main data fetching
@@ -391,7 +393,7 @@ export const ProductDetails = () => {
           setProduct(fetchedProd);
           setSubject(fetchedSubject);
           setYear(fetchedYear);
-          const pSized = getProductSizedConfig(fetchedProd.id);
+          const pSized = getProductSizedConfig(fetchedProd);
           const finalImages = (pSized && pSized.galleryImages) || (fetchedImages.length > 0 ? fetchedImages : [fetchedProd.image_url]);
           setImages(finalImages);
           setActiveImage(finalImages[0] || fetchedProd.image_url || '');

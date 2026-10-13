@@ -7,8 +7,31 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
-    const saved = localStorage.getItem('smylodent_cart');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('smylodent_cart');
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      // Strict safety sanitize: clean up any legacy items where Isolation Gown had Rubber Dam variants attached
+      return parsed.map(item => {
+        if (item && (item.id === '33000000-0000-0000-0000-000000000112' || item.base_product_id === '33000000-0000-0000-0000-000000000112' || String(item.id).startsWith('33000000-0000-0000-0000-000000000112-'))) {
+          const isGown = /gown|جاون/i.test(`${item.name_en || ''} ${item.name_ar || ''}`);
+          if (isGown) {
+            return {
+              ...item,
+              id: '33000000-0000-0000-0000-000000000112',
+              base_product_id: undefined,
+              selected_size: undefined,
+              selected_color: undefined,
+              name_en: 'Disposable Dental Isolation Gown (Blue)',
+              name_ar: 'جاون وقائي طبي للاستخدام مرة واحدة (أزرق) - Dental Isolation Gown'
+            };
+          }
+        }
+        return item;
+      });
+    } catch {
+      return [];
+    }
   });
 
   const [editingOrder, setEditingOrder] = useState(() => {

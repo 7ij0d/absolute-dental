@@ -667,6 +667,26 @@
   },
   {
     "id": "33000000-0000-0000-0000-000000000112",
+    "name_ar": "جاون وقائي طبي للاستخدام مرة واحدة (أزرق) - Dental Isolation Gown",
+    "name_en": "Disposable Dental Isolation Gown (Blue)",
+    "price": 3,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 20,
+    "subject_id": "33000000-0000-0000-0000-000000000032",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "33000000-0000-0000-0000-000000000031"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/disposable-dental-isolation-gown-blue.png",
+    "description_ar": "جاون وقائي عيادي للاستخدام مرة واحدة بلون أزرق عالي الجودة مع أساور بيضاء محبوكة، مريح وعازل للسوائل والرذاذ، مصمم خصيصاً لجلسات مادة طب الأسنان الوقائي (Prevention).",
+    "description_en": "High-quality blue disposable dental isolation gown with white elastic knitted cuffs, liquid-resistant and comfortable for Preventive Dentistry clinical sessions.",
+    "details_ar": "المنتج: جاون وقائي طبي عيادي للاستخدام مرة واحدة (Disposable Medical Isolation Gown)\nاللون: أزرق مع أساور بيضاء محبوكة\nالمادة الدراسية: طب الأسنان الوقائي (Prevention)\nسعر البيع: 3 د.ل",
+    "details_en": "Product: Disposable Dental Isolation Gown\nColor: Blue with white knitted cuffs\nSubject: Preventive Dentistry\nSelling Price: 3 LYD",
+    "sort_order": 112
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000118",
     "name_ar": "حاجز مطاطي عيادي Rubber Dam 6×6 (موديلات وألوان متعددة)",
     "name_en": "Dental Rubber Dam Sheets 6×6 (Multiple Models & Colors)",
     "price": 2.5,
@@ -676,14 +696,15 @@
     "subject_id": "33000000-0000-0000-0000-000000000033",
     "year_id": "30000000-0000-0000-0000-000000000003",
     "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000034"
+      "33000000-0000-0000-0000-000000000034",
+      "33000000-0000-0000-0000-000000000031"
     ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/rubber-dam-heavy-blue.png",
     "description_ar": "شيتات حاجز مطاطي عيادي Rubber Dam قياس 6×6 بوصة (Natural Latex Dental Rubber Dams) عالي المرونة ومقاوم للتمزق. متوفر بموديلين: هيفي (Heavy) باللون الأزرق لثبات وعزل محكم فائق، وميد (Mid/Medium) باللون الأخضر للمرونة العالية أثناء العزل في عيادات البرستو والتحفظي.",
     "description_en": "High-grade 6x6 inch natural latex dental rubber dam sheets for superior clinical isolation and moisture control. Available in Heavy model (Blue) for maximum tear-resistance and seal, and Mid/Medium model (Green) for optimal flexibility during restorative and prosthodontic procedures.",
     "details_ar": "النوع: حاجز مطاطي طبي لعزل الأسنان (Natural Latex Dental Rubber Dam)\nالمقاس: 6×6 بوصة (6x6)\nالموديلات والألوان المتوفرة:\n• هيفي - Heavy (أزرق - Blue)\n• ميد - Mid / Medium (أخضر - Green)\nالمادة الدراسية: صناعة الأسنان الثابتة 2 (البرستو)",
     "details_en": "Type: Natural Latex Dental Rubber Dam Sheets\nSize: 6x6 inches\nAvailable Models & Colors:\n• Heavy - Blue\n• Mid / Medium - Green\nSubject: Fixed Prosthodontics 2 (Prostho)",
-    "sort_order": 11
+    "sort_order": 118
   },
   {
     "id": "33000000-0000-0000-0000-000000000113",
