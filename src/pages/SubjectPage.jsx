@@ -143,7 +143,7 @@ export const SubjectPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const CACHE_KEY = `subject_v30:${slug}`;
+    const CACHE_KEY = `subject_v31:${slug}`;
 
     const applyData = ({ subject, year, prods }) => {
       setSubjectData(subject);

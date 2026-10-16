@@ -61,6 +61,27 @@
     "sort_order": 1
   },
   {
+    "id": "22000000-0000-0000-0000-000000000204",
+    "name_ar": "Bur Holder (with Cover)",
+    "name_en": "Bur Holder (with Cover)",
+    "description_ar": "علبة وحاملة بيرات أسنان عالية الجودة مع غطاء شفاف واقٍ لحفظ وترتيب البيرات. متوفرة باللونين الأزرق والأبيض.",
+    "description_en": "High-quality dental bur holder box with transparent protective cover. Available in Blue and White.",
+    "price": 20,
+    "compare_at_price": null,
+    "stock_quantity": 9999,
+    "availability": "available",
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "subject_id": "22000000-0000-0000-0000-000000000021",
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000023"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-holder-blue.png",
+    "is_featured": false,
+    "is_active": true,
+    "is_archived": false,
+    "sort_order": 1
+  },
+  {
     "id": "8806943f-d3bf-443b-b623-7002b354a355",
     "name_ar": "قبضة توربين أصلية COXO C207 (بنفسجي)",
     "name_en": "COXO High-Speed Handpiece C207 (Purple)",

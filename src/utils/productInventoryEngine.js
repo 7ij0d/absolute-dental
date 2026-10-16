@@ -368,6 +368,51 @@ export const CANONICAL_SIZED_PRODUCTS = {
         image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-blue.png'
       }
     ]
+  },
+  '22000000-0000-0000-0000-000000000204': {
+    productId: '22000000-0000-0000-0000-000000000204',
+    nameAr: 'Bur Holder (with Cover)',
+    nameEn: 'Bur Holder (with Cover)',
+    hasColorAndSize: true,
+    optionsLabelAr: 'اختر اللون المتوفر',
+    optionsLabelEn: 'Select Color',
+    optionsPromptAr: '⚠️ يرجى تحديد اللون أولاً',
+    optionsPromptEn: '⚠️ Please select color',
+    buttonPromptAr: 'اختر اللون وأضف للسلة',
+    buttonPromptEn: 'Select Color & Add',
+    required: true,
+    galleryImages: [
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-holder-blue.png',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-holder-white.png'
+    ],
+    sizes: [
+      {
+        size: 'blue',
+        code: 'Blue',
+        color: 'Blue',
+        colorAr: 'أزرق',
+        colorHex: '#3B82F6',
+        labelAr: 'أزرق (Blue)',
+        labelEn: 'Blue',
+        shortLabel: 'Blue',
+        stock: 9999,
+        price: 20.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-holder-blue.png'
+      },
+      {
+        size: 'white',
+        code: 'White',
+        color: 'White',
+        colorAr: 'أبيض',
+        colorHex: '#F1F5F9',
+        labelAr: 'أبيض (White)',
+        labelEn: 'White',
+        shortLabel: 'White',
+        stock: 9999,
+        price: 20.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-holder-white.png'
+      }
+    ]
   }
 };
 
@@ -385,6 +430,7 @@ export function isSizedProduct(productOrId) {
  * STRICT PRODUCT IDENTITY ENFORCEMENT:
  * - 33000000-0000-0000-0000-000000000112 = Isolation Gown → NO variants, always null
  * - 33000000-0000-0000-0000-000000000118 = Rubber Dam → has Heavy/Mid variants
+ * - 22000000-0000-0000-0000-000000000204 = Bur Holder (with Cover) → Blue / White
  */
 export function getProductSizedConfig(productOrId) {
   if (!productOrId) return null;
@@ -412,6 +458,14 @@ export function getProductSizedConfig(productOrId) {
   if (config.productId === '33000000-0000-0000-0000-000000000118' && typeof productOrId === 'object') {
     const text = `${productOrId.name_en || ''} ${productOrId.name_ar || ''}`.toLowerCase();
     if (!text.includes('rubber') && !text.includes('مطاطي')) {
+      return null;
+    }
+  }
+
+  // Bur Holder config must only be returned for bur holder products
+  if (config.productId === '22000000-0000-0000-0000-000000000204' && typeof productOrId === 'object') {
+    const text = `${productOrId.name_en || ''} ${productOrId.name_ar || ''}`.toLowerCase();
+    if (!text.includes('bur holder') && !text.includes('حاملة')) {
       return null;
     }
   }
