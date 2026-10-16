@@ -381,13 +381,23 @@ export function isSizedProduct(productOrId) {
 
 /**
  * Returns sized product configuration bound strictly to its canonical product ID.
+ *
+ * STRICT PRODUCT IDENTITY ENFORCEMENT:
+ * - 33000000-0000-0000-0000-000000000112 = Isolation Gown → NO variants, always null
+ * - 33000000-0000-0000-0000-000000000118 = Rubber Dam → has Heavy/Mid variants
  */
 export function getProductSizedConfig(productOrId) {
   if (!productOrId) return null;
-  const pId = typeof productOrId === 'object' ? productOrId.id : String(productOrId);
+  const pId = typeof productOrId === 'object' ? productOrId.id : String(productOrId).trim();
   if (!pId) return null;
 
-  // Strict anti-leak guard: Isolation Gown has NO variants (sold as a standard single model)
+  // HARDCODED IDENTITY GUARD (catches both string and object calls):
+  // Isolation Gown always returns null — it has no size/color variants.
+  if (pId === '33000000-0000-0000-0000-000000000112') {
+    return null;
+  }
+
+  // Name-based guard when a product object is provided
   if (typeof productOrId === 'object') {
     const text = `${productOrId.name_en || ''} ${productOrId.name_ar || ''}`.toLowerCase();
     if (text.includes('gown') || text.includes('جاون')) {
@@ -398,13 +408,11 @@ export function getProductSizedConfig(productOrId) {
   const config = CANONICAL_SIZED_PRODUCTS[pId];
   if (!config) return null;
 
-  // Additional integrity check when product object is provided
-  if (typeof productOrId === 'object') {
+  // Rubber Dam config must only be returned for actual Rubber Dam products
+  if (config.productId === '33000000-0000-0000-0000-000000000118' && typeof productOrId === 'object') {
     const text = `${productOrId.name_en || ''} ${productOrId.name_ar || ''}`.toLowerCase();
-    if (config.productId === '33000000-0000-0000-0000-000000000118') {
-      if (!text.includes('rubber') && !text.includes('مطاطي')) {
-        return null;
-      }
+    if (!text.includes('rubber') && !text.includes('مطاطي')) {
+      return null;
     }
   }
 

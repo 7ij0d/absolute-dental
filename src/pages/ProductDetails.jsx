@@ -172,7 +172,7 @@ export const ProductDetails = () => {
   const [isBoxProductState, setIsBoxProductState] = useState(false);
   const [boxColors, setBoxColors] = useState({ availableColors: [], unavailableColors: [], allUnavailable: true });
   const [selectedBoxColor, setSelectedBoxColor] = useState(null);
-  const sizedConfig = getProductSizedConfig(product || id);
+  const sizedConfig = product ? getProductSizedConfig(product) : null;
   const resolvedActiveImage = useStorageImage(
     activeImage,
     'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format'
