@@ -1,44 +1,49 @@
 # حالة المشروع — Absolute Dental Equipment
 
-**تاريخ آخر تحديث:** 2026-10-16 23:38 (بتوقيت طرابلس)  
-**الفرع الرئيسي:** `main`
+**تاريخ آخر تحديث:** 2026-10-17 01:58 (بتوقيت طرابلس)  
+**الفرع الرئيسي:** `main` — آخر commit: `836a189`
 
 ---
 
 ## 1. التعديل الأخير والملفات المتأثرة
-### 🔹 التعديل:
-إصلاح الخلل في نظام الخيارات بالمنتجات المشتركة بين المواد (Shared Products)، وتحديداً فصل خيارات منتج **Rubber Dam** (`Heavy` أزرق و `Mid` أخضر) كلياً عن منتج **Disposable Dental Isolation Gown (Blue)**، وتصحيح واجهة العرض والسلة وقاعدة البيانات.
 
-### 🔹 الملفات التي تأثرت:
-1. **قاعدة البيانات (سيرفر التخزين)**:
-   - جدول `products`: إنشاء سجل مستقل وفريد لمنتج Rubber Dam بمعرف خاص `33000000-0000-0000-0000-000000000118` بسعر 2.5 د.ل ومخزون 71 شيت، والإبقاء على معرّف `33000000-0000-0000-0000-000000000112` كمعرّف أصيل لمنتج Isolation Gown بسعر 3 د.ل ومخزون 20 قطعة.
-   - جدول `product_subjects`: ربط Rubber Dam بالمواد المشتركة الثلاث (Fixed Prosthodontics 2، Removable Prosthodontics 2، Conservative Dentistry 2) دون التداخل مع روابط Isolation Gown.
-2. [`src/utils/productInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/productInventoryEngine.js):
-   - ربط خيارات الموديل واللون (`Heavy` / `Mid`) بالمعرف الحصري `33000000-0000-0000-0000-000000000118` داخل `CANONICAL_SIZED_PRODUCTS`.
-   - إزالة أي خيارات للمعرّف `33000000-0000-0000-0000-000000000112`.
-   - إضافة صمام أمان صارم في `getProductSizedConfig` و `isSizedProduct` للتحقق من هوية المنتج وضمان عدم تسريب خيارات Rubber Dam لأي منتج آخر أو لأي جاون طبي.
-3. [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json):
-   - فصل المنتجين وتثبيت سجل Isolation Gown وسجل Rubber Dam بمعرفاتهما المنفصلة.
-4. [`src/components/ProductCard.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/ProductCard.jsx):
-   - تمرير كائن المنتج كاملاً لدالة `getProductSizedConfig(product)`.
-   - تصفير حالة `selectedSize` و `sizePrompt` تلقائياً عند تغير `product.id`.
-5. [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx):
-   - ربط جلب الخيارات بالتحقق الهيكلي وتصفير الخيارات عند التنقل بين المنتجات.
-6. [`src/context/CartContext.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/context/CartContext.jsx):
-   - تنظيف ومعالجة عناصر السلة في التخزين المحلي (`localStorage`) بحيث تُلغى أي خيارات سابقة خاطئة لجاون العزل تلقائياً على أجهزة المستخدمين وتعود كمنتج قياسي بدون خيارات.
-7. [`src/pages/SubjectPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SubjectPage.jsx):
-   - ترقية مفتاح الكاش إلى `subject_v28` لضمان إفراغ الكاش القديم في جميع المتصفحات فوراً.
+### 🔹 التعديل (commit 836a189):
+إصلاح جذري للمشكلة المتكررة لمنتج **Isolation Gown** الذي يظهر خيارات Rubber Dam (Heavy/Mid).
+
+**السبب الجذري المكتشف:**
+في `ProductDetails.jsx`، كان `sizedConfig` يُحسب مبكراً باستخدام:
+```js
+const sizedConfig = getProductSizedConfig(product || id);
+```
+قبل تحميل المنتج (`product = null`)، يُمرَّر `id` كـ string نصي. والدالة `getProductSizedConfig` لم تكن تمنع string IDs — الحراسة النصية تعمل فقط مع كائنات. لذلك إذا كان `CANONICAL_SIZED_PRODUCTS` يحتوي على ID الجاون سابقاً، أو جاء ID من URL قبل تحميل الكائن، يظهر config خاطئ.
+
+**الإصلاح الجذري المطبق:**
+1. **`productInventoryEngine.js`**: أضفنا حراسة ID صريحة (hardcoded) تمنع ID الجاون (`...000000000112`) من إرجاع أي config حتى لو نودي بها بـ string نصي.
+2. **`ProductDetails.jsx`**: غيّرنا `getProductSizedConfig(product || id)` إلى `product ? getProductSizedConfig(product) : null` — لا يحسب config أبداً قبل تحميل كائن المنتج.
+3. **`SubjectPage.jsx`**: رفعنا cache key إلى `subject_v29` لإلغاء الكاش القديم في المتصفحات.
+
+### 🔹 الملفات المتأثرة في هذا التعديل:
+| الملف | التغيير |
+|---|---|
+| [`src/utils/productInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/productInventoryEngine.js) | إضافة `if (pId === '33000000-0000-0000-0000-000000000112') return null;` |
+| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | تغيير السطر 175: `product ? getProductSizedConfig(product) : null` |
+| [`src/pages/SubjectPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SubjectPage.jsx) | رفع cache key إلى `subject_v29` |
 
 ---
 
 ## 2. ما تم إنجازه ويعمل بنجاح
-- [x] **Isolation Gown**: يظهر الآن بسعره المباشر (3 د.ل) وزر "أضف للسلة" العادي بدون قائمة الموديل واللون وبدون عبارة «اختر الموديل واللون وأضف».
-- [x] **Rubber Dam**: يظهر بصفته منتجاً مستقلاً وله خياراته الحصرية (`Heavy (أزرق)` و `Mid (أخضر)`) وسعره الخاص (2.5 د.ل).
-- [x] **عملية الطلب وإتمام الشراء**: لا ترفق أي خيارات بمنتج Isolation Gown عند إضافته للسلة أو إرساله في الطلب.
-- [x] **نظام المنتجات المشتركة**: كلا المنتجين يظهران في موادهما المشتركة بشكل صحيح تماماً وبدون أي تداخل.
-- [x] **بناء المشروع والتوافقية**: تم تشغيل `npm run build` بنجاح كامل بدون أي أخطاء، وتم دفع التحديثات إلى المستودع الرئيسي (`origin/main`).
+- [x] **Isolation Gown (ID: `...000112`)**: محصور بـ `return null` في جميع مسارات الاستدعاء (object + string)
+- [x] **Rubber Dam (ID: `...000118`)**: خياراته (Heavy/Mid) تعمل صحيحاً ومحصورة به
+- [x] **ProductDetails.jsx**: لا يعرض خيارات قبل تحميل بيانات المنتج
+- [x] **ProductCard.jsx**: يستخدم كائن المنتج الكامل دائماً
+- [x] **CartContext.jsx**: يُنظّف cart القديم من خيارات مزورة
+- [x] **SubjectPage.jsx**: cache v29 يمسح البيانات القديمة
+- [x] **بناء المشروع**: ✓ `npm run build` بنجاح — 7.70s
+- [x] **دفع Git**: commit `836a189` → `origin/main`
+- [x] **إتاحة جميع المنتجات**: 9999 وحدة لكل المنتجات ما عدا الثلاثة الاستثنائية
 
 ---
 
 ## 3. الخطوة القادمة المطلوبة
-- متابعة طلبات وتوجيهات المستخدم التالية بشأن المتجر والمخزون، وتطبيق التحديث الفوري لهذا الملف مع كل مهمة برمجية.
+- التحقق من أن المستخدم يرى الإصلاح على الموقع الفعلي (قد يحتاج Ctrl+Shift+R على المتصفح)
+- متابعة أي طلبات مستجدة من المستخدم
