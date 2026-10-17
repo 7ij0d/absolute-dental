@@ -146,6 +146,24 @@
     "sort_order": 0
   },
   {
+    "id": "11000000-0000-0000-0000-000000000101",
+    "name_ar": "مسطرة قياس الأسنان (Dental Ruler)",
+    "name_en": "Dental Ruler",
+    "description_ar": "مسطرة قياس وتحديد أبعاد الأسنان عالية الدقة من الألومنيوم لمعمل تشريح ونحت الأسنان الطبيعية. متوفرة بثلاثة ألوان: أخضر، أصفر، أزرق.",
+    "description_en": "High-precision aluminum dental measuring ruler for tooth carving, morphology dimensions, and anatomy labs. Available in Green, Yellow, and Blue.",
+    "price": 15,
+    "compare_at_price": null,
+    "stock_quantity": 9999,
+    "availability": "available",
+    "year_id": "10000000-0000-0000-0000-000000000001",
+    "subject_id": "11000000-0000-0000-0000-000000000011",
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-ruler.png",
+    "is_featured": false,
+    "is_active": true,
+    "is_archived": false,
+    "sort_order": 1
+  },
+  {
     "id": "2ebc663e-0967-4d6a-b8be-b07b9e84659c",
     "name_ar": "Inverted cone bur - SI 46",
     "name_en": "Inverted cone bur - SI 46",

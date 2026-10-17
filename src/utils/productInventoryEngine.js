@@ -413,6 +413,66 @@ export const CANONICAL_SIZED_PRODUCTS = {
         image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-holder-white.png'
       }
     ]
+  },
+  '11000000-0000-0000-0000-000000000101': {
+    productId: '11000000-0000-0000-0000-000000000101',
+    nameAr: 'مسطرة قياس الأسنان (Dental Ruler)',
+    nameEn: 'Dental Ruler',
+    hasColorAndSize: true,
+    optionsLabelAr: 'اختر لون المسطرة المطلوب',
+    optionsLabelEn: 'Select Ruler Color',
+    optionsPromptAr: '⚠️ يرجى تحديد لون المسطرة أولاً',
+    optionsPromptEn: '⚠️ Please select ruler color',
+    buttonPromptAr: 'اختر اللون وأضف للسلة',
+    buttonPromptEn: 'Select Color & Add',
+    required: true,
+    galleryImages: [
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-ruler.png',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-ruler-green.png',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-ruler-yellow.png',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-ruler-blue.png'
+    ],
+    sizes: [
+      {
+        size: 'green',
+        code: 'Green',
+        color: 'Green',
+        colorAr: 'أخضر',
+        colorHex: '#22C55E',
+        labelAr: 'أخضر (Green)',
+        labelEn: 'Green',
+        shortLabel: 'Green',
+        stock: 9999,
+        price: 15.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-ruler-green.png'
+      },
+      {
+        size: 'yellow',
+        code: 'Yellow',
+        color: 'Yellow',
+        colorAr: 'أصفر',
+        colorHex: '#EAB308',
+        labelAr: 'أصفر (Yellow)',
+        labelEn: 'Yellow',
+        shortLabel: 'Yellow',
+        stock: 9999,
+        price: 15.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-ruler-yellow.png'
+      },
+      {
+        size: 'blue',
+        code: 'Blue',
+        color: 'Blue',
+        colorAr: 'أزرق',
+        colorHex: '#3B82F6',
+        labelAr: 'أزرق (Blue)',
+        labelEn: 'Blue',
+        shortLabel: 'Blue',
+        stock: 9999,
+        price: 15.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-ruler-blue.png'
+      }
+    ]
   }
 };
 
@@ -431,6 +491,7 @@ export function isSizedProduct(productOrId) {
  * - 33000000-0000-0000-0000-000000000112 = Isolation Gown → NO variants, always null
  * - 33000000-0000-0000-0000-000000000118 = Rubber Dam → has Heavy/Mid variants
  * - 22000000-0000-0000-0000-000000000204 = Bur Holder (with Cover) → Blue / White
+ * - 11000000-0000-0000-0000-000000000101 = Dental Ruler → Green / Yellow / Blue
  */
 export function getProductSizedConfig(productOrId) {
   if (!productOrId) return null;
@@ -466,6 +527,14 @@ export function getProductSizedConfig(productOrId) {
   if (config.productId === '22000000-0000-0000-0000-000000000204' && typeof productOrId === 'object') {
     const text = `${productOrId.name_en || ''} ${productOrId.name_ar || ''}`.toLowerCase();
     if (!text.includes('bur holder') && !text.includes('حاملة')) {
+      return null;
+    }
+  }
+
+  // Dental Ruler config must only be returned for ruler products
+  if (config.productId === '11000000-0000-0000-0000-000000000101' && typeof productOrId === 'object') {
+    const text = `${productOrId.name_en || ''} ${productOrId.name_ar || ''}`.toLowerCase();
+    if (!text.includes('ruler') && !text.includes('مسطرة')) {
       return null;
     }
   }
