@@ -1,6 +1,6 @@
 # حالة المشروع — Absolute Dental Equipment
 
-**تاريخ آخر تحديث:** 2026-10-24 (بتوقيت طرابلس)  
+**تاريخ آخر تحديث:** 2026-10-25 (بتوقيت طرابلس)  
 **الفرع الرئيسي:** `main`
 
 ---
@@ -14,58 +14,60 @@
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
 ### 🔹 التعديل:
-مراجعة هندسية شاملة، تصحيح الأخطاء البرمجية والبصرية (Bug Hunting & Fixing)، وترقية نظام التصميم والواجهة الأمامية بالكامل إلى معايير **Linear / Raycast / Apple-grade Craftsmanship** مع الالتزام الصارم بعدم المساس بأي أسعار أو منتجات أو مواد دراسية (100% Data & Price Integrity).
+تطوير **الصفحة الرئيسية الجديدة، ونظام مجتمع تجارب طلبة الأسنان (`تجارب طلبة الأسنان`)، ونظام طلبات توفير المنتجات غير المتوفرة (`مش لاقي اللي تبيه؟ خلّيه علينا!`)** بناءً على الصور المرجعية المعتمدة على اللابتوب والآيباد والهاتف، مع الحفاظ الكامل على جميع المنتجات والأسعار والمخزون وآلية الشراء الحالية.
 
-### 🔹 أبرز الإصلاحات والتحسينات المنفذة:
-1. **تصحيح الأخطاء البرمجية والبصرية (Bug Fixes):**
-   - **شريط التنقل العلوي والقائمة الجانبية ([`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx))**:
-     - إصلاح مشكلة تعارض المحاذاة في القائمة الجانبية للموبايل (`marginRight: 'auto'` التي كانت تتعارض مع CSS في وضع RTL).
-     - إصلاح خروج قائمة الحساب المنسدلة (Profile Dropdown) عن حدود الشاشة في الوضع العربي عبر استخدام الخصائص المنطقية (`insetInlineEnd: 0`).
-     - إضافة أزرار تبديل اللغة (`Globe`) والمفضلة (`Heart`) التي كانت مفقودة في شريط التنقل الفاتح داخل صفحات المواد والسنوات وتفاصيل المنتجات.
-   - **الفوتر ([`src/components/Footer.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Footer.jsx))**:
-     - إصلاح رابط الشعار المعطل واستبداله بالأصل المحلي المعتمد (`brand-logo-trimmed.png`).
-   - **صفحة الأدوات الدراسية ([`src/pages/StudyToolsPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/StudyToolsPage.jsx))**:
-     - إصلاح خطأ النص الإنجليزي للسنة الثانية حيث كان يظهر بالعربية (`السنة الثانية`) في الوضع الإنجليزي بدلاً من (`2nd Year`).
-   - **صفحة تتبع الطلبات ([`src/pages/OrderTracking.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/OrderTracking.jsx))**:
-     - إصلاح خطأ تكرار خاصية `className` مرتين في عنصر `<form>` (`className="card"` و`className="tracking-form-row"`) مما كان يلغي تنسيق البطاقة في JSX، ودمجهما في `className="card tracking-form-row"`.
-   - **صفحة التبرعات ([`src/pages/DonationsPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/DonationsPage.jsx))**:
-     - إزالة كود `:hover` غير الصالح برمجياً داخل خاصية `style` المضمنة في React والاعتماد على نظام الـ Hover الدلالي في CSS.
+### 🔹 أبرز الميزات والتحسينات المنفذة:
+1. **الشريط العلوي والقائمة الجانبية ([`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx))**:
+   - تصميم الشريط العلوي البني الداكن ليحتوي على شعار واسم `Absolute Dental`، زر القائمة الجانبية (`☰`)، حقل البحث («ابحث عن أداة طبية...»)، أيقونة السلة مع العداد، وأيقونة حساب المستخدم.
+   - القائمة الجانبية (`Side Drawer`) مغلقة افتراضياً، وتفتح فقط عند الضغط على زر (`☰`) على الهاتف والآيباد واللابتوب مع طبقة خلفية وإغلاق عند الضغط خارجها أو على زر الإغلاق.
+   - تضمين جميع الروابط المطلوبة داخل القائمة الجانبية: الرئيسية، أدوات الدراسة، السنوات الدراسية الأربع، إكسسوارات الأسنان، عروض خاصة (`/offers`)، **مستلزمات أخرى** (`/other-supplies` بالصياغة الصحيحة)، سلة التسوق، المفضلة، تتبع الطلب، تواصل معنا، التبرعات ونواقص الطلاب، تسجيل الدخول/الخروج، وتغيير اللغة.
+   - إزالة صف الاختصارات السفلي المكرر (`BottomNav`) من الصفحة الرئيسية.
 
-2. **الترقية البصرية الشاملة وإلغاء المظهر العشوائي (UI/UX & Anti-AI-Slop Elevation):**
-   - **توحيد الأيقونات (Lucide Icons)**: استبدال جميع رموز الـ Emoji العشوائية (`🏠`, `📖`, `📚`, `🛒`, `❤️`, `📦`, `🧰`, `💬`, `🎁`, `💡`, `⚠️`, `🎨`, `📐`, `🚚`, `📥`, `🗃️`, `⏳`) بأيقونات خطية موحدة من مكتبة `lucide-react` في كل من: `Navbar.jsx`, `ProductCard.jsx`, `ProductDetails.jsx`, `AccessoriesPage.jsx`, و`Footer.jsx`.
-   - **نظام التصميم v4.0 ([`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) و [`index.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/index.html))**:
-     - تضمين خطوط **`IBM Plex Sans Arabic`** و **`Cairo`** و **`Inter`** لتحقيق توازن بصري مثالي بين العربية والإنجليزية.
-     - تطبيق تقنية **Double-Border Elevation** (`inset 0 1px 0 rgba(255,255,255,0.85)`) والزوايا المتدرجة المدروسة (`4px` / `6px` / `10px` / `14px` / `18px`).
-     - استبدال تدرج التحميل البنفسجي القديم (`.skeleton`) بتدرج عاجي/رملي دافئ متناسق مع هوية المتجر.
-     - إضافة خاصية `font-variant-numeric: tabular-nums` (`.tabular-nums`) لكافة الأسعار، الخصومات، العدادات، والكميات.
-     - دعم التفاعل اللمسي السلس (`cubic-bezier(0.16, 1, 0.3, 1)` و `button:active { transform: scale(0.98) }`) ودوران الأسهم التلقائي في الوضع العربي (`RTL`).
-   - **تنظيف الكود (Clean CSS Architecture)**:
-     - نقل الأنماط المضمنة المتكررة ومعالجات `onMouseEnter`/`onMouseLeave` اليدوية في `ProductCard.jsx`, `Navbar.jsx`, `Footer.jsx`, `BottomNav.jsx`, و`FloatingCart.jsx` إلى كلاسات CSS دلالية نظيفة داخل `src/index.css`.
+2. **القسم الرئيسي والبطاقتان الرئيسيتان ([`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx) و [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css))**:
+   - دمج صورة الخلفية المرجعية (`home-hero-bg.webp` / `home-hero-bg.png`) خلف العنوان الرئيسي **«شن تبي تجهّز؟»** والوصف **«اختر القسم المناسب لاحتياجاتك.»** وأعلى البطاقتين الرئيسيتين بتدرج ناعم متجاوب على جميع الشاشات.
+   - عرض البطاقتين الرئيسيتين فقط (بجانب بعضهما على اللابتوب والآيباد، وتحت بعضهما على الهاتف):
+     1. **أدوات الدراسة**: «كل مستلزمات الدراسة في مكان واحد.» مع زر «ابدأ الآن ←» يوجه إلى `/study-tools`.
+     2. **إكسسوارات الأسنان**: «بوكسات، حقائب، أدوات تنظيم ومستلزمات إضافية.» مع زر «تصفح الآن ←» يوجه إلى `/accessories`.
+
+3. **نظام مجتمع تجارب طلبة الأسنان (`تجارب طلبة الأسنان`)**:
+   - **الحالة الافتراضية النظيفة**: عند عدم وجود تجارب معتمدة، يظهر التصميم الهادئ المطابق للصورة المرجعية مع رسم الكاميرا وفقاعة المحادثة، ونص **«ما زالت ما فيش تجارب منشورة.»** و **«كون أول من يشارك تجربته مع Absolute Dental.»** وزر **«+ أضف تجربتك»** بدون أي تقييمات وهمية.
+   - **حماية المصادقة**: عند محاولة زائر غير مسجل إضافة تجربة أو الإعجاب أو التعليق، تظهر نافذة **«هذه الميزة متاحة للمستخدمين المسجلين فقط.»** مع خيارات **«تسجيل الدخول»** و **«إنشاء حساب»** و **«المتابعة باستخدام Google»** وإعادة التوجيه التلقائي بعد الدخول.
+   - **إضافة تجربة ومراجعتها**: رفع صورة أو أكثر مع التحقق من الصيغة والحجم ومعاينة الصور قبل الإرسال، وحفظ التجربة بحالة `pending` حتى يعتمدها الأدمن.
+   - **الإعجابات والتعليقات**: إمكانية الإعجاب مرة واحدة لكل حساب مسجل مع إمكانية إلغاء الإعجاب، وإضافة التعليقات وحفظها في قاعدة البيانات.
+
+4. **نظام طلب توفير منتج غير متوفر (`مش لاقي اللي تبيه؟ خلّيه علينا!`)**:
+   - بطاقة مخصصة أسفل قسم تجارب الطلبة مع صورة الصندوق الاستفهامي والقبضة السنية (`product-request-faded.webp`) وزر **«اطلب منتجك الآن ←»**.
+   - نموذج متكامل يشمل: اسم المنتج (إجباري)، صورة المنتج (اختياري مع معاينة)، تفاصيل المنتج ومواصفاته (اختياري)، رقم التواصل (إجباري — يعبأ تلقائياً من حساب المستخدم عند توفره وقابل للتعديل لهذا الطلب فقط دون تعديل رقم الحساب الأصلي)، وملاحظات إضافية (اختياري).
+   - حفظ مسودة الطلب في `sessionStorage` إذا طُلب من الزائر تسجيل الدخول قبل الإرسال حتى لا يفقد بياناته.
+   - توليد رقم طلب فريد (`PR-XXXXXX`) وحفظه بحالة `new` دون خصم مخزون أو إنشاء طلب شراء.
+
+5. **أقسام لوحة التحكم الجديدة للأدمن**:
+   - **صفحة طلبات توفير المنتجات ([`src/pages/admin/ProductRequests.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/ProductRequests.jsx))**: البحث باسم المنتج أو رقم الطلب، عرض الصورة والتفاصيل وبيانات الطالب ورقم التواصل، تحديث الحالة (`جديد`، `قيد المراجعة`، `جارٍ البحث عن المنتج`، `تم توفير المنتج`، `تعذّر توفير المنتج`)، إضافة ملاحظات داخلية خاصة بالإدارة، وعرض سجل تغييرات الحالة بالتاريخ والوقت.
+   - **صفحة تجارب الطلبة ([`src/pages/admin/StudentExperiences.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/StudentExperiences.jsx))**: مراجعة التجارب المرسلة وصورها، قبولها لنشرها في الموقع، رفضها، حذفها، وحذف التعليقات المخالفة.
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`index.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/index.html) | إضافة روابط Google Fonts لخطوط `IBM Plex Sans Arabic` و `Cairo` و `Inter` |
-| [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) | ترقية نظام التصميم إلى v4.0، إضافة كلاسات دلالية للمكونات، تحسين الـ Skeleton، وضبط RTL والـ Tabular Nums |
-| [`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx) | استبدال الإيموجي بأيقونات Lucide، إصلاح القائمة الجانبية والمنسدلة في RTL، وإضافة اللغة والمفضلة للـ Light Navbar |
-| [`src/components/ProductCard.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/ProductCard.jsx) | تنظيف الأنماط المضمنة إلى كلاسات CSS، استبدال الإيموجي بأيقونات Lucide، وتفعيل `tabular-nums` و `decoding="async"` |
-| [`src/components/BottomNav.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/BottomNav.jsx) | استخدام الخصائص المنطقية `insetInline` والحدود المزدوجة وتنسيق العداد |
-| [`src/components/Footer.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Footer.jsx) | إصلاح شعار الفوتر المحلي، استبدال إيموجي الشحن بأيقونة `Truck`، وتحويل الأزرار إلى كلاسات CSS |
-| [`src/components/FloatingCart.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/FloatingCart.jsx) | تحويل الزر العائم إلى كلاس `.floating-cart-pill` مع خصائص منطقية و `tabular-nums` |
-| [`src/pages/StudyToolsPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/StudyToolsPage.jsx) | إصلاح العنوان الإنجليزي للسنة الثانية (`2nd Year`) |
-| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | استبدال الإيموجي بأيقونات Lucide، تطبيق الخصائص المنطقية `insetInline`، وتفعيل `tabular-nums` |
-| [`src/pages/AccessoriesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/AccessoriesPage.jsx) | استبدال إيموجي أزرار العرض وحالة التوفر بأيقونات Lucide وتفعيل `tabular-nums` |
-| [`src/pages/OrderTracking.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/OrderTracking.jsx) | إصلاح تكرار `className` في نموذج تتبع الطلب |
-| [`src/pages/DonationsPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/DonationsPage.jsx) | إزالة مفتاح `:hover` غير الصالح من `style` المضمنة |
+| [`src/utils/communityAndRequestsEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/communityAndRequestsEngine.js) | محرك إدارة تجارب الطلبة، الإعجابات، التعليقات، وطلبات توفير المنتجات ورفع الصور |
+| [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx) | إعادة تصميم الصفحة الرئيسية بالكامل وإضافة قسم تجارب الطلبة وقسم طلب توفير منتج والنوافذ المنبثقة |
+| [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) | إضافة تنسيقات الخلفية الرئيسية، البطاقتين، قسم تجارب الطلبة، قسم طلب توفير منتج، والتجاوب الكامل |
+| [`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx) | تحديث الشريط العلوي البني الداكن والقائمة الجانبية لتشمل جميع الأقسام وتعمل على الهاتف والآيباد واللابتوب |
+| [`src/context/AuthContext.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/context/AuthContext.jsx) | إضافة دعم تسجيل الدخول عبر Google (`signInWithGoogle`) |
+| [`src/pages/SignInPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SignInPage.jsx) | دعم زر Google، التبديل التلقائي لإنشاء الحساب، وإعادة التوجيه بعد تسجيل الدخول |
+| [`src/pages/SearchPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SearchPage.jsx) | دعم صفحتي «عروض خاصة» (`/offers`) و«مستلزمات أخرى» (`/other-supplies`) |
+| [`src/pages/admin/ProductRequests.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/ProductRequests.jsx) | لوحة إدارة طلبات توفير المنتجات وتحديث الحالات والملاحظات الداخلية وسجل الحالة |
+| [`src/pages/admin/StudentExperiences.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/StudentExperiences.jsx) | لوحة مراجعة واعتماد تجارب الطلبة وإدارة التعليقات |
+| [`src/pages/admin/AdminLayout.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/AdminLayout.jsx) | إضافة رابطي «طلبات توفير المنتجات» و«تجارب الطلبة» إلى قائمة لوحة التحكم |
+| [`src/App.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/App.jsx) | ربط المسارات العامة والإدارية الجديدة وإخفاء الشريط السفلي المكرر في الصفحة الرئيسية |
 
 ---
 
 ## 3. ما تم إنجازه ويعمل بنجاح
-- [x] **سلامة البيانات والأسعار 100%**: لم يتم المساس بأي سعر أو عملة أو منتج أو مادة دراسية أو علاقة في قاعدة البيانات أو الملفات المحلية.
-- [x] **خلو البناء من الأخطاء**: تم اختبار `npm run build` بنجاح تام (`✓ built in 7.77s`) بدون أي أخطاء برمجية.
-- [x] **توافق كامل مع RTL / LTR**: جميع القوائم والبطاقات والأزرار تعمل بانسيابية على الجوال والتابلت وسطح المكتب.
+- [x] **سلامة البيانات والأسعار والمخزون 100%**: لم يتم حذف أو تعديل أي منتج أو سعر أو طلب شراء حالي.
+- [x] **اختبار العمليات الفعلية مع قاعدة البيانات**: تم التحقق برمجياً من إرسال التجارب (`pending`)، اعتماد الأدمن لها، الإعجاب مرة واحدة لكل حساب، التعليق، إرسال طلب توفير منتج (`PR-XXXXXX`)، وتحديث حالته وسجل تغييراته، مع تنظيف كافة بيانات الاختبار.
+- [x] **خلو البناء من الأخطاء**: تم اختبار `npm run build` بنجاح تام (`✓ built in 1.57s`).
 
 ---
 
 ## 4. الخطوة القادمة المطلوبة (Immediate Next Step)
-- متابعة أي طلبات إضافية من المستخدم لإضافة منتجات جديدة أو تحديثات مستقبلية في المتجر.
+- متابعة أي ملاحظات إضافية من المستخدم أو إضافة منتجات جديدة عند الطلب.

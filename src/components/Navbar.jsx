@@ -7,7 +7,8 @@ import {
   ShoppingCart, User, Menu, X, Search, Globe,
   ChevronDown, LayoutDashboard, LogOut, ClipboardList,
   Heart, ChevronRight, ChevronLeft, BookOpen,
-  Home, GraduationCap, PackageCheck, Box, MessageSquare, HeartHandshake
+  Home, GraduationCap, PackageCheck, Box, MessageSquare, HeartHandshake,
+  Sparkles, Layers
 } from 'lucide-react';
 import supabase from '../supabaseClient';
 import brandLogoTrimmed from '../assets/images/brand-logo-trimmed.png';
@@ -38,6 +39,7 @@ export const Navbar = () => {
   const { cartCount } = useCart();
   const { user, profile, isAdmin, signOut } = useAuth();
 
+  // Side Drawer closed by default
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,7 +63,7 @@ export const Navbar = () => {
     setMobileOpen(false);
     setProfileOpen(false);
     setMegaOpen(false);
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     const loadNavData = async () => {
@@ -77,14 +79,25 @@ export const Navbar = () => {
     loadNavData();
   }, []);
 
-  // Close dropdowns on outside click
+  // Close dropdowns on outside click & Escape key
   useEffect(() => {
     const handler = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
       if (megaRef.current && !megaRef.current.contains(e.target)) setMegaOpen(false);
     };
+    const keyHandler = (e) => {
+      if (e.key === 'Escape') {
+        setMobileOpen(false);
+        setProfileOpen(false);
+        setMegaOpen(false);
+      }
+    };
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('keydown', keyHandler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('keydown', keyHandler);
+    };
   }, []);
 
   const handleSearch = (e) => {
@@ -95,31 +108,34 @@ export const Navbar = () => {
     }
   };
 
-  const getSubjectsForYear = (yearId) => subjects.filter(s => s.year_id === yearId);
-
   const isLightHeader = location.pathname.startsWith('/study-tools') || location.pathname.startsWith('/years') || location.pathname.startsWith('/year') || location.pathname.startsWith('/subject') || location.pathname.startsWith('/product');
 
-  const renderMobileDrawer = () => {
+  const renderSideDrawer = () => {
     if (!mobileOpen) return null;
     return (
-      <div className="mobile-menu">
+      <div className="mobile-menu" style={{ zIndex: 10000 }} role="dialog" aria-modal="true" aria-label={lang === 'ar' ? 'القائمة الجانبية' : 'Navigation Menu'}>
         <div className="mobile-menu-overlay" onClick={() => setMobileOpen(false)} />
-        <div className="mobile-menu-panel">
-          {/* Mobile Header */}
-          <div className="mobile-menu-header">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
-              <img src={brandLogoTrimmed} alt="Absolute Dental" style={{ width: 28, height: 28, objectFit: 'contain' }} />
-              <span className="navbar-logo-text" style={{ color: '#fff', fontSize: '1.08rem' }}>Absolute Dental</span>
+        <div className="mobile-menu-panel" style={{ width: '320px', maxWidth: '86vw', background: '#2A1D15', borderInlineEnd: '1px solid rgba(255,255,255,0.1)' }}>
+          {/* Drawer Header */}
+          <div className="mobile-menu-header" style={{ background: '#231810', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <img src={brandLogoTrimmed} alt="Absolute Dental" style={{ width: 30, height: 30, objectFit: 'contain' }} />
+              <span className="navbar-logo-text" style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 900 }}>Absolute Dental</span>
             </div>
-            <button className="nav-icon-btn" onClick={() => setMobileOpen(false)} aria-label="Close Menu">
+            <button
+              className="nav-icon-btn"
+              onClick={() => setMobileOpen(false)}
+              aria-label={lang === 'ar' ? 'إغلاق القائمة' : 'Close Menu'}
+              style={{ color: '#fff' }}
+            >
               <X size={20} />
             </button>
           </div>
 
-          {/* Mobile Search */}
-          <form onSubmit={(e) => { handleSearch(e); setMobileOpen(false); }} style={{ padding: '0.9rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          {/* Drawer Search */}
+          <form onSubmit={(e) => { handleSearch(e); setMobileOpen(false); }} style={{ padding: '0.9rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <div style={{ position: 'relative' }}>
-              <Search size={15} style={{ position: 'absolute', insetInlineStart: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.45)' }} />
+              <Search size={15} style={{ position: 'absolute', insetInlineStart: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.55)' }} />
               <input
                 type="text"
                 value={searchQuery}
@@ -128,7 +144,7 @@ export const Navbar = () => {
                 style={{
                   width: '100%',
                   background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(255,255,255,0.14)',
                   borderRadius: 'var(--radius-full)',
                   paddingBlock: '0.55rem',
                   paddingInlineStart: '2.45rem',
@@ -140,64 +156,86 @@ export const Navbar = () => {
             </div>
           </form>
 
-          {/* Mobile Links with Crisp Lucide Icons */}
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            <Link to="/" className="mobile-nav-link">
+          {/* Drawer Links */}
+          <div style={{ flex: 1, overflowY: 'auto', paddingBlock: '0.35rem' }}>
+            <Link to="/" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
               <Home size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
               <span>{lang === 'ar' ? 'الرئيسية' : 'Home'}</span>
             </Link>
-            <Link to="/study-tools" className="mobile-nav-link">
+
+            <Link to="/study-tools" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
               <BookOpen size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
               <span>{lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}</span>
             </Link>
+
             {years.map(year => (
-              <Link key={year.id} to={`/year/${year.slug}`} className="mobile-nav-link">
+              <Link key={year.id} to={`/year/${year.slug}`} className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
                 <GraduationCap size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
                 <span>{lang === 'ar' ? year.name_ar : year.name_en}</span>
               </Link>
             ))}
-            <Link to="/cart" className="mobile-nav-link">
-              <ShoppingCart size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
-              <span>{lang === 'ar' ? 'سلة التسوق' : 'Cart'} {cartCount > 0 && `(${cartCount})`}</span>
-            </Link>
-            <Link to="/favorites" className="mobile-nav-link">
-              <Heart size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
-              <span>{lang === 'ar' ? 'المفضلة' : 'Favorites'}</span>
-            </Link>
-            <Link to="/track" className="mobile-nav-link">
-              <PackageCheck size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
-              <span>{lang === 'ar' ? 'تتبع الطلب' : 'Track Order'}</span>
-            </Link>
-            <Link to="/accessories" className="mobile-nav-link">
+
+            <Link to="/accessories" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
               <Box size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
               <span>{lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories'}</span>
             </Link>
-            <Link to="/contact" className="mobile-nav-link">
-              <MessageSquare size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
-              <span>{lang === 'ar' ? 'تواصل معنا' : 'Contact'}</span>
+
+            <Link to="/offers" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+              <Sparkles size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'عروض خاصة' : 'Special Offers'}</span>
             </Link>
-            <Link to="/donations" className="mobile-nav-link">
+
+            <Link to="/other-supplies" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+              <Layers size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'مستلزمات أخرى' : 'Other Supplies'}</span>
+            </Link>
+
+            <Link to="/cart" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+              <ShoppingCart size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'سلة التسوق' : 'Cart'} {cartCount > 0 && `(${cartCount})`}</span>
+            </Link>
+
+            <Link to="/favorites" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+              <Heart size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'المفضلة' : 'Favorites'}</span>
+            </Link>
+
+            <Link to="/track" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+              <PackageCheck size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'تتبع الطلب' : 'Track Order'}</span>
+            </Link>
+
+            <Link to="/contact" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+              <MessageSquare size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'تواصل معنا' : 'Contact Us'}</span>
+            </Link>
+
+            <Link to="/donations" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
               <HeartHandshake size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
               <span>{lang === 'ar' ? 'التبرعات ونواقص الطلاب' : 'Donations & Need Requests'}</span>
             </Link>
           </div>
 
-          {/* Mobile Footer */}
-          <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', gap: '0.75rem' }}>
-            {user ? (
+          {/* Drawer Footer */}
+          <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: '0.75rem', background: '#231810' }}>
+            {user && user.email !== 'admin@smylodent.com' ? (
               <button
                 className="btn btn-outline"
-                style={{ flex: 1, color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                style={{ flex: 1, color: '#FCA5A5', borderColor: 'rgba(252,165,165,0.4)' }}
                 onClick={() => { signOut(); setMobileOpen(false); }}
               >
-                <LogOut size={15} /> {lang === 'ar' ? 'خروج' : 'Sign Out'}
+                <LogOut size={15} /> {lang === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
               </button>
             ) : (
-              <Link to="/signin" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMobileOpen(false)}>
+              <Link to="/signin" className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setMobileOpen(false)}>
                 <User size={15} /> {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
               </Link>
             )}
-            <button className="btn btn-ghost" onClick={toggleLanguage} style={{ flexShrink: 0 }}>
+            <button
+              className="btn btn-ghost"
+              onClick={toggleLanguage}
+              style={{ flexShrink: 0, color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}
+            >
               <Globe size={15} /> {lang === 'ar' ? 'EN' : 'ع'}
             </button>
           </div>
@@ -209,7 +247,7 @@ export const Navbar = () => {
   if (isLightHeader) {
     return (
       <>
-        {/* ── LIGHT NAVBAR (MATCHING REFERENCE MOCKUP) ── */}
+        {/* ── LIGHT NAVBAR (STOREFRONT INNER PAGES) ── */}
         <header className={`navbar navbar-light-theme ${scrolled ? 'scrolled' : ''}`}>
           <div className="container navbar-inner navbar-light-inner" style={{ direction: 'ltr' }}>
 
@@ -270,7 +308,7 @@ export const Navbar = () => {
               </Link>
             </div>
 
-            {/* Desktop Navigation Links (>= 900px) */}
+            {/* Desktop Navigation Links (>= 1080px) */}
             <nav className="navbar-nav navbar-light-nav" style={{ display: 'none' }} id="desktop-nav-light">
               <Link to="/" className="nav-link nav-light-link">
                 {lang === 'ar' ? 'الرئيسية' : 'Home'}
@@ -294,7 +332,6 @@ export const Navbar = () => {
 
             {/* Right: Search + Language + Favorites + Cart (Brown Badge) + Account */}
             <div className="navbar-actions navbar-light-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              {/* Search Button */}
               <button
                 onClick={() => navigate('/search')}
                 className="nav-icon-btn nav-light-btn"
@@ -314,7 +351,6 @@ export const Navbar = () => {
                 <Search size={20} strokeWidth={2} />
               </button>
 
-              {/* Language Toggle (Desktop) */}
               <button
                 onClick={toggleLanguage}
                 className="nav-icon-btn nav-light-btn nav-icon-desktop-only"
@@ -334,7 +370,6 @@ export const Navbar = () => {
                 <Globe size={19} strokeWidth={2} />
               </button>
 
-              {/* Favorites (Desktop) */}
               <Link
                 to="/favorites"
                 className="nav-icon-btn nav-light-btn nav-icon-desktop-only"
@@ -354,7 +389,6 @@ export const Navbar = () => {
                 <Heart size={19} strokeWidth={2} />
               </Link>
 
-              {/* Cart Button with Brown Badge Circle */}
               <Link
                 to="/cart"
                 className="nav-icon-btn nav-light-btn"
@@ -400,7 +434,6 @@ export const Navbar = () => {
                 </div>
               </Link>
 
-              {/* Account Button */}
               <Link
                 to={user && user.email !== 'admin@smylodent.com' ? '/profile' : '/signin'}
                 className="nav-icon-btn nav-light-btn"
@@ -434,180 +467,133 @@ export const Navbar = () => {
           `}</style>
         </header>
 
-        {/* Reusable Mobile Drawer */}
-        {renderMobileDrawer()}
+        {renderSideDrawer()}
       </>
     );
   }
 
   return (
     <>
-      {/* ── NAVBAR ── */}
-      <header className={`navbar ${scrolled ? 'scrolled' : ''} no-print`}>
-        <div className="container navbar-inner" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
-
-          {/* Logo + Brand */}
-          <Link to="/" className="navbar-logo" style={{
-            textDecoration: 'none',
-            alignItems: 'center',
+      {/* ── DARK BROWN NAVBAR (MATCHING REFERENCE MOCKUP ON LAPTOP, IPAD & PHONE) ── */}
+      <header className={`navbar navbar-reference-brown ${scrolled ? 'scrolled' : ''} no-print`}>
+        <div
+          className="container navbar-inner"
+          style={{
+            direction: isRtl ? 'rtl' : 'ltr',
             display: 'flex',
-            gap: '10px',
-            flexShrink: 0,
-          }}>
-            <img
-              src={brandLogoTrimmed}
-              alt="Absolute Dental"
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.85rem',
+            height: '66px'
+          }}
+        >
+          {/* Start Group: Logo + Brand + Hamburger Button (☰) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexShrink: 0 }}>
+            <Link
+              to="/"
+              className="navbar-logo"
               style={{
-                width: 36,
-                height: 36,
-                objectFit: 'contain',
+                textDecoration: 'none',
+                alignItems: 'center',
+                display: 'flex',
+                gap: '9px',
                 flexShrink: 0,
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                margin: 0
               }}
-            />
-            <span style={{
-              fontFamily: "var(--font-ar)",
-              fontSize: '1.2rem',
-              fontWeight: 900,
-              letterSpacing: '0.02em',
-              color: '#ffffff',
-              whiteSpace: 'nowrap',
-            }}>
-              Absolute Dental
-            </span>
-          </Link>
-
-          {/* Desktop Nav */}
-          <nav className="navbar-nav" style={{ display: 'none' }} id="desktop-nav">
-            <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
-              {lang === 'ar' ? 'الرئيسية' : 'Home'}
-            </Link>
-
-            {/* Mega Menu Trigger */}
-            <div ref={megaRef} className="mega-menu-wrapper">
-              <button
-                className="nav-link"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                onClick={() => setMegaOpen(!megaOpen)}
+            >
+              <img
+                src={brandLogoTrimmed}
+                alt="Absolute Dental"
+                style={{
+                  width: 34,
+                  height: 34,
+                  objectFit: 'contain',
+                  flexShrink: 0,
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: "var(--font-ar)",
+                  fontSize: '1.15rem',
+                  fontWeight: 900,
+                  letterSpacing: '0.01em',
+                  color: '#ffffff',
+                  whiteSpace: 'nowrap',
+                }}
               >
-                <BookOpen size={14} />
-                {lang === 'ar' ? 'المنتجات' : 'Products'}
-                <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: megaOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
-              </button>
-
-              {megaOpen && (
-                <div className="mega-menu">
-                  <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#fff', fontWeight: 800, fontSize: '0.95rem' }}>
-                      {lang === 'ar' ? 'تصفح حسب السنة الدراسية' : 'Browse by Year'}
-                    </span>
-                    <Link
-                      to="/year/1st-year"
-                      style={{ color: '#CDBFA6', fontSize: '0.8rem', fontWeight: 600 }}
-                      onClick={() => setMegaOpen(false)}
-                    >
-                      {lang === 'ar' ? 'عرض الكل' : 'View all'}
-                    </Link>
-                  </div>
-                  <div className="mega-menu-grid">
-                    {years.map(year => (
-                      <Link
-                        key={year.id}
-                        to={`/year/${year.slug}`}
-                        className="mega-menu-year"
-                        onClick={() => setMegaOpen(false)}
-                      >
-                        <div className="mega-menu-year-name">
-                          {lang === 'ar' ? year.name_ar : year.name_en}
-                        </div>
-                        <div className="mega-menu-subjects">
-                          {getSubjectsForYear(year.id).slice(0, 3).map(sub => (
-                            <span
-                              key={sub.id}
-                              className="mega-menu-subject-tag"
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/subject/${sub.slug}`); setMegaOpen(false); }}
-                            >
-                              {lang === 'ar' ? sub.name_ar : sub.name_en}
-                            </span>
-                          ))}
-                        </div>
-                      </Link>
-                    ))}
-
-                    {/* Accessories Mega Menu Card */}
-                    <Link
-                      to="/accessories"
-                      className="mega-menu-year"
-                      style={{ borderInlineStart: '3px solid var(--secondary)', background: 'rgba(205,191,166,0.06)' }}
-                      onClick={() => setMegaOpen(false)}
-                    >
-                      <div className="mega-menu-year-name" style={{ color: '#CDBFA6', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <Box size={15} />
-                        <span>{lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories'}</span>
-                      </div>
-                      <div className="mega-menu-subjects">
-                        <span className="mega-menu-subject-tag" style={{ color: '#ffffff' }}>
-                          {lang === 'ar' ? 'بوكسات أدوات، حقائب، مستلزمات عامة' : 'Tool boxes, bags & general gear'}
-                        </span>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <Link to="/track" className={`nav-link ${location.pathname === '/track' ? 'active' : ''}`}>
-              {lang === 'ar' ? 'تتبع الطلب' : 'Track Order'}
+                Absolute Dental
+              </span>
             </Link>
-            <Link to="/contact" className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}>
-              {lang === 'ar' ? 'تواصل معنا' : 'Contact'}
-            </Link>
-            <Link to="/donations" className={`nav-link ${location.pathname === '/donations' ? 'active' : ''}`}>
-              {lang === 'ar' ? 'التبرعات ونواقص الطلاب' : 'Donations & Need Requests'}
-            </Link>
-          </nav>
 
-          {/* Search */}
-          <form onSubmit={handleSearch} className="navbar-search" style={{ display: 'none' }} id="desktop-search">
+            {/* Hamburger Menu Button (☰) — works on Phone, iPad, and Laptop */}
+            <button
+              type="button"
+              className="nav-icon-btn"
+              onClick={() => setMobileOpen(true)}
+              aria-label={lang === 'ar' ? 'فتح القائمة الجانبية' : 'Open side menu'}
+              title={lang === 'ar' ? 'القائمة الجانبية' : 'Menu'}
+              style={{
+                color: '#FFFFFF',
+                width: '38px',
+                height: '38px',
+                borderRadius: '10px',
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(255,255,255,0.06)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+            >
+              <Menu size={20} strokeWidth={2.2} />
+            </button>
+          </div>
+
+          {/* Center: Pill Search Input (visible on Laptop & iPad) */}
+          <form
+            onSubmit={handleSearch}
+            className="navbar-search navbar-center-search"
+            style={{
+              flex: '1 1 420px',
+              maxWidth: '460px',
+              marginInline: 'auto'
+            }}
+          >
             <Search size={15} className="navbar-search-icon" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder={lang === 'ar' ? 'ابحث عن أداة طبية...' : 'Search products...'}
+              placeholder={lang === 'ar' ? 'ابحث عن أداة طبية...' : 'Search dental tools...'}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                height: '38px',
+                fontSize: '0.85rem'
+              }}
             />
           </form>
 
-          {/* Actions */}
-          <div className="navbar-actions">
-            {/* Tablet & Mobile Quick Search Icon */}
+          {/* End Group: Mobile Search Icon + Cart with Counter + Account Icon */}
+          <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+            {/* Phone Quick Search Icon */}
             <button
-              onClick={() => navigate('/search')}
-              className="nav-icon-btn nav-search-btn-mobile"
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              className="nav-icon-btn nav-phone-search-btn"
               title={lang === 'ar' ? 'بحث' : 'Search'}
+              style={{ color: '#FFFFFF' }}
             >
-              <Search size={18} />
+              <Search size={19} />
             </button>
 
-            {/* Language Toggle — hidden on tablet, accessible via ☰ */}
-            <button
-              onClick={toggleLanguage}
-              className="nav-icon-btn nav-icon-desktop-only"
-              title={lang === 'ar' ? 'English' : 'العربية'}
-            >
-              <Globe size={18} />
-            </button>
-
-            {/* Favorites — hidden on tablet, accessible via ☰ */}
-            <Link to="/favorites" className="nav-icon-btn nav-icon-desktop-only" title={lang === 'ar' ? 'المفضلة' : 'Favorites'}>
-              <Heart size={18} />
-            </Link>
-
-            {/* Cart */}
+            {/* Cart Icon with Counter Badge */}
             <Link
               to="/cart"
               className="nav-icon-btn nav-cart-btn"
-              title={lang === 'ar' ? 'السلة' : 'Cart'}
+              title={lang === 'ar' ? 'سلة التسوق' : 'Cart'}
               style={{
                 background: 'transparent',
                 color: '#ffffff',
@@ -618,41 +604,46 @@ export const Navbar = () => {
                 gap: '0.4rem',
                 textDecoration: 'none',
                 position: 'relative',
-                transition: 'all 0.2s ease',
               }}
             >
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ShoppingCart size={21} />
-                <span className="nav-cart-badge-circle tabular-nums" style={{
-                  position: 'absolute',
-                  top: '-6px',
-                  right: '-7px',
-                  backgroundColor: '#FFFFFF',
-                  color: '#231810',
-                  fontSize: '0.65rem',
-                  fontWeight: 900,
-                  minWidth: '16px',
-                  height: '16px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '0 2px',
-                  lineHeight: 1,
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.3)'
-                }}>
+                <span
+                  className="nav-cart-badge-circle tabular-nums"
+                  style={{
+                    position: 'absolute',
+                    top: '-6px',
+                    right: '-7px',
+                    backgroundColor: '#D4A853',
+                    color: '#1E140E',
+                    fontSize: '0.65rem',
+                    fontWeight: 900,
+                    minWidth: '17px',
+                    height: '17px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0 2px',
+                    lineHeight: 1,
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.35)'
+                  }}
+                >
                   {cartCount}
                 </span>
               </div>
-              <span className="nav-cart-label" style={{ fontSize: '0.82rem', fontWeight: 800 }}>
-                {lang === 'ar' ? 'السلة' : 'Cart'}
-              </span>
             </Link>
 
-            {/* Profile Dropdown (Fixed RTL Overflow via insetInlineEnd: 0) */}
-            <div ref={profileRef} className="nav-icon-desktop-only" style={{ position: 'relative' }}>
-              <button className="nav-icon-btn" onClick={() => setProfileOpen(!profileOpen)} aria-label="Account Menu">
-                <User size={18} />
+            {/* User Account Menu / Icon */}
+            <div ref={profileRef} style={{ position: 'relative' }}>
+              <button
+                type="button"
+                className="nav-icon-btn"
+                onClick={() => setProfileOpen(!profileOpen)}
+                aria-label={lang === 'ar' ? 'حساب المستخدم' : 'User Account'}
+                style={{ color: '#FFFFFF' }}
+              >
+                <User size={20} />
               </button>
               {profileOpen && (
                 <div
@@ -661,10 +652,10 @@ export const Navbar = () => {
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
                     insetInlineEnd: 0,
-                    width: 224,
+                    width: 228,
                     maxWidth: 'calc(100vw - 1rem)',
-                    background: 'var(--brand-brown)',
-                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: '#2A1D15',
+                    border: '1px solid rgba(255,255,255,0.14)',
                     borderRadius: 'var(--radius-md)',
                     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 16px 40px rgba(0,0,0,0.45)',
                     overflow: 'hidden',
@@ -675,7 +666,7 @@ export const Navbar = () => {
                     <>
                       <div style={{ padding: '0.9rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                         <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.88rem' }}>
-                          {profile?.full_name || user.email}
+                          {profile?.full_name || user.user_metadata?.full_name || user.email}
                         </p>
                         <p style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>{user.email}</p>
                       </div>
@@ -686,7 +677,7 @@ export const Navbar = () => {
                         <ClipboardList size={15} /> {lang === 'ar' ? 'طلباتي' : 'My Orders'}
                       </Link>
                       <button
-                        style={{ ...dropItemStyle, width: '100%', color: 'var(--danger)', borderTop: '1px solid rgba(255,255,255,0.06)' }}
+                        style={{ ...dropItemStyle, width: '100%', color: '#FCA5A5', borderTop: '1px solid rgba(255,255,255,0.06)' }}
                         onClick={() => { signOut(); setProfileOpen(false); }}
                       >
                         <LogOut size={15} /> {lang === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
@@ -705,35 +696,27 @@ export const Navbar = () => {
                 </div>
               )}
             </div>
-
-            {/* Hamburger */}
-            <button className="nav-icon-btn" onClick={() => setMobileOpen(true)} id="mobile-menu-btn">
-              <Menu size={20} />
-            </button>
           </div>
         </div>
 
         <style>{`
-          @media (min-width: 1080px) {
-            #desktop-nav { display: flex !important; }
-            #desktop-search { display: flex !important; max-width: 280px; flex: 0 1 280px; }
-            #mobile-menu-btn { display: none !important; }
-            .nav-search-btn-mobile { display: none !important; }
-            .navbar-actions { gap: 0.4rem; }
+          .navbar-reference-brown {
+            background: linear-gradient(90deg, #24170F 0%, #382519 50%, #24170F 100%) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
           }
-          @media (max-width: 1079px) {
-            #desktop-nav { display: none !important; }
-            #desktop-search { display: none !important; }
-            #mobile-menu-btn { display: flex !important; }
-            .nav-icon-desktop-only { display: none !important; }
-            .nav-cart-label { display: none !important; }
-            .navbar-actions { gap: 0.25rem; flex-shrink: 0; }
+          @media (min-width: 680px) {
+            .navbar-center-search { display: block !important; }
+            .nav-phone-search-btn { display: none !important; }
+          }
+          @media (max-width: 679px) {
+            .navbar-center-search { display: none !important; }
+            .nav-phone-search-btn { display: flex !important; }
           }
         `}</style>
       </header>
 
-      {/* ── MOBILE MENU ── */}
-      {renderMobileDrawer()}
+      {/* ── SIDE DRAWER MENU (CLOSED BY DEFAULT, OPENS ON ☰) ── */}
+      {renderSideDrawer()}
     </>
   );
 };
@@ -743,7 +726,7 @@ const dropItemStyle = {
   alignItems: 'center',
   gap: '0.6rem',
   padding: '0.7rem 1rem',
-  color: 'rgba(255,255,255,0.75)',
+  color: 'rgba(255,255,255,0.82)',
   fontSize: '0.875rem',
   fontWeight: 600,
   transition: 'all 0.15s ease',

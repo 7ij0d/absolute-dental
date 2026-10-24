@@ -115,6 +115,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Sign in with Google OAuth
+  const signInWithGoogle = async (redirectPath = '/') => {
+    setLoading(true);
+    try {
+      const safeRedirect = redirectPath && redirectPath.startsWith('/') ? redirectPath : '/';
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}${safeRedirect}`
+        }
+      });
+      if (error) throw error;
+      return { data, error: null };
+    } catch (err) {
+      setLoading(false);
+      return { data: null, error: err };
+    }
+  };
+
   // Sign out session
   const signOut = async () => {
     setLoading(true);
@@ -157,6 +176,7 @@ export const AuthProvider = ({ children }) => {
         isAdmin: profile?.role === 'admin',
         signUp,
         signIn,
+        signInWithGoogle,
         signOut,
         updateProfile,
         refreshProfile: () => user && fetchUserProfile(user.id)

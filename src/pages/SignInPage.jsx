@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { KeyRound, Mail, User, Phone, Landmark, Lock, HelpCircle } from 'lucide-react';
@@ -7,11 +7,25 @@ import MapPicker from '../components/MapPicker';
 
 export const SignInPage = () => {
   const { t, isRtl, lang } = useLanguage();
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, signInWithGoogle, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const initialSignUp = searchParams.get('tab') === 'register' || searchParams.get('mode') === 'signup';
+  const redirectParam = searchParams.get('redirect') || sessionStorage.getItem('ad_auth_return_url') || '/profile';
 
   // Mode state: signin vs signup
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(initialSignUp);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('tab') === 'register' || params.get('mode') === 'signup') {
+      setIsSignUp(true);
+    } else if (params.get('tab') === 'login' || params.get('mode') === 'signin') {
+      setIsSignUp(false);
+    }
+  }, [location.search]);
 
   // Form Fields
   const [email, setEmail] = useState('');
@@ -30,12 +44,29 @@ export const SignInPage = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const completeRedirect = () => {
+    const savedReturn = sessionStorage.getItem('ad_auth_return_url');
+    const target = searchParams.get('redirect') || savedReturn || '/profile';
+    sessionStorage.removeItem('ad_auth_return_url');
+    navigate(target.startsWith('/') ? target : '/profile');
+  };
+
   // Redirect if already authenticated
-  React.useEffect(() => {
-    if (user) {
-      navigate('/profile');
+  useEffect(() => {
+    if (user && user.email !== 'admin@smylodent.com') {
+      completeRedirect();
     }
   }, [user]);
+
+  const handleGoogleSignIn = async () => {
+    setErrorMsg('');
+    const savedReturn = sessionStorage.getItem('ad_auth_return_url');
+    const target = searchParams.get('redirect') || savedReturn || '/';
+    const { error } = await signInWithGoogle(target);
+    if (error) {
+      setErrorMsg(error.message || (lang === 'ar' ? 'تعذّر تسجيل الدخول عبر Google حالياً.' : 'Google sign-in failed.'));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,12 +87,12 @@ export const SignInPage = () => {
           role: 'student'
         });
         if (error) throw error;
-        navigate('/profile');
+        completeRedirect();
       } else {
         // Sign In
         const { data, error } = await signIn(email, password);
         if (error) throw error;
-        navigate('/profile');
+        completeRedirect();
       }
     } catch (err) {
       console.error('Auth handler failed', err);
@@ -82,7 +113,7 @@ export const SignInPage = () => {
           backgroundColor: 'var(--surface-color)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.5rem'
+          gap: '1.35rem'
         }}
       >
         {/* Heading Toggles */}
@@ -91,7 +122,9 @@ export const SignInPage = () => {
             {isSignUp ? t('auth.signup_title') : t('auth.signin_title')}
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            سجل دخولك لتتبع طلباتك وحفظ أدواتك المفضلة.
+            {lang === 'ar'
+              ? 'سجل دخولك لتتبع طلباتك، مشاركة تجربتك، وطلب توفير المنتجات.'
+              : 'Sign in to track orders, share your experience, and request products.'}
           </p>
         </div>
 
@@ -101,7 +134,43 @@ export const SignInPage = () => {
           </div>
         )}
 
+        {/* Google OAuth Button */}
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={loading}
+          style={{
+            width: '100%',
+            padding: '0.72rem 1rem',
+            borderRadius: 'var(--radius-md)',
+            border: '1.5px solid var(--border-color)',
+            backgroundColor: '#FFFFFF',
+            color: '#1E140E',
+            fontWeight: 800,
+            fontSize: '0.9rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.65rem',
+            cursor: 'pointer',
+            boxShadow: '0 2px 6px rgba(35, 24, 16, 0.05)',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+            <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.8-.4-2.8s.2-2 .4-2.8L1.6 6.4C.6 8.4 0 10.6 0 12s.6 3.6 1.6 5.6l3.7-2.8z"/>
+            <path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.7-2.9c-1 .7-2.2 1.1-3.6 1.1-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 20.4 7.4 23 12 23z"/>
+          </svg>
+          <span>{lang === 'ar' ? 'المتابعة باستخدام Google' : 'Continue with Google'}</span>
+        </button>
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }} />
+          <span>{lang === 'ar' ? 'أو عبر البريد الإلكتروني' : 'Or via Email'}</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }} />
+        </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           

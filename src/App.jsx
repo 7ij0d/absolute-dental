@@ -36,6 +36,8 @@ import Users from './pages/admin/Users';
 import AdminDonations from './pages/admin/AdminDonations';
 import AdminRequests from './pages/admin/Requests';
 import AdminAccessories from './pages/admin/AdminAccessories';
+import ProductRequests from './pages/admin/ProductRequests';
+import StudentExperiences from './pages/admin/StudentExperiences';
 import { runPrefetch } from './prefetch';
 import { clearStaleCache } from './cache';
 
@@ -56,7 +58,7 @@ const PublicLayout = () => {
       </main>
       <Footer />
       <FloatingCart />
-      <BottomNav />
+      {!isHomePage && <BottomNav />}
     </div>
   );
 };
@@ -88,6 +90,8 @@ export const App = () => {
         <Route path="signin" element={<SignInPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="search" element={<SearchPage />} />
+        <Route path="offers" element={<SearchPage categoryMode="offers" />} />
+        <Route path="other-supplies" element={<SearchPage categoryMode="other-supplies" />} />
         <Route path="invoice/:id" element={<InvoicePage />} />
         <Route path="donations" element={<DonationsPage />} />
         <Route path="accessories" element={<AccessoriesPage />} />
@@ -101,6 +105,8 @@ export const App = () => {
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="orders" element={<Orders />} />
+        <Route path="product-requests" element={<ProductRequests />} />
+        <Route path="experiences" element={<StudentExperiences />} />
         <Route path="products" element={<Products />} />
         <Route path="subjects" element={<Subjects />} />
         <Route path="banners" element={<Banners />} />

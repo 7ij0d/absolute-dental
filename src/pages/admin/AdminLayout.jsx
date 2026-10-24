@@ -16,7 +16,9 @@ import {
   UserCheck,
   Lock,
   Users,
-  Gift
+  Gift,
+  Sparkles,
+  MessageSquare
 } from 'lucide-react';
 
 export const AdminLayout = () => {
@@ -136,6 +138,8 @@ export const AdminLayout = () => {
   const menuItems = [
     { path: '/admin', label: isRtl ? 'الرئيسية' : 'Dashboard', icon: LayoutDashboard },
     { path: '/admin/orders', label: isRtl ? 'الطلبات' : 'Orders', icon: ShoppingCart },
+    { path: '/admin/product-requests', label: isRtl ? 'طلبات توفير المنتجات' : 'Product Requests', icon: Sparkles },
+    { path: '/admin/experiences', label: isRtl ? 'تجارب الطلبة' : 'Student Experiences', icon: MessageSquare },
     { path: '/admin/products', label: isRtl ? 'المنتجات' : 'Products', icon: Package },
     { path: '/admin/subjects', label: isRtl ? 'المواد' : 'Subjects', icon: BookOpen },
     { path: '/admin/users', label: isRtl ? 'إدارة المستخدمين' : 'User Management', icon: Users },
