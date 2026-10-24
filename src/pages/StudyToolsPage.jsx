@@ -30,7 +30,7 @@ const STUDY_YEARS = [
     id: '2nd-year',
     slug: '2nd-year',
     titleAr: 'السنة الثانية',
-    titleEn: 'السنة الثانية',
+    titleEn: '2nd Year',
     descAr: 'الأدوات والمواد المتقدمة لمواصلة رحلتك في طب الأسنان.',
     descEn: 'Advanced tools & materials to continue your dental journey.',
     href: '/year/2nd-year',

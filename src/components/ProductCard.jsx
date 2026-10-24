@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useStorageImage } from '../utils/storageImage';
 import { isBundleProduct, getBundleDefinition, getProductSizedConfig, getStudentGuideInfo } from '../utils/productInventoryEngine';
-import { ShoppingCart, Check, Heart, Sparkles } from 'lucide-react';
+import { ShoppingCart, Check, Heart, Sparkles, BookOpen, AlertCircle } from 'lucide-react';
 
 export const ProductCard = ({ product }) => {
   const { lang, t, isRtl } = useLanguage();
@@ -138,15 +138,21 @@ export const ProductCard = ({ product }) => {
           src={resolvedImageSrc}
           alt={displayName}
           loading="lazy"
+          decoding="async"
           onError={e => { e.target.src = 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format'; }}
         />
 
         {/* Status Badges */}
         <div className="product-card-badge">
-          {isGuide && <span className="badge" style={{ background: 'linear-gradient(135deg, #d97706, #b45309)', color: '#fff', boxShadow: '0 2px 6px rgba(217,119,6,0.35)' }}>{lang === 'ar' ? '💡 إرشاد للطلبة' : '💡 Student Guide'}</span>}
+          {isGuide && (
+            <span className="badge" style={{ background: 'linear-gradient(135deg, #d97706, #b45309)', color: '#fff', boxShadow: '0 2px 6px rgba(217,119,6,0.35)', gap: '0.25rem' }}>
+              <BookOpen size={11} />
+              <span>{lang === 'ar' ? 'إرشاد للطلبة' : 'Student Guide'}</span>
+            </span>
+          )}
           {isByOrder && <span className="badge badge-by-order" style={{ background: 'linear-gradient(135deg, #4f46e5, #3730a3)', color: '#fff', boxShadow: '0 2px 6px rgba(79,70,229,0.35)' }}>{lang === 'ar' ? 'بالطلب' : 'By Order'}</span>}
           {isOffer && !isUnavailable && <span className="badge badge-discount" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff' }}>{lang === 'ar' ? 'عرض خاص' : 'Special Offer'}</span>}
-          {discountPercent > 0 && <span className="badge badge-discount">-{discountPercent}%</span>}
+          {discountPercent > 0 && <span className="badge badge-discount tabular-nums">-{discountPercent}%</span>}
           {isUnavailable && <span className="badge badge-unavailable">{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>}
           {isComingSoon && <span className="badge badge-unavailable">{lang === 'ar' ? 'قريباً' : 'Soon'}</span>}
         </div>
@@ -156,25 +162,7 @@ export const ProductCard = ({ product }) => {
           onClick={toggleFav}
           aria-label="Favorite"
           className="product-fav-btn"
-          style={{
-            position: 'absolute',
-            top: '0.6rem',
-            left: isRtl ? '0.6rem' : 'auto',
-            right: isRtl ? 'auto' : '0.6rem',
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            background: 'rgba(255,255,255,0.92)',
-            border: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
-            color: isFav ? '#EF4444' : '#9CA3AF',
-            cursor: 'pointer',
-            zIndex: 3,
-            transition: 'transform 0.15s ease',
-          }}
+          style={{ color: isFav ? '#EF4444' : '#8C7E72' }}
         >
           <Heart size={15} fill={isFav ? '#EF4444' : 'none'} />
         </button>
@@ -182,32 +170,12 @@ export const ProductCard = ({ product }) => {
         {/* Live Cart Quantity Pill (Visible when item is in cart) */}
         {currentCartQuantity > 0 && (
           <div
-            className="product-cart-count-pill"
-            style={{
-              position: 'absolute',
-              bottom: '0.6rem',
-              left: isRtl ? 'auto' : '0.6rem',
-              right: isRtl ? '0.6rem' : 'auto',
-              backgroundColor: '#3D352E',
-              color: '#FFFFFF',
-              padding: '0.22rem 0.55rem',
-              borderRadius: '999px',
-              fontSize: '0.72rem',
-              fontWeight: 800,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.22)',
-              border: '1.5px solid rgba(255,255,255,0.95)',
-              zIndex: 3,
-              pointerEvents: 'none',
-              lineHeight: 1,
-            }}
+            className="product-in-cart-pill"
             title={lang === 'ar' ? `${currentCartQuantity} في السلة` : `${currentCartQuantity} in cart`}
           >
             <ShoppingCart size={11} strokeWidth={2.5} />
             <span>{currentCartQuantity}</span>
-            <span style={{ fontSize: '0.66rem', opacity: 0.9 }}>{lang === 'ar' ? 'بالسلة' : 'in cart'}</span>
+            <span style={{ fontSize: '0.66rem', opacity: 0.92 }}>{lang === 'ar' ? 'بالسلة' : 'in cart'}</span>
           </div>
         )}
 
@@ -244,14 +212,14 @@ export const ProductCard = ({ product }) => {
 
         {/* Price Row */}
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45rem', marginTop: 'auto', marginBottom: '0.75rem' }}>
-          <span className="product-card-price">
+          <span className="product-card-price tabular-nums">
             {product.price}{' '}
             <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-muted)' }}>
               {t('cart.currency') || 'د.ل'}
             </span>
           </span>
           {product.compare_at_price && (
-            <span className="product-card-compare">
+            <span className="product-card-compare tabular-nums">
               {product.compare_at_price}
             </span>
           )}
@@ -261,22 +229,18 @@ export const ProductCard = ({ product }) => {
         {sizedConfig && (
           <div
             onClick={(e) => e.stopPropagation()}
+            className={`product-size-selector-bar ${sizePrompt ? 'has-error' : ''}`}
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '0.4rem',
-              marginBottom: '0.65rem',
-              padding: '0.35rem 0.6rem',
-              borderRadius: '8px',
-              background: sizePrompt ? 'rgba(239, 68, 68, 0.08)' : 'rgba(0, 0, 0, 0.03)',
-              border: sizePrompt ? '1.5px solid #EF4444' : '1px solid var(--border-card, #e2e8f0)',
-              transition: 'all 0.2s ease',
             }}
           >
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: sizePrompt ? '#DC2626' : 'var(--text-muted)' }}>
+            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: sizePrompt ? '#DC2626' : 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+              {sizePrompt && <AlertCircle size={12} />}
               {sizePrompt
-                ? (lang === 'ar' ? (sizedConfig.optionsPromptAr || (sizedConfig.hasColorAndSize ? '⚠️ حدد الخيار أولاً:' : '⚠️ حدد المقاس أولاً:')) : (sizedConfig.optionsPromptEn || (sizedConfig.hasColorAndSize ? '⚠️ Select option:' : '⚠️ Select size:')))
+                ? (lang === 'ar' ? (sizedConfig.optionsPromptAr || (sizedConfig.hasColorAndSize ? 'حدد الخيار أولاً:' : 'حدد المقاس أولاً:')) : (sizedConfig.optionsPromptEn || (sizedConfig.hasColorAndSize ? 'Select option:' : 'Select size:')))
                 : (lang === 'ar' ? (sizedConfig.optionsLabelAr || (sizedConfig.hasColorAndSize ? 'الخيارات:' : 'المقاس:')) : (sizedConfig.optionsLabelEn || (sizedConfig.hasColorAndSize ? 'Options:' : 'Size:')))}
             </span>
             <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
@@ -292,24 +256,7 @@ export const ProductCard = ({ product }) => {
                       setSelectedSize(s.size);
                       setSizePrompt(false);
                     }}
-                    style={{
-                      minWidth: '32px',
-                      height: '26px',
-                      padding: '0 8px',
-                      borderRadius: '6px',
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.3rem',
-                      border: isSelected ? '1px solid #3D352E' : '1px solid #CBD5E1',
-                      background: isSelected ? '#3D352E' : '#FFFFFF',
-                      color: isSelected ? '#FFFFFF' : '#334155',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
-                      transform: isSelected ? 'scale(1.05)' : 'none',
-                      boxShadow: isSelected ? '0 1px 4px rgba(0,0,0,0.2)' : 'none'
-                    }}
+                    className={`product-size-pill ${isSelected ? 'selected' : ''}`}
                   >
                     {s.colorHex && (
                       <span style={{
@@ -318,7 +265,7 @@ export const ProductCard = ({ product }) => {
                         borderRadius: '50%',
                         backgroundColor: s.colorHex,
                         display: 'inline-block',
-                        border: '1px solid rgba(255,255,255,0.7)'
+                        border: '1px solid rgba(255,255,255,0.75)'
                       }} />
                     )}
                     <span>{s.shortLabel}</span>
@@ -338,109 +285,73 @@ export const ProductCard = ({ product }) => {
               e.stopPropagation();
               navigate(`/product/${product.id}`);
             }}
-            className="product-add-cart-btn"
-            style={{
-              width: '100%',
-              padding: '0.6rem 0.8rem',
-              borderRadius: '10px',
-              border: '1px solid rgba(217, 119, 6, 0.4)',
-              fontSize: '0.84rem',
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.45rem',
-              cursor: 'pointer',
-              backgroundColor: 'rgba(245, 158, 11, 0.12)',
-              color: '#B45309',
-              boxShadow: '0 2px 6px rgba(217, 119, 6, 0.15)'
-            }}
+            className="product-card-cta-btn guide-state"
           >
-            <span>💡 {lang === 'ar' ? 'عرض توجيه وإرشاد الطلبة' : 'View Student Guide'}</span>
+            <BookOpen size={15} strokeWidth={2.2} />
+            <span>{lang === 'ar' ? 'عرض توجيه وإرشاد الطلبة' : 'View Student Guide'}</span>
           </button>
         ) : (
-        <button
-          onClick={handleAddToCart}
-          disabled={isUnavailable || isComingSoon}
-          className={`product-add-cart-btn ${justAdded ? 'added' : ''}`}
-          style={{
-            width: '100%',
-            padding: '0.6rem 0.8rem',
-            borderRadius: '10px',
-            border: 'none',
-            fontSize: '0.84rem',
-            fontWeight: 800,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.45rem',
-            cursor: (isUnavailable || isComingSoon) ? 'not-allowed' : 'pointer',
-            backgroundColor: justAdded
-              ? '#2E7D32'
-              : sizePrompt
-              ? '#DC2626'
-              : (isUnavailable || isComingSoon ? '#E5E0D8' : '#684835'),
-            color: (isUnavailable || (isComingSoon && !justAdded)) ? '#8C7E72' : '#FFFFFF',
-            boxShadow: justAdded
-              ? '0 2px 8px rgba(46,125,50,0.3)'
-              : sizePrompt
-              ? '0 2px 8px rgba(220,38,38,0.3)'
-              : '0 2px 6px rgba(104,72,53,0.2)',
-            transition: 'background-color 0.2s ease, transform 0.15s ease',
-          }}
-        >
-          {justAdded ? (
-            <>
-              <Check size={16} strokeWidth={2.8} />
-              <span>{lang === 'ar' ? (selectedSize ? `تمت إضافة (${selectedSize})` : 'تمت الإضافة') : (selectedSize ? `Added (${selectedSize})` : 'Added')}</span>
-            </>
-          ) : isUnavailable ? (
-            <span>{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>
-          ) : isComingSoon ? (
-            <span>{lang === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
-          ) : sizePrompt ? (
-            <span>{lang === 'ar' ? (sizedConfig?.optionsPromptAr || (sizedConfig?.hasColorAndSize ? '⚠️ يرجى تحديد الخيار المطلوب أولاً' : '⚠️ يرجى اختيار المقاس (M أو L)')) : (sizedConfig?.optionsPromptEn || (sizedConfig?.hasColorAndSize ? '⚠️ Please select an option first' : '⚠️ Please select size (M or L)'))}</span>
-          ) : sizedConfig && !selectedSize ? (
-            <>
-              <ShoppingCart size={15} strokeWidth={2.2} />
-              <span>{lang === 'ar' ? (sizedConfig.buttonPromptAr || (sizedConfig.hasColorAndSize ? 'اختر الخيار وأضف' : 'اختر المقاس وأضف')) : (sizedConfig.buttonPromptEn || (sizedConfig.hasColorAndSize ? 'Select Option & Add' : 'Select Size & Add'))}</span>
-            </>
-          ) : sizedConfig && selectedSize ? (
-            <>
-              <ShoppingCart size={15} strokeWidth={2.2} />
-              <span>{lang === 'ar' ? `أضف للسلة (${sizedConfig.sizes.find(s => s.size === selectedSize)?.shortLabel || selectedSize})` : `Add to Cart (${sizedConfig.sizes.find(s => s.size === selectedSize)?.shortLabel || selectedSize})`}</span>
-            </>
-          ) : isByOrder ? (
-            <>
-              <ShoppingCart size={15} strokeWidth={2.2} />
-              <span>{lang === 'ar' ? 'أضف للسلة (بالطلب)' : 'Add to Cart (By Order)'}</span>
-            </>
-          ) : (
-            <>
-              <ShoppingCart size={15} strokeWidth={2.2} />
-              <span>{lang === 'ar' ? 'أضف للسلة' : 'Add to Cart'}</span>
-            </>
-          )}
+          <button
+            onClick={handleAddToCart}
+            disabled={isUnavailable || isComingSoon}
+            className={`product-card-cta-btn ${justAdded ? 'just-added' : ''} ${sizePrompt ? 'error-state' : ''}`}
+          >
+            {justAdded ? (
+              <>
+                <Check size={16} strokeWidth={2.8} />
+                <span>{lang === 'ar' ? (selectedSize ? `تمت إضافة (${selectedSize})` : 'تمت الإضافة') : (selectedSize ? `Added (${selectedSize})` : 'Added')}</span>
+              </>
+            ) : isUnavailable ? (
+              <span>{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>
+            ) : isComingSoon ? (
+              <span>{lang === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
+            ) : sizePrompt ? (
+              <>
+                <AlertCircle size={15} strokeWidth={2.3} />
+                <span>{lang === 'ar' ? (sizedConfig?.optionsPromptAr || (sizedConfig?.hasColorAndSize ? 'يرجى تحديد الخيار المطلوب أولاً' : 'يرجى اختيار المقاس (M أو L)')) : (sizedConfig?.optionsPromptEn || (sizedConfig?.hasColorAndSize ? 'Please select an option first' : 'Please select size (M or L)'))}</span>
+              </>
+            ) : sizedConfig && !selectedSize ? (
+              <>
+                <ShoppingCart size={15} strokeWidth={2.2} />
+                <span>{lang === 'ar' ? (sizedConfig.buttonPromptAr || (sizedConfig.hasColorAndSize ? 'اختر الخيار وأضف' : 'اختر المقاس وأضف')) : (sizedConfig.buttonPromptEn || (sizedConfig.hasColorAndSize ? 'Select Option & Add' : 'Select Size & Add'))}</span>
+              </>
+            ) : sizedConfig && selectedSize ? (
+              <>
+                <ShoppingCart size={15} strokeWidth={2.2} />
+                <span>{lang === 'ar' ? `أضف للسلة (${sizedConfig.sizes.find(s => s.size === selectedSize)?.shortLabel || selectedSize})` : `Add to Cart (${sizedConfig.sizes.find(s => s.size === selectedSize)?.shortLabel || selectedSize})`}</span>
+              </>
+            ) : isByOrder ? (
+              <>
+                <ShoppingCart size={15} strokeWidth={2.2} />
+                <span>{lang === 'ar' ? 'أضف للسلة (بالطلب)' : 'Add to Cart (By Order)'}</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart size={15} strokeWidth={2.2} />
+                <span>{lang === 'ar' ? 'أضف للسلة' : 'Add to Cart'}</span>
+              </>
+            )}
 
-          {currentCartQuantity > 0 && !isUnavailable && !isComingSoon && (
-            <span
-              style={{
-                marginInlineStart: 'auto',
-                backgroundColor: 'rgba(255, 255, 255, 0.22)',
-                color: '#FFFFFF',
-                padding: '1px 6px',
-                borderRadius: '999px',
-                fontSize: '0.7rem',
-                fontWeight: 800,
-                border: '1px solid rgba(255, 255, 255, 0.35)',
-                lineHeight: 1.2
-              }}
-              title={lang === 'ar' ? `${currentCartQuantity} في السلة` : `${currentCartQuantity} in cart`}
-            >
-              {currentCartQuantity}
-            </span>
-          )}
-        </button>
+            {currentCartQuantity > 0 && !isUnavailable && !isComingSoon && (
+              <span
+                className="tabular-nums"
+                style={{
+                  marginInlineStart: 'auto',
+                  backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                  color: '#FFFFFF',
+                  padding: '1px 6px',
+                  borderRadius: '999px',
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  border: '1px solid rgba(255, 255, 255, 0.35)',
+                  lineHeight: 1.2
+                }}
+                title={lang === 'ar' ? `${currentCartQuantity} في السلة` : `${currentCartQuantity} in cart`}
+              >
+                {currentCartQuantity}
+              </span>
+            )}
+          </button>
         )}
       </div>
     </div>

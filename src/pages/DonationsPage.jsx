@@ -678,7 +678,7 @@ export default function DonationsPage() {
                 <div 
                   key={donation.id} 
                   className="card" 
-                  style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.2s', ':hover': { transform: 'translateY(-4px)' } }}
+                  style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.2s var(--spring-ease)' }}
                   onClick={() => handleCardClick(donation)}
                 >
                   <div style={{ 

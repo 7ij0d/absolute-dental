@@ -53,15 +53,14 @@ export const BottomNav = () => {
       style={{
         position: 'fixed',
         bottom: 0,
-        left: 0,
-        right: 0,
+        insetInline: 0,
         zIndex: 9998,
         backgroundColor: '#231810',
-        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-        borderTopLeftRadius: '22px',
-        borderTopRightRadius: '22px',
-        boxShadow: '0 -4px 28px rgba(0, 0, 0, 0.35)',
-        padding: '0.45rem 0.85rem calc(env(safe-area-inset-bottom, 8px) + 0.45rem) 0.85rem',
+        borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+        borderTopLeftRadius: '16px',
+        borderTopRightRadius: '16px',
+        boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 -6px 24px rgba(0, 0, 0, 0.35)',
+        padding: '0.4rem 0.75rem calc(env(safe-area-inset-bottom, 6px) + 0.4rem) 0.75rem',
         direction: isRtl ? 'rtl' : 'ltr'
       }}
     >
@@ -71,7 +70,7 @@ export const BottomNav = () => {
           alignItems: 'center',
           justifyContent: 'space-around',
           maxWidth: '520px',
-          margin: '0 auto',
+          marginInline: 'auto',
           position: 'relative'
         }}
       >
@@ -90,23 +89,24 @@ export const BottomNav = () => {
                 gap: '0.2rem',
                 minWidth: '68px',
                 padding: '0.4rem 0.6rem',
-                borderRadius: '14px',
+                borderRadius: '10px',
                 textDecoration: 'none',
                 color: active ? '#FFFFFF' : 'rgba(255, 255, 255, 0.65)',
                 backgroundColor: active ? '#38281D' : 'transparent',
+                boxShadow: active ? 'inset 0 1px 0 rgba(255, 255, 255, 0.08)' : 'none',
                 transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 position: 'relative'
               }}
             >
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Icon size={20} strokeWidth={active ? 2.3 : 1.8} />
+                <Icon size={19} strokeWidth={active ? 2.3 : 1.8} />
                 {item.id === 'cart' && (
                   <span
+                    className="tabular-nums"
                     style={{
                       position: 'absolute',
                       top: '-6px',
-                      right: isRtl ? 'auto' : '-9px',
-                      left: isRtl ? '-9px' : 'auto',
+                      insetInlineEnd: '-9px',
                       backgroundColor: '#FFFFFF',
                       color: '#231810',
                       fontSize: '0.65rem',

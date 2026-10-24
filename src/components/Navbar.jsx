@@ -6,7 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import {
   ShoppingCart, User, Menu, X, Search, Globe,
   ChevronDown, LayoutDashboard, LogOut, ClipboardList,
-  Heart, ChevronRight, ChevronLeft, BookOpen
+  Heart, ChevronRight, ChevronLeft, BookOpen,
+  Home, GraduationCap, PackageCheck, Box, MessageSquare, HeartHandshake
 } from 'lucide-react';
 import supabase from '../supabaseClient';
 import brandLogoTrimmed from '../assets/images/brand-logo-trimmed.png';
@@ -103,30 +104,35 @@ export const Navbar = () => {
     return (
       <div className="mobile-menu">
         <div className="mobile-menu-overlay" onClick={() => setMobileOpen(false)} />
-        <div className="mobile-menu-panel" style={{ marginRight: isRtl ? 'auto' : 0 }}>
+        <div className="mobile-menu-panel">
           {/* Mobile Header */}
           <div className="mobile-menu-header">
-            <span className="navbar-logo-text" style={{ color: '#fff' }}>Absolute Dental</span>
-            <button className="nav-icon-btn" onClick={() => setMobileOpen(false)}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+              <img src={brandLogoTrimmed} alt="Absolute Dental" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+              <span className="navbar-logo-text" style={{ color: '#fff', fontSize: '1.08rem' }}>Absolute Dental</span>
+            </div>
+            <button className="nav-icon-btn" onClick={() => setMobileOpen(false)} aria-label="Close Menu">
               <X size={20} />
             </button>
           </div>
 
           {/* Mobile Search */}
-          <form onSubmit={(e) => { handleSearch(e); setMobileOpen(false); }} style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <form onSubmit={(e) => { handleSearch(e); setMobileOpen(false); }} style={{ padding: '0.9rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
             <div style={{ position: 'relative' }}>
-              <Search size={15} style={{ position: 'absolute', left: isRtl ? 'auto' : '0.75rem', right: isRtl ? '0.75rem' : 'auto', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
+              <Search size={15} style={{ position: 'absolute', insetInlineStart: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.45)' }} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder={lang === 'ar' ? 'ابحث...' : 'Search...'}
+                placeholder={lang === 'ar' ? 'ابحث عن أداة طبية...' : 'Search dental tools...'}
                 style={{
                   width: '100%',
                   background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.12)',
                   borderRadius: 'var(--radius-full)',
-                  padding: isRtl ? '0.55rem 2.5rem 0.55rem 1rem' : '0.55rem 1rem 0.55rem 2.5rem',
+                  paddingBlock: '0.55rem',
+                  paddingInlineStart: '2.45rem',
+                  paddingInlineEnd: '1rem',
                   color: '#fff',
                   fontSize: '0.875rem',
                 }}
@@ -134,36 +140,45 @@ export const Navbar = () => {
             </div>
           </form>
 
-          {/* Mobile Links */}
+          {/* Mobile Links with Crisp Lucide Icons */}
           <div style={{ flex: 1, overflowY: 'auto' }}>
             <Link to="/" className="mobile-nav-link">
-              {lang === 'ar' ? '🏠 الرئيسية' : '🏠 Home'}
+              <Home size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'الرئيسية' : 'Home'}</span>
             </Link>
             <Link to="/study-tools" className="mobile-nav-link">
-              📖 {lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}
+              <BookOpen size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}</span>
             </Link>
             {years.map(year => (
               <Link key={year.id} to={`/year/${year.slug}`} className="mobile-nav-link">
-                📚 {lang === 'ar' ? year.name_ar : year.name_en}
+                <GraduationCap size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+                <span>{lang === 'ar' ? year.name_ar : year.name_en}</span>
               </Link>
             ))}
             <Link to="/cart" className="mobile-nav-link">
-              🛒 {lang === 'ar' ? 'سلة التسوق' : 'Cart'} {cartCount > 0 && `(${cartCount})`}
+              <ShoppingCart size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'سلة التسوق' : 'Cart'} {cartCount > 0 && `(${cartCount})`}</span>
             </Link>
             <Link to="/favorites" className="mobile-nav-link">
-              ❤️ {lang === 'ar' ? 'المفضلة' : 'Favorites'}
+              <Heart size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'المفضلة' : 'Favorites'}</span>
             </Link>
             <Link to="/track" className="mobile-nav-link">
-              📦 {lang === 'ar' ? 'تتبع الطلب' : 'Track Order'}
+              <PackageCheck size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'تتبع الطلب' : 'Track Order'}</span>
             </Link>
             <Link to="/accessories" className="mobile-nav-link">
-              🧰 {lang === 'ar' ? 'اكسسوارات الأسنان' : 'Dental Accessories'}
+              <Box size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories'}</span>
             </Link>
             <Link to="/contact" className="mobile-nav-link">
-              💬 {lang === 'ar' ? 'تواصل معنا' : 'Contact'}
+              <MessageSquare size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'تواصل معنا' : 'Contact'}</span>
             </Link>
             <Link to="/donations" className="mobile-nav-link">
-              🎁 {lang === 'ar' ? 'التبرعات ونواقص الطلاب' : 'Donations & Need Requests'}
+              <HeartHandshake size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'التبرعات ونواقص الطلاب' : 'Donations & Need Requests'}</span>
             </Link>
           </div>
 
@@ -277,8 +292,8 @@ export const Navbar = () => {
               </Link>
             </nav>
 
-            {/* Right: Search + Cart (Brown Badge 0) + Account */}
-            <div className="navbar-actions navbar-light-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {/* Right: Search + Language + Favorites + Cart (Brown Badge) + Account */}
+            <div className="navbar-actions navbar-light-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
               {/* Search Button */}
               <button
                 onClick={() => navigate('/search')}
@@ -293,11 +308,51 @@ export const Navbar = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  borderRadius: '50%',
+                  borderRadius: '8px',
                 }}
               >
-                <Search size={21} strokeWidth={2} />
+                <Search size={20} strokeWidth={2} />
               </button>
+
+              {/* Language Toggle (Desktop) */}
+              <button
+                onClick={toggleLanguage}
+                className="nav-icon-btn nav-light-btn nav-icon-desktop-only"
+                title={lang === 'ar' ? 'English' : 'العربية'}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#1E140E',
+                  padding: '0.4rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  borderRadius: '8px',
+                }}
+              >
+                <Globe size={19} strokeWidth={2} />
+              </button>
+
+              {/* Favorites (Desktop) */}
+              <Link
+                to="/favorites"
+                className="nav-icon-btn nav-light-btn nav-icon-desktop-only"
+                title={lang === 'ar' ? 'المفضلة' : 'Favorites'}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#1E140E',
+                  padding: '0.4rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textDecoration: 'none',
+                  borderRadius: '8px',
+                }}
+              >
+                <Heart size={19} strokeWidth={2} />
+              </Link>
 
               {/* Cart Button with Brown Badge Circle */}
               <Link
@@ -314,12 +369,13 @@ export const Navbar = () => {
                   justifyContent: 'center',
                   textDecoration: 'none',
                   position: 'relative',
-                  borderRadius: '50%',
+                  borderRadius: '8px',
                 }}
               >
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ShoppingCart size={22} strokeWidth={2} />
+                  <ShoppingCart size={21} strokeWidth={2} />
                   <span
+                    className="tabular-nums"
                     style={{
                       position: 'absolute',
                       top: '-6px',
@@ -357,11 +413,11 @@ export const Navbar = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: '50%',
+                  borderRadius: '8px',
                   textDecoration: 'none',
                 }}
               >
-                <User size={21} strokeWidth={2} />
+                <User size={20} strokeWidth={2} />
               </Link>
             </div>
 
@@ -373,6 +429,7 @@ export const Navbar = () => {
             }
             @media (max-width: 1079px) {
               #desktop-nav-light { display: none !important; }
+              .nav-icon-desktop-only { display: none !important; }
             }
           `}</style>
         </header>
@@ -401,18 +458,18 @@ export const Navbar = () => {
               src={brandLogoTrimmed}
               alt="Absolute Dental"
               style={{
-                width: 38,
-                height: 38,
+                width: 36,
+                height: 36,
                 objectFit: 'contain',
                 flexShrink: 0,
                 filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
               }}
             />
             <span style={{
-              fontFamily: "'Cairo', sans-serif",
-              fontSize: '1.25rem',
+              fontFamily: "var(--font-ar)",
+              fontSize: '1.2rem',
               fontWeight: 900,
-              letterSpacing: '0.03em',
+              letterSpacing: '0.02em',
               color: '#ffffff',
               whiteSpace: 'nowrap',
             }}>
@@ -484,8 +541,9 @@ export const Navbar = () => {
                       style={{ borderInlineStart: '3px solid var(--secondary)', background: 'rgba(205,191,166,0.06)' }}
                       onClick={() => setMegaOpen(false)}
                     >
-                      <div className="mega-menu-year-name" style={{ color: '#CDBFA6', fontWeight: 900 }}>
-                        🧰 {lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories'}
+                      <div className="mega-menu-year-name" style={{ color: '#CDBFA6', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <Box size={15} />
+                        <span>{lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories'}</span>
                       </div>
                       <div className="mega-menu-subjects">
                         <span className="mega-menu-subject-tag" style={{ color: '#ffffff' }}>
@@ -564,8 +622,8 @@ export const Navbar = () => {
               }}
             >
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ShoppingCart size={22} />
-                <span className="nav-cart-badge-circle" style={{
+                <ShoppingCart size={21} />
+                <span className="nav-cart-badge-circle tabular-nums" style={{
                   position: 'absolute',
                   top: '-6px',
                   right: '-7px',
@@ -591,9 +649,9 @@ export const Navbar = () => {
               </span>
             </Link>
 
-            {/* Profile Dropdown */}
+            {/* Profile Dropdown (Fixed RTL Overflow via insetInlineEnd: 0) */}
             <div ref={profileRef} className="nav-icon-desktop-only" style={{ position: 'relative' }}>
-              <button className="nav-icon-btn" onClick={() => setProfileOpen(!profileOpen)}>
+              <button className="nav-icon-btn" onClick={() => setProfileOpen(!profileOpen)} aria-label="Account Menu">
                 <User size={18} />
               </button>
               {profileOpen && (
@@ -602,22 +660,21 @@ export const Navbar = () => {
                   style={{
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
-                    right: 0,
-                    left: 'auto',
-                    width: 220,
+                    insetInlineEnd: 0,
+                    width: 224,
                     maxWidth: 'calc(100vw - 1rem)',
                     background: 'var(--brand-brown)',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: 'var(--radius-md)',
-                    boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 16px 40px rgba(0,0,0,0.45)',
                     overflow: 'hidden',
                     zIndex: 9999,
                   }}
                 >
                   {user && user.email !== 'admin@smylodent.com' ? (
                     <>
-                      <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                        <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem' }}>
+                      <div style={{ padding: '0.9rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                        <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.88rem' }}>
                           {profile?.full_name || user.email}
                         </p>
                         <p style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>{user.email}</p>

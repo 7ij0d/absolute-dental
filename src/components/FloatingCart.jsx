@@ -22,75 +22,49 @@ export const FloatingCart = () => {
       style={{
         position: 'fixed',
         bottom: '1.5rem',
-        right: isRtl ? '1.5rem' : 'auto',
-        left: isRtl ? 'auto' : '1.5rem',
+        insetInlineStart: '1.5rem',
         zIndex: 9990,
         pointerEvents: 'none'
       }}
     >
-      <Link
-        to="/cart"
-        style={{
-          pointerEvents: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          background: 'linear-gradient(135deg, #1A1A1A 0%, #2A241F 100%)',
-          color: '#ffffff',
-          padding: '0.75rem 1.25rem',
-          borderRadius: '999px',
-          textDecoration: 'none',
-          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 2px rgba(205, 191, 166, 0.4)',
-          backdropFilter: 'blur(12px)',
-          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-          cursor: 'pointer'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-4px) scale(1.03)';
-          e.currentTarget.style.boxShadow = '0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 0 2px var(--secondary)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0) scale(1)';
-          e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 2px rgba(205, 191, 166, 0.4)';
-        }}
-      >
+      <Link to="/cart" className="floating-cart-pill">
         {/* Cart Icon Wrapper with Badge */}
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div
             style={{
-              width: 38,
-              height: 38,
+              width: 36,
+              height: 36,
               borderRadius: '50%',
               background: 'var(--secondary)',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(205, 191, 166, 0.5)'
+              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 8px rgba(205, 191, 166, 0.45)'
             }}
           >
-            <ShoppingCart size={19} />
+            <ShoppingCart size={18} />
           </div>
           {cartCount > 0 && (
             <span
+              className="tabular-nums"
               style={{
                 position: 'absolute',
                 top: -4,
-                right: -4,
+                insetInlineEnd: -4,
                 background: '#E53935',
                 color: '#ffffff',
-                fontSize: '0.7rem',
+                fontSize: '0.68rem',
                 fontWeight: 900,
-                minWidth: 20,
-                height: 20,
+                minWidth: 19,
+                height: 19,
                 borderRadius: '999px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '0 4px',
-                border: '2px solid #1A1A1A',
+                border: '2px solid #1F1A16',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-                animation: 'pulse 2s infinite'
               }}
             >
               {cartCount}
@@ -100,15 +74,15 @@ export const FloatingCart = () => {
 
         {/* Text Content */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--secondary)', letterSpacing: '0.02em', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <div style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--secondary)', letterSpacing: '0.01em', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <span>{lang === 'ar' ? 'سلة المشتريات' : 'Shopping Cart'}</span>
             {cartCount > 0 && (
-              <span style={{ background: 'rgba(205, 191, 166, 0.2)', padding: '0.1rem 0.4rem', borderRadius: '6px', fontSize: '0.75rem', color: '#ffffff' }}>
+              <span className="tabular-nums" style={{ background: 'rgba(205, 191, 166, 0.2)', padding: '0.08rem 0.4rem', borderRadius: '6px', fontSize: '0.74rem', color: '#ffffff' }}>
                 {cartCount}
               </span>
             )}
           </div>
-          <div style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.8)', fontWeight: 600 }}>
+          <div className="tabular-nums" style={{ fontSize: '0.76rem', color: 'rgba(255, 255, 255, 0.82)', fontWeight: 600 }}>
             {cartCount > 0 ? (
               <span>{lang === 'ar' ? `الإجمالي: ${subtotal} د.ل` : `Total: ${subtotal} LYD`}</span>
             ) : (
@@ -118,7 +92,7 @@ export const FloatingCart = () => {
         </div>
 
         {/* Arrow Action Icon */}
-        <div style={{ marginInlineStart: '0.4rem', color: 'var(--secondary)', display: 'flex', alignItems: 'center' }}>
+        <div style={{ marginInlineStart: '0.35rem', color: 'var(--secondary)', display: 'flex', alignItems: 'center' }}>
           <ArrowIcon size={16} />
         </div>
       </Link>

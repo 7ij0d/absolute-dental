@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import {
   Phone, Mail, MapPin, MessageCircle, Send,
-  Share2, ExternalLink, Heart
+  Share2, ExternalLink, Heart, Truck
 } from 'lucide-react';
+import brandLogoTrimmed from '../assets/images/brand-logo-trimmed.png';
 
 export const Footer = () => {
   const { lang, t, isRtl } = useLanguage();
@@ -18,7 +19,7 @@ export const Footer = () => {
         { label: 'السنة الثانية',      to: '/year/2nd-year' },
         { label: 'السنة الثالثة',     to: '/year/3rd-year' },
         { label: 'السنة الرابعة',      to: '/year/4th-year' },
-        { label: 'اكسسوارات الأسنان', to: '/accessories' },
+        { label: 'إكسسوارات الأسنان', to: '/accessories' },
         { label: 'التبرعات ونواقص الطلاب', to: '/donations' },
         { label: 'تتبع طلبك',          to: '/track' },
       ]
@@ -54,13 +55,13 @@ export const Footer = () => {
 
           {/* Brand Column */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
               <img
-                src="https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/brand/logo-icon.png"
+                src={brandLogoTrimmed}
                 alt="Absolute Dental Logo"
-                style={{ width: 48, height: 48, objectFit: 'contain', flexShrink: 0 }}
+                style={{ width: 42, height: 42, objectFit: 'contain', flexShrink: 0 }}
               />
-              <div className="footer-brand-name">{lang === 'ar' ? 'Absolute Dental' : 'Absolute Dental'}</div>
+              <div className="footer-brand-name">Absolute Dental</div>
             </div>
             <p className="footer-desc">
               {lang === 'ar'
@@ -74,62 +75,40 @@ export const Footer = () => {
                 href="https://wa.me/218946859163"
                 target="_blank"
                 rel="noreferrer"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem', transition: 'color 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#25D366'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
+                className="footer-nav-link tabular-nums"
               >
                 <Phone size={14} /> 094-6859163 (واتساب وهاتف)
               </a>
               <a
                 href="tel:0925813109"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem', transition: 'color 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#CDBFA6'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
+                className="footer-nav-link tabular-nums"
               >
                 <Phone size={14} /> 092-5813109 (احتياطي)
               </a>
               <a
                 href="mailto:absolutedental.ly@gmail.com"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem', transition: 'color 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#CDBFA6'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
+                className="footer-nav-link"
               >
                 <Mail size={14} /> absolutedental.ly@gmail.com
               </a>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)', fontSize: '0.85rem' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-dim)', fontSize: '0.85rem' }}>
                 <MapPin size={14} /> {lang === 'ar' ? 'طرابلس، ليبيا' : 'Tripoli, Libya'}
               </span>
             </div>
 
             {/* Social Icons */}
             <div className="footer-social">
-              <a href="https://wa.me/218946859163" target="_blank" rel="noreferrer" className="social-btn" title="WhatsApp"
-                style={{ color: 'var(--text-dim)' }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#25D366'; e.currentTarget.style.borderColor = '#25D366'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
-              >
+              <a href="https://wa.me/218946859163" target="_blank" rel="noreferrer" className="footer-social-btn" title="WhatsApp">
                 <MessageCircle size={16} />
               </a>
-              <a href="https://t.me/absolutedental_ly" target="_blank" rel="noreferrer" className="social-btn" title="Telegram"
-                style={{ color: 'var(--text-dim)' }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#0088cc'; e.currentTarget.style.borderColor = '#0088cc'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
-              >
+              <a href="https://t.me/absolutedental_ly" target="_blank" rel="noreferrer" className="footer-social-btn" title="Telegram">
                 <Send size={16} />
               </a>
-              <a href="https://instagram.com/absolutedental.ly" target="_blank" rel="noreferrer" className="social-btn" title="Instagram"
-                style={{ color: 'var(--text-dim)' }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#E1306C'; e.currentTarget.style.borderColor = '#E1306C'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
-              >
-              <ExternalLink size={16} />
+              <a href="https://instagram.com/absolutedental.ly" target="_blank" rel="noreferrer" className="footer-social-btn" title="Instagram">
+                <ExternalLink size={16} />
               </a>
-              <a href="https://facebook.com/absolutedental.ly" target="_blank" rel="noreferrer" className="social-btn" title="Facebook"
-                style={{ color: 'var(--text-dim)' }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#1877F2'; e.currentTarget.style.borderColor = '#1877F2'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
-              >
-              <Share2 size={16} />
+              <a href="https://facebook.com/absolutedental.ly" target="_blank" rel="noreferrer" className="footer-social-btn" title="Facebook">
+                <Share2 size={16} />
               </a>
             </div>
           </div>
@@ -165,14 +144,16 @@ export const Footer = () => {
             <div style={{
               marginTop: '1.5rem',
               padding: '1rem',
-              background: 'rgba(205,191,166,0.15)',
-              border: '1px solid rgba(205,191,166,0.3)',
+              background: 'rgba(205,191,166,0.12)',
+              border: '1px solid rgba(205,191,166,0.28)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
               borderRadius: 'var(--radius-md)',
             }}>
-              <p style={{ color: '#CDBFA6', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem' }}>
-                🚚 {lang === 'ar' ? 'معلومات التوصيل' : 'Delivery Info'}
+              <p style={{ color: '#CDBFA6', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <Truck size={15} />
+                <span>{lang === 'ar' ? 'معلومات التوصيل' : 'Delivery Info'}</span>
               </p>
-              <p style={{ color: 'var(--text-dim)', fontSize: '0.78rem', lineHeight: 1.6 }}>
+              <p style={{ color: 'var(--text-dim)', fontSize: '0.78rem', lineHeight: 1.65, whiteSpace: 'pre-line' }}>
                 {lang === 'ar'
                   ? 'كلية الأسنان: مجاناً\nداخل طرابلس: 15 د.ل\nضواحي طرابلس: 20 د.ل'
                   : 'Dental College: Free\nWithin Tripoli: 15 LYD\nTripoli suburbs: 20 LYD'}
@@ -184,7 +165,7 @@ export const Footer = () => {
 
         {/* Footer Bottom */}
         <div className="footer-bottom">
-          <p className="footer-copy">
+          <p className="footer-copy tabular-nums">
             © {currentYear} Absolute Dental — {lang === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
           </p>
           <p className="footer-copy" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>

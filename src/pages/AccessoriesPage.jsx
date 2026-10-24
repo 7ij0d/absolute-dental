@@ -382,10 +382,15 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
               color: viewMode === 'outside' ? '#ffffff' : 'rgba(255,255,255,0.75)',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.3rem'
             }}
           >
-            {lang === 'ar' ? '📦 مغلق' : '📦 Closed'}
+            <Box size={13} />
+            <span>{lang === 'ar' ? 'مغلق' : 'Closed'}</span>
           </button>
 
           <button
@@ -402,10 +407,15 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
               color: viewMode === 'inside' ? '#ffffff' : 'rgba(255,255,255,0.75)',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.3rem'
             }}
           >
-            {lang === 'ar' ? '📥 الرف الداخلي' : '📥 Tray View'}
+            <Package size={13} />
+            <span>{lang === 'ar' ? 'الرف الداخلي' : 'Tray View'}</span>
           </button>
 
           {(box.size === '16 inch' || box.name_en?.includes('16"')) && (
@@ -423,10 +433,15 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
                 color: viewMode === 'base' ? '#ffffff' : 'rgba(255,255,255,0.75)',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.3rem'
               }}
             >
-              {lang === 'ar' ? '🗃️ بدون رف' : '🗃️ Base'}
+              <CheckCircle2 size={13} />
+              <span>{lang === 'ar' ? 'بدون رف' : 'Base'}</span>
             </button>
           )}
         </div>
@@ -439,21 +454,22 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+              <h3 className="tabular-nums" style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
                 {box.size}
               </h3>
               {allUnavailable ? (
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#DC2626', background: 'rgba(239, 68, 68, 0.1)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
-                  ⏳ {lang === 'ar' ? 'جميع الألوان غير متوفرة حالياً' : 'All Colors Unavailable'}
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#DC2626', background: 'rgba(239, 68, 68, 0.1)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <Ban size={12} />
+                  <span>{lang === 'ar' ? 'جميع الألوان غير متوفرة حالياً' : 'All Colors Unavailable'}</span>
                 </span>
               ) : (
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#059669', background: 'rgba(16, 185, 129, 0.1)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+                <span className="tabular-nums" style={{ fontSize: '0.72rem', fontWeight: 800, color: '#059669', background: 'rgba(16, 185, 129, 0.1)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
                   ✓ {lang === 'ar' ? `${availableColors.length} ألوان متوفرة` : `${availableColors.length} Colors Available`}
                 </span>
               )}
             </div>
             {effectivePrice > 0 && (
-              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--secondary)', flexShrink: 0 }}>
+              <span className="tabular-nums" style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--secondary)', flexShrink: 0 }}>
                 {effectivePrice} LYD
               </span>
             )}

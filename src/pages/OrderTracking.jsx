@@ -301,7 +301,7 @@ export const OrderTracking = () => {
       {/* Query inputs card */}
       <form
         onSubmit={(e) => handleTrackOrder(e)}
-        className="card"
+        className="card tracking-form-row"
         style={{
           padding: '1.5rem',
           backgroundColor: 'var(--surface-color)',
@@ -310,7 +310,6 @@ export const OrderTracking = () => {
           alignItems: 'end',
           gap: '1rem'
         }}
-        className="tracking-form-row"
       >
         <div className="form-group" style={{ marginBottom: 0 }}>
           <label className="form-label">

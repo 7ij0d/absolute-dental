@@ -718,8 +718,7 @@ export const ProductDetails = () => {
                 aria-label="Favorite"
                 className="product-fav-floating-btn"
                 style={{
-                  left: isRtl ? '1rem' : 'auto',
-                  right: isRtl ? 'auto' : '1rem',
+                  insetInlineEnd: '1rem',
                 }}
               >
                 <Heart
@@ -733,12 +732,11 @@ export const ProductDetails = () => {
               {/* Discount Badge */}
               {discountPercent > 0 && (
                 <span
-                  className="badge badge-discount"
+                  className="badge badge-discount tabular-nums"
                   style={{
                     position: 'absolute',
                     top: '1rem',
-                    left: isRtl ? 'auto' : '1rem',
-                    right: isRtl ? '1rem' : 'auto',
+                    insetInlineStart: '1rem',
                     zIndex: 2,
                     fontSize: '0.85rem',
                     padding: '0.35rem 0.75rem',
@@ -753,6 +751,7 @@ export const ProductDetails = () => {
                 src={resolvedActiveImage}
                 alt={displayName}
                 className="product-image-main"
+                decoding="async"
                 onError={e => {
                   e.target.src = 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format';
                 }}
@@ -819,15 +818,15 @@ export const ProductDetails = () => {
             </h1>
 
             {/* Pricing Row */}
-            <div className="product-price-row">
-              <span className="product-price-current">
+            <div className="product-price-row tabular-nums">
+              <span className="product-price-current tabular-nums">
                 {product.price}
                 <span className="product-price-currency">
                   {lang === 'ar' ? 'د.ل' : 'LYD'}
                 </span>
               </span>
               {product.compare_at_price && product.compare_at_price > product.price && (
-                <span className="product-price-compare">
+                <span className="product-price-compare tabular-nums">
                   {product.compare_at_price} {lang === 'ar' ? 'د.ل' : 'LYD'}
                 </span>
               )}
@@ -868,14 +867,14 @@ export const ProductDetails = () => {
               <div style={{
                 margin: '1.25rem 0',
                 padding: '1.25rem 1.5rem',
-                borderRadius: '16px',
+                borderRadius: '14px',
                 background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(217, 119, 6, 0.05))',
                 border: '1.5px solid rgba(245, 158, 11, 0.4)',
-                boxShadow: '0 4px 16px rgba(245, 158, 11, 0.08)'
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 4px 16px rgba(245, 158, 11, 0.08)'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem', color: '#92400E', fontWeight: 900, fontSize: '1.02rem' }}>
                   <Info size={20} color="#D97706" />
-                  <span>{lang === 'ar' ? '💡 دليل وتوجيه عملي لطلبة الأسنان' : '💡 Student Practical Advisory'}</span>
+                  <span>{lang === 'ar' ? 'دليل وتوجيه عملي لطلبة الأسنان' : 'Student Practical Advisory'}</span>
                 </div>
                 <p style={{ margin: 0, fontSize: '0.92rem', color: '#78350F', lineHeight: 1.75, fontWeight: 500 }}>
                   {lang === 'ar' ? guideInfo.noteAr : guideInfo.noteEn}
@@ -888,7 +887,7 @@ export const ProductDetails = () => {
               <div style={{
                 margin: '1rem 0',
                 padding: '1.25rem',
-                borderRadius: '16px',
+                borderRadius: '14px',
                 background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.03))',
                 border: '1px solid rgba(16, 185, 129, 0.3)',
                 display: 'flex',
@@ -901,7 +900,7 @@ export const ProductDetails = () => {
                     <span>{lang === 'ar' ? 'عرض خاص توفيري — حزمة متكاملة' : 'Special Value Bundle Offer'}</span>
                   </div>
                   {bundleInfo.savings > 0 && (
-                    <span style={{
+                    <span className="tabular-nums" style={{
                       fontSize: '0.78rem',
                       fontWeight: 800,
                       background: '#10B981',
@@ -930,7 +929,7 @@ export const ProductDetails = () => {
                       border: '1px solid rgba(16, 185, 129, 0.15)',
                       fontSize: '0.85rem'
                     }}>
-                      <span style={{ fontWeight: 700, color: '#1F2937' }}>{lang === 'ar' ? (comp.nameAr || comp.nameEn) : (comp.nameEn || comp.nameAr)} (×{comp.required})</span>
+                      <span className="tabular-nums" style={{ fontWeight: 700, color: '#1F2937' }}>{lang === 'ar' ? (comp.nameAr || comp.nameEn) : (comp.nameEn || comp.nameAr)} (×{comp.required})</span>
                       <span style={{ color: '#059669', fontWeight: 700, fontSize: '0.8rem' }}>
                         {lang === 'ar' ? '✓ متوفر' : '✓ In Stock'}
                       </span>
@@ -946,7 +945,7 @@ export const ProductDetails = () => {
                   paddingTop: '0.6rem',
                   fontSize: '0.85rem'
                 }}>
-                  <span style={{ color: 'var(--text-muted)' }}>
+                  <span className="tabular-nums" style={{ color: 'var(--text-muted)' }}>
                     {lang === 'ar' ? `السعر المنفصل: ${bundleInfo.normalTotalPrice} د.ل` : `Separate Total: ${bundleInfo.normalTotalPrice} LYD`}
                   </span>
                   <span style={{ fontWeight: 800, color: '#065F46', fontSize: '0.95rem' }}>
@@ -980,7 +979,7 @@ export const ProductDetails = () => {
                     <button
                       type="button"
                       onClick={() => navigate(`/product/${siblingProduct.id}`)}
-                      className="btn btn-outline"
+                      className="btn btn-outline tabular-nums"
                       style={{
                         fontSize: '0.82rem',
                         padding: '0.4rem 0.85rem',
@@ -1007,7 +1006,7 @@ export const ProductDetails = () => {
             {/* Already in Cart Indicator (Requirement 11) */}
             {inCartItem && (
               <div className="product-in-cart-banner">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}>
+                <div className="tabular-nums" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}>
                   <Check size={16} strokeWidth={2.5} />
                   <span>
                     {lang === 'ar'
@@ -1056,7 +1055,7 @@ export const ProductDetails = () => {
               <div
                 style={{
                   padding: '1.25rem',
-                  borderRadius: '16px',
+                  borderRadius: '14px',
                   backgroundColor: 'rgba(245, 158, 11, 0.08)',
                   border: '1.5px solid rgba(245, 158, 11, 0.35)',
                   color: '#92400E',
@@ -1115,23 +1114,24 @@ export const ProductDetails = () => {
                     style={{
                       margin: '1.25rem 0',
                       padding: '1.25rem',
-                      borderRadius: '16px',
+                      borderRadius: '14px',
                       background: sizeError ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-surface, #F8FAFC)',
                       border: sizeError ? '2px solid #EF4444' : '1px solid var(--border-card, #e2e8f0)',
-                      boxShadow: sizeError ? '0 0 0 4px rgba(239, 68, 68, 0.15)' : '0 2px 8px rgba(0,0,0,0.03)',
+                      boxShadow: sizeError ? '0 0 0 4px rgba(239, 68, 68, 0.15)' : 'inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 8px rgba(0,0,0,0.03)',
                       transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '1.2rem' }}>{sizedConfig.hasColorAndSize ? '🎨' : '📐'}</span>
+                        {sizedConfig.hasColorAndSize ? <Sparkles size={17} color="var(--secondary)" /> : <Layers size={17} color="var(--secondary)" />}
                         <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main, #1E293B)' }}>
                           {lang === 'ar' ? (sizedConfig.optionsLabelAr ? `${sizedConfig.optionsLabelAr} (اختيار إلزامي):` : (sizedConfig.hasColorAndSize ? 'اللون والمقاس المتوفر (اختيار إلزامي):' : 'المقاس المطلوب (اختيار إلزامي):')) : (sizedConfig.optionsLabelEn ? `${sizedConfig.optionsLabelEn} (Mandatory):` : (sizedConfig.hasColorAndSize ? 'Available Color & Size (Mandatory):' : 'Required Size (Mandatory):'))}
                         </span>
                       </div>
                       {sizeError ? (
-                        <span style={{ color: '#DC2626', fontWeight: 800, fontSize: '0.82rem', animation: 'pulse 1s infinite' }}>
-                          {lang === 'ar' ? (sizedConfig.optionsPromptAr || (sizedConfig.hasColorAndSize ? '⚠️ يرجى اختيار اللون والمقاس أولاً' : '⚠️ يرجى اختيار المقاس (M أو L) أولاً')) : (sizedConfig.optionsPromptEn || (sizedConfig.hasColorAndSize ? '⚠️ Please select color & size first' : '⚠️ Please select size (M or L) first'))}
+                        <span style={{ color: '#DC2626', fontWeight: 800, fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', animation: 'pulse 1s infinite' }}>
+                          <AlertCircle size={14} />
+                          <span>{lang === 'ar' ? (sizedConfig.optionsPromptAr || (sizedConfig.hasColorAndSize ? 'يرجى اختيار اللون والمقاس أولاً' : 'يرجى اختيار المقاس (M أو L) أولاً')) : (sizedConfig.optionsPromptEn || (sizedConfig.hasColorAndSize ? 'Please select color & size first' : 'Please select size (M or L) first'))}</span>
                         </span>
                       ) : selectedSize ? (
                         <span style={{ color: '#059669', fontWeight: 700, fontSize: '0.82rem' }}>
@@ -1163,7 +1163,7 @@ export const ProductDetails = () => {
                               justifyContent: 'center',
                               gap: '0.4rem',
                               padding: '0.9rem 1rem',
-                              borderRadius: '12px',
+                              borderRadius: '10px',
                               border: isSelected ? '2px solid var(--primary, #3D352E)' : '1px solid #CBD5E1',
                               background: isSelected ? 'var(--primary, #3D352E)' : '#FFFFFF',
                               color: isSelected ? '#FFFFFF' : '#1E293B',
@@ -1218,7 +1218,7 @@ export const ProductDetails = () => {
                     >
                       <Minus size={15} />
                     </button>
-                    <span className="qty-display">{quantity}</span>
+                    <span className="qty-display tabular-nums">{quantity}</span>
                     <button
                       type="button"
                       onClick={() => handleQtyChange(1)}
@@ -1275,7 +1275,7 @@ export const ProductDetails = () => {
                     ) : sizeError ? (
                       <>
                         <AlertCircle size={18} />
-                        <span>{lang === 'ar' ? '⚠️ اختر المقاس (M أو L) أولاً' : '⚠️ Select Size (M or L) First'}</span>
+                        <span>{lang === 'ar' ? 'اختر المقاس (M أو L) أولاً' : 'Select Size (M or L) First'}</span>
                       </>
                     ) : sizedConfig && !selectedSize ? (
                       <>
@@ -1305,7 +1305,7 @@ export const ProductDetails = () => {
                   <div style={{
                     marginTop: '0.85rem',
                     padding: '0.75rem 1rem',
-                    borderRadius: '12px',
+                    borderRadius: '10px',
                     backgroundColor: 'rgba(79, 70, 229, 0.06)',
                     border: '1px solid rgba(79, 70, 229, 0.2)',
                     display: 'flex',
@@ -1315,11 +1315,11 @@ export const ProductDetails = () => {
                     color: '#4338CA',
                     lineHeight: 1.45
                   }}>
-                    <Clock size={16} style={{ flexShrink: 0 }} />
+                    <Package size={16} style={{ flexShrink: 0 }} />
                     <span>
                       {lang === 'ar'
-                        ? '📦 هذا المنتج متوفر بالطلب: يمكنك إضافته للسلة وإكمال طلبك بشكل طبيعي، وسيقوم فريق الإدارة بالتأكيد وتوفير المنتج فور استلام الطلب.'
-                        : '📦 This product is available by order: add it to your cart and complete checkout, and our management team will confirm and fulfill it promptly.'}
+                        ? 'هذا المنتج متوفر بالطلب: يمكنك إضافته للسلة وإكمال طلبك بشكل طبيعي، وسيقوم فريق الإدارة بالتأكيد وتوفير المنتج فور استلام الطلب.'
+                        : 'This product is available by order: add it to your cart and complete checkout, and our management team will confirm and fulfill it promptly.'}
                     </span>
                   </div>
                 )}
@@ -1384,7 +1384,7 @@ export const ProductDetails = () => {
                   <span className="spec-label">{lang === 'ar' ? 'حالة التوفر' : 'Availability'}</span>
                   <span className="spec-value">
                     {isGuide
-                      ? (lang === 'ar' ? '💡 إرشاد وتوجيه للطلبة' : '💡 Student Advisory Guide')
+                      ? (lang === 'ar' ? 'إرشاد وتوجيه للطلبة' : 'Student Advisory Guide')
                       : isByOrder
                       ? (lang === 'ar' ? 'متوفر بالطلب (By Order)' : 'Available By Order')
                       : isComingSoon
