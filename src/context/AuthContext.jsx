@@ -196,20 +196,46 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Update profile metrics (e.g. name, university, college)
+  // Update profile metrics (e.g. name, university, college, avatar, username, privacy)
   const updateProfile = async (updates) => {
     if (!user) return { error: 'No user authenticated' };
     try {
+      const payload = {
+        id: user.id,
+        email: user.email,
+        ...updates
+      };
+
       const { data, error } = await supabase
         .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
+        .upsert(payload)
+        .select()
+        .maybeSingle();
       
       if (!error) {
+        // Also update auth user metadata for immediate cross-session persistence
+        try {
+          const authData = {};
+          if (updates.full_name) authData.full_name = updates.full_name;
+          if (updates.name) authData.name = updates.name;
+          if (updates.username) authData.username = updates.username;
+          if (updates.avatar_url) authData.avatar_url = updates.avatar_url;
+          if (updates.phone) authData.phone = updates.phone;
+          if (updates.university) authData.university = updates.university;
+          if (updates.college) authData.college = updates.college;
+          if (updates.academic_year) authData.academic_year = updates.academic_year;
+          if (updates.is_anonymous_default !== undefined) authData.is_anonymous_default = updates.is_anonymous_default;
+          if (Object.keys(authData).length > 0) {
+            await supabase.auth.updateUser({ data: authData });
+          }
+        } catch (metaErr) {
+          console.warn('Metadata sync warning:', metaErr);
+        }
+
         // Refresh local profile
-        setProfile((prev) => ({ ...prev, ...updates }));
+        setProfile((prev) => ({ ...(prev || {}), ...payload, ...(data || {}) }));
       }
-      return { data, error };
+      return { data: data || payload, error };
     } catch (err) {
       return { data: null, error: err };
     }

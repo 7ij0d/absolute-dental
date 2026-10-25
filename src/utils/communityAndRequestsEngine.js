@@ -120,21 +120,25 @@ export async function uploadCompressedImage(file, folder = 'experiences') {
 
 function normalizeExperienceRecord(item) {
   if (!item) return null;
-  const userName = item.user_name || item.author_name || 'طالب طب أسنان';
-  const userEmail = item.user_email || item.author_email || '';
+  const isAnonymous = Boolean(item.is_anonymous);
+  const userName = isAnonymous ? 'طالب مجهول الهوية' : (item.user_name || item.author_name || 'طالب طب أسنان');
+  const userEmail = isAnonymous ? '' : (item.user_email || item.author_email || '');
   const comments = Array.isArray(item.comments)
     ? item.comments.map((c) => ({
         ...c,
-        user_name: c.user_name || c.author_name || 'طالب طب أسنان',
-        author_name: c.author_name || c.user_name || 'طالب طب أسنان',
+        is_anonymous: Boolean(c.is_anonymous),
+        user_name: c.is_anonymous ? 'طالب مجهول الهوية' : (c.user_name || c.author_name || 'طالب طب أسنان'),
+        author_name: c.is_anonymous ? 'طالب مجهول الهوية' : (c.author_name || c.user_name || 'طالب طب أسنان'),
       }))
     : [];
   return {
     ...item,
+    is_anonymous: isAnonymous,
     user_name: userName,
     author_name: userName,
     user_email: userEmail,
     author_email: userEmail,
+    avatar_url: isAnonymous ? null : (item.avatar_url || null),
     likes: Array.isArray(item.likes) ? item.likes : [],
     comments,
   };
@@ -185,7 +189,7 @@ export const fetchPublishedExperiences = fetchApprovedExperiences;
 /**
  * Submits a new student experience with status = 'pending' (requires admin approval before public display).
  */
-export async function submitStudentExperience({ user, profile, text, imageFiles = [] }) {
+export async function submitStudentExperience({ user, profile, text, imageFiles = [], isAnonymous = false }) {
   if (!user || !user.id) {
     throw new Error('AUTH_REQUIRED');
   }
@@ -210,16 +214,22 @@ export async function submitStudentExperience({ user, profile, text, imageFiles 
     user.user_metadata?.name ||
     (user.email ? user.email.split('@')[0] : 'طالب طب أسنان');
 
-  const cleanName = sanitizeInputText(rawAuthorName, 80);
+  const cleanRealName = sanitizeInputText(rawAuthorName, 80);
+  const displayName = isAnonymous ? 'طالب مجهول الهوية' : cleanRealName;
+  const authorAvatar = isAnonymous ? null : (profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || null);
 
   const experienceRecord = {
     id,
     user_id: user.id,
-    user_name: cleanName,
-    author_name: cleanName,
+    user_name: displayName,
+    author_name: displayName,
+    real_author_name: cleanRealName,
+    is_anonymous: Boolean(isAnonymous),
     user_email: user.email || '',
     author_email: user.email || '',
+    avatar_url: authorAvatar,
     university: sanitizeInputText(profile?.university || user.user_metadata?.university || 'كلية طب الأسنان', 100),
+    academic_year: profile?.academic_year || user.user_metadata?.academic_year || null,
     text: cleanText,
     images: uploadedUrls,
     status: 'pending',
@@ -297,18 +307,20 @@ export async function toggleExperienceLike(arg1, arg2) {
 /**
  * Adds a comment from an authenticated user to a published experience.
  */
-export async function addExperienceComment(arg1, arg2, arg3, arg4) {
-  let expId, user, profile, commentText;
+export async function addExperienceComment(arg1, arg2, arg3, arg4, arg5) {
+  let expId, user, profile, commentText, isAnonymous = false;
   if (typeof arg1 === 'object' && arg1 !== null) {
     expId = arg1.experienceId || arg1.expId;
     user = arg1.user;
     profile = arg1.profile;
     commentText = arg1.commentText;
+    isAnonymous = Boolean(arg1.isAnonymous);
   } else {
     expId = arg1;
     user = arg2;
     profile = arg3;
     commentText = arg4;
+    isAnonymous = Boolean(arg5);
   }
 
   if (!user || !user.id) {
@@ -338,12 +350,15 @@ export async function addExperienceComment(arg1, arg2, arg3, arg4) {
     (user.email ? user.email.split('@')[0] : 'طالب طب أسنان');
 
   const cleanAuthor = sanitizeInputText(rawAuthorName, 80);
+  const displayAuthor = isAnonymous ? 'طالب مجهول الهوية' : cleanAuthor;
 
   const newComment = {
     id: `cmt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
     user_id: user.id,
-    user_name: cleanAuthor,
-    author_name: cleanAuthor,
+    user_name: displayAuthor,
+    author_name: displayAuthor,
+    real_author_name: cleanAuthor,
+    is_anonymous: Boolean(isAnonymous),
     text: cleanComment,
     created_at: new Date().toISOString(),
   };
@@ -407,13 +422,18 @@ export async function adminApproveExperience(expOrId) {
   const exp = await resolveExperienceByIdOrObject(expOrId);
   if (!exp || !exp.id) throw new Error('التجربة غير موجودة');
   const now = new Date().toISOString();
-  const cleanName = exp.user_name || exp.author_name || 'طالب طب أسنان';
+  const isAnon = Boolean(exp.is_anonymous);
+  const cleanName = isAnon ? 'طالب مجهول الهوية' : (exp.user_name || exp.author_name || 'طالب طب أسنان');
 
   const approvedRecord = {
+    ...exp,
     id: exp.id,
     user_id: exp.user_id,
     user_name: cleanName,
     author_name: cleanName,
+    real_author_name: exp.real_author_name || exp.user_name,
+    is_anonymous: isAnon,
+    avatar_url: isAnon ? null : (exp.avatar_url || null),
     university: exp.university || 'كلية طب الأسنان',
     text: exp.text || '',
     images: Array.isArray(exp.images) ? exp.images : [],

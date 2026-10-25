@@ -18,9 +18,11 @@ import {
   User,
   Phone,
   FileText,
-  Image as ImageIcon,
   Lock,
-  ExternalLink
+  ExternalLink,
+  EyeOff,
+  UserCheck,
+  Shield
 } from 'lucide-react';
 
 import homeHeroBgWebp from '../assets/images/home-hero-bg.webp';
@@ -70,6 +72,8 @@ export const Home = () => {
   const [expText, setExpText] = useState('');
   const [expFiles, setExpFiles] = useState([]);
   const [expPreviews, setExpPreviews] = useState([]);
+  const [expIsAnonymous, setExpIsAnonymous] = useState(false);
+  const [commentAnonMap, setCommentAnonMap] = useState({});
   const [expSubmitting, setExpSubmitting] = useState(false);
   const [expError, setExpError] = useState('');
   const [expSuccess, setExpSuccess] = useState(false);
@@ -226,7 +230,8 @@ export const Home = () => {
         user,
         profile,
         text: expText,
-        imageFiles: expFiles
+        imageFiles: expFiles,
+        isAnonymous: expIsAnonymous
       });
       setExpSuccess(true);
       setExpText('');
@@ -264,11 +269,13 @@ export const Home = () => {
 
     setCommentSubmittingId(expId);
     try {
+      const isAnon = Boolean(commentAnonMap[expId]);
       const updated = await addExperienceComment({
         experienceId: expId,
         user,
         profile,
-        commentText: text
+        commentText: text,
+        isAnonymous: isAnon
       });
       setExperiences((prev) => prev.map((item) => (item.id === expId ? updated : item)));
       setCommentInputs((prev) => ({ ...prev, [expId]: '' }));
@@ -587,11 +594,43 @@ export const Home = () => {
                     <article key={exp.id} className="home-exp-card">
                       {/* Author & Date Header */}
                       <div className="home-exp-card-header">
-                        <div className="home-exp-avatar">
-                          {(exp.user_name || 'ط')[0]}
-                        </div>
+                        {exp.is_anonymous ? (
+                          <div
+                            className="home-exp-avatar"
+                            style={{
+                              backgroundColor: '#EFEBE4',
+                              color: '#6E6258',
+                              border: '1.5px solid #D6CBC1',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                            title={lang === 'ar' ? 'طالب مجهول الهوية' : 'Anonymous Student'}
+                          >
+                            <EyeOff size={18} strokeWidth={2.2} />
+                          </div>
+                        ) : (
+                          <div className="home-exp-avatar">
+                            {exp.avatar_url ? (
+                              <img src={exp.avatar_url} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                            ) : (
+                              (exp.user_name || 'ط')[0]
+                            )}
+                          </div>
+                        )}
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div className="home-exp-author-name">{exp.user_name || 'طالب طب أسنان'}</div>
+                          <div className="home-exp-author-name" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                            <span>{exp.is_anonymous ? (lang === 'ar' ? 'طالب مجهول الهوية' : 'Anonymous Student') : (exp.user_name || 'طالب طب أسنان')}</span>
+                            {exp.is_anonymous ? (
+                              <span style={{ fontSize: '0.68rem', padding: '0.1rem 0.5rem', borderRadius: '999px', backgroundColor: '#F0ECE6', color: '#6E6258', fontWeight: 700, border: '1px solid #DFD7CC' }}>
+                                🔒 {lang === 'ar' ? 'مجهول الهوية' : 'Anonymous'}
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: '0.68rem', padding: '0.1rem 0.5rem', borderRadius: '999px', backgroundColor: 'rgba(16,185,129,0.1)', color: '#059669', fontWeight: 700, border: '1px solid rgba(16,185,129,0.2)' }}>
+                                ✓ {lang === 'ar' ? 'طالب معتمد' : 'Verified'}
+                              </span>
+                            )}
+                          </div>
                           <div className="home-exp-meta">
                             <span>{exp.university || 'كلية طب الأسنان'}</span>
                             <span>•</span>
@@ -662,7 +701,16 @@ export const Home = () => {
                               {commentsArr.map((c) => (
                                 <div key={c.id} className="home-exp-comment-item">
                                   <div className="home-exp-comment-head">
-                                    <strong>{c.user_name}</strong>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                      {c.is_anonymous ? (
+                                        <>
+                                          <EyeOff size={13} style={{ color: '#8A7B6E' }} />
+                                          <strong style={{ color: '#6E6258' }}>{lang === 'ar' ? 'طالب مجهول' : 'Anonymous Student'}</strong>
+                                        </>
+                                      ) : (
+                                        <strong>{c.user_name}</strong>
+                                      )}
+                                    </div>
                                     <span>
                                       {c.created_at
                                         ? new Date(c.created_at).toLocaleDateString('ar-LY', {
@@ -682,6 +730,27 @@ export const Home = () => {
                             </p>
                           )}
 
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '0.2rem 0.4rem 0.4rem', fontSize: '0.74rem' }}>
+                            <button
+                              type="button"
+                              onClick={() => setCommentAnonMap((prev) => ({ ...prev, [exp.id]: !prev[exp.id] }))}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: commentAnonMap[exp.id] ? '#684835' : '#8A7B6E',
+                                fontWeight: commentAnonMap[exp.id] ? 800 : 600,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                                padding: 0
+                              }}
+                            >
+                              {commentAnonMap[exp.id] ? <EyeOff size={13} /> : <UserCheck size={13} />}
+                              <span>{commentAnonMap[exp.id] ? (lang === 'ar' ? '🔒 تعليق بمجهول الهوية' : 'Anonymous comment') : (lang === 'ar' ? '👤 تعليق باسمي الشخصي' : 'Real name comment')}</span>
+                            </button>
+                          </div>
+
                           <form onSubmit={(e) => handleCommentSubmit(e, exp.id)} className="home-exp-comment-form">
                             <input
                               type="text"
@@ -694,7 +763,7 @@ export const Home = () => {
                                   requireStudentAuth('comment_experience');
                                 }
                               }}
-                              placeholder={lang === 'ar' ? 'اكتب تعليقاً...' : 'Write a comment...'}
+                              placeholder={commentAnonMap[exp.id] ? (lang === 'ar' ? 'اكتب تعليقك بمجهول الهوية...' : 'Write an anonymous comment...') : (lang === 'ar' ? 'اكتب تعليقاً...' : 'Write a comment...')}
                               className="home-exp-comment-input"
                             />
                             <button
@@ -940,6 +1009,83 @@ export const Home = () => {
                       className="form-input"
                       style={{ resize: 'vertical' }}
                     />
+                  </div>
+
+                  {/* Identity Selector: Real Name vs Anonymous */}
+                  <div
+                    style={{
+                      backgroundColor: '#FAF7F2',
+                      border: '1.5px solid #E6DDD2',
+                      borderRadius: '16px',
+                      padding: '0.9rem 1rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.65rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#3E2B1D' }}>
+                        {lang === 'ar' ? 'طريقة ظهور هويتك' : 'Publishing Identity'}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: '#8A7B6E' }}>
+                        {lang === 'ar' ? 'يمكنك الاختيار لكل مشاركة' : 'Choose per post'}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => setExpIsAnonymous(false)}
+                        style={{
+                          padding: '0.65rem 0.85rem',
+                          borderRadius: '12px',
+                          border: !expIsAnonymous ? '2px solid #684835' : '1px solid #D6CBC1',
+                          backgroundColor: !expIsAnonymous ? '#F5ECE1' : '#FFFFFF',
+                          color: !expIsAnonymous ? '#3B2617' : '#6E6258',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.5rem',
+                          cursor: 'pointer',
+                          fontSize: '0.82rem',
+                          fontWeight: !expIsAnonymous ? 800 : 600,
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <UserCheck size={16} style={{ color: !expIsAnonymous ? '#684835' : '#8C7E72' }} />
+                        <span>{lang === 'ar' ? 'باسمي الحقيقي' : 'Real Name'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setExpIsAnonymous(true)}
+                        style={{
+                          padding: '0.65rem 0.85rem',
+                          borderRadius: '12px',
+                          border: expIsAnonymous ? '2px solid #684835' : '1px solid #D6CBC1',
+                          backgroundColor: expIsAnonymous ? '#F5ECE1' : '#FFFFFF',
+                          color: expIsAnonymous ? '#3B2617' : '#6E6258',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.5rem',
+                          cursor: 'pointer',
+                          fontSize: '0.82rem',
+                          fontWeight: expIsAnonymous ? 800 : 600,
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <EyeOff size={16} style={{ color: expIsAnonymous ? '#684835' : '#8C7E72' }} />
+                        <span>{lang === 'ar' ? 'مجهول الهوية' : 'Anonymous'}</span>
+                      </button>
+                    </div>
+
+                    <p style={{ margin: 0, fontSize: '0.74rem', color: '#73665C', lineHeight: 1.4 }}>
+                      {expIsAnonymous
+                        ? (lang === 'ar' ? '🔒 سيتم نشر تجربتك تحت اسم «طالب مجهول الهوية» دون كشف اسمك أو صورتك الشخصية.' : '🔒 Your experience will be posted as "Anonymous Student" with your name & avatar hidden.')
+                        : (lang === 'ar' ? `✨ ستظهر التجربة باسمك «${profile?.full_name || user?.user_metadata?.full_name || user?.user_metadata?.name || 'طالب معتمد'}» وصورتك الشخصية الموثقة.` : '✨ Your verified student name and photo will be displayed.')
+                      }
+                    </p>
                   </div>
 
                   <div className="ad-modal-footer">
