@@ -6,6 +6,7 @@ import { jsPDF } from 'jspdf';
 import brandLogoTrimmed from '../assets/images/brand-logo-trimmed.png';
 import { normalizeOrderItems, paginateInvoiceItems } from '../utils/invoicePaginationEngine';
 import { getBundleUnitLabel } from '../utils/productInventoryEngine';
+import { isBurHolderProduct } from '../utils/burHolderInventoryEngine';
 
 export { normalizeOrderItems, paginateInvoiceItems };
 
@@ -331,6 +332,11 @@ export const InvoiceView = ({ order }) => {
                                 {item.sellingUnit && (
                                   <span style={{ fontSize: '0.7rem', backgroundColor: 'rgba(0, 168, 150, 0.1)', color: '#00a896', padding: '0.1rem 0.45rem', borderRadius: '4px', fontWeight: 600 }}>
                                     {item.sellingUnit}
+                                  </span>
+                                )}
+                                {isBurHolderProduct(item.productId || item.id || primaryName || secondaryName) && (
+                                  <span style={{ fontSize: '0.7rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '0.1rem 0.45rem', borderRadius: '4px', fontWeight: 700, border: '1px solid #fde68a' }}>
+                                    🎨 {lang === 'ar' ? 'لون عشوائي' : 'Random Color'}
                                   </span>
                                 )}
                                 {item.isBundle && (

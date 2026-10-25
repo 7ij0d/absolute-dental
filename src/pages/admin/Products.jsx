@@ -10,6 +10,12 @@ import {
   CANONICAL_MULTI_UNITS,
   getPhysicalStockBreakdown
 } from '../../utils/productInventoryEngine';
+import {
+  isBurHolderProduct,
+  fetchBurHolderColorInventory,
+  saveBurHolderColorInventory,
+  BUR_HOLDER_COLORS
+} from '../../utils/burHolderInventoryEngine';
 import { Plus, Edit, Trash2, Archive, Check, X, FileEdit, PlusCircle, Search, Layers, Globe, Sparkles, BookOpen, AlertCircle, Info } from 'lucide-react';
 
 // Specialized Dental Specialty Icons matching reference mockup
@@ -137,6 +143,10 @@ export const Products = () => {
   const [showInOtherSupplies, setShowInOtherSupplies] = useState(false);
   const [subjectSelectionMode, setSubjectSelectionMode] = useState('custom'); // 'all' or 'custom'
   const [subjectSearchInModal, setSubjectSearchInModal] = useState('');
+
+  // Bur Holder 3-color breakdown state
+  const [burColorStocks, setBurColorStocks] = useState({ yellow: 12, white: 12, pink: 12 });
+  const [loadingBurColors, setLoadingBurColors] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [uploadingMain, setUploadingMain] = useState(false);
@@ -576,12 +586,22 @@ export const Products = () => {
     setAudioUrl('');
     setRecordedBlobUrl('');
     setAudioChunks([]);
+    setBurColorStocks({ yellow: 12, white: 12, pink: 12 });
     setShowFormModal(true);
   };
 
   const openEditModal = async (prod) => {
     const meta = await ensureMetadataLoaded();
     setEditingProduct(prod);
+    if (isBurHolderProduct(prod)) {
+      setLoadingBurColors(true);
+      fetchBurHolderColorInventory().then(inv => {
+        setBurColorStocks({ yellow: inv.yellow, white: inv.white, pink: inv.pink });
+        setLoadingBurColors(false);
+      }).catch(() => setLoadingBurColors(false));
+    } else {
+      setBurColorStocks({ yellow: 12, white: 12, pink: 12 });
+    }
     setNameAr(prod.name_ar || '');
     setNameEn(prod.name_en || '');
     setDescriptionAr(prod.description_ar || '');
@@ -765,6 +785,15 @@ export const Products = () => {
             sort_order: index
           }));
           await supabase.from('product_images').insert(insertPayload);
+        }
+      }
+
+      // Sync Bur Holder random color inventory breakdown if applicable
+      if (isBurHolderProduct(editingProduct || productId) || isBurHolderProduct({ name_ar: nameAr, name_en: nameEn })) {
+        try {
+          await saveBurHolderColorInventory(burColorStocks);
+        } catch (colorErr) {
+          console.warn('Could not sync bur holder color inventory:', colorErr);
         }
       }
 
@@ -1049,6 +1078,90 @@ export const Products = () => {
                   </select>
                 </div>
               </div>
+
+              {/* Bur Holder Random Color Inventory Breakdown */}
+              {(isBurHolderProduct(editingProduct) || isBurHolderProduct({ name_ar: nameAr, name_en: nameEn })) && (
+                <div style={{
+                  border: '1.5px solid #f59e0b',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1rem',
+                  backgroundColor: 'rgba(245, 158, 11, 0.05)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <label className="form-label" style={{ margin: 0, color: '#b45309', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      🎨 إدارة مخزون ألوان Bur Holder (تُباع عشوائياً للزبون)
+                    </label>
+                    <span style={{ fontSize: '0.75rem', color: '#92400e', backgroundColor: '#fef3c7', padding: '2px 8px', borderRadius: '999px', fontWeight: 700 }}>
+                      إجمالي مخزون الألوان: {burColorStocks.yellow + burColorStocks.white + burColorStocks.pink} قطعة
+                    </span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                    الزبون لا يمكنه اختيار اللون، ويتم تحديد اللون عند تجهيز الطلبية. سجّل الكميات المتاحة من كل لون وسيتم تحديث إجمالي المخزون تلقائياً:
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#ca8a04', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <span>🟡</span> أصفر (Yellow)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        className="form-input"
+                        value={burColorStocks.yellow}
+                        onChange={(e) => {
+                          const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                          const newStocks = { ...burColorStocks, yellow: val };
+                          setBurColorStocks(newStocks);
+                          const newTotal = newStocks.yellow + newStocks.white + newStocks.pink;
+                          setStockQuantity(newTotal);
+                          setAvailability(newTotal > 0 ? 'available' : 'unavailable');
+                        }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <span>⚪</span> أبيض (White)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        className="form-input"
+                        value={burColorStocks.white}
+                        onChange={(e) => {
+                          const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                          const newStocks = { ...burColorStocks, white: val };
+                          setBurColorStocks(newStocks);
+                          const newTotal = newStocks.yellow + newStocks.white + newStocks.pink;
+                          setStockQuantity(newTotal);
+                          setAvailability(newTotal > 0 ? 'available' : 'unavailable');
+                        }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#db2777', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <span>🌸</span> وردي (Pink)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        className="form-input"
+                        value={burColorStocks.pink}
+                        onChange={(e) => {
+                          const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                          const newStocks = { ...burColorStocks, pink: val };
+                          setBurColorStocks(newStocks);
+                          const newTotal = newStocks.yellow + newStocks.white + newStocks.pink;
+                          setStockQuantity(newTotal);
+                          setAvailability(newTotal > 0 ? 'available' : 'unavailable');
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Shared Inventory */}
               <div style={{

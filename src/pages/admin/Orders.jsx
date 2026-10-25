@@ -13,6 +13,12 @@ import { extractOrderDeliverySchedule } from '../../utils/deliveryScheduleEngine
 import { getOrderStatusMeta, normalizeOrderStatus, createStatusAuditEntry, parseOrderEditHistory } from '../../utils/orderEditHelper';
 import { parseOrderVersioning } from '../../utils/orderVersioning';
 import {
+  isBurHolderProduct,
+  fetchBurHolderColorInventory,
+  assignBurHolderColorToOrder,
+  BUR_HOLDER_COLORS
+} from '../../utils/burHolderInventoryEngine';
+import {
   Search, Eye, RefreshCw, Printer, X, ClipboardList, CheckCircle,
   Trash2, Pencil, Save, Check, AlertCircle, ArrowUpDown, Calendar,
   TrendingUp, Clock, ChevronLeft, ChevronRight, Filter, AlertTriangle, Layers, Plus, MessageCircle
@@ -139,6 +145,41 @@ export const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [showInvoicePrint, setShowInvoicePrint] = useState(false);
+
+  // Bur Holder Color Fulfillment State
+  const [burHolderInventory, setBurHolderInventory] = useState(null);
+  const [assigningBurColor, setAssigningBurColor] = useState(false);
+  const [burColorFeedback, setBurColorFeedback] = useState(null);
+
+  const loadBurInventory = async () => {
+    try {
+      const inv = await fetchBurHolderColorInventory();
+      setBurHolderInventory(inv);
+    } catch (e) {
+      console.warn('Failed loading bur inventory:', e);
+    }
+  };
+
+  useEffect(() => {
+    loadBurInventory();
+  }, []);
+
+  const handleAssignBurHolderColor = async (orderId, itemKey, colorId) => {
+    try {
+      setAssigningBurColor(true);
+      setBurColorFeedback(null);
+      const res = await assignBurHolderColorToOrder({ orderId, itemKey, colorId });
+      if (res.success) {
+        setBurHolderInventory(res.newStocks);
+        setBurColorFeedback({ orderId, itemKey, text: `تم اعتماد اللون (${res.assignedColor.name_ar}) وخصم قطعة من مخزونه بنجاح ✓` });
+        setTimeout(() => setBurColorFeedback(null), 4000);
+      }
+    } catch (err) {
+      alert(err.message || 'حدث خطأ أثناء تحديد اللون');
+    } finally {
+      setAssigningBurColor(false);
+    }
+  };
 
   // Edit Modal
   const [editingOrder, setEditingOrder] = useState(null);
@@ -1643,6 +1684,13 @@ export const Orders = () => {
                   const itemSellingUnit = item.selling_unit || item.sellingUnit || snapshotItem?.selling_unit || snapshotItem?.sellingUnit || null;
                   const isBundle = Boolean(item.is_bundle || snapshotItem?.is_bundle || isBundleProduct(item.product_id) || isBundleProduct(item.id));
                   const bundleComponents = item.bundle_components || snapshotItem?.bundle_components || null;
+
+                  const isBurHolder = isBurHolderProduct(item.product_id || item.id || itemName);
+                  const burItemKey = item.id || idx;
+                  const orderKey = `${selectedOrder.id}_${burItemKey}`;
+                  const assignedColorKey = burHolderInventory?.assignedOrders?.[orderKey];
+                  const assignedColorObj = BUR_HOLDER_COLORS.find(c => c.id === assignedColorKey);
+
                   return (
                     <div
                       key={item.id || idx}
@@ -1651,68 +1699,145 @@ export const Orders = () => {
                         border: '1px solid var(--border-color)',
                         borderRadius: 'var(--radius-sm)',
                         display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
+                        flexDirection: 'column',
+                        gap: '0.5rem',
                         fontSize: '0.82rem'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        <div
-                          style={{
-                            width: '38px',
-                            height: '38px',
-                            borderRadius: '6px',
-                            overflow: 'hidden',
-                            backgroundColor: 'var(--accent)',
-                            border: '1px solid var(--border-color)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0
-                          }}
-                        >
-                          {itemImg ? (
-                            <img
-                              src={itemImg}
-                              alt=""
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                            />
-                          ) : (
-                            <ClipboardList size={18} style={{ color: 'var(--text-muted)' }} />
-                          )}
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                            <span>{itemName}</span>
-                            {isBundle && (
-                              <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(0, 168, 150, 0.12)', color: '#00a896', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
-                                🎁 {(() => {
-                                  const count = bundleComponents?.length || getBundleDefinition(item.product_id || item.id)?.components?.length || '';
-                                  const unit = getBundleUnitLabel(item.product_id || item.id || itemName, isRtl ? 'ar' : 'en');
-                                  return isRtl
-                                    ? `بكج متكامل ${count ? `(${count} ${unit})` : ''}`
-                                    : `Bundle ${count ? `(${count} ${unit})` : ''}`;
-                                })()}
-                              </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <div
+                            style={{
+                              width: '38px',
+                              height: '38px',
+                              borderRadius: '6px',
+                              overflow: 'hidden',
+                              backgroundColor: 'var(--accent)',
+                              border: '1px solid var(--border-color)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
+                            }}
+                          >
+                            {itemImg ? (
+                              <img
+                                src={itemImg}
+                                alt=""
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                              />
+                            ) : (
+                              <ClipboardList size={18} style={{ color: 'var(--text-muted)' }} />
                             )}
-                            {itemSellingUnit && !isBundle && (
-                              <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#b45309', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 600 }}>
-                                {itemSellingUnit}
-                              </span>
-                            )}
-                            <strong style={{ color: 'var(--secondary)' }}>x{item.quantity}</strong>
                           </div>
-                          {isBundle && Array.isArray(bundleComponents) && bundleComponents.length > 0 && (
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
-                              {bundleComponents.map(c => c.nameAr || c.nameEn).join(' • ')}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                              <span>{itemName}</span>
+                              {isBundle && (
+                                <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(0, 168, 150, 0.12)', color: '#00a896', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
+                                  🎁 {(() => {
+                                    const count = bundleComponents?.length || getBundleDefinition(item.product_id || item.id)?.components?.length || '';
+                                    const unit = getBundleUnitLabel(item.product_id || item.id || itemName, isRtl ? 'ar' : 'en');
+                                    return isRtl
+                                      ? `بكج متكامل ${count ? `(${count} ${unit})` : ''}`
+                                      : `Bundle ${count ? `(${count} ${unit})` : ''}`;
+                                  })()}
+                                </span>
+                              )}
+                              {itemSellingUnit && !isBundle && (
+                                <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#b45309', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 600 }}>
+                                  {itemSellingUnit}
+                                </span>
+                              )}
+                              <strong style={{ color: 'var(--secondary)' }}>x{item.quantity}</strong>
+                            </div>
+                            {isBundle && Array.isArray(bundleComponents) && bundleComponents.length > 0 && (
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                                {bundleComponents.map(c => c.nameAr || c.nameEn).join(' • ')}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <span style={{ fontWeight: 700 }}>
+                          {item.price} د.ل
+                        </span>
+                      </div>
+
+                      {/* Bur Holder Color Dispatch Assignment */}
+                      {isBurHolder && (
+                        <div style={{
+                          padding: '0.55rem 0.75rem',
+                          borderRadius: '8px',
+                          backgroundColor: '#fffbeb',
+                          border: '1px solid #fde68a',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.45rem',
+                          fontSize: '0.78rem'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#92400e', fontWeight: 700 }}>
+                              <span>🎨 تحديد لون التجهيز للإرسال:</span>
+                              {assignedColorObj ? (
+                                <span style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.3rem',
+                                  padding: '2px 8px',
+                                  borderRadius: '999px',
+                                  backgroundColor: '#fef08a',
+                                  color: '#713f12',
+                                  fontWeight: 800,
+                                  border: '1px solid #facc15'
+                                }}>
+                                  {assignedColorObj.emoji} {assignedColorObj.name_ar}
+                                </span>
+                              ) : (
+                                <span style={{ color: '#ea580c', fontWeight: 700, backgroundColor: 'rgba(234, 88, 12, 0.1)', padding: '2px 8px', borderRadius: '999px' }}>
+                                  ⚠️ لم يُحدد اللون بعد (عشوائي)
+                                </span>
+                              )}
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <select
+                                value={assignedColorKey || ''}
+                                onChange={(e) => handleAssignBurHolderColor(selectedOrder.id, burItemKey, e.target.value)}
+                                disabled={assigningBurColor}
+                                style={{
+                                  fontSize: '0.78rem',
+                                  padding: '0.3rem 0.6rem',
+                                  borderRadius: '6px',
+                                  border: '1.5px solid #f59e0b',
+                                  backgroundColor: '#ffffff',
+                                  fontWeight: 700,
+                                  color: '#78350f',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <option value="">— اختر اللون المتوفر للإرسال —</option>
+                                {BUR_HOLDER_COLORS.map(c => {
+                                  const stock = burHolderInventory ? (burHolderInventory[c.id] || 0) : 0;
+                                  const isAssigned = assignedColorKey === c.id;
+                                  return (
+                                    <option key={c.id} value={c.id} disabled={stock <= 0 && !isAssigned}>
+                                      {c.emoji} {c.name_ar} (متوفر: {stock} قطعة {isAssigned ? '• معتمد للطلب' : ''})
+                                    </option>
+                                  );
+                                })}
+                              </select>
+                            </div>
+                          </div>
+
+                          {burColorFeedback && burColorFeedback.orderId === selectedOrder.id && burColorFeedback.itemKey === burItemKey && (
+                            <div style={{ color: '#16a34a', fontWeight: 700, fontSize: '0.76rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                              <span>✓</span>
+                              <span>{burColorFeedback.text}</span>
                             </div>
                           )}
                         </div>
-                      </div>
-                      <span style={{ fontWeight: 700 }}>
-                        {item.price} د.ل
-                      </span>
+                      )}
                     </div>
                   );
                 })}

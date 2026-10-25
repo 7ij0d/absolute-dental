@@ -13,60 +13,60 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 إضافة منتجي Water Gauge كمنتجين منفصلين تماماً في قاعدة البيانات والمخزون:
-1. **المنتج الأول: Water Gauge (Green) — `WG-GREEN-001`**:
-   - **الاسم:** Water Gauge (Green) / معيار ماء (Water Gauge - Green)
-   - **السعر:** 11 دينار ليبي
-   - **المعرّف الفريد (ID):** `29e6eeb8-378c-4270-b16b-e09a92f8c0ea`
-   - **كود المنتج (SKU):** `WG-GREEN-001`
-   - **المخزون وحالة التوفر:** 25 قطعة مستقلة، `available`
-   - **الصورة:** رُفعت الصورة الأولى الخاصة به إلى التخزين السحابي:
-     `https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/water-gauge-green.png`
-     ونسخة محلية في [`public/products/water-gauge-green.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/water-gauge-green.png)
-   - **الربط الأكاديمي:** مواد طب الأسنان (سنة أولى) + صناعة الأسنان المتحركة 1 و 2 + قسم «مستلزمات أخرى».
+### 🔹 استبدال منتجات Bur Holder وإطلاق نظام الألوان العشوائي وتتبع المخزون:
 
-2. **المنتج الثاني: Water Gauge (LASGOD) — `WG-LASGOD-002`**:
-   - **الاسم:** Water Gauge (LASGOD) / معيار ماء (Water Gauge - LASGOD)
-   - **السعر:** 15 دينار ليبي
-   - **المعرّف الفريد (ID):** `28647b17-8bc9-4834-a9d9-abbb45c88fca`
-   - **كود المنتج (SKU):** `WG-LASGOD-002`
-   - **المخزون وحالة التوفر:** 25 قطعة مستقلة تماماً، `available`
-   - **الصورة:** رُفعت الصورة الثانية (طقم قطعتين نيون أخضر فسفوري LASCOD) إلى التخزين السحابي:
-     `https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/water-gauge-lasgod.png`
-     ونسخة محلية في [`public/products/water-gauge-lasgod.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/water-gauge-lasgod.png)
-   - **الربط الأكاديمي:** مواد طب الأسنان (سنة أولى) + صناعة الأسنان المتحركة 1 و 2 + قسم «مستلزمات أخرى».
+1. **أولاً: أرشفة وحذف المنتجين القديمين من البيع مع الحفاظ على السجلات التاريخية**:
+   - تم إيقاف عرض وحذف ارتباط منتجي Bur Holder القديمين:
+     - القديم 1: `22000000-0000-0000-0000-000000000203` (`Bur Holder`)
+     - القديم 2: `22000000-0000-0000-0000-000000000204` (`Bur Holder (with Cover)`)
+   - تم تعيين `is_active: false` و `is_archived: true` وحذف ارتباطهما بجدول `product_subjects` لمنع ظهورهما في المتجر أو البحث أو طلبهما مجدداً.
+   - تم الحفاظ على سجلات الطلبات والفواتير السابقة والبيانات التاريخية دون مساس بقاعدة البيانات.
 
-3. **ضمانات الفصل التام والاستقلالية وعدم الدمج**:
-   - سجلان مستقلان في جدول `products` برقمين تسلسليين ومعرّفين UUID فريدين تماماً.
-   - كودان فريدان غير مكررين (`WG-GREEN-001` و `WG-LASGOD-002`).
-   - أسعار ومخزون منفصل بالكامل؛ تعديل سعر أو مخزون أحدهما أو خصمه عند الطلب لا يؤثر إطلاقاً على الآخر.
-   - ظهور مستقل في نتائج البحث والسلة والفواتير والطلبات وتقارير المبيعات ولوحة تحكم الإدارة.
-   - الحفاظ على كافة المنتجات السابقة دون مساس.
+2. **ثانياً: إضافة المنتج الجديد**:
+   - **الاسم:** Bur Holder
+   - **المعرّف الفريد (UUID):** `50c5fac9-de64-452d-85ac-c6cce3496793`
+   - **كود المنتج (SKU):** `BUR-HOLDER-MIX-001`
+   - **السعر:** قابل للتحديد والتعديل بالكامل من لوحة الإدارة (قيمة أولية 20 د.ل).
+   - **الصورة:** صورة العلب بثلاثة ألوان (أصفر، أبيض، وردي) مرفوعة للتخزين السحابي وحفظت محلياً في `public/products/bur-holder-mix-3colors.png`.
+   - **الربط الأكاديمي:** مواد العلاج التحفظي والاستعاضة الثابتة في السنتين الثانية والثالثة.
+
+3. **ثالثاً: نظام الألوان العشوائي (Random Color System)**:
+   - الزبون لا يختار اللون عند الطلب، ولا توجد خيارات ألوان مشتتة في صفحة المنتج.
+   - عرض تنبيه بارز في صفحة تفاصيل المنتج:
+     **«الألوان تُرسل عشوائيًا حسب المتوفر في المخزون، ولا يمكن اختيار لون محدد.»**
+   - تطوير محرك `src/utils/burHolderInventoryEngine.js` لإدارة وتتبع مخزون الألوان الثلاثة:
+     - 🟡 أصفر (Yellow)
+     - ⚪ أبيض (White)
+     - 🌸 وردي (Pink)
+   - إضافة واجهة تحكم في نافذة تعديل المنتج بلوحة الإدارة لتسجيل كميات الألوان الثلاثة، مع مزامنة إجمالي المخزون تلقائياً.
+   - في لوحة إدارة الطلبات (`Orders.jsx`)، يظهر خيار تجهيز اللون لكل طلبية مع بيان الكمية المتوفرة، ويتم خصم قطعة واحدة من مخزون اللون المختار فعلياً مع منع التجاوز.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| `قاعدة البيانات السحابية` | إدراج سجلي المنتجين المستقلين في `products` وربطهما في `product_subjects` |
-| `حاوية التخزين السحابي` | رفع صورتي المنتجين المستقلتين إلى `smylodent-assets/products/` |
-| [`public/products/water-gauge-green.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/water-gauge-green.png) | حفظ الصورة الأولى للمنتج الأخضر |
-| [`public/products/water-gauge-lasgod.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/water-gauge-lasgod.png) | حفظ الصورة الثانية لطقم LASCOD النيون |
-| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | توثيق المنتجين في الكتالوج الاحتياطي لحالات الأوفلاين |
+| `قاعدة البيانات السحابية` | أرشفة المنتجين القديمين، وإدراج سجل المنتج الجديد `BUR-HOLDER-MIX-001`، وتخزين تفصيل الألوان في `settings` |
+| `حاوية التخزين السحابي` | رفع صورة الألوان الثلاثة `bur-holder-mix-3colors.png` |
+| [`public/products/bur-holder-mix-3colors.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/bur-holder-mix-3colors.png) | حفظ الصورة محلياً |
+| [`src/utils/burHolderInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/burHolderInventoryEngine.js) | محرك تتبع مخزون الألوان وخصم القطع عند التجهيز |
+| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | عرض تنبيه الألوان العشوائية وإلغاء اختيار اللون من الزبون |
+| [`src/pages/admin/Products.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/Products.jsx) | حقول إدخال وتعديل مخزون الألوان الثلاثة ومزامنة الإجمالي والسعر |
+| [`src/pages/admin/Orders.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/Orders.jsx) | قائمة منسدلة لتحديد اللون المجهز للزبون وخصم قطعة من لونه المختار |
+| [`src/components/InvoiceView.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/InvoiceView.jsx) | وسم «لون عشوائي» في الفاتورة |
+| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | استبدال المنتجين القديمين بالمنتج الجديد في الكتالوج الاحتياطي |
 
 ---
 
 ## 3. ما تم إنجازه ويعمل بنجاح
-- [x] **إضافة المنتجين كسجلين مستقلين تماماً في قاعدة البيانات السحابية** ✅
-- [x] **تخصيص كود فريد لكل منتج (`WG-GREEN-001` و `WG-LASGOD-002`)** ✅
-- [x] **تحديد سعر ومخزون منفصل لكل منهما (11 د.ل و 15 د.ل)** ✅
-- [x] **ربط كل صورة بمنتجها الصحيح ورفعها للتخزين السحابي وحفظها محلياً** ✅
-- [x] **ظهور المنتجين كخيارين مستقلين في البحث، السلة، الفواتير، وتقارير المبيعات** ✅
-- [x] **ربطهما بمحرك خصم المخزون المستقل لكل منتج على حدة** ✅
-- [x] **عدم دمج المنتجين أو التأثير على أي منتجات قديمة** ✅
-- [x] **بناء المشروع للإنتاج (`npm run build`) بنجاح تام 100% وبدون أي أخطاء** ✅
+- [x] **أرشفة وحذف المنتجين القديمين من الواجهة والبيع مع الحفاظ على الفواتير السابقة** ✅
+- [x] **إضافة المنتج الجديد `Bur Holder` بكود `BUR-HOLDER-MIX-001` وصورة الألوان الثلاثة** ✅
+- [x] **عرض ملاحظة الألوان العشوائية الصريحة في صفحة المنتج ومنع اختيار اللون من الزبون** ✅
+- [x] **إمكانية تعديل السعر ومخزون الألوان من لوحة الإدارة** ✅
+- [x] **تحديد اللون المجهز للإرسال في لوحة الطلبات وخصم قطعة من اللون الفعلي** ✅
+- [x] **بناء المشروع للإنتاج (`npm run build`) بنجاح تام وبدون أي أخطاء** ✅
 
 ---
 
 ## 4. الخطوة القادمة المطلوبة (Immediate Next Step)
-- فحص المنتجين في صفحة مواد طب الأسنان وقسم مستلزمات أخرى، وتجربة البحث بكود `WG-GREEN-001` أو `WG-LASGOD-002`.
+- تجربة فتح صفحة منتج `Bur Holder` في المتجر للتحقق من الملاحظة، وتجربة تسجيل طلب جديد واختيار لون تجهيزه من لوحة الإدارة لمراقبة الخصم الفعلي.

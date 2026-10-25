@@ -652,6 +652,12 @@ export const ProductDetails = () => {
   // Strict English name requirement
   const displayName = product.name_en || product.name_ar || 'Dental Tool';
   const productSku = product.sku || (product.details_ar && product.details_ar.match(/SKU:\s*([^\n\r]+)/i)?.[1]) || (product.details_en && product.details_en.match(/SKU:\s*([^\n\r]+)/i)?.[1]) || null;
+  const isRandomColorProduct = Boolean(
+    product.sku === 'BUR-HOLDER-MIX-001' ||
+    (product.details_ar && product.details_ar.includes('BUR-HOLDER-MIX-001')) ||
+    (product.details_en && product.details_en.includes('BUR-HOLDER-MIX-001')) ||
+    (displayName.toLowerCase() === 'bur holder')
+  );
 
   return (
     <div className="product-details-page">
@@ -1092,6 +1098,47 @@ export const ProductDetails = () => {
               </div>
             ) : (
               <>
+                {/* Random Color System Notice for Bur Holder */}
+                {isRandomColorProduct && (
+                  <div
+                    style={{
+                      margin: '1.25rem 0',
+                      padding: '1.1rem 1.25rem',
+                      borderRadius: '14px',
+                      backgroundColor: '#FFFBEB',
+                      border: '1.5px solid #FDE68A',
+                      boxShadow: '0 4px 14px rgba(245, 158, 11, 0.08)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.65rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#92400E', fontWeight: 800, fontSize: '0.95rem' }}>
+                      <Sparkles size={19} style={{ color: '#D97706', flexShrink: 0 }} />
+                      <span>{lang === 'ar' ? 'تنبيه نظام الألوان' : 'Color Dispatch Notice'}</span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.92rem', color: '#92400E', lineHeight: 1.6, fontWeight: 700 }}>
+                      {lang === 'ar'
+                        ? '«الألوان تُرسل عشوائيًا حسب المتوفر في المخزون، ولا يمكن اختيار لون محدد.»'
+                        : '«Colors are sent randomly based on available stock, specific color selection is not available.»'}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#78350F', fontWeight: 700 }}>
+                        {lang === 'ar' ? 'الألوان المتوفرة للدفعة:' : 'Available batch colors:'}
+                      </span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.76rem', padding: '3px 8px', borderRadius: '6px', background: '#FEF08A', color: '#713F12', border: '1px solid #FACC15', fontWeight: 700 }}>
+                        🟡 {lang === 'ar' ? 'أصفر' : 'Yellow'}
+                      </span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.76rem', padding: '3px 8px', borderRadius: '6px', background: '#FFFFFF', color: '#1E293B', border: '1px solid #CBD5E1', fontWeight: 700 }}>
+                        ⚪ {lang === 'ar' ? 'أبيض' : 'White'}
+                      </span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.76rem', padding: '3px 8px', borderRadius: '6px', background: '#FCE7F3', color: '#831843', border: '1px solid #F472B6', fontWeight: 700 }}>
+                        🌸 {lang === 'ar' ? 'وردي' : 'Pink'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Dedicated Box Color Availability System (Requirements 3, 4, 11) */}
                 {isBoxProductState && (
                   <div style={{ margin: '1.25rem 0' }}>
