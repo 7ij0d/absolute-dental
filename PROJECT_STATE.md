@@ -7,66 +7,76 @@
 
 ## 1. نظرة عامة على المشروع والتقنيات (Project Overview & Tech Stack)
 - **المنصة:** متجر ومستودع الأدوات والمستلزمات الطبية الدراسية لطلبة طب وجراحة الفم والأسنان (**Absolute Dental Equipment**).
-- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + Vanilla Semantic CSS Design System (v4.0) + Bur Grouping & Popup Engine + Subject Categorization Engine.
+- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + Vanilla Semantic CSS Design System (v4.0) + Bur Grouping & Popup Engine + Subject Categorization Engine + Boxes & Accessories Gateway Architecture.
 
 ---
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 1. إعادة تنظيم عرض المنتجات في جميع المواد والسنوات إلى مجموعات سريرية متناسقة:
-- تم استبدال العرض الشبكي العشوائي القديم بنظام تبويب وتجميع سريري ذكي للمنتجات داخل صفحات المواد (`SubjectPage.jsx`) وفق طبيعتها واستخدامها الفعلي في طب الأسنان:
-  1. **Fixed Prosthodontics (الاستعاضة السنية الثابتة - السنة الثانية):**
-     - **Dental Burs (البارات):** تضم مجموعات البارات الستة (TF, Round, FO, Fisher, TC Needle, SI Bur) مع البير المستقل WR 13.
-     - **Handpieces & Casting (القبضات والكاستات):** باقة الكاست + قبضة NSK أولاً، ثم كاست الأسنان، ثم قبضة NSK، قبضة COXO، وقبضة Westcode.
-     - **Examination Instruments (أدوات الفحص والقياس):** Periodontal Probe ثم Dental Mouth Mirror.
-     - **Artificial Teeth (الأسنان والمجسمات):** Central Incisor.
-     - **Consumables & Accessories (المستهلكات والمستلزمات):** Bur Holder (بألوانه العشوائية) أولاً، ثم القفازات، الكمامات، البكج، و Cover Sheets.
-  2. **Conservative Dentistry (علاج الأسنان التحفظي - السنة الثانية):**
-     - Dental Burs, Handpieces, Restorative & Filling Instruments, Dental Models, Consumables & Accessories.
-  3. **Removable Prosthodontics (الاستعاضة الصناعية المتحركة - السنة الثانية):**
-     - Impression & Casting Tools, Laboratory Instruments, Waxing & Articulation, Artificial Teeth, Accessories.
-  4. **Dental Anatomy & Dental Materials (السنة الأولى):**
-     - مجسمات الأسنان، أدوات النحت والواكس، مواد القياس والخلط، والمستلزمات.
-  5. **مواد السنة الثالثة وباقي التخصصات:**
-     - تقسيم سريري منظم تلقائياً (Dental Burs, Handpieces, Clinical Instruments, Endodontics/Restorative, Diagnostic Tools, Consumables).
-  6. **محرك تصنيف احتياطي مرن (Adaptive Fallback):**
-     - تصنيف أي مادة جديدة أو منتج مستقبلي تلقائياً استناداً إلى خصائص المنتج ونوعه.
+### 🔹 1. تعديل الصفحة الرئيسية إلى 3 بطاقات رئيسية متناسقة وفق التصميم المرجعي:
+1. **أدوات الدراسة (`/study-tools`):**
+   - احتفاظ كامل بالبطاقة الحالية وصورتها ووصفها وزرها («ابدأ الآن»).
+2. **الإكسسوارات (`/accessories`):**
+   - تغيير الصورة إلى الصورة المرجعية الجديدة (`accessories-faded.webp` / `png`) التي تبرز البالطو الأبيض واليونيفورم الطبي.
+   - العنوان: «الإكسسوارات».
+   - الوصف: «لابكوت، يونيفورم، إكسسوارات طبية وشخصية.».
+   - الزر: «تصفح الآن».
+3. **البوكسات (`/boxes`):**
+   - بطاقة رئيسية مستقلة تماماً للبوكسات باستخدام الصورة الرسمية للبوكسات (`dental-boxes-faded.webp` / `png`).
+   - العنوان: «البوكسات».
+   - الوصف: «بوكسات تنظيم وحفظ لجميع أدواتك.».
+   - الزر: «تصفح الآن».
+   - مرتبطة بصفحة مستقلة متخصصة للبوكسات (`BoxesPage.jsx`).
 
-### 🔹 2. ضوابط ومعايير العرض المنفذة بدقة:
-- **عرض مباشر لجميع المنتجات دون استثناء:** لا وجود لأزرار "عرض المزيد" أو تقطيع الصفحات؛ جميع المنتجات تظهر مباشرة أمام الطالب.
-- **إخفاء الأقسام الفارغة تلقائياً:** لا يظهر أي تصنيف إلا إذا كان يحتوي على منتجات فعلية متوفرة.
-- **رأس قسم مزدوج أنيق (Bilingual Headers):** عنوان رئيسي إنجليزي بارز + ترجمة عربية فرعية ناعمة + أيقونة معبرة + شارة (`badge`) بعدد المنتجات.
-- **تصميم متجاوب متعدد الشاشات (Responsive Multi-device Grid):**
-  - شاشات الحاسوب العريضة (>= 1400px): 5 أعمدة.
-  - الشاشات المكتبية واللابتوب (1081-1399px): 4 أعمدة.
-  - أجهزة التابلت والآيباد (768-1080px): 3 أعمدة.
-  - الهواتف المحمولة (<= 680px): عمودان متناسقان مع تصغير متزن لأزرار التفاعل.
-  - الشاشات الضيقة جداً (<= 360px): عمود واحد كامل الاتساع.
-- **تحديث الكاش الفوري:** ترقية بادئة الكاش إلى `ad9:` لتحديث البيانات فوراً لدى كافة الزوار.
+### 🔹 2. فصل كامل وتام بين منتجات الإكسسوارات والبوكسات:
+- إنشاء صفحة مستقلة للبوكسات [`src/pages/BoxesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/BoxesPage.jsx) تعرض كافة موديلات البوكسات (17.5" GT-MAX، 16.5"، 16"، 14") وخيارات الألوان والجهات الخارجية والداخلية والتكبير والسلة.
+- تخصيص صفحة الإكسسوارات [`src/pages/AccessoriesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/AccessoriesPage.jsx) للمستلزمات الشخصية والطبية واللابكوتات واليونيفورم والديكور.
+- تحديث روابط النافبار وفوتر الموقع لتضمين قسم البوكسات وقسم الإكسسوارات بشكل مستقل وواضح.
+
+### 🔹 3. إضافة منتج «لاب كوت ابيض FIGS محلي» للمتجر:
+- **المواصفات:**
+  - الاسم: `لاب كوت ابيض FIGS محلي` / `White FIGS Lab Coat (Local)`
+  - السعر: **45 دينار ليبي**.
+  - المقاسات المتوفرة: **M**, **L**, **XL**.
+  - ملاحظة المقاس: «💡 ملاحظة المقاس: زيد مقاس ديما على مقاسك العادي، وتقدر تقيس قبل الدفع.»
+  - الصور: تم تجهيز الصور الثلاثة عالية الدقة ورفعها إلى السيرفر وتخزينها محلياً في `public/products/labcoat-figs-white-1.jpg`, `2.jpg`, `3.jpg`.
+  - ربط كامل بنظام السلة والمخزون وصفحة تفاصيل المنتج [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) ومحرك المقاسات [`CANONICAL_SIZED_PRODUCTS`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/productInventoryEngine.js).
+  - إضافة سجلات المنتج في الجداول الحية لقاعدة البيانات والنسخة المحلية `src/defaultProducts.json`.
+
+### 🔹 4. تجاوب الشاشات الدقيق (Desktop, iPad, Mobile):
+- **كمبيوتر ولابتوب (>= 961px):** 3 بطاقات متجاورة في صف واحد متوازن بدقة مطابقة للصورة المرجعية.
+- **أجهزة التابلت والآيباد (720px - 960px):** 3 بطاقات في صف واحد مع تحجيم متزن للنصوص والأزرار والهوامش.
+- **الهواتف الذكية (<= 719px):** 3 بطاقات متتالية رأسياً بانسيابية تامة وسهولة لمس دون تداخل.
+- **ترقية الكاش التلقائي:** ترقية بادئة الكاش إلى `ad10:` لضمان تحميل التعديلات فوراً لجميع المستخدمين.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/utils/subjectGroupEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/subjectGroupEngine.js) | محرك التصنيف والترتيب السريري لمجموعات المواد |
-| [`src/utils/burGroupingEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/burGroupingEngine.js) | إعادة ترتيب مجموعات البارات حسب تسلسل الفكسد والكونس المعتمد |
-| [`src/pages/SubjectPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SubjectPage.jsx) | دمج المجموعات السريرية ورؤوس الأقسام مع الحفاظ على الفلاتر والبحث والسلة |
-| [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) | إضافة تنسيقات المجموعات وتجاوب الشبكة على مختلف مقاسات الشاشات |
-| [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) | ترقية بادئة الكاش إلى `ad9:` لإفراغ الذاكرة المؤقتة القديمة |
-| قاعدة البيانات الحية (`product_subjects`) | ربط البارات الناقصة بقسم الفكسد لتحقيق مطابقة 100% مع التصميم المعتمد |
+| [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx) | تعديل شبكة البطاقات الرئيسية إلى 3 بطاقات متجاوبة (دراسة، إكسسوارات، بوكسات) |
+| [`src/pages/BoxesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/BoxesPage.jsx) | صفحة مستقلة جديدة بالكامل لعرض موديلات وتفاصيل البوكسات |
+| [`src/pages/AccessoriesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/AccessoriesPage.jsx) | صفحة الإكسسوارات المخصصة مع بطاقات اللابكوت واليونيفورم ومعرض الصور |
+| [`src/App.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/App.jsx) | تسجيل مسارات `/boxes` و `/dental-boxes` وربطها بالصفحة المستقلة |
+| [`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx) | إضافة رابط البوكسات وتحديث رابط الإكسسوارات في القائمة الرئيسية والموبايل |
+| [`src/components/Footer.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Footer.jsx) | تحديث الروابط السريعة لفصل البوكسات عن الإكسسوارات |
+| [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) | إضافة قواعد الشبكة ثلاثية الأعمدة وتجاوب الآيباد والموبايل للبطاقات الرئيسية |
+| [`src/utils/productInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/productInventoryEngine.js) | تسجيل منتج لابكوت FIGS في محرك المقاسات الإلزامية والصور |
+| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | إضافة صندوق التنبيه البصري لملاحظة المقاس قبل الشراء |
+| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | مزامنة منتج اللابكوت في ملف البيانات المحلي الاحتياطي |
+| [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) | ترقية بادئة الكاش إلى `ad10:` لتحديث ذاكرة المتصفح الفوري |
 
 ---
 
 ## 3. ما تم إنجازه ويعمل بنجاح
-- [x] **توزيع وتصنيف منتجات جميع المواد والسنوات في مجموعات وظيفية متناسقة** ✅
-- [x] **مطابقة تامة لترتيب مجموعات قسم الفكسد كمرجع أساسي** ✅
-- [x] **إلغاء الإخفاء وإظهار جميع المنتجات مباشرة دون أزرار "عرض المزيد"** ✅
-- [x] **تجاوب سلس ودقيق على شاشات الكمبيوتر والآيباد والهواتف الذكية** ✅
-- [x] **الحفاظ الكامل على وظائف السلة، المفضلة، تفاصيل المنتج، نافذة البارات، والأسعار** ✅
-- [x] **إتمام البناء بنجاح خالي من الأخطاء (`npm run build`)** ✅
+- [x] **تحديث الصفحة الرئيسية بـ 3 بطاقات فقط (أدوات الدراسة، الإكسسوارات، البوكسات)** ✅
+- [x] **فصل البوكسات عن الإكسسوارات في صفحات وقوائم مستقلة تماماً** ✅
+- [x] **إضافة منتج «لاب كوت ابيض FIGS محلي» بسعر 45 د.ل وصوره الثلاثة ومقاساته M/L/XL وملاحظة القياس** ✅
+- [x] **الحفاظ على سلامة أقسام تجارب الطلبة وطلب المنتجات غير المتوفرة والهيدر والبحث** ✅
+- [x] **تطابق التجاوب على الكمبيوتر والآيباد والهواتف الذكية مع الموك اب المرفق** ✅
+- [x] **إتمام البناء الإنتاجي (`npm run build`) بنجاح (3.45s)** ✅
 
 ---
 
 ## 4. الخطوة التالية المباشرة (Immediate Next Step)
-- متابعة أي ملاحظات إضافية وتأكيد جاهزية المنصة بالكامل.
+- جاهز للمعاينة والتأكيد النهائي من قبل العميل.

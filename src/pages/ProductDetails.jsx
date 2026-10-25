@@ -1184,6 +1184,25 @@ export const ProductDetails = () => {
                         🌸 {lang === 'ar' ? 'وردي' : 'Pink'}
                       </span>
                     </div>
+                    {sizedConfig.sizingNoticeAr && (
+                      <div style={{
+                        marginTop: '0.85rem',
+                        padding: '0.75rem 1rem',
+                        borderRadius: '10px',
+                        background: 'rgba(217, 119, 6, 0.08)',
+                        border: '1px solid rgba(217, 119, 6, 0.25)',
+                        color: '#92400E',
+                        fontSize: '0.88rem',
+                        fontWeight: 700,
+                        lineHeight: 1.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        <Info size={18} style={{ flexShrink: 0, color: '#D97706' }} />
+                        <span>{lang === 'ar' ? sizedConfig.sizingNoticeAr : (sizedConfig.sizingNoticeEn || sizedConfig.sizingNoticeAr)}</span>
+                      </div>
+                    )}
                   </div>
                 )}
 

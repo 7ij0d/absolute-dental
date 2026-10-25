@@ -8,7 +8,7 @@ import {
   ChevronDown, LayoutDashboard, LogOut, ClipboardList,
   Heart, ChevronRight, ChevronLeft, BookOpen,
   Home, GraduationCap, PackageCheck, Box, MessageSquare, HeartHandshake,
-  Sparkles, Layers
+  Sparkles, Layers, Shirt
 } from 'lucide-react';
 import supabase from '../supabaseClient';
 import brandLogoTrimmed from '../assets/images/brand-logo-trimmed.png';

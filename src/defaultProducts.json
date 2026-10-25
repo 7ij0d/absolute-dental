@@ -1,5 +1,19 @@
 [
   {
+    "id": "55000000-0000-0000-0000-000000000001",
+    "name_ar": "لاب كوت ابيض FIGS محلي",
+    "name_en": "White FIGS Lab Coat (Local)",
+    "description_ar": "لاب كوت أبيض طبي أنيق ومريح بتصميم FIGS محلي. متوفر بمقاسات M, L, XL. ملاحظة المقاس: زيد مقاس ديما على مقاسك العادي، وتقدر تقيس قبل الدفع.",
+    "description_en": "White FIGS local medical lab coat. Available in M, L, XL sizes. Sizing note: Always size up from your regular size. Fitting available before payment.",
+    "details_ar": "المقاسات المتوفرة: M, L, XL\nملاحظة: زيد مقاس ديما على مقاسك العادي وتقدر تقيس قبل الدفع.",
+    "price": 45,
+    "stock_quantity": 30,
+    "availability": "available",
+    "is_active": true,
+    "sort_order": 1,
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/labcoat-figs-white-1.jpg"
+  },
+  {
     "id": "50c5fac9-de64-452d-85ac-c6cce3496793",
     "name_ar": "Bur Holder",
     "name_en": "Bur Holder",

@@ -31,6 +31,8 @@ import studyToolsWebp from '../assets/images/study-tools-faded.webp';
 import studyToolsPng from '../assets/images/study-tools-faded.png';
 import dentalBoxesWebp from '../assets/images/dental-boxes-faded.webp';
 import dentalBoxesPng from '../assets/images/dental-boxes-faded.png';
+import accessoriesWebp from '../assets/images/accessories-faded.webp';
+import accessoriesPng from '../assets/images/accessories-faded.png';
 import productRequestWebp from '../assets/images/product-request-faded.webp';
 import productRequestPng from '../assets/images/product-request-faded.png';
 
@@ -407,8 +409,8 @@ export const Home = () => {
             </p>
           </section>
 
-          {/* Two Main Gateway Cards */}
-          <section className="home-gateway-grid" aria-label="Main Sections">
+          {/* Three Main Gateway Cards */}
+          <section className="home-gateway-grid home-gateway-grid-3cols" aria-label="Main Sections">
             {/* CARD 01: أدوات الدراسة */}
             <Link
               to="/study-tools"
@@ -448,21 +450,60 @@ export const Home = () => {
               </div>
             </Link>
 
-            {/* CARD 02: إكسسوارات الأسنان */}
+            {/* CARD 02: الإكسسوارات */}
             <Link
               to="/accessories"
               className="gateway-card gateway-card-reference"
-              aria-label={lang === 'ar' ? 'إكسسوارات الأسنان - بوكسات، حقائب، أدوات تنظيم ومستلزمات إضافية' : 'Dental Accessories'}
+              aria-label={lang === 'ar' ? 'الإكسسوارات - لابكوت، يونيفورم، إكسسوارات طبية وشخصية' : 'Accessories'}
             >
               <div className="gateway-card-content">
                 <div className="gateway-card-text">
                   <h2 className="gateway-card-title">
-                    {lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories'}
+                    {lang === 'ar' ? 'الإكسسوارات' : 'Accessories'}
                   </h2>
                   <p className="gateway-card-desc">
                     {lang === 'ar'
-                      ? 'بوكسات، حقائب، أدوات تنظيم ومستلزمات إضافية.'
-                      : 'Boxes, bags, organization gear and extra student supplies.'}
+                      ? 'لابكوت، يونيفورم، إكسسوارات طبية وشخصية.'
+                      : 'Lab coats, uniforms, personal & medical accessories.'}
+                  </p>
+                </div>
+
+                <div className="gateway-card-action">
+                  <span className="gateway-pill-cta">
+                    <span>{lang === 'ar' ? 'تصفح الآن' : 'Browse Now'}</span>
+                    <ArrowIcon size={16} strokeWidth={2.5} />
+                  </span>
+                </div>
+              </div>
+
+              <div className="gateway-card-artwork">
+                <picture>
+                  <source srcSet={accessoriesWebp} type="image/webp" />
+                  <img
+                    src={accessoriesPng}
+                    alt={lang === 'ar' ? 'الإكسسوارات' : 'Accessories'}
+                    loading="eager"
+                    className="gateway-art-img"
+                  />
+                </picture>
+              </div>
+            </Link>
+
+            {/* CARD 03: البوكسات */}
+            <Link
+              to="/boxes"
+              className="gateway-card gateway-card-reference"
+              aria-label={lang === 'ar' ? 'البوكسات - بوكسات تنظيم وحفظ لجميع أدواتك' : 'Dental Boxes'}
+            >
+              <div className="gateway-card-content">
+                <div className="gateway-card-text">
+                  <h2 className="gateway-card-title">
+                    {lang === 'ar' ? 'البوكسات' : 'Boxes'}
+                  </h2>
+                  <p className="gateway-card-desc">
+                    {lang === 'ar'
+                      ? 'بوكسات تنظيم وحفظ لجميع أدواتك.'
+                      : 'Organizer & storage boxes for all your tools.'}
                   </p>
                 </div>
 
@@ -479,7 +520,7 @@ export const Home = () => {
                   <source srcSet={dentalBoxesWebp} type="image/webp" />
                   <img
                     src={dentalBoxesPng}
-                    alt={lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories'}
+                    alt={lang === 'ar' ? 'البوكسات' : 'Boxes'}
                     loading="eager"
                     className="gateway-art-img"
                   />

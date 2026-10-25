@@ -19,7 +19,8 @@ export const Footer = () => {
         { label: 'السنة الثانية',      to: '/year/2nd-year' },
         { label: 'السنة الثالثة',     to: '/year/3rd-year' },
         { label: 'السنة الرابعة',      to: '/year/4th-year' },
-        { label: 'إكسسوارات الأسنان', to: '/accessories' },
+        { label: 'الإكسسوارات',       to: '/accessories' },
+        { label: 'البوكسات',          to: '/boxes' },
         { label: 'التبرعات ونواقص الطلاب', to: '/donations' },
         { label: 'تتبع طلبك',          to: '/track' },
       ]
@@ -29,7 +30,8 @@ export const Footer = () => {
         { label: '2nd Year',               to: '/year/2nd-year' },
         { label: '3rd Year',               to: '/year/3rd-year' },
         { label: '4th Year',               to: '/year/4th-year' },
-        { label: 'Dental Accessories',     to: '/accessories' },
+        { label: 'Accessories',            to: '/accessories' },
+        { label: 'Boxes',                  to: '/boxes' },
         { label: 'Donations & Need Requests', to: '/donations' },
         { label: 'Track Order',            to: '/track' },
       ];

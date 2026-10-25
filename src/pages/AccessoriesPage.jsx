@@ -4,289 +4,76 @@ import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import supabase from '../supabaseClient';
 import {
-  Package,
+  Sparkles,
   ChevronRight,
   ChevronLeft,
-  MessageCircle,
-  CheckCircle2,
-  Info,
-  ArrowLeft,
-  ArrowRight,
-  Box,
   ShoppingCart,
   Maximize2,
   X,
   Check,
-  Ban
+  Info,
+  ShieldCheck,
+  Shirt,
+  Tag
 } from 'lucide-react';
-import BoxColorVariantSelector from '../components/BoxColorVariantSelector';
-import {
-  splitBoxColorsByAvailability,
-  cleanColorLabel,
-  fetchCanonicalBoxInventory
-} from '../utils/boxInventoryEngine';
 
 const BASE = import.meta.env.BASE_URL || '/';
 
-
-
-/* ─── HARDCODED FALLBACKS (Used only if DB returns 0 rows) ─── */
-const FALLBACK_CATEGORIES = [
+/* ─── DEFAULT ACCESSORIES CATALOG (First Star Item: FIGS Lab Coat) ─── */
+const DEFAULT_ACCESSORY_PRODUCTS = [
   {
-    id: 'cat-1',
-    name_ar: 'بوكسات الأسنان',
-    name_en: 'Dental Boxes',
-    slug: 'dental-boxes',
-    description_ar: 'بوكسات تخزين وتنظيم الأدوات الطبية بأحجام وألوان متعددة',
-    description_en: 'Professional storage & organizer boxes in various sizes & colors',
-    image_url: `${BASE}accessories/box17-colors.png`
-  }
-];
-
-const FALLBACK_BOXES = [
-  {
-    id: 'box-14',
-    size: '14 inch',
-    name_ar: '14" Dental Tool Box',
-    name_en: '14" Dental Tool Box',
+    id: '55000000-0000-0000-0000-000000000001',
+    name_ar: 'لاب كوت ابيض FIGS محلي',
+    name_en: 'White FIGS Lab Coat (Local)',
     price: 45,
-    stock_quantity: 1,
-    desc_ar: 'Compact Arradent dental toolbox with a colored lid, top organizer compartments, and durable carry handle.',
-    desc_en: 'Compact Arradent dental toolbox with a colored lid, top organizer compartments, and durable carry handle.',
-    features_ar: ['Top organizer compartments', 'Single front latch', 'Compact portable size', 'Comfortable carry handle'],
-    features_en: ['Top organizer compartments', 'Single front latch', 'Compact portable size', 'Comfortable carry handle'],
-    main_image: `${BASE}accessories/box14-pink.jpg`,
-    inside_image: `${BASE}accessories/box14-pink.jpg`,
-    colors: [
-      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 1, physical_stock: 1, reserved_stock: 0, image_url: `${BASE}accessories/box14-pink.jpg` }
-    ]
-  },
-  {
-    id: 'box-16',
-    size: '16 inch',
-    name_ar: '16" Dental Tool Box',
-    name_en: '16" Dental Tool Box',
-    price: 65,
-    stock_quantity: 0,
-    desc_ar: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
-    desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
-    features_ar: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
-    features_en: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
-    main_image: `${BASE}accessories/box16-purple.jpg`,
-    inside_image: `${BASE}accessories/box16-inside-blue.jpg`,
-    colors: [
-      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي',                     label_en: 'Purple',                     status: 'in_stock',     available_stock: 6, physical_stock: 6, reserved_stock: 0, image_url: `${BASE}accessories/box16-purple.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
-      { id: 'pink',   hex_code: '#F48FB1', label_ar: 'وردي',                       label_en: 'Pink',                       status: 'in_stock',     available_stock: 6, physical_stock: 6, reserved_stock: 0, image_url: `${BASE}accessories/box16-pink.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
-      { id: 'blue',   hex_code: '#1565C0', label_ar: 'أزرق [out_of_stock]',         label_en: 'Blue [out_of_stock]',       status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-blue.jpg`, inside_image_url: `${BASE}accessories/box16-inside-blue.jpg`, base_image_url: `${BASE}accessories/box16-base-blue.jpg` },
-      { id: 'red',    hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]',          label_en: 'Red [out_of_stock]',        status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-red.jpg`, inside_image_url: `${BASE}accessories/box16-inside-red.jpg`, base_image_url: `${BASE}accessories/box16-base-red.jpg` },
-      { id: 'yellow', hex_code: '#F5C518', label_ar: 'أصفر [out_of_stock]',         label_en: 'Yellow [out_of_stock]',     status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-yellow.jpg`, inside_image_url: `${BASE}accessories/box16-inside-yellow.jpg`, base_image_url: `${BASE}accessories/box16-base-yellow.jpg` },
-      { id: 'maroon', hex_code: '#800020', label_ar: 'خمري / عنابي',               label_en: 'Maroon',                     status: 'in_stock',     available_stock: 1, physical_stock: 1, reserved_stock: 0, image_url: `${BASE}accessories/box16-maroon.jpg`, inside_image_url: `${BASE}accessories/box16-inside-maroon.jpg`, base_image_url: `${BASE}accessories/box16-base-maroon.jpg` },
-    ]
-  },
-  {
-    id: 'box-16-5',
-    size: '16.5 inch',
-    name_ar: '16.5" Organizer Box',
-    name_en: '16.5" Organizer Box',
-    price: 85,
-    stock_quantity: 4,
-    desc_ar: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
-    desc_en: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
-    features_ar: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
-    features_en: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
-    main_image: `${BASE}accessories/box16_5-real.jpg`,
-    inside_image: `${BASE}accessories/box16_5-inside.png`,
-    colors: [
-      { id: 'black',  hex_code: '#1F2937', label_ar: 'أسود',                             label_en: 'Black',                              status: 'in_stock',     available_stock: 4, physical_stock: 4, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-black.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside.png` },
-      { id: 'red',    hex_code: '#D32F2F', label_ar: 'أحمر [out_of_stock]',              label_en: 'Red [out_of_stock]',                 status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-red.jpg`,    inside_image_url: `${BASE}accessories/box16_5-inside-red.jpg` },
-      { id: 'blue',   hex_code: '#2196F3', label_ar: 'أزرق فاتح [out_of_stock]',         label_en: 'Light Blue [out_of_stock]',          status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-blue.png`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
-      { id: 'navy',   hex_code: '#0D47A1', label_ar: 'أزرق داكن [out_of_stock]',         label_en: 'Dark Navy Blue [out_of_stock]',      status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-blue.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
-      { id: 'purple', hex_code: '#6A3093', label_ar: 'بنفسجي [out_of_stock]',            label_en: 'Purple [out_of_stock]',              status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-purple.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-purple.jpg` },
-      { id: 'teal',   hex_code: '#00ACC1', label_ar: 'تركوازي [out_of_stock]',     label_en: 'Teal [out_of_stock]',       status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-teal.jpg`,   inside_image_url: `${BASE}accessories/box16_5-inside-teal.jpg` },
-      { id: 'green',  hex_code: '#7CB342', label_ar: 'أخضر [out_of_stock]',        label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-green.jpg`,  inside_image_url: `${BASE}accessories/box16_5-inside-green.jpg` },
-      { id: 'orange', hex_code: '#F57C00', label_ar: 'برتقالي [out_of_stock]',     label_en: 'Orange [out_of_stock]',     status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-orange.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-orange.jpg` },
-    ]
-  },
-  {
-    id: 'box-17',
-    size: '17.5 inch',
-    name_ar: '17.5" Professional Box — GT-MAX',
-    name_en: '17.5" Professional Box — GT-MAX',
-    price: 95,
-    stock_quantity: 10,
-    desc_ar: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
-    desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
-    features_ar: ['Clear lid organizer', 'Wide main storage space', 'Two side + front latches', 'Strong & Durable plastic'],
-    features_en: ['Clear lid organizer', 'Wide main storage space', 'Two side + front latches', 'Strong & Durable plastic'],
-    main_image: `${BASE}accessories/box17_5-dark-blue.jpg`,
-    inside_image: `${BASE}accessories/box17-inside-black.jpg`,
-    colors: [
-      { id: 'blue',   hex_code: '#0D47A1', label_ar: 'أزرق داكن',                   label_en: 'Dark Blue',                  status: 'in_stock',     available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: `${BASE}accessories/box17_5-dark-blue.jpg`, inside_image_url: `${BASE}accessories/box17-inside-blue.jpg` },
-      { id: 'black',  hex_code: '#111111', label_ar: 'أسود [out_of_stock]',         label_en: 'Black [out_of_stock]',       status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-black.jpg`, inside_image_url: `${BASE}accessories/box17-inside-black.jpg` },
-      { id: 'purple', hex_code: '#A880C8', label_ar: 'بنفسجي [out_of_stock]',       label_en: 'Purple [out_of_stock]',      status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-purple.jpg`, inside_image_url: `${BASE}accessories/box17-inside-purple.jpg` },
-      { id: 'red',    hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]',          label_en: 'Red [out_of_stock]',         status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-red.jpg`, inside_image_url: `${BASE}accessories/box17-inside-red.jpg` },
-      { id: 'pink',   hex_code: '#F48FB1', label_ar: 'وردي [out_of_stock]',          label_en: 'Pink [out_of_stock]',        status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-pink.jpg`, inside_image_url: `${BASE}accessories/box17-inside-pink.jpg` },
-      { id: 'beige',  hex_code: '#C8A882', label_ar: 'بيج [out_of_stock]',          label_en: 'Beige [out_of_stock]',       status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-beige.jpg`, inside_image_url: `${BASE}accessories/box17-inside-beige.jpg` },
-      { id: 'teal',   hex_code: '#00897B', label_ar: 'تركوازي [out_of_stock]',       label_en: 'Teal [out_of_stock]',        status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-colors.png` },
-      { id: 'lime',   hex_code: '#7CB342', label_ar: 'أخضر فسفوري [out_of_stock]',   label_en: 'Lime Green [out_of_stock]',  status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-colors.png` },
+    tag_ar: 'جديد ومميز 🔥',
+    tag_en: 'New & Featured 🔥',
+    desc_ar: 'بالطو طبي أبيض بتصميم FIGS محلي أنيق ومريح، مصنوع من خامة عملية وعالية الجودة لطلبة طب الأسنان والكوادر الطبية.',
+    desc_en: 'White FIGS local medical lab coat, tailored with premium comfortable fabric for dental students and clinical sessions.',
+    sizes: ['M', 'L', 'XL'],
+    size_notice_ar: '💡 ملاحظة المقاس: زيد مقاس ديما على مقاسك العادي، وتقدر تقيس قبل الدفع.',
+    size_notice_en: '💡 Sizing note: Always choose one size up from your regular size. Fitting available before payment.',
+    images: [
+      `${BASE}products/labcoat-figs-white-1.jpg`,
+      `${BASE}products/labcoat-figs-white-2.jpg`,
+      `${BASE}products/labcoat-figs-white-3.jpg`
     ]
   }
 ];
 
-const getColorStatus = (c) => {
-  if (!c) return 'in_stock';
-  const label = `${c.label_ar || ''} ${c.label_en || ''}`;
-  if (label.includes('[out_of_stock]') || label.includes('نفذت الكمية')) return 'out_of_stock';
-  if (label.includes('[coming_soon]') || label.includes('قريبا')) return 'coming_soon';
-  if (c.status) return c.status;
-  return 'in_stock';
-};
-
-const sortColorsByAvailability = (colors) => {
-  if (!colors || !Array.isArray(colors)) return [];
-  const statusRank = (c) => {
-    const st = getColorStatus(c);
-    if (st === 'in_stock') return 0;
-    if (st === 'coming_soon') return 1;
-    return 2;
-  };
-  return [...colors].sort((a, b) => {
-    const rankA = statusRank(a);
-    const rankB = statusRank(b);
-    if (rankA !== rankB) return rankA - rankB;
-    return (a.sort_order || 0) - (b.sort_order || 0);
-  });
-};
-
-const getCleanLabel = (c, lang) => {
-  if (!c) return '';
-  const text = lang === 'ar' ? (c.label_ar || c.label_en || '') : (c.label_en || c.label_ar || '');
-  return text.replace(/\[out_of_stock\]|\[coming_soon\]|\[in_stock\]/g, '').trim();
-};
-
-/* ─── SINGLE DENTAL BOX PRODUCT CARD ────────────────────── */
-const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} }) => {
+/* ─── LAB COAT & ACCESSORY CARD COMPONENT ─── */
+const AccessoryProductCard = ({ product, onZoomImage }) => {
+  const { lang } = useLanguage();
   const { addToCart } = useCart();
-  const { lang, isRtl } = useLanguage();
-
-  const { availableColors, unavailableColors, allUnavailable } = splitBoxColorsByAvailability(
-    box.colors && box.colors.length > 0
-      ? box.colors
-      : [{ id: 'default', hex_code: '#CDBFA6', label_en: 'Standard', image_url: box.main_image || box.image_url }],
-    inventoryMap
-  );
-
-  const colorsList = [...availableColors, ...unavailableColors];
-
-  const [selectedColor, setSelectedColor] = useState(
-    availableColors[0] || unavailableColors[0] || colorsList[0] || null
-  );
-  const [viewMode, setViewMode] = useState('outside'); // 'outside', 'inside', 'base'
+  const [selectedImgIndex, setSelectedImgIndex] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || 'L');
   const [addedNotice, setAddedNotice] = useState(false);
 
-  useEffect(() => {
-    if (availableColors.length > 0) {
-      setSelectedColor(prev => {
-        const stillAvailable = prev && availableColors.find(c => c.id === prev.id || c.color_id === prev.color_id);
-        return stillAvailable || availableColors[0];
-      });
-    } else if (unavailableColors.length > 0) {
-      setSelectedColor(prev => {
-        const stillMatch = prev && unavailableColors.find(c => c.id === prev.id || c.color_id === prev.color_id);
-        return stillMatch || unavailableColors[0];
-      });
-    }
-  }, [box, inventoryMap]);
+  const images = (product.images && product.images.length > 0)
+    ? product.images
+    : [product.main_image || product.image_url || `${BASE}products/labcoat-figs-white-1.jpg`];
 
-  // ── Preload all color variant images silently into memory for 0ms instant switching ──
-  useEffect(() => {
-    colorsList.forEach(color => {
-      const colorId = (color.color_id || color.id || 'maroon').toLowerCase();
-      const urls = [
-        color.image_url,
-        color.inside_image_url || (box.size?.includes('17') ? `${BASE}accessories/box17-inside-${colorId}.jpg` : box.size?.includes('16.5') ? `${BASE}accessories/box16_5-inside-${colorId}.jpg` : `${BASE}accessories/box16-inside-${colorId}.jpg`),
-        color.base_image_url || `${BASE}accessories/box16-base-${colorId}.jpg`
-      ];
-      urls.forEach(url => {
-        if (url) {
-          const img = new Image();
-          img.src = url;
-        }
-      });
-    });
-  }, [box, colorsList]);
-
-  const getActiveViewImage = () => {
-    const colorId = (selectedColor?.color_id || selectedColor?.id || 'maroon').toLowerCase();
-
-    if (viewMode === 'base') {
-      if (selectedColor?.base_image_url) return selectedColor.base_image_url;
-      if (box.size === '16 inch' || (box.name_en && box.name_en.includes('16'))) {
-        return `${BASE}accessories/box16-base-${colorId}.jpg`;
-      }
-      return box.inside_image || box.main_image;
-    }
-
-    if (viewMode === 'inside') {
-      if (selectedColor?.inside_image_url) return selectedColor.inside_image_url;
-      if (box.size === '17 inch' || (box.name_en && box.name_en.includes('17'))) {
-        return `${BASE}accessories/box17-inside-${colorId}.jpg`;
-      }
-      if (box.size === '16.5 inch' || (box.name_en && box.name_en.includes('16.5'))) {
-        return `${BASE}accessories/box16_5-inside-${colorId}.jpg`;
-      }
-      if (box.size === '16 inch' || (box.name_en && box.name_en.includes('16'))) {
-        return `${BASE}accessories/box16-inside-${colorId}.jpg`;
-      }
-      return box.inside_image || box.main_image;
-    }
-
-    return selectedColor?.image_url || box.main_image || `${BASE}accessories/box17-colors.png`;
-  };
-
-  const activeImage = getActiveViewImage();
-
-  const isSelectedColorAvailable = Boolean(
-    selectedColor && selectedColor.available_stock > 0
-  );
-
-  const effectivePrice = selectedColor?.price || box.price || 0;
+  const currentImage = images[selectedImgIndex] || images[0];
 
   const handleAddToCart = () => {
-    if (!selectedColor || !isSelectedColorAvailable) return;
-
-    const variantColorLabel = cleanColorLabel(selectedColor, 'ar');
-    const variantColorLabelEn = cleanColorLabel(selectedColor, 'en');
+    const sizeSuffix = selectedSize ? ` (مقاس ${selectedSize})` : '';
+    const sizeSuffixEn = selectedSize ? ` (Size ${selectedSize})` : '';
 
     addToCart({
-      ...box,
-      id: `${box.id}-${selectedColor.color_id || selectedColor.id}`,
-      base_product_id: box.id,
-      name_ar: `${box.name_ar} (${variantColorLabel})`,
-      name_en: `${box.name_en} (${variantColorLabelEn})`,
-      price: effectivePrice,
-      is_box: true,
-      is_accessory: true,
-      selected_color: variantColorLabel,
-      image_url: selectedColor.image_url || activeImage,
-      availableStock: selectedColor.available_stock,
-      stock_quantity: selectedColor.available_stock
+      id: `${product.id}-${selectedSize}`,
+      base_product_id: product.id,
+      name_ar: `${product.name_ar}${sizeSuffix}`,
+      name_en: `${product.name_en || product.name_ar}${sizeSuffixEn}`,
+      price: product.price,
+      selected_size: selectedSize,
+      image_url: currentImage,
+      stock_quantity: 10,
+      is_accessory: true
     }, 1);
 
     setAddedNotice(true);
-    setTimeout(() => setAddedNotice(false), 2000);
+    setTimeout(() => setAddedNotice(false), 2200);
   };
-
-  const buildWhatsappUrl = () => {
-    const colorLabel = cleanColorLabel(selectedColor, 'en') || 'Standard';
-    const productName = box.name_en || box.name_ar || `Dental Box ${box.size}`;
-    const msg = `Hi, I'd like to inquire about: ${productName} (${box.size}) — Color: ${colorLabel} 🎨`;
-    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
-  };
-
-  const features = Array.isArray(box.features_en)
-    ? box.features_en
-    : (Array.isArray(box.features_ar) ? box.features_ar : []);
 
   return (
     <div
@@ -302,449 +89,323 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
         transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
     >
-      {/* ── IMAGE WRAPPER WITH 3-VIEW SELECTOR ── */}
-      <div
-        className="ad-watermarked-container product-card-image"
-        style={{ position: 'relative', background: 'var(--accent)', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer' }}
-        onClick={() => onZoomImage(activeImage, box.name_en || box.size)}
-        onContextMenu={e => e.preventDefault()}
-      >
-        <img
-          src={activeImage}
-          alt={box.name_en || box.size}
-          draggable={false}
-          onContextMenu={e => e.preventDefault()}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            opacity: 1
-          }}
-        />
-
-        {/* Zoom Hint */}
-        <div style={{
-          position: 'absolute',
-          top: '0.85rem',
-          left: '0.85rem',
-          background: 'rgba(0,0,0,0.55)',
-          color: '#ffffff',
-          borderRadius: '50%',
-          width: 32,
-          height: 32,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <Maximize2 size={15} />
-        </div>
-
-        {/* Size Badge */}
-        <div style={{
-          position: 'absolute',
-          top: '0.85rem',
-          right: '0.85rem',
-          background: 'var(--secondary)',
-          color: '#ffffff',
-          fontSize: '0.8rem',
-          fontWeight: 800,
-          padding: '0.3rem 0.75rem',
-          borderRadius: '999px',
-          letterSpacing: '0.04em',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-        }}>
-          {box.size}
-        </div>
-
-        {/* Multi-View Selector Bar */}
+      {/* ── IMAGE SECTION WITH WATERMARK & THUMBNAILS ── */}
+      <div style={{ position: 'relative', background: '#F8F6F2' }}>
         <div
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            position: 'absolute',
-            bottom: '0.65rem',
-            left: '0.65rem',
-            right: '0.65rem',
-            display: 'flex',
-            gap: '0.3rem',
-            background: 'rgba(15, 23, 42, 0.78)',
-            backdropFilter: 'blur(8px)',
-            borderRadius: '999px',
-            padding: '3px',
-            zIndex: 11,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.35)',
-            border: '1px solid rgba(255,255,255,0.15)'
-          }}
+          className="ad-watermarked-container product-card-image"
+          style={{ position: 'relative', aspectRatio: '4/4.2', overflow: 'hidden', cursor: 'pointer' }}
+          onClick={() => onZoomImage(currentImage, product.name_ar)}
+          onContextMenu={e => e.preventDefault()}
         >
-          <button
-            type="button"
-            onClick={() => setViewMode('outside')}
+          <img
+            src={currentImage}
+            alt={product.name_ar}
+            draggable={false}
+            onContextMenu={e => e.preventDefault()}
             style={{
-              flex: 1,
-              padding: '0.35rem 0.4rem',
-              fontSize: '0.72rem',
-              fontWeight: 800,
-              border: 'none',
-              borderRadius: '999px',
-              background: viewMode === 'outside' ? 'var(--secondary)' : 'transparent',
-              color: viewMode === 'outside' ? '#ffffff' : 'rgba(255,255,255,0.75)',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.3rem'
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center 20%',
+              display: 'block'
             }}
-          >
-            <Box size={13} />
-            <span>{lang === 'ar' ? 'مغلق' : 'Closed'}</span>
-          </button>
+          />
 
-          <button
-            type="button"
-            onClick={() => setViewMode('inside')}
-            style={{
-              flex: 1,
-              padding: '0.35rem 0.4rem',
-              fontSize: '0.72rem',
-              fontWeight: 800,
-              border: 'none',
-              borderRadius: '999px',
-              background: viewMode === 'inside' ? 'var(--secondary)' : 'transparent',
-              color: viewMode === 'inside' ? '#ffffff' : 'rgba(255,255,255,0.75)',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.3rem'
-            }}
-          >
-            <Package size={13} />
-            <span>{lang === 'ar' ? 'الرف الداخلي' : 'Tray View'}</span>
-          </button>
+          {/* Badge Tag */}
+          <div style={{
+            position: 'absolute',
+            top: '0.85rem',
+            right: '0.85rem',
+            background: 'linear-gradient(135deg, #4B3324 0%, #2F1E14 100%)',
+            color: '#FFFFFF',
+            fontSize: '0.78rem',
+            fontWeight: 800,
+            padding: '0.3rem 0.75rem',
+            borderRadius: '999px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.25)'
+          }}>
+            {lang === 'ar' ? (product.tag_ar || 'إكسسوار طبي') : (product.tag_en || 'Medical Gear')}
+          </div>
 
-          {(box.size === '16 inch' || box.name_en?.includes('16"')) && (
-            <button
-              type="button"
-              onClick={() => setViewMode('base')}
-              style={{
-                flex: 1,
-                padding: '0.35rem 0.4rem',
-                fontSize: '0.72rem',
-                fontWeight: 800,
-                border: 'none',
-                borderRadius: '999px',
-                background: viewMode === 'base' ? 'var(--secondary)' : 'transparent',
-                color: viewMode === 'base' ? '#ffffff' : 'rgba(255,255,255,0.75)',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                whiteSpace: 'nowrap',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.3rem'
-              }}
-            >
-              <CheckCircle2 size={13} />
-              <span>{lang === 'ar' ? 'بدون رف' : 'Base'}</span>
-            </button>
-          )}
+          {/* Zoom Button */}
+          <div style={{
+            position: 'absolute',
+            top: '0.85rem',
+            left: '0.85rem',
+            background: 'rgba(0,0,0,0.55)',
+            color: '#ffffff',
+            borderRadius: '50%',
+            width: 32,
+            height: 32,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Maximize2 size={15} />
+          </div>
         </div>
+
+        {/* Thumbnail Selector (if multiple photos) */}
+        {images.length > 1 && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '0.65rem 0.75rem',
+            background: '#FFFFFF',
+            borderTop: '1px solid rgba(0,0,0,0.06)'
+          }}>
+            {images.map((img, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setSelectedImgIndex(idx)}
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '8px',
+                  border: selectedImgIndex === idx ? '2px solid #4B3324' : '1px solid #E2E8F0',
+                  overflow: 'hidden',
+                  padding: 0,
+                  cursor: 'pointer',
+                  opacity: selectedImgIndex === idx ? 1 : 0.65,
+                  transform: selectedImgIndex === idx ? 'scale(1.05)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* ── CARD CONTENT BODY ── */}
-      <div style={{ padding: 'clamp(1rem, 3vw, 1.4rem)', flex: 1, display: 'flex', flexDirection: 'column', gap: '1.1rem', minWidth: 0 }}>
-        
-        {/* Title & Size */}
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <h3 className="tabular-nums" style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
-                {box.size}
-              </h3>
-              {allUnavailable ? (
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#DC2626', background: 'rgba(239, 68, 68, 0.1)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                  <Ban size={12} />
-                  <span>{lang === 'ar' ? 'جميع الألوان غير متوفرة حالياً' : 'All Colors Unavailable'}</span>
-                </span>
-              ) : (
-                <span className="tabular-nums" style={{ fontSize: '0.72rem', fontWeight: 800, color: '#059669', background: 'rgba(16, 185, 129, 0.1)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
-                  ✓ {lang === 'ar' ? `${availableColors.length} ألوان متوفرة` : `${availableColors.length} Colors Available`}
-                </span>
-              )}
-            </div>
-            {effectivePrice > 0 && (
-              <span className="tabular-nums" style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--secondary)', flexShrink: 0 }}>
-                {effectivePrice} LYD
-              </span>
-            )}
+      {/* ── CARD BODY ── */}
+      <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1, gap: '0.85rem' }}>
+        {/* Title and Price */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
+              {lang === 'ar' ? product.name_ar : (product.name_en || product.name_ar)}
+            </h3>
+            <span style={{ fontSize: '0.78rem', color: '#16A34A', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
+              <ShieldCheck size={14} /> {lang === 'ar' ? 'متوفر وجاهز للتوصيل' : 'In Stock & Ready'}
+            </span>
           </div>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
-            {box.desc_en || box.desc_ar}
-          </p>
+
+          <div style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--secondary)', whiteSpace: 'nowrap' }}>
+            {product.price} <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>{lang === 'ar' ? 'د.ل' : 'LYD'}</span>
+          </div>
         </div>
 
-        {/* ── DUAL-ROW COLOR VARIANT SELECTOR (Section A & Section B) ── */}
-        <BoxColorVariantSelector
-          availableColors={availableColors}
-          unavailableColors={unavailableColors}
-          selectedColor={selectedColor}
-          onSelectColor={setSelectedColor}
-          boxName={box.name_en || box.size}
-        />
+        {/* Description */}
+        <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
+          {lang === 'ar' ? product.desc_ar : (product.desc_en || product.desc_ar)}
+        </p>
 
-        {/* ── FEATURES LIST ── */}
-        {features.length > 0 && (
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            {features.map((feat, idx) => (
-              <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.55rem', fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
-                <span style={{ color: 'var(--secondary)', fontWeight: 900, flexShrink: 0, marginTop: '2px' }}>✓</span>
-                <span style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>{feat}</span>
-              </li>
-            ))}
-          </ul>
+        {/* Sizing Notice Box */}
+        {(product.size_notice_ar || product.size_notice_en) && (
+          <div style={{
+            padding: '0.7rem 0.85rem',
+            borderRadius: '10px',
+            background: 'rgba(217, 119, 6, 0.08)',
+            border: '1px solid rgba(217, 119, 6, 0.22)',
+            color: '#92400E',
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            lineHeight: 1.45,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.45rem'
+          }}>
+            <Info size={16} style={{ flexShrink: 0, color: '#D97706' }} />
+            <span>{lang === 'ar' ? product.size_notice_ar : (product.size_notice_en || product.size_notice_ar)}</span>
+          </div>
         )}
 
-        {/* ── ORDER BUTTONS (DIRECT SITE CHECKOUT + WHATSAPP) ── */}
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          
-          {/* Add to Cart Button (Strictly inventory driven) */}
+        {/* Size Selection Chips */}
+        {product.sizes && product.sizes.length > 0 && (
+          <div style={{ marginTop: 'auto', paddingTop: '0.25rem' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.45rem' }}>
+              {lang === 'ar' ? 'المقاس المطلوب:' : 'Select Size:'}
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {product.sizes.map(sz => (
+                <button
+                  key={sz}
+                  type="button"
+                  onClick={() => setSelectedSize(sz)}
+                  style={{
+                    flex: 1,
+                    minWidth: '60px',
+                    padding: '0.55rem 0.75rem',
+                    borderRadius: '8px',
+                    border: selectedSize === sz ? '2px solid #4B3324' : '1px solid #CBD5E1',
+                    background: selectedSize === sz ? '#4B3324' : '#FFFFFF',
+                    color: selectedSize === sz ? '#FFFFFF' : '#1E293B',
+                    fontWeight: 800,
+                    fontSize: '0.88rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    boxShadow: selectedSize === sz ? '0 2px 8px rgba(75, 51, 36, 0.25)' : 'none'
+                  }}
+                >
+                  {sz}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons: Add to Cart + View Details */}
+        <div style={{ display: 'flex', gap: '0.5rem', paddingTop: '0.4rem' }}>
           <button
             type="button"
             onClick={handleAddToCart}
-            disabled={!isSelectedColorAvailable}
             style={{
-              width: '100%',
-              padding: '0.85rem',
+              flex: 1,
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              border: 'none',
+              background: addedNotice ? '#10B981' : 'linear-gradient(135deg, #4B3324 0%, #2F1E14 100%)',
+              color: '#FFFFFF',
               fontWeight: 800,
               fontSize: '0.9rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '0.6rem',
-              minHeight: '44px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: addedNotice
-                ? 'var(--success, #10B981)'
-                : isSelectedColorAvailable
-                  ? 'var(--primary, #3D352E)'
-                  : 'rgba(239, 68, 68, 0.08)',
-              color: isSelectedColorAvailable || addedNotice
-                ? '#FFFFFF'
-                : '#991B1B',
-              border: isSelectedColorAvailable
-                ? 'none'
-                : '1.5px solid rgba(239, 68, 68, 0.25)',
-              cursor: isSelectedColorAvailable ? 'pointer' : 'not-allowed',
-              boxShadow: isSelectedColorAvailable ? '0 2px 8px rgba(61, 53, 46, 0.2)' : 'none',
-              transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+              gap: '0.45rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 12px rgba(47, 30, 20, 0.2)'
             }}
           >
             {addedNotice ? (
               <>
-                <Check size={18} strokeWidth={2.5} />
-                <span>{lang === 'ar' ? 'تمت الإضافة للسلة ✓' : 'Added to Cart ✓'}</span>
-              </>
-            ) : allUnavailable ? (
-              <>
-                <Ban size={18} />
-                <span>{lang === 'ar' ? 'جميع الألوان غير متوفرة حالياً' : 'All Colors Unavailable'}</span>
-              </>
-            ) : !isSelectedColorAvailable ? (
-              <>
-                <Ban size={18} />
-                <span>{lang === 'ar' ? 'هذا اللون غير متوفر حالياً بالمخزن' : 'This Color is Currently Out of Stock'}</span>
+                <Check size={18} />
+                <span>{lang === 'ar' ? `تمت الإضافة (${selectedSize}) ✓` : `Added (${selectedSize}) ✓`}</span>
               </>
             ) : (
               <>
                 <ShoppingCart size={18} />
-                <span>
-                  {lang === 'ar'
-                    ? `أضف إلى السلة (${cleanColorLabel(selectedColor, 'ar')})`
-                    : `Add to Cart (${cleanColorLabel(selectedColor, 'en')})`}
-                </span>
+                <span>{lang === 'ar' ? `أضف للسلة (مقاس ${selectedSize})` : `Add (Size ${selectedSize})`}</span>
               </>
             )}
           </button>
 
-          {/* Optional WhatsApp Inquiry */}
-          <a
-            href={buildWhatsappUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to={`/product/${product.id}`}
             style={{
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-color)',
+              background: 'var(--accent)',
+              color: 'var(--text-main)',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              textDecoration: 'none',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '0.5rem',
-              background: 'transparent',
-              color: '#25D366',
-              border: '1px solid #25D366',
-              borderRadius: 'var(--radius-md)',
-              padding: '0.6rem 1rem',
-              fontWeight: 700,
-              fontSize: '0.82rem',
-              textDecoration: 'none',
-              transition: 'background 0.2s ease'
+              whiteSpace: 'nowrap'
             }}
           >
-            <MessageCircle size={16} />
-            <span>{lang === 'ar' ? 'استفسار عبر واتساب' : 'Inquire via WhatsApp'}</span>
-          </a>
-
+            {lang === 'ar' ? 'التفاصيل' : 'Details'}
+          </Link>
         </div>
-
       </div>
     </div>
   );
 };
 
-/* ─── MAIN ACCESSORIES PAGE COMPONENT ─────────────────────── */
+/* ─── MAIN ACCESSORIES PAGE ─── */
 export const AccessoriesPage = () => {
   const { lang, isRtl } = useLanguage();
-  const [categories, setCategories] = useState(FALLBACK_CATEGORIES);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [boxesProducts, setBoxesProducts] = useState(FALLBACK_BOXES);
+  const [products, setProducts] = useState(DEFAULT_ACCESSORY_PRODUCTS);
   const [loading, setLoading] = useState(false);
-  const [whatsappNumber, setWhatsappNumber] = useState('218946859163');
-  const [boxInventory, setBoxInventory] = useState({});
-  const [accessoriesBg, setAccessoriesBg] = useState('');
-  const [dentalBoxesBg, setDentalBoxesBg] = useState('');
-
-  // Lightbox Zoom Modal State
   const [lightboxImg, setLightboxImg] = useState(null);
 
   const ChevronFwd = isRtl ? ChevronLeft : ChevronRight;
-  const BackArrow = isRtl ? ArrowRight : ArrowLeft;
 
   useEffect(() => {
     let isMounted = true;
 
-    const fetchData = async () => {
+    const fetchAccessories = async () => {
       try {
-        const [contactRes, bgRes, catRes, prodRes, boxInvRes] = await Promise.all([
-          supabase.from('settings').select('value').eq('key', 'contact_links').single(),
-          supabase.from('settings').select('value').eq('key', 'accessories_bgs').single(),
-          supabase.from('accessory_categories').select('*').eq('is_active', true).order('sort_order', { ascending: true }),
-          supabase.from('accessory_products').select('*, colors:accessory_product_colors(*)').eq('is_active', true).order('sort_order', { ascending: true }),
-          supabase.from('settings').select('value').eq('key', 'box_variants_inventory').maybeSingle()
-        ]);
+        const { data: accList, error } = await supabase
+          .from('accessory_products')
+          .select('*')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
 
         if (!isMounted) return;
 
-        if (contactRes.data?.value?.whatsapp) {
-          const match = String(contactRes.data.value.whatsapp).match(/\d+/);
-          if (match) setWhatsappNumber(match[0]);
-        }
+        if (!error && accList && accList.length > 0) {
+          // Filter products that are NOT boxes (e.g., lab coats, uniforms, scrubs, decor)
+          const nonBoxes = accList.filter(p => {
+            const name = `${p.name_ar || ''} ${p.name_en || ''} ${p.size || ''}`.toLowerCase();
+            return !name.includes('tool box') && !name.includes('organizer box') && !name.includes('gt-max') && !name.includes('inch');
+          });
 
-        if (bgRes.data?.value) {
-          if (bgRes.data.value.accessories_page_bg) setAccessoriesBg(bgRes.data.value.accessories_page_bg);
-          if (bgRes.data.value.dental_boxes_page_bg) setDentalBoxesBg(bgRes.data.value.dental_boxes_page_bg);
-        }
-
-        if (boxInvRes.data?.value?.variants) {
-          setBoxInventory(boxInvRes.data.value.variants);
-        }
-
-        if (!catRes.error && catRes.data && catRes.data.length > 0) {
-          setCategories(catRes.data);
-        }
-
-        if (!prodRes.error && prodRes.data && prodRes.data.length > 0) {
-          setBoxesProducts(prodRes.data);
+          if (nonBoxes.length > 0) {
+            const mapped = nonBoxes.map(p => ({
+              id: p.id,
+              name_ar: p.name_ar,
+              name_en: p.name_en,
+              price: p.price,
+              tag_ar: 'إكسسوار طبي',
+              tag_en: 'Medical Gear',
+              desc_ar: p.desc_ar,
+              desc_en: p.desc_en,
+              sizes: p.size ? p.size.split(/[/,]/).map(s => s.trim()).filter(Boolean) : ['M', 'L', 'XL'],
+              size_notice_ar: '💡 ملاحظة المقاس: زيد مقاس ديما على مقاسك العادي، وتقدر تقيس قبل الدفع.',
+              size_notice_en: '💡 Sizing note: Always choose one size up from your regular size. Fitting available before payment.',
+              images: [
+                p.main_image,
+                p.inside_image,
+                `${BASE}products/labcoat-figs-white-3.jpg`
+              ].filter(Boolean)
+            }));
+            setProducts(mapped);
+          }
         }
       } catch (err) {
-        console.warn('Background accessories sync fallback active:', err);
+        console.warn('Accessories fetch notice:', err);
       }
     };
 
-    fetchData();
+    fetchAccessories();
 
     return () => { isMounted = false; };
   }, []);
 
-  const activeHeroBg = selectedCategory
-    ? (dentalBoxesBg || 'var(--gradient-dark)')
-    : (accessoriesBg || 'var(--gradient-dark)');
-
   return (
     <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
       
-      {/* ── HERO SECTION ── */}
+      {/* ── HERO BANNER ── */}
       <div
         style={{
-          background: activeHeroBg.startsWith('http') || activeHeroBg.startsWith('/')
-            ? `linear-gradient(rgba(15,23,42,0.85), rgba(15,23,42,0.92)), url("${activeHeroBg}") center/cover no-repeat`
-            : 'var(--gradient-dark)',
-          borderBottom: '1px solid var(--border-color)',
-          paddingBlock: 'clamp(2.5rem, 5vw, 4.5rem)',
+          background: 'linear-gradient(135deg, #1E140E 0%, #38281D 50%, #24170F 100%)',
+          borderBottom: '1px solid rgba(138, 108, 82, 0.25)',
+          paddingBlock: 'clamp(2.5rem, 5vw, 4rem)',
           paddingInline: '1.25rem',
           position: 'relative',
           overflow: 'hidden'
         }}
       >
         <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-          
           {/* Breadcrumb Bar */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', marginBottom: '1.25rem', color: 'rgba(255,255,255,0.6)', flexWrap: 'wrap' }}>
             <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
               {lang === 'ar' ? 'الرئيسية' : 'Home'}
             </Link>
             <ChevronFwd size={14} />
-            <span style={{ color: 'rgba(255,255,255,0.6)' }}>
-              {lang === 'ar' ? 'السنوات الدراسية' : 'Academic Years'}
+            <span style={{ color: '#CDBFA6', fontWeight: 800 }}>
+              {lang === 'ar' ? 'الإكسسوارات' : 'Accessories'}
             </span>
-            <ChevronFwd size={14} />
-            
-            {selectedCategory ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setSelectedCategory(null)}
-                  style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', padding: 0, font: 'inherit' }}
-                >
-                  {lang === 'ar' ? 'إكسسوارات الأسنان' : 'Accessories'}
-                </button>
-                <ChevronFwd size={14} />
-                <span style={{ color: '#CDBFA6', fontWeight: 800 }}>
-                  {selectedCategory.name_en || selectedCategory.name_ar}
-                </span>
-              </>
-            ) : (
-              <span style={{ color: '#CDBFA6', fontWeight: 800 }}>
-                {lang === 'ar' ? 'إكسسوارات الأسنان' : 'Accessories'}
-              </span>
-            )}
           </div>
 
-          {/* Hero Header Title */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            {selectedCategory && (
-              <button
-                type="button"
-                onClick={() => setSelectedCategory(null)}
-                style={{
-                  background: 'rgba(255,255,255,0.12)',
-                  color: '#ffffff',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '50%',
-                  width: 42,
-                  height: 42,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s ease',
-                  flexShrink: 0
-                }}
-                title={lang === 'ar' ? 'الرجوع للأقسام' : 'Back to Categories'}
-              >
-                <BackArrow size={20} />
-              </button>
-            )}
-
             <div style={{
               width: 50,
               height: 50,
@@ -756,216 +417,41 @@ export const AccessoriesPage = () => {
               color: 'var(--secondary)',
               flexShrink: 0
             }}>
-              {selectedCategory ? <Box size={26} /> : <Package size={26} />}
+              <Shirt size={28} />
             </div>
 
             <div>
-              <h1 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.5rem)', fontWeight: 900, color: '#ffffff', margin: 0, lineHeight: 1.2 }}>
-                {selectedCategory
-                  ? (selectedCategory.name_en || selectedCategory.name_ar)
-                  : (lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories')}
+              <h1 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 900, color: '#ffffff', margin: 0, lineHeight: 1.2 }}>
+                {lang === 'ar' ? 'الإكسسوارات' : 'Accessories'}
               </h1>
-              <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 'clamp(0.85rem, 1.8vw, 1.05rem)', margin: '0.35rem 0 0 0', maxWidth: 620 }}>
-                {selectedCategory
-                  ? (selectedCategory.description_en || selectedCategory.description_ar || 'Professional dental equipment boxes in multiple sizes and colors.')
-                  : (lang === 'ar'
-                      ? 'قسم الإكسسوارات الشامل لجميع السنوات الدراسية — بوكسات وحقائب أدوات احترافية'
-                      : 'Comprehensive accessories section covering all academic years — professional tool boxes & gear')}
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(0.85rem, 1.8vw, 1rem)', margin: '0.35rem 0 0 0', maxWidth: 650 }}>
+                {lang === 'ar'
+                  ? 'لابكوت، يونيفورم، ديكور وإكسسوارات طبية وشخصية لطلبة طب الأسنان'
+                  : 'Lab coats, uniforms, clinic decor, and medical accessories for dental students.'}
               </p>
             </div>
           </div>
-
         </div>
       </div>
 
-      {/* ── MAIN CONTENT AREA ── */}
+      {/* ── MAIN CONTENT ── */}
       <div className="container" style={{ paddingBlock: '3rem', flex: 1 }}>
-        
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
-            <div className="spinner" style={{ margin: '0 auto 1rem auto' }} />
-            <p>{lang === 'ar' ? 'جاري تحميل المحتوى...' : 'Loading accessories...'}</p>
-          </div>
-        ) : !selectedCategory ? (
-
-          /* ── LEVEL 1: CATEGORIES OVERVIEW GRID ── */
-          <div>
-            <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
-                  {lang === 'ar' ? 'أقسام الإكسسوارات' : 'Accessories Categories'}
-                </h2>
-                <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', margin: '0.2rem 0 0 0' }}>
-                  {lang === 'ar' ? 'اختر القسم لعرض المنتجات والأحجام المتوفرة' : 'Select a category to view available sizes & options'}
-                </p>
-              </div>
-            </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: '1.75rem'
-            }}>
-              {categories.map(cat => (
-                <div
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat)}
-                  className="card animate-fade-in"
-                  style={{
-                    background: 'var(--surface-color)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-lg)',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-                  }}
-                >
-                  <div style={{ position: 'relative', background: 'var(--accent)', aspectRatio: '16/9', overflow: 'hidden' }}>
-                    <img
-                      src={cat.image_url || `${BASE}accessories/box17-colors.png`}
-                      alt={cat.name_en || cat.name_ar}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                    <div style={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 60%)',
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      padding: '1.25rem'
-                    }}>
-                      <span style={{
-                        background: cat.slug === 'dental-boxes' ? '#D97706' : 'var(--secondary)',
-                        color: '#ffffff',
-                        fontSize: '0.75rem',
-                        fontWeight: 800,
-                        padding: '0.25rem 0.65rem',
-                        borderRadius: '999px',
-                        textTransform: 'uppercase'
-                      }}>
-                        {cat.slug === 'dental-boxes' ? (lang === 'ar' ? 'متوقف مؤقتاً ⏳' : 'Paused ⏳') : 'Category'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div style={{ padding: '1.35rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
-                        {lang === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)}
-                      </h3>
-                      <ChevronFwd size={18} style={{ color: 'var(--secondary)' }} />
-                    </div>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
-                      {lang === 'ar' ? cat.description_ar : (cat.description_en || cat.description_ar)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        ) : (
-
-          /* ── LEVEL 2: DENTAL BOXES / CATEGORY PRODUCTS VIEW ── */
-          <div>
-            <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedCategory(null)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--secondary)',
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    marginBottom: '0.4rem',
-                    padding: 0
-                  }}
-                >
-                  <BackArrow size={16} />
-                  <span>{lang === 'ar' ? 'الرجوع لجميع الأقسام' : 'Back to Categories'}</span>
-                </button>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
-                  Dental Boxes Selection
-                </h2>
-              </div>
-            </div>
-
-            {/* Prominent Temporary Paused Notice Banner */}
-            <div className="card animate-fade-in" style={{
-              padding: '1.25rem 1.5rem',
-              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(217, 119, 6, 0.05))',
-              border: '1.5px solid rgba(245, 158, 11, 0.35)',
-              borderRadius: 'var(--radius-lg)',
-              marginBottom: '2rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1.2rem',
-              boxShadow: '0 4px 16px rgba(245, 158, 11, 0.08)'
-            }}>
-              <div style={{
-                width: 48,
-                height: 48,
-                borderRadius: '50%',
-                background: 'rgba(245, 158, 11, 0.18)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.5rem',
-                flexShrink: 0
-              }}>
-                ⏳
-              </div>
-              <div style={{ flex: 1 }}>
-                <h4 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 900, color: '#92400E' }}>
-                  {lang === 'ar' ? 'طلب البوكسات متوقف مؤقتاً — سنعاود الفتح قريباً جداً 📦✨' : 'Dental Box Orders Temporarily Paused — Reopening Very Soon 📦✨'}
-                </h4>
-                <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.88rem', color: '#B45309', lineHeight: 1.6 }}>
-                  {lang === 'ar'
-                    ? 'نعمل حالياً على فحص وتجهيز الدفعة القادمة من البوكسات وحقائب تنظيم الأدوات، وسيتم إعادة فتح استقبال الطلبات المباشرة قريباً جداً بإذن الله.'
-                    : 'We are currently restocking and preparing the next batch of dental tool boxes. Direct orders will be reopened very soon!'}
-                </p>
-              </div>
-            </div>
-
-            {/* 3 Product Cards Grid (17 inch, 16.5 inch, 16 inch) */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '2rem'
-            }}>
-              {boxesProducts.map(box => (
-                <BoxProductCard
-                  key={box.id}
-                  box={box}
-                  whatsappNumber={whatsappNumber}
-                  inventoryMap={boxInventory}
-                  onZoomImage={(url, title) => setLightboxImg({ url, title })}
-                />
-              ))}
-            </div>
-
-          </div>
-        )}
-
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 380px))',
+          gap: '2rem'
+        }}>
+          {products.map(prod => (
+            <AccessoryProductCard
+              key={prod.id}
+              product={prod}
+              onZoomImage={(url, title) => setLightboxImg({ url, title })}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* ── LIGHTBOX ZOOM MODAL WITH WATERMARK ── */}
+      {/* ── LIGHTBOX ZOOM MODAL ── */}
       {lightboxImg && (
         <div
           onClick={() => setLightboxImg(null)}

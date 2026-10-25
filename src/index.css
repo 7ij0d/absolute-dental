@@ -4705,6 +4705,36 @@ table {
   box-shadow: 0 6px 16px rgba(47, 30, 20, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
+/* ── 3-Column Gateway Cards Grid for Home Page ── */
+.home-gateway-grid-3cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.home-gateway-grid-3cols .gateway-card-reference {
+  min-height: 220px;
+}
+
+.home-gateway-grid-3cols .gateway-card-content {
+  padding: 1.5rem 1.25rem;
+}
+
+.home-gateway-grid-3cols .gateway-card-title {
+  font-size: 1.35rem;
+}
+
+.home-gateway-grid-3cols .gateway-card-desc {
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.home-gateway-grid-3cols .gateway-pill-cta {
+  font-size: 0.84rem;
+  padding: 0.5rem 1.1rem;
+}
+
 /* ── 2. Student Experiences Section (تجارب طلبة الأسنان) ── */
 .home-experiences-section {
   margin-top: 1.5rem;
@@ -5353,14 +5383,35 @@ table {
 
 /* ── Responsive Breakpoints (Laptop, iPad, Phone) ── */
 @media (min-width: 720px) and (max-width: 960px) {
-  /* iPad / Tablet: keep the two gateway cards side by side just like the reference image */
-  .home-redesign-page .home-gateway-grid {
-    grid-template-columns: repeat(2, 1fr);
+  /* iPad / Tablet: 3 gateway cards side by side just like the reference mockup */
+  .home-redesign-page .home-gateway-grid,
+  .home-redesign-page .home-gateway-grid-3cols {
+    grid-template-columns: repeat(3, 1fr);
     max-width: 100%;
-    gap: 1.15rem;
+    gap: 0.75rem;
   }
-  .home-redesign-page .gateway-card-reference {
-    min-height: 200px;
+  .home-redesign-page .home-gateway-grid-3cols .gateway-card-reference {
+    min-height: 195px;
+    border-radius: 18px;
+  }
+  .home-redesign-page .home-gateway-grid-3cols .gateway-card-content {
+    padding: 1.1rem 0.85rem;
+  }
+  .home-redesign-page .home-gateway-grid-3cols .gateway-card-title {
+    font-size: 1.1rem;
+  }
+  .home-redesign-page .home-gateway-grid-3cols .gateway-card-desc {
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+  .home-redesign-page .home-gateway-grid-3cols .gateway-pill-cta {
+    font-size: 0.76rem;
+    padding: 0.42rem 0.85rem;
+    gap: 0.35rem;
+  }
+  .home-redesign-page .home-gateway-grid-3cols .gateway-pill-cta svg {
+    width: 13px;
+    height: 13px;
   }
 }
 

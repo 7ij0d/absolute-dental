@@ -23,6 +23,7 @@ import SearchPage from './pages/SearchPage';
 import InvoicePage from './pages/InvoicePage';
 import DonationsPage from './pages/DonationsPage';
 import AccessoriesPage from './pages/AccessoriesPage';
+import BoxesPage from './pages/BoxesPage';
 // Admin Pages
 import AdminLayout from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
@@ -105,6 +106,8 @@ export const App = () => {
         <Route path="invoice/:id" element={<InvoicePage />} />
         <Route path="donations" element={<DonationsPage />} />
         <Route path="accessories" element={<AccessoriesPage />} />
+        <Route path="boxes" element={<BoxesPage />} />
+        <Route path="dental-boxes" element={<BoxesPage />} />
         {/* Policy & Static Pages */}
         <Route path="about" element={<StaticPages pageKey="about_us" />} />
         <Route path="faq" element={<StaticPages pageKey="faq" />} />

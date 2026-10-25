@@ -385,6 +385,57 @@ export const CANONICAL_SIZED_PRODUCTS = {
         image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-ruler-blue.png'
       }
     ]
+  },
+  '55000000-0000-0000-0000-000000000001': {
+    productId: '55000000-0000-0000-0000-000000000001',
+    nameAr: 'لاب كوت ابيض FIGS محلي',
+    nameEn: 'White FIGS Lab Coat (Local)',
+    optionsLabelAr: 'اختر المقاس المتوفر (M, L, XL)',
+    optionsLabelEn: 'Select Size (M, L, XL)',
+    optionsPromptAr: '⚠️ يرجى تحديد مقاس اللاب كوت أولاً',
+    optionsPromptEn: '⚠️ Please select a lab coat size first',
+    buttonPromptAr: 'اختر المقاس وأضف للسلة',
+    buttonPromptEn: 'Select Size & Add to Cart',
+    sizingNoticeAr: '💡 ملاحظة المقاس: زيد مقاس ديما على مقاسك العادي، وتقدر تقيس قبل الدفع.',
+    sizingNoticeEn: '💡 Sizing Note: Always choose one size up from your regular size. Fitting available before payment.',
+    required: true,
+    galleryImages: [
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/labcoat-figs-white-1.jpg',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/labcoat-figs-white-2.jpg',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/labcoat-figs-white-3.jpg'
+    ],
+    sizes: [
+      {
+        size: 'M',
+        code: 'M',
+        labelAr: 'مقاس M (وسط)',
+        labelEn: 'Size M',
+        shortLabel: 'M',
+        stock: 10,
+        price: 45.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/labcoat-figs-white-1.jpg'
+      },
+      {
+        size: 'L',
+        code: 'L',
+        labelAr: 'مقاس L (كبير)',
+        labelEn: 'Size L',
+        shortLabel: 'L',
+        stock: 10,
+        price: 45.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/labcoat-figs-white-1.jpg'
+      },
+      {
+        size: 'XL',
+        code: 'XL',
+        labelAr: 'مقاس XL (كبير جداً)',
+        labelEn: 'Size XL',
+        shortLabel: 'XL',
+        stock: 10,
+        price: 45.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/labcoat-figs-white-1.jpg'
+      }
+    ]
   }
 };
 
