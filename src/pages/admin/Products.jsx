@@ -134,6 +134,7 @@ export const Products = () => {
   const [unitMultiplier, setUnitMultiplier] = useState(1);
   const [sharedInventoryProductId, setSharedInventoryProductId] = useState('');
   const [isUniversal, setIsUniversal] = useState(false);
+  const [showInOtherSupplies, setShowInOtherSupplies] = useState(false);
   const [subjectSelectionMode, setSubjectSelectionMode] = useState('custom'); // 'all' or 'custom'
   const [subjectSearchInModal, setSubjectSearchInModal] = useState('');
 
@@ -564,6 +565,7 @@ export const Products = () => {
     setSubjectSelectionMode('custom');
     setSubjectSearchInModal('');
     setIsUniversal(false);
+    setShowInOtherSupplies(false);
     setMainImageUrl('');
     setExtraImageUrls([]);
     setUsageVideoUrl('');
@@ -594,7 +596,9 @@ export const Products = () => {
     setSubjectId(prod.subject_id || '');
 
     const isUniv = Boolean(prod.discount_label_en === 'universal' || prod.all_subjects === true || prod.is_universal === true);
+    const isOtherSupp = Boolean(isUniv || prod.discount_label_en === 'other_supplies' || !prod.subject_id);
     setIsUniversal(isUniv);
+    setShowInOtherSupplies(isOtherSupp);
     setSubjectSelectionMode(isUniv ? 'all' : 'custom');
     setSubjectSearchInModal('');
 
@@ -637,7 +641,7 @@ export const Products = () => {
       .select('image_url')
       .eq('product_id', prod.id)
       .order('sort_order', { ascending: true });
-    
+
     if (extraImgs) {
       setExtraImageUrls(extraImgs.map((img) => img.image_url));
     } else {
@@ -659,21 +663,42 @@ export const Products = () => {
     }
 
     const isUniv = subjectSelectionMode === 'all';
+    const effectiveSubjectIds = isUniv ? subjects.map(s => s.id) : selectedSubjectIds;
 
-    if (!isUniv && selectedSubjectIds.length === 0) {
-      alert(lang === 'ar' ? 'يرجى تحديد مادة دراسية واحدة على الأقل أو اختيار «جميع المواد»!' : 'Please select at least one subject or choose "All Subjects"!');
+    if (effectiveSubjectIds.length === 0 && !showInOtherSupplies) {
+      alert(
+        lang === 'ar'
+          ? 'يرجى تحديد مادة دراسية واحدة على الأقل أو تفعيل الظهور في قسم «مستلزمات أخرى»!'
+          : 'Please select at least one subject or enable display in "Other Supplies"!'
+      );
       return;
     }
 
     setSubmitting(true);
 
-    const primarySubjectId = isUniv ? null : (selectedSubjectIds[0] || null);
-    const primarySubObj = subjects.find(s => s.id === primarySubjectId);
-    const resolvedYearId = isUniv ? null : (primarySubObj?.year_id || yearId || null);
+    // Determine primary subject_id and year_id
+    // If product is ONLY in Other Supplies (0 subjects), subject_id and year_id are null
+    const primarySubjectId = effectiveSubjectIds.length > 0 ? effectiveSubjectIds[0] : null;
+    const primarySubObj = primarySubjectId ? subjects.find(s => s.id === primarySubjectId) : null;
+    const resolvedYearId = primarySubObj?.year_id || (primarySubjectId ? yearId : null) || null;
+
+    // Determine placement flag in discount_label_en
+    let resolvedPlacementLabel = null;
+    if (showInOtherSupplies) {
+      resolvedPlacementLabel = isUniv ? 'universal' : 'other_supplies';
+    } else {
+      // Preserve non-placement discount label if any existed
+      const prevLabel = editingProduct?.discount_label_en;
+      if (prevLabel && prevLabel !== 'universal' && prevLabel !== 'other_supplies') {
+        resolvedPlacementLabel = prevLabel;
+      } else {
+        resolvedPlacementLabel = null;
+      }
+    }
 
     const productPayload = {
       name_ar: nameArTrimmed,
-      name_en: nameArTrimmed,
+      name_en: nameEn.trim() || nameArTrimmed,
       description_ar: descriptionAr.trim() || null,
       description_en: descriptionEn.trim() || null,
       details_ar: detailsAr.trim() || null,
@@ -684,7 +709,7 @@ export const Products = () => {
       availability,
       year_id: resolvedYearId,
       subject_id: primarySubjectId,
-      discount_label_en: isUniv ? 'universal' : (editingProduct?.discount_label_en === 'universal' ? null : (editingProduct?.discount_label_en || null)),
+      discount_label_en: resolvedPlacementLabel,
       image_url: mainImageUrl.trim(),
       usage_video_url: usageVideoUrl.trim() || null,
       audio_url: audioUrl.trim() || null,
@@ -703,7 +728,7 @@ export const Products = () => {
           .from('products')
           .update(productPayload)
           .eq('id', editingProduct.id);
-        
+
         if (error) throw error;
         productId = editingProduct.id;
       } else {
@@ -713,7 +738,7 @@ export const Products = () => {
           .insert({ ...productPayload, is_archived: false })
           .select()
           .single();
-        
+
         if (error) throw error;
         productId = data.id;
       }
@@ -721,16 +746,9 @@ export const Products = () => {
       // Save multi-subject links in junction table
       if (productId) {
         await supabase.from('product_subjects').delete().eq('product_id', productId);
-        if (isUniv) {
-          // If universal, link to all active subjects so relational joins find it everywhere
-          if (subjects.length > 0) {
-            await supabase.from('product_subjects').insert(
-              subjects.map(s => ({ product_id: productId, subject_id: s.id }))
-            );
-          }
-        } else if (selectedSubjectIds.length > 0) {
+        if (effectiveSubjectIds.length > 0) {
           await supabase.from('product_subjects').insert(
-            selectedSubjectIds.map(sid => ({ product_id: productId, subject_id: sid }))
+            effectiveSubjectIds.map(sid => ({ product_id: productId, subject_id: sid }))
           );
         }
       }
@@ -871,15 +889,21 @@ export const Products = () => {
                     <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
                       {(prod.discount_label_en === 'universal' || prod.all_subjects || prod.is_universal) ? (
                         <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '1px 6px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#047857', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                          🌐 {lang === 'ar' ? 'مستلزمات عامة (كل السنوات)' : 'Universal Supplies'}
+                          🌐 {lang === 'ar' ? 'جميع المواد والسنوات' : 'All Subjects & Years'}
                         </span>
                       ) : ((Array.isArray(prod.product_subjects) && prod.product_subjects.length > 1) || (Array.isArray(prod.extra_subject_ids) && prod.extra_subject_ids.length > 0)) ? (
                         <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '1px 6px', backgroundColor: 'rgba(14, 116, 144, 0.12)', color: '#0E7490', borderRadius: '4px', border: '1px solid rgba(14, 116, 144, 0.25)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                           🔄 {lang === 'ar' ? `مشتركة (${(prod.product_subjects?.length || (prod.extra_subject_ids?.length + 1))} مواد)` : `Shared (${(prod.product_subjects?.length || (prod.extra_subject_ids?.length + 1))} subjects)`}
                         </span>
-                      ) : (
+                      ) : (prod.subject_id || (Array.isArray(prod.product_subjects) && prod.product_subjects.length === 1)) ? (
                         <span style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 6px', backgroundColor: 'rgba(128, 0, 32, 0.08)', color: 'var(--secondary)', borderRadius: '4px', border: '1px solid rgba(128, 0, 32, 0.18)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                          🎯 {lang === 'ar' ? 'خاصة بمادة واحدة' : 'Single Subject'}
+                          🎯 {lang === 'ar' ? 'مادة واحدة' : 'Single Subject'}
+                        </span>
+                      ) : null}
+
+                      {(prod.discount_label_en === 'other_supplies' || prod.discount_label_en === 'universal' || !prod.subject_id) && (
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '1px 6px', backgroundColor: 'rgba(124, 58, 237, 0.1)', color: '#6D28D9', borderRadius: '4px', border: '1px solid rgba(124, 58, 237, 0.25)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                          📦 {lang === 'ar' ? 'مستلزمات أخرى' : 'Other Supplies'}
                         </span>
                       )}
                     </div>
@@ -1485,11 +1509,12 @@ export const Products = () => {
                 </div>
 
                 {/* =============================================================
-                    BOTTOM 3 EXPLANATORY CARDS (As shown in reference mockup)
+                    DISPLAY LOCATIONS & COMBINABLE PLACEMENT CONTROLS
+                    (Single Subject | Multi-Subject / Multi-Year | All Subjects | + Other Supplies)
                     ============================================================= */}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(195px, 1fr))',
                   gap: '0.75rem',
                   marginTop: '0.25rem'
                 }}>
@@ -1526,7 +1551,7 @@ export const Products = () => {
                             alignItems: 'center',
                             gap: '0.4rem',
                             fontWeight: 800,
-                            fontSize: '0.92rem',
+                            fontSize: '0.9rem',
                             color: '#1D4ED8'
                           }}>
                             <span>{lang === 'ar' ? 'مادة واحدة فقط' : 'Single Subject'}</span>
@@ -1538,20 +1563,25 @@ export const Products = () => {
                           </div>
                           <p style={{
                             margin: '0.25rem 0 0 0',
-                            fontSize: '0.78rem',
+                            fontSize: '0.76rem',
                             color: '#4B5563',
                             lineHeight: 1.35
                           }}>
-                            {lang === 'ar' ? 'يظهر المنتج في قسم الأدوات الخاصة بهذه المادة فقط' : 'Appears in specific tools section for this subject only'}
+                            {lang === 'ar' ? 'يظهر المنتج مباشرة داخل صفحة المادة المحددة' : 'Appears directly inside the selected subject page'}
                           </p>
                         </div>
                       </div>
                     );
                   })()}
 
-                  {/* Box 2: مادتين أو أكثر */}
+                  {/* Box 2: مادتين أو أكثر (ضمن نفس السنة أو عدة سنوات) */}
                   {(() => {
                     const isSharedActive = !isUniversal && subjectSelectionMode !== 'all' && selectedSubjectIds.length >= 2;
+                    const linkedYearSet = new Set(
+                      selectedSubjectIds
+                        .map(sid => subjects.find(s => s.id === sid)?.year_id)
+                        .filter(Boolean)
+                    );
                     return (
                       <div style={{
                         backgroundColor: isSharedActive ? '#FFF7ED' : 'rgba(255, 247, 237, 0.65)',
@@ -1582,23 +1612,24 @@ export const Products = () => {
                             alignItems: 'center',
                             gap: '0.4rem',
                             fontWeight: 800,
-                            fontSize: '0.92rem',
-                            color: '#C2410C'
+                            fontSize: '0.9rem',
+                            color: '#C2410C',
+                            flexWrap: 'wrap'
                           }}>
-                            <span>{lang === 'ar' ? 'مادتين أو أكثر' : 'Two or More Subjects'}</span>
+                            <span>{lang === 'ar' ? 'مادتين أو أكثر' : 'Multiple Subjects'}</span>
                             {isSharedActive && (
                               <span style={{ fontSize: '0.65rem', backgroundColor: '#EA580C', color: '#FFFFFF', padding: '1px 6px', borderRadius: '9999px' }}>
-                                ✓ {lang === 'ar' ? `نشط (${selectedSubjectIds.length})` : `Active (${selectedSubjectIds.length})`}
+                                ✓ {lang === 'ar' ? `${selectedSubjectIds.length} مواد (${linkedYearSet.size} سنوات)` : `${selectedSubjectIds.length} subjects`}
                               </span>
                             )}
                           </div>
                           <p style={{
                             margin: '0.25rem 0 0 0',
-                            fontSize: '0.78rem',
+                            fontSize: '0.76rem',
                             color: '#4B5563',
                             lineHeight: 1.35
                           }}>
-                            {lang === 'ar' ? 'يظهر المنتج في قسم الأدوات المشتركة بين المواد' : 'Appears in shared tools section across selected subjects'}
+                            {lang === 'ar' ? 'يظهر المنتج مباشرة في جميع المواد والسنوات المختارة بنفس السعر والمخزون' : 'Appears directly in all selected subjects & years with unified stock'}
                           </p>
                         </div>
                       </div>
@@ -1651,39 +1682,165 @@ export const Products = () => {
                             alignItems: 'center',
                             gap: '0.4rem',
                             fontWeight: 800,
-                            fontSize: '0.92rem',
+                            fontSize: '0.9rem',
                             color: '#047857'
                           }}>
                             <span>{lang === 'ar' ? 'جميع المواد' : 'All Subjects'}</span>
                             {isUniversalActive && (
                               <span style={{ fontSize: '0.65rem', backgroundColor: '#059669', color: '#FFFFFF', padding: '1px 6px', borderRadius: '9999px' }}>
-                                ✓ {lang === 'ar' ? 'نشط (عام)' : 'Active (Universal)'}
+                                ✓ {lang === 'ar' ? 'نشط' : 'Active'}
                               </span>
                             )}
                           </div>
                           <p style={{
                             margin: '0.25rem 0 0 0',
-                            fontSize: '0.78rem',
+                            fontSize: '0.76rem',
                             color: '#4B5563',
                             lineHeight: 1.35
                           }}>
-                            {lang === 'ar' ? 'يظهر المنتج في قسم المستلزمات المشتركة بين جميع السنوات' : 'Appears in universal supplies section across all years'}
+                            {lang === 'ar' ? 'يظهر المنتج في كافة المواد الدراسية لجميع السنوات' : 'Appears across all subjects in all academic years'}
                           </p>
                         </div>
                       </div>
                     );
                   })()}
+
+                  {/* Box 4: قسم «مستلزمات أخرى» (Independent & Combinable Toggle) */}
+                  <div
+                    onClick={() => setShowInOtherSupplies(prev => !prev)}
+                    style={{
+                      backgroundColor: showInOtherSupplies ? '#F5F3FF' : 'rgba(245, 243, 255, 0.6)',
+                      border: showInOtherSupplies ? '2px solid #7C3AED' : '1.5px solid #DDD6FE',
+                      borderRadius: '14px',
+                      padding: '0.85rem 1rem',
+                      boxShadow: showInOtherSupplies ? '0 4px 14px rgba(124, 58, 237, 0.16)' : 'none',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '0.75rem',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                    }}
+                  >
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(124, 58, 237, 0.12)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <Layers size={18} style={{ color: '#7C3AED' }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '0.4rem',
+                        fontWeight: 800,
+                        fontSize: '0.9rem',
+                        color: '#5B21B6'
+                      }}>
+                        <span>{lang === 'ar' ? 'قسم «مستلزمات أخرى»' : 'Other Supplies Section'}</span>
+                        <div style={{
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '5px',
+                          border: showInOtherSupplies ? '1.5px solid #7C3AED' : '1.5px solid #C4B5FD',
+                          backgroundColor: showInOtherSupplies ? '#7C3AED' : '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          {showInOtherSupplies && <Check size={13} color="#FFFFFF" strokeWidth={3} />}
+                        </div>
+                      </div>
+                      <p style={{
+                        margin: '0.25rem 0 0 0',
+                        fontSize: '0.76rem',
+                        color: '#4B5563',
+                        lineHeight: 1.35
+                      }}>
+                        {lang === 'ar'
+                          ? 'إظهار المنتج في قسم «مستلزمات أخرى» (مستقل تماماً؛ يمكن دمجه مع أي مادة أو تفعيله بمفرده)'
+                          : 'Display in "Other Supplies" (independent; combinable with any subject or standalone)'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
+              {/* Associated Academic Years Summary & Quick Selector */}
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">{t('admin.year')} <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-muted)' }}>({lang === 'ar' ? 'يتم تحديده تلقائياً من المادة المختارة' : 'Auto-detected from subject'})</span></label>
-                <select className="form-input" value={yearId} onChange={(e) => setYearId(e.target.value)}>
-                  <option value="">{lang === 'ar' ? 'اختر السنة الدراسية (تلقائي)' : 'Select Year (Auto)'}</option>
-                  {years.map((y) => (
-                    <option key={y.id} value={y.id}>{y.name_ar}</option>
-                  ))}
-                </select>
+                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <span>{lang === 'ar' ? 'السنوات الدراسية المرتبطة بالمنتج' : 'Academic Years Associated with Product'}</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)' }}>
+                    {lang === 'ar' ? '(تُحدَّد تلقائياً من المواد المختارة، أو اضغط على السنة لتحديد موادها)' : '(Auto-detected from selected subjects, or click a year to toggle its subjects)'}
+                  </span>
+                </label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.35rem' }}>
+                  {years.map((y) => {
+                    const yearSubs = subjects.filter(s => String(s.year_id) === String(y.id));
+                    const yearSubIds = yearSubs.map(s => s.id);
+                    const selectedCountInYear = yearSubIds.filter(id => selectedSubjectIds.includes(id)).length;
+                    const isYearActive = (subjectSelectionMode === 'all' && yearSubIds.length > 0) || selectedCountInYear > 0;
+                    const isAllYearSelected = yearSubIds.length > 0 && selectedCountInYear === yearSubIds.length;
+
+                    return (
+                      <button
+                        key={y.id}
+                        type="button"
+                        onClick={() => {
+                          if (yearSubIds.length === 0) {
+                            setYearId(y.id);
+                            return;
+                          }
+                          if (subjectSelectionMode === 'all') {
+                            setSubjectSelectionMode('custom');
+                            setIsUniversal(false);
+                          }
+                          if (isAllYearSelected) {
+                            setSelectedSubjectIds(prev => prev.filter(id => !yearSubIds.includes(id)));
+                          } else {
+                            setSelectedSubjectIds(prev => Array.from(new Set([...prev, ...yearSubIds])));
+                            setYearId(y.id);
+                          }
+                        }}
+                        style={{
+                          padding: '0.45rem 0.9rem',
+                          borderRadius: '10px',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.45rem',
+                          backgroundColor: isYearActive ? 'rgba(128, 0, 32, 0.08)' : '#FFFFFF',
+                          border: isYearActive ? '1.5px solid #800020' : '1px solid #D8CCA8',
+                          color: isYearActive ? '#800020' : '#5C4E43',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <span>🎓 {y.name_ar}</span>
+                        {selectedCountInYear > 0 && (
+                          <span style={{
+                            fontSize: '0.7rem',
+                            backgroundColor: '#800020',
+                            color: '#FFFFFF',
+                            padding: '1px 6px',
+                            borderRadius: '999px'
+                          }}>
+                            {selectedCountInYear}/{yearSubIds.length}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>

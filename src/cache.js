@@ -93,13 +93,17 @@ export function cacheDelete(key) {
 
 export function clearSubjectCaches() {
   for (const k of memCache.keys()) {
-    if (k.startsWith('subj:') || k.includes('subj')) memCache.delete(k);
+    if (k.startsWith('subj:') || k.includes('subj') || k.includes('products:') || k.includes('year')) {
+      memCache.delete(k);
+    }
   }
   try {
     const toRemove = [];
     for (let i = 0; i < sessionStorage.length; i++) {
       const k = sessionStorage.key(i);
-      if (k && (k.includes('subj:') || k.includes('subj'))) toRemove.push(k);
+      if (k && (k.includes('subj:') || k.includes('subj') || k.includes('products:') || k.includes('year'))) {
+        toRemove.push(k);
+      }
     }
     toRemove.forEach(k => sessionStorage.removeItem(k));
   } catch {}

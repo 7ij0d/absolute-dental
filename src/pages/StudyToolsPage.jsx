@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { ChevronLeft, ChevronRight, ArrowRight, Lock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, Lock, Layers } from 'lucide-react';
 
 // Direct Vite Asset Imports (guarantees correct asset URLs on GitHub Pages & localhost)
 import year1ArtWebp from '../assets/images/year-1-artwork.webp';
@@ -173,6 +173,60 @@ export const StudyToolsPage = () => {
               </Link>
             );
           })}
+
+          {/* ── 4. OTHER SUPPLIES SECTION LINK (مستلزمات أخرى) ── */}
+          <Link
+            to="/other-supplies"
+            className="study-other-supplies-banner"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              padding: '1.15rem 1.4rem',
+              marginTop: '0.35rem',
+              borderRadius: '18px',
+              background: 'linear-gradient(135deg, #FFFDF9 0%, #F5EFE6 100%)',
+              border: '1.5px solid #E5D9CA',
+              boxShadow: '0 6px 20px rgba(74, 47, 29, 0.06)',
+              textDecoration: 'none',
+              direction: isRtl ? 'rtl' : 'ltr',
+              transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
+              <div
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: '13px',
+                  backgroundColor: '#5B3A24',
+                  color: '#FFF8F0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  boxShadow: '0 4px 12px rgba(91, 58, 36, 0.22)'
+                }}
+              >
+                <Layers size={22} />
+              </div>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#3E2515' }}>
+                  {lang === 'ar' ? 'مستلزمات أخرى' : 'Other Supplies'}
+                </h2>
+                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.84rem', color: '#786657', lineHeight: 1.4 }}>
+                  {lang === 'ar'
+                    ? 'القفازات، الكمامات، المستهلكات الطبية، والأدوات العامة للعيادة والمعمل.'
+                    : 'Gloves, masks, clinical consumables, and general dental instruments.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="study-circle-btn" aria-hidden="true" style={{ flexShrink: 0 }}>
+              <ArrowRight size={18} strokeWidth={2.5} style={{ transform: isRtl ? 'rotate(180deg)' : 'none' }} />
+            </div>
+          </Link>
         </section>
 
       </div>
