@@ -2401,13 +2401,14 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 .study-tools-page {
   background-color: #FAF7F2;
   min-height: calc(100vh - 72px);
-  padding: 1.5rem 0 3.5rem;
+  padding: 1.65rem 0 3.75rem;
+  overflow-x: hidden;
 }
 
 .study-tools-container {
   width: 100%;
-  max-width: 1060px;
-  margin: 0 auto;
+  max-width: 1080px;
+  margin-inline: auto;
   padding-inline: 1.25rem;
 }
 
@@ -2419,14 +2420,14 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   gap: 0.45rem;
   font-size: 0.84rem;
   color: #8C7E72;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.75rem;
   user-select: none;
 }
 
-/* ── Centered Header ── */
+/* ── Centered Page Header ── */
 .study-tools-header {
   text-align: center;
-  margin-bottom: 1.85rem;
+  margin-bottom: 2rem;
 }
 
 .study-tools-title {
@@ -2434,256 +2435,525 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   font-size: 2.15rem;
   font-weight: 900;
   color: #1E140E;
-  margin: 0 0 0.35rem 0;
+  margin: 0 0 0.4rem 0;
   letter-spacing: -0.01em;
   line-height: 1.2;
 }
 
 .study-tools-subtitle {
   font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.96rem;
   font-weight: 600;
-  color: #7A6E65;
+  color: #73665C;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-/* ── Responsive Grid for 4 Years + 5th Other Supplies Card ── */
-.study-tools-list {
+/* ── 4 Academic Year Cards Grid (2x2 on Desktop/iPad, 1-Col on Mobile) ── */
+.study-years-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.15rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 1.25rem;
   width: 100%;
-}
-
-@media (min-width: 768px) {
-  .study-tools-list {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-  }
-  .study-other-supplies-card {
-    grid-column: 1 / -1;
-  }
-}
-
-.study-other-supplies-card {
-  background: linear-gradient(135deg, #FFFFFF 0%, #FAF5ED 100%);
-  border: 1.5px solid #DECBB4;
-}
-
-.study-other-supplies-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.15rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  background-color: #EFE6DA;
-  color: #5B3A24;
-  border: 1px solid rgba(91, 58, 36, 0.16);
-  margin-bottom: 0.15rem;
+  margin-bottom: 1.35rem;
 }
 
 .study-year-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 205px;
+  align-items: stretch;
+  gap: 1.15rem;
   background-color: #FFFFFF;
-  border: 1px solid rgba(226, 218, 208, 0.9);
-  border-radius: 22px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 4px 20px rgba(35, 24, 16, 0.04);
-  min-height: 175px;
-  position: relative;
-  overflow: hidden;
+  border: 1px solid #E4DBD0;
+  border-radius: 20px;
+  padding: 1.2rem;
+  min-height: 196px;
+  height: 100%;
   text-decoration: none;
-  direction: ltr; /* Keeps titles & actions on left, artwork on right */
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 6px 22px rgba(35, 24, 16, 0.045);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s ease;
 }
 
-.study-year-card:not(.study-year-card-disabled):hover {
+.study-year-card:not(.study-year-card--disabled):hover {
   transform: translateY(-3px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 10px 28px rgba(35, 24, 16, 0.08);
-  border-color: rgba(104, 72, 53, 0.35);
+  border-color: #B89B82;
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 14px 32px rgba(35, 24, 16, 0.09);
 }
 
-.study-year-card:not(.study-year-card-disabled):active {
+.study-year-card:not(.study-year-card--disabled):active {
   transform: scale(0.985);
 }
 
-.study-year-card-disabled {
+.study-year-card--disabled {
   cursor: default;
-  background-color: #FAF8F5;
-  border-color: rgba(226, 218, 208, 0.7);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(35, 24, 16, 0.02);
+  background-color: #FBF9F6;
+  border-color: #E8E0D6;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 3px 12px rgba(35, 24, 16, 0.025);
 }
 
-.study-card-left {
-  padding: 1.6rem 1.4rem;
+/* Dedicated Text Column — Strictly separated from image container */
+.study-year-card__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.9rem;
+  min-width: 0;
+  padding-block: 0.15rem;
+  padding-inline-start: 0.25rem;
+}
+
+.study-year-card__top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.study-year-card__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.study-year-card__step-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.65rem;
+  border-radius: 999px;
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background-color: #F4EDE4;
+  color: #684835;
+  border: 1px solid rgba(104, 72, 53, 0.14);
+  line-height: 1.3;
+}
+
+.study-year-card--disabled .study-year-card__step-badge {
+  background-color: #F0ECE6;
+  color: #7D7166;
+  border-color: rgba(125, 113, 102, 0.15);
+}
+
+.study-year-card__soon-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background-color: #EFECE7;
+  color: #7A6E63;
+}
+
+.study-year-card__title {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #1E140E;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.study-year-card--disabled .study-year-card__title {
+  color: #5C5046;
+}
+
+.study-year-card__desc {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #6E6258;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.study-year-card--disabled .study-year-card__desc {
+  color: #8C8075;
+}
+
+.study-year-card__footer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-top: auto;
+}
+
+.study-year-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.42rem 0.48rem 0.42rem 0.95rem;
+  border-radius: 999px;
+  background-color: #F6F0E8;
+  border: 1px solid rgba(104, 72, 53, 0.16);
+  color: #4A3222;
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+[dir="rtl"] .study-year-card__cta {
+  padding: 0.42rem 0.95rem 0.42rem 0.48rem;
+}
+
+.study-year-card__cta-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #684835;
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(104, 72, 53, 0.25);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+}
+
+.study-year-card:hover .study-year-card__cta {
+  background-color: #EFE5D8;
+  border-color: rgba(104, 72, 53, 0.3);
+}
+
+.study-year-card:hover .study-year-card__cta-icon {
+  background-color: #533928;
+  transform: scale(1.06);
+}
+
+.study-year-card__locked-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  background-color: #EFECE6;
+  color: #6E6258;
+  border: 1px solid rgba(110, 98, 88, 0.16);
+  border-radius: 999px;
+  padding: 0.42rem 0.95rem;
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  user-select: none;
+}
+
+/* Dedicated Framed Image Container — Uniform size, never overlaps text */
+.study-year-card__media {
+  width: 100%;
+  height: 100%;
+  min-height: 164px;
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: #F5ECE1;
+  border: 1px solid rgba(104, 72, 53, 0.1);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.study-year-card__picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.study-year-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.study-year-card:not(.study-year-card--disabled):hover .study-year-card__img {
+  transform: scale(1.04);
+}
+
+.study-year-card--disabled .study-year-card__img {
+  opacity: 0.8;
+  filter: saturate(0.85) contrast(0.95);
+}
+
+/* ==========================================================================
+   REDESIGNED «مستلزمات أخرى» BANNER — COHESIVE WIDE SPLIT CARD
+   ========================================================================== */
+.study-other-banner-section {
+  width: 100%;
+}
+
+.study-other-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) 370px;
+  align-items: center;
+  gap: 1.75rem;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FAF3E8 100%);
+  border: 1.5px solid #DECBB4;
+  border-radius: 22px;
+  padding: 1.4rem 1.55rem;
+  text-decoration: none;
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 8px 26px rgba(59, 39, 24, 0.055);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s ease;
+}
+
+.study-other-banner:hover {
+  transform: translateY(-3px);
+  border-color: #B49375;
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 14px 34px rgba(59, 39, 24, 0.1);
+}
+
+.study-other-banner:active {
+  transform: scale(0.99);
+}
+
+.study-other-banner__body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
   gap: 1.15rem;
-  z-index: 2;
-  min-width: 185px;
-  max-width: 58%;
-  direction: rtl; /* Arabic text alignment */
-  text-align: right;
+  min-width: 0;
+  padding-inline-start: 0.25rem;
 }
 
-[dir="ltr"] .study-card-left {
-  direction: ltr;
-  text-align: left;
-}
-
-.study-card-text {
+.study-other-banner__top {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-}
-
-.study-card-title-row {
-  display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  width: 100%;
 }
 
-.study-card-title {
+.study-other-banner__badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.study-other-banner__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.24rem 0.75rem;
+  border-radius: 999px;
   font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1.42rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  background-color: #EFE4D4;
+  color: #5B3A24;
+  border: 1px solid rgba(91, 58, 36, 0.18);
+}
+
+.study-other-banner__pills {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.study-other-banner__pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background-color: #FFFFFF;
+  color: #6E5D4F;
+  border: 1px solid #E5D9CA;
+}
+
+.study-other-banner__title {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.65rem;
   font-weight: 900;
-  color: #1A130E;
+  color: #1E140E;
   margin: 0;
   line-height: 1.25;
 }
 
-.study-year-card-disabled .study-card-title {
-  color: #4A3E36;
-}
-
-.study-card-soon-hint {
+.study-other-banner__desc {
   font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #8C7E72;
-}
-
-.study-card-desc {
-  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.84rem;
-  font-weight: 500;
-  color: #73685E;
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: #65584D;
   margin: 0;
-  line-height: 1.45;
+  line-height: 1.6;
+  max-width: 540px;
 }
 
-.study-year-card-disabled .study-card-desc {
-  color: #8C8075;
-}
-
-.study-card-action {
+.study-other-banner__actions {
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
-.study-circle-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background-color: #684835;
-  color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 3px 10px rgba(104, 72, 53, 0.25);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
-  flex-shrink: 0;
-}
-
-.study-year-card:hover .study-circle-btn {
-  background-color: #533928;
-  transform: scale(1.08) translateX(2px);
-}
-
-.study-pill-btn {
+.study-other-banner__btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  background-color: #EFECE6;
-  color: #6E6258;
-  border: 1px solid rgba(110, 98, 88, 0.15);
-  border-radius: 999px;
-  padding: 0.42rem 0.95rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  user-select: none;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.68rem 1.35rem;
+  border-radius: 12px;
+  background-color: #684835;
+  color: #FFFFFF;
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 12px rgba(104, 72, 53, 0.24);
+  transition: background-color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.study-card-art {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 58%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  pointer-events: none;
+.study-other-banner:hover .study-other-banner__btn {
+  background-color: #533928;
+  transform: translateY(-1px);
+}
+
+.study-other-banner__media {
+  width: 100%;
+  height: 215px;
+  border-radius: 16px;
   overflow: hidden;
+  background-color: #F4E9DA;
+  border: 1px solid rgba(104, 72, 53, 0.14);
+  box-shadow: 0 4px 16px rgba(35, 24, 16, 0.06);
 }
 
-.study-card-img {
+.study-other-banner__picture {
+  display: block;
+  width: 100%;
   height: 100%;
-  width: auto;
-  max-width: 100%;
+}
+
+.study-other-banner__img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  object-position: right center;
+  object-position: center;
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.study-year-card-disabled .study-card-img {
-  opacity: 0.82;
-  filter: contrast(0.95);
+.study-other-banner:hover .study-other-banner__img {
+  transform: scale(1.035);
 }
 
-/* Responsive adjustments */
-@media (max-width: 480px) {
+/* ── iPad / Tablet Responsive Breakpoint (768px – 991px) ── */
+@media (max-width: 991px) and (min-width: 768px) {
+  .study-years-grid {
+    gap: 1rem;
+  }
+  .study-year-card {
+    grid-template-columns: minmax(0, 1fr) 155px;
+    padding: 1.05rem;
+    gap: 0.95rem;
+    min-height: 184px;
+  }
+  .study-year-card__title {
+    font-size: 1.28rem;
+  }
+  .study-year-card__desc {
+    font-size: 0.82rem;
+  }
+  .study-other-banner {
+    grid-template-columns: minmax(0, 1fr) 290px;
+    padding: 1.25rem;
+    gap: 1.25rem;
+  }
+  .study-other-banner__media {
+    height: 195px;
+  }
+  .study-other-banner__title {
+    font-size: 1.45rem;
+  }
+}
+
+/* ── Mobile / Phone Responsive Breakpoint (max-width: 767px) ── */
+@media (max-width: 767px) {
   .study-tools-page {
-    padding: 1.15rem 0 2.5rem;
+    padding: 1.15rem 0 2.75rem;
+  }
+  .study-tools-container {
+    padding-inline: 0.95rem;
+  }
+  .study-tools-header {
+    margin-bottom: 1.35rem;
   }
   .study-tools-title {
-    font-size: 1.85rem;
+    font-size: 1.75rem;
   }
   .study-tools-subtitle {
     font-size: 0.88rem;
   }
+  .study-years-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    gap: 0.9rem;
+    margin-bottom: 1rem;
+  }
   .study-year-card {
-    min-height: 165px;
+    grid-template-columns: minmax(0, 1fr) 132px;
+    padding: 0.95rem;
+    gap: 0.85rem;
+    min-height: 152px;
     border-radius: 18px;
   }
-  .study-card-left {
-    padding: 1.35rem 1.15rem;
-    min-width: 160px;
-    max-width: 60%;
-    gap: 0.95rem;
+  .study-year-card__media {
+    min-height: 128px;
+    border-radius: 12px;
   }
-  .study-card-title {
-    font-size: 1.28rem;
+  .study-year-card__title {
+    font-size: 1.24rem;
   }
-  .study-card-desc {
+  .study-year-card__desc {
     font-size: 0.8rem;
+    line-height: 1.45;
   }
-  .study-circle-btn {
-    width: 38px;
-    height: 38px;
-  }
-  .study-pill-btn {
+  .study-year-card__cta {
     font-size: 0.78rem;
-    padding: 0.38rem 0.8rem;
+    padding: 0.34rem 0.4rem 0.34rem 0.8rem;
+  }
+  [dir="rtl"] .study-year-card__cta {
+    padding: 0.34rem 0.8rem 0.34rem 0.4rem;
+  }
+  .study-year-card__cta-icon {
+    width: 26px;
+    height: 26px;
+  }
+  .study-other-banner {
+    grid-template-columns: 1fr;
+    padding: 1.05rem;
+    gap: 1rem;
+    border-radius: 18px;
+  }
+  .study-other-banner__media {
+    order: -1;
+    height: 180px;
+    border-radius: 13px;
+  }
+  .study-other-banner__title {
+    font-size: 1.35rem;
+  }
+  .study-other-banner__desc {
+    font-size: 0.85rem;
+  }
+  .study-other-banner__btn {
+    width: 100%;
+    padding: 0.72rem 1.15rem;
+    font-size: 0.88rem;
   }
 }
+
 
 /* ==========================================================================
    SUBJECT PRODUCT LISTING PAGE (STEP 4) — ABSOLUTE DENTAL
