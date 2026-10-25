@@ -667,6 +667,15 @@ export const ProductDetails = () => {
     (displayName.toLowerCase() === 'bur holder')
   );
 
+  const navContext = resolveNavigationContext({
+    product,
+    subject,
+    year,
+    searchParams,
+    locationState: location.state,
+    lang
+  });
+
   return (
     <div className="product-details-page">
       <div className="container" style={{ maxWidth: '1140px', paddingInline: '1.25rem' }}>

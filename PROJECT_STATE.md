@@ -13,47 +13,32 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 1. إصلاح نظام التنقل (Breadcrumb Navigation) بالكامل ليعكس مسار التصفح الفعلي:
-- **فصل مسار التنقل عن الهيكلية الثابتة لقاعدة البيانات:**
-  - تم بناء محرك تتبع المسار وسياق التصفح في [`src/utils/navigationTrail.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/navigationTrail.js).
-  - عند دخول المستخدم من **الرئيسية ← الإكسسوارات ← منتج اللاب كوت**:
-    - يظهر مسار التنقل بدقة: `الرئيسية › الإكسسوارات › White FIGS Lab Coat (Local)`.
-    - زر الرجوع يعود مباشرة إلى صفحة الإكسسوارات: `العودة إلى الإكسسوارات`.
-    - الضغط على رابط «الإكسسوارات» في مسار التنقل يعيد المستخدم مباشرة إلى `/accessories`.
-- **دعم التصفح المتداخل الكامل (Nested Browsing Support):**
-  - عند الدخول عبر مسار المواد الدراسية: `الرئيسية › أدوات الدراسة › السنة الأولى › تشريح الأسنان › اسم المنتج`:
-    - يظهر المسار بالكامل بمستوياته الخمسة.
-    - زر الرجوع يعيد إلى المادة الدراسية السابقة `العودة إلى تشريح الأسنان`.
-    - كافة الروابط في المسار قابلة للنقر وتوجه إلى المستوى الصحيح.
-- **الاحتفاظ بالسياق ومقاومة تحديث الصفحة (Survives Page Refresh):**
-  - اعتماد استراتيجية ثلاثية الطبقات: `URL Query Parameters (?from=...)` + `React Router State` + `sessionStorage`.
-  - عند تحديث الصفحة بالمتصفح (`F5` أو Refresh)، يظل المسار محفوظاً وزر الرجوع متوافقاً.
-  - عند التنقل بين المنتجات المرتبطة (Sibling / Related Products)، يتم توريث سياق التصفح الأصلي دون فقدانه.
-- **دعم كافة مسارات الدخول الأخرى في المتجر:**
-  - البوكسات: `الرئيسية › البوكسات › اسم المنتج`.
-  - مستلزمات أخرى: `الرئيسية › مستلزمات أخرى › اسم المنتج`.
-  - العروض والتخفيضات: `الرئيسية › العروض والتخفيضات › اسم المنتج`.
-  - البحث: `الرئيسية › البحث › اسم المنتج` (مع الحفاظ على كلمة البحث السابقة).
-  - المفضلة: `الرئيسية › المفضلة › اسم المنتج`.
-  - السلة: `الرئيسية › سلة المشتريات › اسم المنتج`.
-  - الدخول المباشر بالرابط (Direct Link Fallback): يتعرف المحرك بذكاء على طبيعة المنتج (إكسسوار، بوكس، أو مادة دراسية) ويعرض مساراً طبيعياً ومنطقياً دون إجبار المستخدم على أقسام دراسية وهمية.
-- **التوافق وترقية الكاش:**
-  - متوافق بالكامل مع جميع الشاشات (الهواتف الذكية، الآيباد/التابلت، الحاسوب).
-  - تم رفع إصدار الكاش إلى `ad13:` لضمان تفعيل محرك التنقل فوراً لجميع المستخدمين.
-  - تم إجراء اختبارات برمجية شاملة لـ 27 سيناريو بنجاح كامل 100%.
+### 🔹 1. تفعيل محرك سياق التصفح في صفحة تفاصيل المنتج وحل التعارض نهائياً:
+- **ربط متغير `navContext` في صفحة تفاصيل المنتج:**
+  - تم تعريف وربط `navContext` عبر محرك `resolveNavigationContext` قبل تصيير عناصر الواجهة في [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx).
+  - التأكد من عدم وجود أي خطأ تشغيلي أو ارتداد للكود السابق.
+- **تأكيد سلوك المسارات:**
+  - عند الدخول من الإكسسوارات (`/accessories`):
+    - مسار التنقل: `الرئيسية › الإكسسوارات › White FIGS Lab Coat (Local)`
+    - زر الرجوع: `العودة إلى الإكسسوارات` يوجه فوراً إلى `/accessories`.
+    - رابط «الإكسسوارات» يعيد المستخدم مباشرة إلى صفحة الإكسسوارات.
+  - عند الدخول من مسار المواد:
+    - مسار متداخل كامل: `الرئيسية › أدوات الدراسة › السنة الأولى › Dental Anatomy › [اسم المنتج]`.
+    - زر الرجوع يعود للمادة الدراسية السابقة بدقة.
+  - عند الدخول بالرابط المباشر (Direct Entry):
+    - للمنتجات التابعة لقسم الإكسسوارات: يظهر مسار `الرئيسية › الإكسسوارات › [اسم المنتج]` تلقائياً دون إقحام أدوات الدراسة.
+- **تحديث الكاش وإعادة البناء:**
+  - تم رفع بادئة الكاش إلى `ad14:` لضمان التحديث التلقائي الفوري لدى كافة المتصفحات والزوار.
+  - تم بناء المشروع للإنتاج (`npm run build`) والتأكد من اجتياز جميع الاختبارات البرمجية بنجاح.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/utils/navigationTrail.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/navigationTrail.js) | محرك التنقل الديناميكي وتحديد المسارات الفردية والمتداخلة |
-| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | استبدال المسار الثابت بمسار تصفح المستخدم الفعلي وتحديث زر الرجوع والتنقل بين المنتجات المرتبطة |
-| [`src/components/ProductCard.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/ProductCard.jsx) | تسجيل مسار الدخول الفعلي وتمرير البارامترات والسياق عند النقر على أي بطاقة منتج |
-| [`src/pages/AccessoriesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/AccessoriesPage.jsx) | ربط فتح تفاصيل اللاب كوت بمسار الإكسسوارات الفعلي وتخزين السياق |
-| [`src/pages/SubjectPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SubjectPage.jsx) | تمرير سياق المادة والسنة لبطاقات المنتجات لضمان التسلسل المتداخل |
-| [`src/pages/CartPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/CartPage.jsx) | ربط منتجات السلة بمسار سلة المشتريات التفاعلي |
-| [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) | ترقية بادئة الكاش إلى `ad13:` |
+| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | تعريف وربط `navContext` المباشر قبل العرض وتأمين مسار التنقل |
+| [`src/utils/navigationTrail.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/navigationTrail.js) | ضبط أولوية الكشف المباشر لمنتجات الإكسسوارات والبوكسات |
+| [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) | ترقية بادئة الكاش إلى `ad14:` |
 
 ---
 

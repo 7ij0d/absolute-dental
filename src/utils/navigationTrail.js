@@ -293,8 +293,8 @@ export function resolveNavigationContext({
   }
 
   // ── BRANCH H: User arrived from a Subject Page or has Subject parameter ──
-  const activeSubSlug = subParam || subject?.slug;
-  if (fromParam === 'subject' || activeSubSlug) {
+  const activeSubSlug = subParam || (fromParam === 'subject' ? subject?.slug : null);
+  if (fromParam === 'subject' || subParam) {
     const resolvedSubject = DEFAULT_SUBJECTS.find(s => s.slug === activeSubSlug || s.id === subject?.id) || subject;
     const resolvedYearId = resolvedSubject?.year_id || year?.id;
     const resolvedYear = DEFAULT_YEARS.find(y => y.slug === yrParam || y.id === resolvedYearId) || year;
