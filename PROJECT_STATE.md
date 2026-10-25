@@ -7,76 +7,68 @@
 
 ## 1. نظرة عامة على المشروع والتقنيات (Project Overview & Tech Stack)
 - **المنصة:** متجر ومستودع الأدوات والمستلزمات الطبية الدراسية لطلبة طب وجراحة الفم والأسنان (**Absolute Dental Equipment**).
-- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + Vanilla Semantic CSS Design System (v4.0) + Bur Grouping & Popup Engine + Subject Categorization Engine + Boxes & Accessories Gateway Architecture.
+- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + Vanilla Semantic CSS Design System (Reference Mockup Grade) + Bur Grouping & Popup Engine + Subject Categorization Engine + Boxes & Accessories Gateway Architecture.
 
 ---
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 1. تعديل الصفحة الرئيسية إلى 3 بطاقات رئيسية متناسقة وفق التصميم المرجعي:
-1. **أدوات الدراسة (`/study-tools`):**
-   - احتفاظ كامل بالبطاقة الحالية وصورتها ووصفها وزرها («ابدأ الآن»).
-2. **الإكسسوارات (`/accessories`):**
-   - تغيير الصورة إلى الصورة المرجعية الجديدة (`accessories-faded.webp` / `png`) التي تبرز البالطو الأبيض واليونيفورم الطبي.
-   - العنوان: «الإكسسوارات».
-   - الوصف: «لابكوت، يونيفورم، إكسسوارات طبية وشخصية.».
-   - الزر: «تصفح الآن».
-3. **البوكسات (`/boxes`):**
-   - بطاقة رئيسية مستقلة تماماً للبوكسات باستخدام الصورة الرسمية للبوكسات (`dental-boxes-faded.webp` / `png`).
-   - العنوان: «البوكسات».
-   - الوصف: «بوكسات تنظيم وحفظ لجميع أدواتك.».
-   - الزر: «تصفح الآن».
-   - مرتبطة بصفحة مستقلة متخصصة للبوكسات (`BoxesPage.jsx`).
+### 🔹 1. حذف الشريط العلوي المتحرك نهائياً:
+- تم حذف شريط الإعلانات المتحرك (`AnnouncementBar`) بالكامل من الكود المصدري عبر كافة الصفحات (`src/App.jsx`).
+- أزيلت المساحة التي كان يشغلها ليبدأ الهيدر من أعلى الشاشة مباشرة بدون أي إزاحة رأسية غير ضرورية.
 
-### 🔹 2. فصل كامل وتام بين منتجات الإكسسوارات والبوكسات:
-- إنشاء صفحة مستقلة للبوكسات [`src/pages/BoxesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/BoxesPage.jsx) تعرض كافة موديلات البوكسات (17.5" GT-MAX، 16.5"، 16"، 14") وخيارات الألوان والجهات الخارجية والداخلية والتكبير والسلة.
-- تخصيص صفحة الإكسسوارات [`src/pages/AccessoriesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/AccessoriesPage.jsx) للمستلزمات الشخصية والطبية واللابكوتات واليونيفورم والديكور.
-- تحديث روابط النافبار وفوتر الموقع لتضمين قسم البوكسات وقسم الإكسسوارات بشكل مستقل وواضح.
+### 🔹 2. إعادة تصميم الهيدر بالكامل بنمط كريمي أنيق (RTL):
+- **الخلفية والمظهر:** خلفية كريمية دافئة (`#FAF7F2`) وحدود سفلية ناعمة راقية (`#ECE4DA`).
+- **أقصى اليمين (RTL):** زر القائمة الجانبية (Hamburger) + شعار Absolute Dental الدائري الفاخر + اسم المتجر `Absolute Dental`.
+- **المنتصف:** شريط بحث بيضاوي كبسولي (Pill-shaped) بخلفية بيج هادئة (`#F0E9DF`)، أيقونة بحث دقيقة، ونص استرشادي واضح («ابحث عن أداة طبية...»).
+- **أقصى اليسار (RTL):**
+  - أيقونة سلة المشتريات مع شارة عداد بني داكن أنيق (`ad-cart-badge-count`) وتحتها تسمية نصية واضحة («سلة المشتريات»).
+  - أيقونة الحساب الشخصي وتحتها تسمية نصية واضحة («حسابي»).
+  - تفعيل كامل لكافة الروابط المنبثقة والسلال الجانبية ولوحة التسجيل.
 
-### 🔹 3. إضافة منتج «لاب كوت ابيض FIGS محلي» للمتجر:
-- **المواصفات:**
-  - الاسم: `لاب كوت ابيض FIGS محلي` / `White FIGS Lab Coat (Local)`
-  - السعر: **45 دينار ليبي**.
-  - المقاسات المتوفرة: **M**, **L**, **XL**.
-  - ملاحظة المقاس: «💡 ملاحظة المقاس: زيد مقاس ديما على مقاسك العادي، وتقدر تقيس قبل الدفع.»
-  - الصور: تم تجهيز الصور الثلاثة عالية الدقة ورفعها إلى السيرفر وتخزينها محلياً في `public/products/labcoat-figs-white-1.jpg`, `2.jpg`, `3.jpg`.
-  - ربط كامل بنظام السلة والمخزون وصفحة تفاصيل المنتج [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) ومحرك المقاسات [`CANONICAL_SIZED_PRODUCTS`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/productInventoryEngine.js).
-  - إضافة سجلات المنتج في الجداول الحية لقاعدة البيانات والنسخة المحلية `src/defaultProducts.json`.
+### 🔹 3. مسار التنقل وبانر القسم المرجعي (Section Banner):
+- إضافة مسار التنقل مباشرة أسفل الهيدر على اليمين: `الرئيسية › الإكسسوارات`.
+- بانر تعريفي عريض متناسق بألوان بيج دافئة متدرجة (`linear-gradient(135deg, #F3ECE2 0%, #EBE1D3 100%)`) وزوايا مستديرة (18px):
+  - أيقونة القسم ضمن مربع مستدير أنيق.
+  - عنوان رئيسي بارز («الإكسسوارات»).
+  - نص وصفي دقيق للمستلزمات المتوفرة.
+  - صورة فوتوغرافية حقيقية للمنتج على يسار البانر مستخرجة ومجهزة من التصميم المرجعي (`accessories-banner-art.png`).
+  - تفعيل نفس البانر التوافقي عبر صفحات المواد والسنوات الدراسية وصفحة البوكسات.
 
-### 🔹 4. تجاوب الشاشات الدقيق (Desktop, iPad, Mobile):
-- **كمبيوتر ولابتوب (>= 961px):** 3 بطاقات متجاورة في صف واحد متوازن بدقة مطابقة للصورة المرجعية.
-- **أجهزة التابلت والآيباد (720px - 960px):** 3 بطاقات في صف واحد مع تحجيم متزن للنصوص والأزرار والهوامش.
-- **الهواتف الذكية (<= 719px):** 3 بطاقات متتالية رأسياً بانسيابية تامة وسهولة لمس دون تداخل.
-- **ترقية الكاش التلقائي:** ترقية بادئة الكاش إلى `ad10:` لضمان تحميل التعديلات فوراً لجميع المستخدمين.
+### 🔹 4. عرض المنتجات وبطاقة المنتج المرجعية المطابقة للصورة (No Fake Products):
+- عرض المنتج الفعلي المتوفر فقط: **«لاب كوت أبيض FIGS محلي»** بسعر **45 د.ل**.
+- تموضع البطاقة على اليمين طبيعياً في شبكة الـ RTL بمقاس مثالي (`minmax(290px, 330px)`) دون تمديد غير مبرر ودون ملء وهمي.
+- تشريح البطاقة:
+  - زر القلب العائم للمفضلة على يسار أعلى البطاقة مع حفظ الحالة تلقائياً في المتصفح (`localStorage`).
+  - الصورة الرئيسية على خلفية حجرية فاتحة ناعمة.
+  - صف من 4 صور مصغرة تفاعلية (الياقة، الجيب بشعار FIGS الأحمر، ثنية الصدر، الصورة الكاملة) للتبديل الفوري بين الزوايا عند الضغط.
+  - عنوان المنتج، السعر (45 د.ل)، شارة التوفر الخضراء («✓ متوفر وجاهز للتوصيل»).
+  - زر الشراء الأنيق باللون البني الداكن المرجعي: «عرض التفاصيل 🛒».
+
+### 🔹 5. حذف شريط الفلاتر نهائياً:
+- إزالة الشريط الجانبي للفلاتر بالكامل، سلايدر الأسعار، وفلاتر التوفر في صفحات الأقسام والسنوات.
+- تخصيص المساحة الكاملة لعرض المنتجات بسلاسة ودون مساحات محجوزة فارغة.
+
+### 🔹 6. التجاوب الكامل وتحديث الكاش:
+- تجاوب تلقائي وسلس عبر شاشات الموبايل، الآيباد/التابلت، وأجهزة الكمبيوتر الكبيرة.
+- ترقية بادئة الكاش إلى `ad11:` لضمان التحديث التلقائي الفوري لدى جميع الزوار.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx) | تعديل شبكة البطاقات الرئيسية إلى 3 بطاقات متجاوبة (دراسة، إكسسوارات، بوكسات) |
-| [`src/pages/BoxesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/BoxesPage.jsx) | صفحة مستقلة جديدة بالكامل لعرض موديلات وتفاصيل البوكسات |
-| [`src/pages/AccessoriesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/AccessoriesPage.jsx) | صفحة الإكسسوارات المخصصة مع بطاقات اللابكوت واليونيفورم ومعرض الصور |
-| [`src/App.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/App.jsx) | تسجيل مسارات `/boxes` و `/dental-boxes` وربطها بالصفحة المستقلة |
-| [`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx) | إضافة رابط البوكسات وتحديث رابط الإكسسوارات في القائمة الرئيسية والموبايل |
-| [`src/components/Footer.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Footer.jsx) | تحديث الروابط السريعة لفصل البوكسات عن الإكسسوارات |
-| [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) | إضافة قواعد الشبكة ثلاثية الأعمدة وتجاوب الآيباد والموبايل للبطاقات الرئيسية |
-| [`src/utils/productInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/productInventoryEngine.js) | تسجيل منتج لابكوت FIGS في محرك المقاسات الإلزامية والصور |
-| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | إضافة صندوق التنبيه البصري لملاحظة المقاس قبل الشراء |
-| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | مزامنة منتج اللابكوت في ملف البيانات المحلي الاحتياطي |
-| [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) | ترقية بادئة الكاش إلى `ad10:` لتحديث ذاكرة المتصفح الفوري |
+| [`src/App.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/App.jsx) | حذف `AnnouncementBar` بالكامل من الكود |
+| [`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx) | إعادة هيكلة الهيدر المرجعي الكريمي مع التسميات الرأسية وشريط البحث |
+| [`src/pages/AccessoriesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/AccessoriesPage.jsx) | إعادة بناء الصفحة بالكامل وفق التصميم المرجعي مع البطاقة التفاعلية والمصغرات |
+| [`src/pages/SubjectPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SubjectPage.jsx) | تطبيق بانر القسم المرجعي وإزالة الفلاتر الجانبية تماماً |
+| [`src/pages/BoxesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/BoxesPage.jsx) | تطبيق بانر القسم المرجعي وإزالة الشاشات القديمة |
+| [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) | إضافة ستايلات الهيدر المرجعي والبانر والبطاقة والتجاوب |
+| [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) | ترقية بادئة الكاش إلى `ad11:` |
+| `public/products/labcoat-figs-white-collar.jpg` | تجهيز المصغر الرابع للياقة |
+| `src/assets/images/accessories-banner-art.png` | صورة البانر المرجعي الشفافة |
 
 ---
 
-## 3. ما تم إنجازه ويعمل بنجاح
-- [x] **تحديث الصفحة الرئيسية بـ 3 بطاقات فقط (أدوات الدراسة، الإكسسوارات، البوكسات)** ✅
-- [x] **فصل البوكسات عن الإكسسوارات في صفحات وقوائم مستقلة تماماً** ✅
-- [x] **إضافة منتج «لاب كوت ابيض FIGS محلي» بسعر 45 د.ل وصوره الثلاثة ومقاساته M/L/XL وملاحظة القياس** ✅
-- [x] **الحفاظ على سلامة أقسام تجارب الطلبة وطلب المنتجات غير المتوفرة والهيدر والبحث** ✅
-- [x] **تطابق التجاوب على الكمبيوتر والآيباد والهواتف الذكية مع الموك اب المرفق** ✅
-- [x] **إتمام البناء الإنتاجي (`npm run build`) بنجاح (3.45s)** ✅
-
----
-
-## 4. الخطوة التالية المباشرة (Immediate Next Step)
-- جاهز للمعاينة والتأكيد النهائي من قبل العميل.
+## 3. الخطوة التالية المباشرة (Immediate Next Step)
+- متابعة طلبات المستخدم وتطبيق أي تعديلات إضافية على باقي الأقسام أو تفاصيل المنتجات.

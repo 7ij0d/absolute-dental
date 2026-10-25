@@ -326,239 +326,10 @@ export const Navbar = () => {
       </div>
     );
   };
-
-  if (isLightHeader) {
-    return (
-      <>
-        {/* ── LIGHT NAVBAR (STOREFRONT INNER PAGES) ── */}
-        <header className={`navbar navbar-light-theme ${scrolled ? 'scrolled' : ''}`}>
-          <div className="container navbar-inner navbar-light-inner" style={{ direction: 'ltr' }}>
-
-            {/* Left: Menu Hamburger + Brand (AD Monogram + Absolute Dental) */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <button
-                className="nav-icon-btn nav-light-menu-btn"
-                onClick={() => setMobileOpen(true)}
-                aria-label="Menu"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#1E140E',
-                  padding: '0.35rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  borderRadius: '8px',
-                }}
-              >
-                <Menu size={22} strokeWidth={2.2} />
-              </button>
-
-              <Link
-                to="/"
-                className="navbar-logo"
-                style={{
-                  textDecoration: 'none',
-                  alignItems: 'center',
-                  display: 'flex',
-                  gap: '8px',
-                  flexShrink: 0,
-                }}
-              >
-                <img
-                  src={brandLogoTrimmed}
-                  alt="Absolute Dental"
-                  style={{
-                    width: 32,
-                    height: 32,
-                    objectFit: 'contain',
-                    flexShrink: 0,
-                  }}
-                />
-                <span
-                  style={{
-                    fontFamily: "'Cairo', sans-serif",
-                    fontSize: '1.2rem',
-                    fontWeight: 900,
-                    letterSpacing: '0.01em',
-                    color: '#1E140E',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  Absolute Dental
-                </span>
-              </Link>
-            </div>
-
-            {/* Desktop Navigation Links (>= 1080px) */}
-            <nav className="navbar-nav navbar-light-nav" style={{ display: 'none' }} id="desktop-nav-light">
-              <Link to="/" className="nav-link nav-light-link">
-                {lang === 'ar' ? 'الرئيسية' : 'Home'}
-              </Link>
-              <Link to="/study-tools" className={`nav-link nav-light-link ${location.pathname.startsWith('/study-tools') || location.pathname.startsWith('/years') ? 'active' : ''}`}>
-                {lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}
-              </Link>
-              <Link to="/year/1st-year" className={`nav-link nav-light-link ${location.pathname === '/year/1st-year' ? 'active' : ''}`}>
-                {lang === 'ar' ? 'السنة الأولى' : '1st Year'}
-              </Link>
-              <Link to="/year/2nd-year" className={`nav-link nav-light-link ${location.pathname === '/year/2nd-year' ? 'active' : ''}`}>
-                {lang === 'ar' ? 'السنة الثانية' : '2nd Year'}
-              </Link>
-              <Link to="/accessories" className={`nav-link nav-light-link ${location.pathname === '/accessories' ? 'active' : ''}`}>
-                {lang === 'ar' ? 'إكسسوارات الأسنان' : 'Accessories'}
-              </Link>
-              <Link to="/donations" className={`nav-link nav-light-link ${location.pathname === '/donations' ? 'active' : ''}`}>
-                {lang === 'ar' ? 'التبرعات' : 'Donations'}
-              </Link>
-            </nav>
-
-            {/* Right: Search + Language + Favorites + Cart (Brown Badge) + Account */}
-            <div className="navbar-actions navbar-light-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              <button
-                onClick={() => navigate('/search')}
-                className="nav-icon-btn nav-light-btn"
-                title={lang === 'ar' ? 'بحث' : 'Search'}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#1E140E',
-                  padding: '0.4rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  borderRadius: '8px',
-                }}
-              >
-                <Search size={20} strokeWidth={2} />
-              </button>
-
-              <button
-                onClick={toggleLanguage}
-                className="nav-icon-btn nav-light-btn nav-icon-desktop-only"
-                title={lang === 'ar' ? 'English' : 'العربية'}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#1E140E',
-                  padding: '0.4rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  borderRadius: '8px',
-                }}
-              >
-                <Globe size={19} strokeWidth={2} />
-              </button>
-
-              <Link
-                to="/favorites"
-                className="nav-icon-btn nav-light-btn nav-icon-desktop-only"
-                title={lang === 'ar' ? 'المفضلة' : 'Favorites'}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#1E140E',
-                  padding: '0.4rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textDecoration: 'none',
-                  borderRadius: '8px',
-                }}
-              >
-                <Heart size={19} strokeWidth={2} />
-              </Link>
-
-              <Link
-                to="/cart"
-                className="nav-icon-btn nav-light-btn"
-                title={lang === 'ar' ? 'السلة' : 'Cart'}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#1E140E',
-                  padding: '0.4rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textDecoration: 'none',
-                  position: 'relative',
-                  borderRadius: '8px',
-                }}
-              >
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ShoppingCart size={21} strokeWidth={2} />
-                  <span
-                    className="tabular-nums"
-                    style={{
-                      position: 'absolute',
-                      top: '-6px',
-                      right: '-8px',
-                      backgroundColor: '#684835',
-                      color: '#FFFFFF',
-                      fontSize: '0.65rem',
-                      fontWeight: 900,
-                      minWidth: '17px',
-                      height: '17px',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '0 2px',
-                      lineHeight: 1,
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                    }}
-                  >
-                    {cartCount}
-                  </span>
-                </div>
-              </Link>
-
-              <Link
-                to={user && user.email !== 'admin@smylodent.com' ? '/profile' : '/signin'}
-                className="nav-icon-btn nav-light-btn"
-                title={lang === 'ar' ? 'حسابي' : 'Account'}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#1E140E',
-                  padding: '0.4rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                }}
-              >
-                <User size={20} strokeWidth={2} />
-              </Link>
-            </div>
-
-          </div>
-
-          <style>{`
-            @media (min-width: 1080px) {
-              #desktop-nav-light { display: flex !important; }
-            }
-            @media (max-width: 1079px) {
-              #desktop-nav-light { display: none !important; }
-              .nav-icon-desktop-only { display: none !important; }
-            }
-          `}</style>
-        </header>
-
-        {renderSideDrawer()}
-      </>
-    );
-  }
-
   return (
     <>
-      {/* ── DARK BROWN NAVBAR (MATCHING REFERENCE MOCKUP ON LAPTOP, IPAD & PHONE) ── */}
-      <header className={`navbar navbar-reference-brown ${scrolled ? 'scrolled' : ''} no-print`}>
+      {/* ── LIGHT CREAM NAVBAR (MATCHING REFERENCE MOCKUP IN ARABIC RTL) ── */}
+      <header className={`navbar navbar-reference-light ${scrolled ? 'scrolled' : ''} no-print`}>
         <div
           className="container navbar-inner"
           style={{
@@ -566,12 +337,39 @@ export const Navbar = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '0.85rem',
-            height: '66px'
+            gap: '1rem',
+            height: '74px',
+            paddingInline: '1.25rem'
           }}
         >
-          {/* Start Group: Logo + Brand + Hamburger Button (☰) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexShrink: 0 }}>
+          {/* 1. RIGHT (in RTL): Menu Button + Logo + Brand Name */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+            {/* Hamburger Menu Button */}
+            <button
+              type="button"
+              className="nav-icon-btn"
+              onClick={() => setMobileOpen(true)}
+              aria-label={lang === 'ar' ? 'فتح القائمة الجانبية' : 'Open side menu'}
+              title={lang === 'ar' ? 'القائمة الجانبية' : 'Menu'}
+              style={{
+                color: '#2C1A11',
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                border: 'none',
+                background: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0,
+                padding: 0
+              }}
+            >
+              <Menu size={24} strokeWidth={2.2} />
+            </button>
+
+            {/* Brand Logo & Name */}
             <Link
               to="/"
               className="navbar-logo"
@@ -579,7 +377,7 @@ export const Navbar = () => {
                 textDecoration: 'none',
                 alignItems: 'center',
                 display: 'flex',
-                gap: '9px',
+                gap: '10px',
                 flexShrink: 0,
                 margin: 0
               }}
@@ -588,117 +386,98 @@ export const Navbar = () => {
                 src={brandLogoTrimmed}
                 alt="Absolute Dental"
                 style={{
-                  width: 34,
-                  height: 34,
+                  width: 36,
+                  height: 36,
                   objectFit: 'contain',
+                  borderRadius: '50%',
                   flexShrink: 0,
-                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
                 }}
               />
               <span
                 style={{
-                  fontFamily: "var(--font-ar)",
-                  fontSize: '1.15rem',
+                  fontFamily: "'Cairo', -apple-system, BlinkMacSystemFont, sans-serif",
+                  fontSize: '1.25rem',
                   fontWeight: 900,
                   letterSpacing: '0.01em',
-                  color: '#ffffff',
+                  color: '#2C1A11',
                   whiteSpace: 'nowrap',
                 }}
               >
                 Absolute Dental
               </span>
             </Link>
-
-            {/* Hamburger Menu Button (☰) — works on Phone, iPad, and Laptop */}
-            <button
-              type="button"
-              className="nav-icon-btn"
-              onClick={() => setMobileOpen(true)}
-              aria-label={lang === 'ar' ? 'فتح القائمة الجانبية' : 'Open side menu'}
-              title={lang === 'ar' ? 'القائمة الجانبية' : 'Menu'}
-              style={{
-                color: '#FFFFFF',
-                width: '38px',
-                height: '38px',
-                borderRadius: '10px',
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.06)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                flexShrink: 0
-              }}
-            >
-              <Menu size={20} strokeWidth={2.2} />
-            </button>
           </div>
 
-          {/* Center: Pill Search Input (visible on Laptop & iPad) */}
+          {/* 2. CENTER: Pill Search Input */}
           <form
             onSubmit={handleSearch}
             className="navbar-search navbar-center-search"
             style={{
-              flex: '1 1 420px',
-              maxWidth: '460px',
-              marginInline: 'auto'
+              flex: '1 1 440px',
+              maxWidth: '480px',
+              marginInline: 'auto',
+              position: 'relative'
             }}
           >
-            <Search size={15} className="navbar-search-icon" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder={lang === 'ar' ? 'ابحث عن أداة طبية...' : 'Search dental tools...'}
+            <div
               style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.18)',
-                height: '38px',
-                fontSize: '0.85rem'
+                display: 'flex',
+                alignItems: 'center',
+                background: '#F0E9DF',
+                borderRadius: '999px',
+                border: '1px solid rgba(138, 108, 82, 0.16)',
+                paddingInline: '1rem',
+                height: '44px',
+                width: '100%',
+                transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
               }}
-            />
+            >
+              <Search size={18} style={{ color: '#7A6556', flexShrink: 0, marginInlineEnd: '0.65rem' }} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder={lang === 'ar' ? 'ابحث عن أداة طبية...' : 'Search for dental instruments...'}
+                style={{
+                  width: '100%',
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  fontFamily: "'Cairo', sans-serif",
+                  fontSize: '0.9rem',
+                  color: '#2C1A11',
+                  fontWeight: 600
+                }}
+              />
+            </div>
           </form>
 
-          {/* End Group: Mobile Search Icon + Cart with Counter + Account Icon */}
-          <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
-            {/* Phone Quick Search Icon */}
-            <button
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              className="nav-icon-btn nav-phone-search-btn"
-              title={lang === 'ar' ? 'بحث' : 'Search'}
-              style={{ color: '#FFFFFF' }}
-            >
-              <Search size={19} />
-            </button>
-
-            {/* Cart Icon with Counter Badge */}
+          {/* 3. LEFT (in RTL): Shopping Cart + Account with vertical labels */}
+          <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.35rem', flexShrink: 0 }}>
+            {/* Cart with Counter Badge + Label */}
             <Link
               to="/cart"
-              className="nav-icon-btn nav-cart-btn"
-              title={lang === 'ar' ? 'سلة التسوق' : 'Cart'}
               style={{
-                background: 'transparent',
-                color: '#ffffff',
-                borderRadius: '999px',
-                padding: '0.35rem 0.5rem',
-                display: 'inline-flex',
+                display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '0.4rem',
                 textDecoration: 'none',
-                position: 'relative',
+                color: '#2C1A11',
+                cursor: 'pointer',
+                padding: '2px 4px'
               }}
+              title={lang === 'ar' ? 'سلة المشتريات' : 'Shopping Cart'}
             >
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ShoppingCart size={21} />
+                <ShoppingCart size={22} strokeWidth={2} style={{ color: '#2C1A11' }} />
                 <span
-                  className="nav-cart-badge-circle tabular-nums"
+                  className="tabular-nums"
                   style={{
                     position: 'absolute',
                     top: '-6px',
-                    right: '-7px',
-                    backgroundColor: '#D4A853',
-                    color: '#1E140E',
+                    right: '-8px',
+                    backgroundColor: '#4A3525',
+                    color: '#FFFFFF',
                     fontSize: '0.65rem',
                     fontWeight: 900,
                     minWidth: '17px',
@@ -709,217 +488,137 @@ export const Navbar = () => {
                     justifyContent: 'center',
                     padding: '0 2px',
                     lineHeight: 1,
-                    boxShadow: '0 2px 5px rgba(0,0,0,0.35)'
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.25)'
                   }}
                 >
                   {cartCount}
                 </span>
               </div>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#3E271D', marginTop: '3px' }}>
+                {lang === 'ar' ? 'سلة المشتريات' : 'Cart'}
+              </span>
             </Link>
 
-            {/* User Account Menu / Icon */}
+            {/* Account with Label */}
             <div ref={profileRef} style={{ position: 'relative' }}>
               {user && user.email !== 'admin@smylodent.com' ? (
                 <button
                   type="button"
-                  className="nav-user-pill-btn"
                   onClick={() => setProfileOpen(!profileOpen)}
-                  aria-label={lang === 'ar' ? 'حساب المستخدم' : 'User Account'}
                   style={{
-                    display: 'inline-flex',
+                    background: 'none',
+                    border: 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '0.45rem',
-                    padding: '0.22rem 0.65rem 0.22rem 0.25rem',
-                    borderRadius: '999px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: '#FFFFFF',
+                    color: '#2C1A11',
                     cursor: 'pointer',
-                    transition: 'all 0.2s ease',
+                    padding: '2px 4px'
                   }}
+                  title={lang === 'ar' ? 'حسابي' : 'Account'}
                 >
-                  <div style={{ position: 'relative', width: 28, height: 28, flexShrink: 0 }}>
-                    {profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture ? (
-                      <img
-                        src={profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture}
-                        alt="Avatar"
-                        style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: 28,
-                          height: 28,
-                          borderRadius: '50%',
-                          backgroundColor: '#684835',
-                          color: '#FFFFFF',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.78rem',
-                          fontWeight: 800,
-                          fontFamily: 'Cairo, sans-serif',
-                        }}
-                      >
-                        {(profile?.full_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'ط')[0].toUpperCase()}
-                      </div>
-                    )}
-                    <span
-                      style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        insetInlineEnd: 0,
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: '#10B981',
-                        border: '1.5px solid #231810',
-                      }}
-                    />
-                  </div>
-                  <span
-                    style={{
-                      fontFamily: 'Cairo, sans-serif',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      maxWidth: 85,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {(profile?.full_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '').split(' ')[0]}
+                  <User size={22} strokeWidth={2} style={{ color: '#2C1A11' }} />
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#3E271D', marginTop: '3px' }}>
+                    {lang === 'ar' ? 'حسابي' : 'Account'}
                   </span>
                 </button>
               ) : (
-                <button
-                  type="button"
-                  className="nav-icon-btn"
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  aria-label={lang === 'ar' ? 'حساب المستخدم' : 'User Account'}
-                  style={{ color: '#FFFFFF' }}
+                <Link
+                  to="/signin"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textDecoration: 'none',
+                    color: '#2C1A11',
+                    cursor: 'pointer',
+                    padding: '2px 4px'
+                  }}
+                  title={lang === 'ar' ? 'حسابي' : 'Sign In'}
                 >
-                  <User size={20} />
-                </button>
+                  <User size={22} strokeWidth={2} style={{ color: '#2C1A11' }} />
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#3E271D', marginTop: '3px' }}>
+                    {lang === 'ar' ? 'حسابي' : 'Account'}
+                  </span>
+                </Link>
               )}
 
+              {/* Profile Dropdown */}
               {profileOpen && (
                 <div
-                  className="animate-slide-down"
+                  className="profile-dropdown-card"
                   style={{
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
-                    insetInlineEnd: 0,
+                    [isRtl ? 'left' : 'right']: 0,
                     width: 240,
-                    maxWidth: 'calc(100vw - 1rem)',
-                    background: '#2A1D15',
-                    border: '1px solid rgba(255,255,255,0.14)',
-                    borderRadius: 'var(--radius-md)',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 16px 40px rgba(0,0,0,0.45)',
-                    overflow: 'hidden',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #ECE4DA',
+                    borderRadius: '14px',
+                    boxShadow: '0 12px 32px rgba(35, 24, 16, 0.12)',
                     zIndex: 9999,
+                    overflow: 'hidden',
+                    direction: isRtl ? 'rtl' : 'ltr'
                   }}
                 >
-                  {user && user.email !== 'admin@smylodent.com' ? (
-                    <>
-                      <div style={{ padding: '0.9rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                        <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.88rem', margin: 0 }}>
-                          {profile?.full_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email}
-                        </p>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '0.75rem', margin: '0.2rem 0 0 0' }}>{user.email}</p>
-                        {profile?.phone && (
-                          <p style={{ color: '#CDBFA6', fontSize: '0.74rem', margin: '0.15rem 0 0 0', direction: 'ltr', textAlign: isRtl ? 'right' : 'left' }}>
-                            📱 {profile.phone}
-                          </p>
-                        )}
-                      </div>
-
-                      {(!profile?.phone || !profile.phone.trim()) && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setProfileOpen(false);
-                            if (openProfileCompletion) openProfileCompletion();
-                          }}
-                          style={{
-                            ...dropItemStyle,
-                            width: '100%',
-                            backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                            color: '#FBBF24',
-                            fontWeight: 800,
-                          }}
-                        >
-                          <Phone size={15} /> {lang === 'ar' ? 'إضافة رقم الواتساب' : 'Add WhatsApp'}
-                        </button>
-                      )}
-
-                      <Link to="/profile" style={dropItemStyle} onClick={() => setProfileOpen(false)}>
-                        <User size={15} /> {lang === 'ar' ? 'حسابي وبياناتي' : 'My Profile'}
-                      </Link>
-                      <Link to="/track" style={dropItemStyle} onClick={() => setProfileOpen(false)}>
-                        <ClipboardList size={15} /> {lang === 'ar' ? 'طلباتي' : 'My Orders'}
-                      </Link>
-                      <button
-                        style={{ ...dropItemStyle, width: '100%', color: '#FCA5A5', borderTop: '1px solid rgba(255,255,255,0.06)' }}
-                        onClick={() => { signOut(); setProfileOpen(false); }}
-                      >
-                        <LogOut size={15} /> {lang === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link to="/signin" style={dropItemStyle} onClick={() => setProfileOpen(false)}>
-                        <User size={15} /> {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
-                      </Link>
-                      <Link to="/signin?tab=register" style={{ ...dropItemStyle, color: '#CDBFA6' }} onClick={() => setProfileOpen(false)}>
-                        <ClipboardList size={15} /> {lang === 'ar' ? 'إنشاء حساب' : 'Create Account'}
-                      </Link>
-                    </>
-                  )}
+                  <div style={{ padding: '0.9rem 1rem', borderBottom: '1px solid #F1EBE4', background: '#FAF7F2' }}>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#2C1A11' }}>
+                      {profile?.full_name || user?.user_metadata?.full_name || user?.email}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#7A6556', marginTop: '2px' }}>
+                      {user?.email}
+                    </div>
+                  </div>
+                  <div style={{ padding: '0.4rem' }}>
+                    <Link
+                      to="/profile"
+                      onClick={() => setProfileOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.6rem 0.85rem',
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        color: '#2C1A11',
+                        textDecoration: 'none',
+                        borderRadius: '8px'
+                      }}
+                    >
+                      <User size={16} /> {lang === 'ar' ? 'الملف الشخصي' : 'Profile'}
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => { signOut(); setProfileOpen(false); }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.6rem 0.85rem',
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        color: '#DC2626',
+                        border: 'none',
+                        background: 'none',
+                        cursor: 'pointer',
+                        borderRadius: '8px',
+                        textAlign: isRtl ? 'right' : 'left'
+                      }}
+                    >
+                      <LogOut size={16} /> {lang === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
-
-        <style>{`
-          .navbar-reference-brown {
-            background: linear-gradient(90deg, #24170F 0%, #382519 50%, #24170F 100%) !important;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-          }
-          @media (min-width: 680px) {
-            .navbar-center-search { display: block !important; }
-            .nav-phone-search-btn { display: none !important; }
-          }
-          @media (max-width: 679px) {
-            .navbar-center-search { display: none !important; }
-            .nav-phone-search-btn { display: flex !important; }
-          }
-        `}</style>
       </header>
 
-      {/* ── SIDE DRAWER MENU (CLOSED BY DEFAULT, OPENS ON ☰) ── */}
       {renderSideDrawer()}
     </>
   );
 };
 
-const dropItemStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.6rem',
-  padding: '0.7rem 1rem',
-  color: 'rgba(255,255,255,0.82)',
-  fontSize: '0.875rem',
-  fontWeight: 600,
-  transition: 'all 0.15s ease',
-  cursor: 'pointer',
-  background: 'none',
-  border: 'none',
-  width: '100%',
-  textAlign: 'start',
-  textDecoration: 'none',
-};
-
 export default Navbar;
-

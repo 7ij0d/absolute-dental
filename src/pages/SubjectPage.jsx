@@ -4,6 +4,25 @@ import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import supabase from '../supabaseClient';
 import ProductCard from '../components/ProductCard';
+import fixedProsthoFaded from '../assets/images/fixed-prosthodontics-faded.png';
+import operativeFaded from '../assets/images/operative-dentistry-faded.png';
+import removableFaded from '../assets/images/removable-prosthodontics-faded.png';
+import anatomyFaded from '../assets/images/dental-anatomy-faded.png';
+import materialsFaded from '../assets/images/dental-materials-faded.png';
+import preventiveFaded from '../assets/images/preventive-dentistry-faded.png';
+import studyToolsFaded from '../assets/images/study-tools-faded.png';
+
+const getSubjectArtwork = (slug) => {
+  const s = String(slug || '').toLowerCase();
+  if (s.includes('fixed')) return fixedProsthoFaded;
+  if (s.includes('restorative') || s.includes('operative') || s.includes('conservative')) return operativeFaded;
+  if (s.includes('removable')) return removableFaded;
+  if (s.includes('anatomy')) return anatomyFaded;
+  if (s.includes('materials')) return materialsFaded;
+  if (s.includes('preventive')) return preventiveFaded;
+  return studyToolsFaded;
+};
+
 import { cacheGet, cacheSet } from '../cache';
 import defaultProductsList from '../defaultProducts.json';
 import { groupProductsList } from '../utils/burGroupingEngine';
@@ -559,190 +578,203 @@ export const SubjectPage = () => {
           </span>
         </nav>
 
-        {/* ── 2. PAGE HEADER SECTION ── */}
-        <header className="subject-header-card" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
-          <div className="subject-header-info">
-            {/* Arabic Name (Large & Bold) */}
-            <h1 className="subject-title-arabic">{subjectTitleAr}</h1>
-
-            {/* English Name */}
-            <h2 className="subject-title-english">{subjectTitleEn}</h2>
-
-            {/* Subtitle */}
-            <p className="subject-header-subtitle">
-              {lang === 'ar'
-                ? 'الأدوات والمواد المطلوبة للمادة'
-                : `Required tools and supplies for ${subjectTitleEn}`}
-            </p>
-          </div>
-
-          <div className="subject-header-meta">
-            {/* Dynamic Product Count */}
-            <div className="subject-count-pill">
-              <Package size={15} />
-              <span>
-                {filteredList.length}{' '}
-                {lang === 'ar' ? 'منتج' : (filteredList.length === 1 ? 'product' : 'products')}
-              </span>
-            </div>
-          </div>
-        </header>
-
-        {/* ── 3. IN-PAGE LIVE SEARCH & MOBILE CONTROLS BAR ── */}
-        <div className="subject-tools-toolbar" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
-          {/* In-page live search */}
-          <div className="subject-search-container">
-            <Search size={16} className="subject-search-icon" />
-            <input
-              type="text"
-              value={inPageSearch}
-              onChange={(e) => setInPageSearch(e.target.value)}
-              placeholder={lang === 'ar' ? `ابحث في أدوات ${subjectTitleEn}... (مثال: Wax, Carver, Spatula)` : `Search in ${subjectTitleEn}...`}
-              className="subject-search-input"
-            />
-            {inPageSearch && (
-              <button
-                type="button"
-                onClick={() => setInPageSearch('')}
-                className="subject-search-clear"
-                aria-label="Clear search"
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-
-          {/* Mobile Filter Toggle Button */}
-          <button
-            type="button"
-            onClick={() => setShowMobileFilters(true)}
-            className="subject-mobile-filter-trigger"
-          >
-            <SlidersHorizontal size={16} />
-            <span>{lang === 'ar' ? 'التصفية والترتيب' : 'Filter & Sort'}</span>
-            {isFiltered && <span className="filter-active-indicator" />}
-          </button>
-        </div>
-
-        {/* ── 4. MAIN BROWSE LAYOUT (SIDEBAR + DIRECT UNIFIED GRID) ── */}
-        <div className="subject-browse-layout" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
-
-          {/* Desktop Filter Sidebar (RTL start) */}
-          <aside className="subject-desktop-sidebar">
-            <FilterControls />
-          </aside>
-
-          {/* Direct Unified Product Grid Area */}
-          <main className="subject-products-container">
-            {filteredList.length === 0 || productGroups.length === 0 ? (
-              <div className="subject-empty-state">
-                {products.length === 0 ? (
-                  <>
-                    <Package size={52} strokeWidth={1.5} className="subject-empty-icon" />
-                    <h3 className="subject-empty-title">
-                      {lang === 'ar' ? 'لا توجد أدوات متاحة حالياً لهذه المادة.' : 'No tools available for this subject currently.'}
-                    </h3>
-                    <p className="subject-empty-desc">
-                      {lang === 'ar' ? 'سيتم تزويد وفهرسة كافة الأدوات المطلوبة لهذه المادة قريباً.' : 'All required tools for this subject will be stocked soon.'}
-                    </p>
-                    <Link to={`/year/${yearData?.slug || '1st-year'}`} className="btn btn-secondary" style={{ marginTop: '1rem' }}>
-                      {lang === 'ar' ? 'العودة للمواد' : 'Back to Subjects'}
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Search size={44} strokeWidth={1.5} className="subject-empty-icon" />
-                    <h3 className="subject-empty-title">
-                      {lang === 'ar' ? 'لا توجد أدوات تطابق البحث أو الفلاتر المحددة' : 'No tools match your search or filters'}
-                    </h3>
-                    <p className="subject-empty-desc">
-                      {lang === 'ar' ? 'جرب البحث باسم أداة أخرى أو قم بإعادة ضبط نطاق السعر والتوفر.' : 'Try searching for another tool or reset price and stock filters.'}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={resetAllFilters}
-                      className="btn btn-outline"
-                      style={{ marginTop: '1rem' }}
-                    >
-                      {lang === 'ar' ? 'إعادة ضبط الفلاتر' : 'Reset Filters'}
-                    </button>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="subject-grouped-stack">
-                {productGroups.map((group) => (
-                  <section key={group.id} className="subject-group-section">
-                    {/* Visual Semantic Header */}
-                    <div className="subject-group-header">
-                      <div className="subject-group-icon-badge">
-                        {renderGroupIcon(group.icon)}
-                      </div>
-                      <div className="subject-group-titles">
-                        <h2 className="subject-group-title-en">{group.titleEn}</h2>
-                        <span className="subject-group-title-ar">{group.titleAr}</span>
-                      </div>
-                      <span className="subject-group-pill">
-                        {group.items.length} {lang === 'ar' ? 'منتج' : 'items'}
-                      </span>
-                    </div>
-
-                    {/* Products Grid for this Group */}
-                    <div className="subject-products-grid">
-                      {group.items.map((product) => (
-                        <ProductCard key={product.id} product={product} />
-                      ))}
-                    </div>
-                  </section>
-                ))}
-              </div>
-            )}
-          </main>
-
-        </div>
-
-      </div>
-
-      {/* ── 5. MOBILE FILTERS DRAWER / BOTTOM SHEET ── */}
-      {showMobileFilters && (
-        <div className="mobile-filter-drawer-portal">
+        {/* ── 2. SECTION REFERENCE BANNER ── */}
+        <section
+          className="section-reference-banner animate-fade-in"
+          style={{
+            position: 'relative',
+            width: '100%',
+            minHeight: '124px',
+            borderRadius: '18px',
+            background: 'linear-gradient(135deg, #F3ECE2 0%, #EBE1D3 100%)',
+            border: '1px solid rgba(138, 108, 82, 0.18)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            overflow: 'hidden',
+            marginBottom: '1.75rem',
+            boxShadow: '0 4px 18px rgba(36, 23, 15, 0.04)',
+            direction: isRtl ? 'rtl' : 'ltr'
+          }}
+        >
+          {/* Banner Text & Icon */}
           <div
-            className="mobile-filter-backdrop"
-            onClick={() => setShowMobileFilters(false)}
-          />
-          <div className="mobile-filter-panel" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
-            <div className="mobile-filter-topbar">
-              <h3 className="mobile-filter-title">
-                {lang === 'ar' ? 'التصفية والترتيب' : 'Filter & Sort'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setShowMobileFilters(false)}
-                className="mobile-filter-close"
-              >
-                <X size={20} />
-              </button>
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.1rem',
+              padding: '1.35rem 1.75rem',
+              zIndex: 2,
+              flex: '1 1 auto'
+            }}
+          >
+            <div
+              style={{
+                width: '54px',
+                height: '54px',
+                borderRadius: '14px',
+                background: 'rgba(180, 155, 130, 0.35)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#4A3525',
+                flexShrink: 0
+              }}
+            >
+              <Package size={26} strokeWidth={2} />
             </div>
 
-            <div className="mobile-filter-scroll-body">
-              <FilterControls />
-            </div>
-
-            <div className="mobile-filter-footer">
-              <button
-                type="button"
-                onClick={() => setShowMobileFilters(false)}
-                className="btn btn-secondary"
-                style={{ width: '100%', padding: '0.75rem', fontWeight: 800 }}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <h1
+                  style={{
+                    margin: 0,
+                    fontFamily: "'Cairo', sans-serif",
+                    fontSize: 'clamp(1.4rem, 2.8vw, 1.95rem)',
+                    fontWeight: 900,
+                    color: '#2C1A11',
+                    lineHeight: 1.2
+                  }}
+                >
+                  {subjectTitleAr}
+                </h1>
+                <span
+                  style={{
+                    fontFamily: "'Cairo', sans-serif",
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                    color: '#7A6556'
+                  }}
+                >
+                  ({subjectTitleEn})
+                </span>
+              </div>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: "'Cairo', sans-serif",
+                  fontSize: 'clamp(0.82rem, 1.6vw, 0.94rem)',
+                  fontWeight: 600,
+                  color: '#6B5344',
+                  lineHeight: 1.45
+                }}
               >
-                {lang === 'ar' ? `عرض النتائج (${filteredList.length})` : `Show Results (${filteredList.length})`}
-              </button>
+                {lang === 'ar'
+                  ? (subjectData?.description_ar || 'الأدوات والمستلزمات الدراسية المخصصة للمادة')
+                  : (subjectData?.description_en || 'Required tools and supplies for this subject')}
+              </p>
             </div>
           </div>
+
+          {/* Banner Artwork on Left */}
+          <div
+            className="section-banner-art-wrap"
+            style={{
+              position: 'relative',
+              height: '100%',
+              minHeight: '124px',
+              width: '38%',
+              maxWidth: '380px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              overflow: 'hidden',
+              pointerEvents: 'none'
+            }}
+          >
+            <img
+              src={getSubjectArtwork(slug || lookupSlug)}
+              alt=""
+              style={{
+                height: '100%',
+                width: '100%',
+                objectFit: 'cover',
+                objectPosition: isRtl ? 'left center' : 'right center',
+                maskImage: isRtl
+                  ? 'linear-gradient(to right, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)'
+                  : 'linear-gradient(to left, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
+                WebkitMaskImage: isRtl
+                  ? 'linear-gradient(to right, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)'
+                  : 'linear-gradient(to left, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)'
+              }}
+            />
+          </div>
+        </section>
+
+        {/* ── 3. PRODUCT COUNT HEADER ── */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '1.25rem',
+            direction: isRtl ? 'rtl' : 'ltr'
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "'Cairo', sans-serif",
+              fontSize: '0.95rem',
+              fontWeight: 800,
+              color: '#3E271D'
+            }}
+          >
+            {filteredList.length} {lang === 'ar' ? 'منتج' : 'products'}
+          </span>
         </div>
-      )}
+
+        {/* ── 4. FULL-WIDTH PRODUCT GROUPS (NO SIDEBAR / NO FILTERS) ── */}
+        <main
+          className="subject-products-fullwidth"
+          style={{
+            width: '100%',
+            direction: isRtl ? 'rtl' : 'ltr'
+          }}
+        >
+          {filteredList.length === 0 || productGroups.length === 0 ? (
+            <div className="subject-empty-state">
+              <Package size={52} strokeWidth={1.5} className="subject-empty-icon" />
+              <h3 className="subject-empty-title">
+                {lang === 'ar' ? 'لا توجد أدوات متاحة حالياً لهذه المادة.' : 'No tools available for this subject currently.'}
+              </h3>
+              <p className="subject-empty-desc">
+                {lang === 'ar' ? 'سيتم تزويد وفهرسة كافة الأدوات المطلوبة لهذه المادة قريباً.' : 'All required tools for this subject will be stocked soon.'}
+              </p>
+              <Link to={`/year/${yearData?.slug || '1st-year'}`} className="btn btn-secondary" style={{ marginTop: '1rem' }}>
+                {lang === 'ar' ? 'العودة للمواد' : 'Back to Subjects'}
+              </Link>
+            </div>
+          ) : (
+            <div className="subject-grouped-stack">
+              {productGroups.map((group) => (
+                <section key={group.id} className="subject-group-section">
+                  {/* Visual Semantic Header */}
+                  <div className="subject-group-header">
+                    <div className="subject-group-icon-badge">
+                      {renderGroupIcon(group.icon)}
+                    </div>
+                    <div className="subject-group-titles">
+                      <h2 className="subject-group-title-en">{group.titleEn}</h2>
+                      <span className="subject-group-title-ar">{group.titleAr}</span>
+                    </div>
+                    <span className="subject-group-pill">
+                      {group.items.length} {lang === 'ar' ? 'منتج' : 'items'}
+                    </span>
+                  </div>
+
+                  {/* Products Grid for this Group */}
+                  <div className="subject-products-grid">
+                    {group.items.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 };
-
 export default SubjectPage;

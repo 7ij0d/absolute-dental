@@ -16,6 +16,7 @@ import {
   Ban
 } from 'lucide-react';
 import BoxColorVariantSelector from '../components/BoxColorVariantSelector';
+import dentalBoxesFaded from '../assets/images/dental-boxes-faded.png';
 import {
   splitBoxColorsByAvailability,
   cleanColorLabel,
@@ -481,56 +482,140 @@ export const BoxesPage = () => {
   return (
     <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
       
-      {/* ── HERO BANNER ── */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #1E140E 0%, #38281D 50%, #24170F 100%)',
-          borderBottom: '1px solid rgba(138, 108, 82, 0.25)',
-          paddingBlock: 'clamp(2.5rem, 5vw, 4rem)',
-          paddingInline: '1.25rem',
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
-        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-          {/* Breadcrumb Bar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', marginBottom: '1.25rem', color: 'rgba(255,255,255,0.6)', flexWrap: 'wrap' }}>
-            <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-              {lang === 'ar' ? 'الرئيسية' : 'Home'}
-            </Link>
-            <ChevronFwd size={14} />
-            <span style={{ color: '#CDBFA6', fontWeight: 800 }}>
-              {lang === 'ar' ? 'البوكسات' : 'Boxes'}
-            </span>
-          </div>
+      {/* ── 1. BREADCRUMBS ── */}
+      <div className="container" style={{ maxWidth: '1280px', paddingInline: '1.25rem' }}>
+        <nav
+          aria-label="breadcrumb"
+          style={{
+            paddingBlock: '1.1rem 0.75rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.45rem',
+            fontSize: '0.86rem',
+            fontWeight: 700,
+            color: '#7A6556',
+            direction: isRtl ? 'rtl' : 'ltr'
+          }}
+        >
+          <Link to="/" style={{ color: '#7A6556', textDecoration: 'none' }}>
+            {lang === 'ar' ? 'الرئيسية' : 'Home'}
+          </Link>
+          <span style={{ color: '#B3A293', fontSize: '0.8rem' }}>›</span>
+          <span style={{ color: '#2C1A11', fontWeight: 800 }}>
+            {lang === 'ar' ? 'البوكسات' : 'Boxes'}
+          </span>
+        </nav>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <div style={{
-              width: 50,
-              height: 50,
-              borderRadius: 'var(--radius-md)',
-              background: 'rgba(255,255,255,0.1)',
+        {/* ── 2. SECTION REFERENCE BANNER ── */}
+        <section
+          className="section-reference-banner animate-fade-in"
+          style={{
+            position: 'relative',
+            width: '100%',
+            minHeight: '124px',
+            borderRadius: '18px',
+            background: 'linear-gradient(135deg, #F3ECE2 0%, #EBE1D3 100%)',
+            border: '1px solid rgba(138, 108, 82, 0.18)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            overflow: 'hidden',
+            marginBottom: '1.75rem',
+            boxShadow: '0 4px 18px rgba(36, 23, 15, 0.04)',
+            direction: isRtl ? 'rtl' : 'ltr'
+          }}
+        >
+          {/* Banner Text & Icon */}
+          <div
+            style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--secondary)',
-              flexShrink: 0
-            }}>
-              <Box size={28} />
+              gap: '1.1rem',
+              padding: '1.35rem 1.75rem',
+              zIndex: 2,
+              flex: '1 1 auto'
+            }}
+          >
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '14px',
+                background: 'rgba(180, 155, 130, 0.35)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#4A3525',
+                flexShrink: 0
+              }}
+            >
+              <Box size={28} strokeWidth={2} />
             </div>
 
-            <div>
-              <h1 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 900, color: '#ffffff', margin: 0, lineHeight: 1.2 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <h1
+                style={{
+                  margin: 0,
+                  fontFamily: "'Cairo', sans-serif",
+                  fontSize: 'clamp(1.5rem, 3vw, 2.1rem)',
+                  fontWeight: 900,
+                  color: '#2C1A11',
+                  lineHeight: 1.2
+                }}
+              >
                 {lang === 'ar' ? 'البوكسات' : 'Dental Boxes'}
               </h1>
-              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(0.85rem, 1.8vw, 1rem)', margin: '0.35rem 0 0 0', maxWidth: 650 }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: "'Cairo', sans-serif",
+                  fontSize: 'clamp(0.85rem, 1.8vw, 0.98rem)',
+                  fontWeight: 600,
+                  color: '#6B5344',
+                  lineHeight: 1.45
+                }}
+              >
                 {lang === 'ar'
                   ? 'بوكسات تنظيم وحفظ لجميع أدواتك ومعداتك الطبية بأحجام وألوان متعددة'
-                  : 'Organizer & storage boxes for all your dental tools and gear in multiple sizes & colors.'}
+                  : 'Organizer & storage boxes for all your dental tools and gear in multiple sizes & colors'}
               </p>
             </div>
           </div>
-        </div>
+
+          {/* Banner Artwork on Left */}
+          <div
+            className="section-banner-art-wrap"
+            style={{
+              position: 'relative',
+              height: '100%',
+              minHeight: '124px',
+              width: '40%',
+              maxWidth: '420px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              overflow: 'hidden',
+              pointerEvents: 'none'
+            }}
+          >
+            <img
+              src={dentalBoxesFaded}
+              alt=""
+              style={{
+                height: '100%',
+                width: '100%',
+                objectFit: 'cover',
+                objectPosition: isRtl ? 'left center' : 'right center',
+                maskImage: isRtl
+                  ? 'linear-gradient(to right, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)'
+                  : 'linear-gradient(to left, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
+                WebkitMaskImage: isRtl
+                  ? 'linear-gradient(to right, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)'
+                  : 'linear-gradient(to left, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)'
+              }}
+            />
+          </div>
+        </section>
       </div>
 
       {/* ── MAIN CONTENT ── */}

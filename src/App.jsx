@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Outlet, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import AnnouncementBar from './components/AnnouncementBar';
 import BottomNav from './components/BottomNav';
 
 // Public Storefront Pages
@@ -60,7 +59,7 @@ const PublicLayout = () => {
 
   return (
     <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
-      {!isUnifiedStudyFlow && <AnnouncementBar />}
+      
       <Navbar />
       <main style={{ flexGrow: 1, width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
         <Outlet />

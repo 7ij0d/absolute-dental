@@ -5574,3 +5574,65 @@ table {
 
 
 
+
+
+/* ==========================================================================
+   REFERENCE SHOWCASE & REDESIGNED PRODUCT DISPLAY
+   ========================================================================== */
+
+/* Navbar Light Cream Theme */
+.navbar.navbar-reference-light {
+  background-color: #FAF7F2 !important;
+  border-bottom: 1px solid #ECE4DA !important;
+  box-shadow: 0 2px 10px rgba(36, 23, 15, 0.03) !important;
+}
+
+.navbar.navbar-reference-light.scrolled {
+  background-color: rgba(250, 247, 242, 0.96) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  box-shadow: 0 4px 20px rgba(36, 23, 15, 0.08) !important;
+}
+
+/* Section Reference Banner */
+.section-reference-banner {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+@media (max-width: 768px) {
+  .section-reference-banner {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    min-height: auto !important;
+  }
+  .section-banner-art-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 120px !important;
+  }
+}
+
+/* Product Reference Card */
+.product-reference-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(35, 24, 16, 0.1) !important;
+  border-color: #DDD4C8 !important;
+}
+
+/* Fullwidth catalog without filter sidebar */
+.subject-products-fullwidth {
+  width: 100% !important;
+}
+
+.subject-browse-layout {
+  display: block !important;
+}
+
+.subject-desktop-sidebar {
+  display: none !important;
+}
+
+/* Remove announcement bar spacing */
+.announcement-bar {
+  display: none !important;
+}
