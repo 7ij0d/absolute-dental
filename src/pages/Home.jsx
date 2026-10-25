@@ -852,44 +852,35 @@ export const Home = () => {
 
         {/* ── 3. PRODUCT AVAILABILITY REQUEST SECTION (قسم طلب توفير منتج) ── */}
         <section className="home-product-request-section" aria-labelledby="product-request-heading">
-          <div className="home-product-request-banner">
-            <div className="home-product-request-content">
-              <div className="home-product-request-title-row">
-                <Sparkles size={22} className="home-product-request-star" />
-                <h2 id="product-request-heading" className="home-product-request-title">
-                  {lang === 'ar' ? 'مش لاقي اللي تبيه؟ خلّيه علينا!' : "Can't find what you need? Leave it to us!"}
-                </h2>
-              </div>
+          <div
+            className="home-product-request-banner-card"
+            onClick={handleOpenProductRequest}
+            role="region"
+            aria-label={lang === 'ar' ? 'طلب توفير منتج' : 'Product Availability Request'}
+          >
+            <picture>
+              <source srcSet={productRequestWebp} type="image/webp" />
+              <img
+                src={productRequestPng}
+                alt={lang === 'ar' ? 'مش متوفر حالياً؟ نقدرو نوفروهولك.. اطلب منتجك الآن' : "Can't find what you need? Request your product now"}
+                className="home-product-request-new-img"
+                loading="lazy"
+              />
+            </picture>
 
-              <p className="home-product-request-desc">
-                {lang === 'ar'
-                  ? 'لو فيه أداة أو منتج تحتاجه ومش موجود عندنا، ابعتلنا طلبك وحنراجعوا إمكانية توفيره.'
-                  : 'If there is a dental tool or product you need that is not listed, send us a request and we will review sourcing it for you.'}
-              </p>
-
-              <div className="home-product-request-action">
-                <button
-                  type="button"
-                  onClick={handleOpenProductRequest}
-                  className="home-primary-pill-btn home-request-cta-btn"
-                >
-                  <span>{lang === 'ar' ? 'اطلب منتجك الآن' : 'Request Your Product Now'}</span>
-                  <ArrowIcon size={16} strokeWidth={2.5} />
-                </button>
-              </div>
-            </div>
-
-            <div className="home-product-request-artwork" aria-hidden="true">
-              <picture>
-                <source srcSet={productRequestWebp} type="image/webp" />
-                <img
-                  src={productRequestPng}
-                  alt=""
-                  loading="lazy"
-                  className="home-product-request-img"
-                />
-              </picture>
-            </div>
+            {/* Clickable CTA button aligned directly with the button in the image */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenProductRequest();
+              }}
+              className="home-product-request-overlay-cta"
+              aria-label={lang === 'ar' ? 'اطلب منتجك الآن' : 'Request Your Product Now'}
+              title={lang === 'ar' ? 'اطلب منتجك الآن' : 'Request Your Product Now'}
+            >
+              <span className="sr-only">{lang === 'ar' ? 'اطلب منتجك الآن' : 'Request Your Product Now'}</span>
+            </button>
           </div>
         </section>
       </div>

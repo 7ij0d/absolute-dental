@@ -5041,6 +5041,55 @@ table {
 }
 
 /* ── 3. Product Availability Request Banner (قسم طلب توفير منتج) ── */
+
+.home-product-request-banner-card {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(36, 23, 15, 0.06);
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  user-select: none;
+  background-color: #F8F3EC;
+}
+
+.home-product-request-banner-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(36, 23, 15, 0.1);
+}
+
+.home-product-request-new-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.home-product-request-overlay-cta {
+  position: absolute;
+  left: 77.05%;
+  top: 60.42%;
+  width: 19.04%;
+  height: 13.80%;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 4;
+  outline: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.home-product-request-overlay-cta:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.home-product-request-overlay-cta:focus-visible {
+  box-shadow: 0 0 0 3px rgba(62, 39, 29, 0.6);
+}
+
 .home-product-request-section {
   margin-top: 0.5rem;
 }
