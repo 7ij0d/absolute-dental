@@ -47,18 +47,25 @@ import FloatingCart from './components/FloatingCart';
 // Public Layout Wrapper
 const PublicLayout = () => {
   const location = useLocation();
-  const isHomePage = location.pathname === '/';
+  const isUnifiedStudyFlow =
+    location.pathname === '/' ||
+    location.pathname.startsWith('/study-tools') ||
+    location.pathname.startsWith('/years') ||
+    location.pathname.startsWith('/year') ||
+    location.pathname.startsWith('/subject') ||
+    location.pathname.startsWith('/other-supplies') ||
+    location.pathname.startsWith('/product');
 
   return (
     <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
-      {!isHomePage && !location.pathname.startsWith('/study-tools') && !location.pathname.startsWith('/years') && !location.pathname.startsWith('/year') && !location.pathname.startsWith('/subject') && !location.pathname.startsWith('/product') && <AnnouncementBar />}
+      {!isUnifiedStudyFlow && <AnnouncementBar />}
       <Navbar />
       <main style={{ flexGrow: 1, width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
         <Outlet />
       </main>
       <Footer />
       <FloatingCart />
-      {!isHomePage && <BottomNav />}
+      {!isUnifiedStudyFlow && <BottomNav />}
     </div>
   );
 };

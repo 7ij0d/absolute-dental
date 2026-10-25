@@ -2406,7 +2406,7 @@ select option { background-color: var(--surface-color); color: var(--text-main);
 
 .study-tools-container {
   width: 100%;
-  max-width: 580px;
+  max-width: 1060px;
   margin: 0 auto;
   padding-inline: 1.25rem;
 }
@@ -2448,12 +2448,40 @@ select option { background-color: var(--surface-color); color: var(--text-main);
   line-height: 1.5;
 }
 
-/* ── Vertical Card Stack ── */
+/* ── Responsive Grid for 4 Years + 5th Other Supplies Card ── */
 .study-tools-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1.15rem;
   width: 100%;
+}
+
+@media (min-width: 768px) {
+  .study-tools-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  .study-other-supplies-card {
+    grid-column: 1 / -1;
+  }
+}
+
+.study-other-supplies-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FAF5ED 100%);
+  border: 1.5px solid #DECBB4;
+}
+
+.study-other-supplies-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background-color: #EFE6DA;
+  color: #5B3A24;
+  border: 1px solid rgba(91, 58, 36, 0.16);
+  margin-bottom: 0.15rem;
 }
 
 .study-year-card {

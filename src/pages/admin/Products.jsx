@@ -596,7 +596,7 @@ export const Products = () => {
     setSubjectId(prod.subject_id || '');
 
     const isUniv = Boolean(prod.discount_label_en === 'universal' || prod.all_subjects === true || prod.is_universal === true);
-    const isOtherSupp = Boolean(isUniv || prod.discount_label_en === 'other_supplies' || !prod.subject_id);
+    const isOtherSupp = Boolean(isUniv || prod.discount_label_en === 'other_supplies');
     setIsUniversal(isUniv);
     setShowInOtherSupplies(isOtherSupp);
     setSubjectSelectionMode(isUniv ? 'all' : 'custom');
@@ -665,11 +665,12 @@ export const Products = () => {
     const isUniv = subjectSelectionMode === 'all';
     const effectiveSubjectIds = isUniv ? subjects.map(s => s.id) : selectedSubjectIds;
 
-    if (effectiveSubjectIds.length === 0 && !showInOtherSupplies) {
+    // Require at least one placement when adding a new product
+    if (!editingProduct && effectiveSubjectIds.length === 0 && !showInOtherSupplies) {
       alert(
         lang === 'ar'
-          ? 'يرجى تحديد مادة دراسية واحدة على الأقل أو تفعيل الظهور في قسم «مستلزمات أخرى»!'
-          : 'Please select at least one subject or enable display in "Other Supplies"!'
+          ? 'يرجى تحديد مكان ظهور المنتج (أدوات الدراسة أو مستلزمات أخرى)!'
+          : 'Please select a display location (Study Tools or Other Supplies)!'
       );
       return;
     }
@@ -1083,8 +1084,7 @@ export const Products = () => {
               </div>
 
               {/* =============================================================
-                  SUBJECT SELECTION & AUTOMATIC CLASSIFICATION SYSTEM
-                  (Redesigned to precisely match the reference UI mockup)
+                  PRODUCT DISPLAY LOCATION (مكان ظهور المنتج) & SUBJECT ASSOCIATION
                   ============================================================= */}
               <div style={{
                 marginTop: '0.25rem',
@@ -1097,6 +1097,129 @@ export const Products = () => {
                 flexDirection: 'column',
                 gap: '1rem'
               }}>
+                {/* Top Combinable Placement Selector: مكان ظهور المنتج */}
+                <div style={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1.5px solid #E4D7C5',
+                  borderRadius: '14px',
+                  padding: '1rem 1.1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.8rem'
+                }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 900, color: '#2C221E' }}>
+                      {lang === 'ar' ? 'مكان ظهور المنتج' : 'Product Display Location'}
+                    </h4>
+                    <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: '#7A6E65' }}>
+                      {lang === 'ar'
+                        ? 'حدد مكان ظهور المنتج (يمكن اختيار مكان واحد أو الجمع بين أدوات الدراسة ومستلزمات أخرى في نفس الوقت):'
+                        : 'Select where the product appears (combinable across Study Tools and Other Supplies):'}
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '0.75rem' }}>
+                    {/* Option 1: أدوات الدراسة */}
+                    {(() => {
+                      const inStudyTools = subjectSelectionMode === 'all' || selectedSubjectIds.length > 0;
+                      return (
+                        <div
+                          onClick={() => {
+                            if (inStudyTools) {
+                              setSelectedSubjectIds([]);
+                              setSubjectSelectionMode('custom');
+                              setIsUniversal(false);
+                            } else if (subjects.length > 0) {
+                              setSelectedSubjectIds([subjects[0].id]);
+                            }
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '0.75rem',
+                            padding: '0.8rem 0.95rem',
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            userSelect: 'none',
+                            backgroundColor: inStudyTools ? '#FFF9F5' : '#FAF7F2',
+                            border: inStudyTools ? '2px solid #684835' : '1.5px solid #E2D6C5',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#2C221E' }}>
+                              1. {lang === 'ar' ? 'أدوات الدراسة (السنوات والمواد)' : 'Study Tools (Years & Subjects)'}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#7A6E65', marginTop: '2px' }}>
+                              {inStudyTools
+                                ? (lang === 'ar'
+                                    ? `نشط (${subjectSelectionMode === 'all' ? 'جميع المواد' : `${selectedSubjectIds.length} مادة محددة`})`
+                                    : `Active (${selectedSubjectIds.length} subjects)`)
+                                : (lang === 'ar' ? 'حدد المواد الدراسية من القائمة بالأسفل' : 'Select subjects below')}
+                            </div>
+                          </div>
+                          <div style={{
+                            width: '22px',
+                            height: '22px',
+                            borderRadius: '6px',
+                            backgroundColor: inStudyTools ? '#684835' : '#FFFFFF',
+                            border: inStudyTools ? '1.5px solid #684835' : '1.5px solid #C8BCAC',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}>
+                            {inStudyTools && <Check size={14} color="#FFFFFF" strokeWidth={3} />}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Option 2: مستلزمات أخرى */}
+                    <div
+                      onClick={() => setShowInOtherSupplies(prev => !prev)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '0.75rem',
+                        padding: '0.8rem 0.95rem',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        backgroundColor: showInOtherSupplies ? '#F5F3FF' : '#FAF7F2',
+                        border: showInOtherSupplies ? '2px solid #6D28D9' : '1.5px solid #E2D6C5',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#2C221E' }}>
+                          2. {lang === 'ar' ? 'مستلزمات أخرى' : 'Other Supplies'}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#7A6E65', marginTop: '2px' }}>
+                          {showInOtherSupplies
+                            ? (lang === 'ar' ? 'نشط — يظهر في قسم «مستلزمات أخرى»' : 'Active — appears in Other Supplies')
+                            : (lang === 'ar' ? 'اضغط لتفعيل ظهوره في «مستلزمات أخرى»' : 'Click to show in Other Supplies')}
+                        </div>
+                      </div>
+                      <div style={{
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '6px',
+                        backgroundColor: showInOtherSupplies ? '#6D28D9' : '#FFFFFF',
+                        border: showInOtherSupplies ? '1.5px solid #6D28D9' : '1.5px solid #C8BCAC',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        {showInOtherSupplies && <Check size={14} color="#FFFFFF" strokeWidth={3} />}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Section Header */}
                 <div style={{
                   display: 'flex',

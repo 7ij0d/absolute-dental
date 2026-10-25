@@ -108,7 +108,8 @@ export const Navbar = () => {
     }
   };
 
-  const isLightHeader = location.pathname.startsWith('/study-tools') || location.pathname.startsWith('/years') || location.pathname.startsWith('/year') || location.pathname.startsWith('/subject') || location.pathname.startsWith('/product');
+  // Unified dark brown header across all pages (Home, Study Tools, Years, Subjects, Other Supplies, Product Details)
+  const isLightHeader = false;
 
   const renderSideDrawer = () => {
     if (!mobileOpen) return null;
