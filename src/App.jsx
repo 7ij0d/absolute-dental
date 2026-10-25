@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Outlet, useLocation } from 'react-router-dom';
+import { Routes, Route, Outlet, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AnnouncementBar from './components/AnnouncementBar';
@@ -109,6 +109,8 @@ export const App = () => {
         <Route path="about" element={<StaticPages pageKey="about_us" />} />
         <Route path="faq" element={<StaticPages pageKey="faq" />} />
         <Route path="shipping-returns" element={<StaticPages pageKey="shipping_refunds" />} />
+        {/* Wildcard fallback inside PublicLayout */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
 
       {/* 2. ADMIN DASHBOARD SECURE ROUTES */}
@@ -128,6 +130,8 @@ export const App = () => {
         <Route path="accessories" element={<AdminAccessories />} />
       </Route>
 
+      {/* Global Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
     </>
   );

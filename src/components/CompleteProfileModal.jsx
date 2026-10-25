@@ -124,7 +124,7 @@ export const CompleteProfileModal = () => {
         .from('profiles')
         .upsert(profilePayload)
         .select()
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
 

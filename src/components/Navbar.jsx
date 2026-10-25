@@ -133,6 +133,88 @@ export const Navbar = () => {
             </button>
           </div>
 
+          {/* Student Profile Info in Mobile Drawer */}
+          {user && user.email !== 'admin@smylodent.com' && (
+            <div
+              style={{
+                padding: '0.85rem 1.15rem',
+                backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+              }}
+            >
+              <div style={{ position: 'relative', width: 38, height: 38, flexShrink: 0 }}>
+                {profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture ? (
+                  <img
+                    src={profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture}
+                    alt="Avatar"
+                    style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: '50%',
+                      backgroundColor: '#684835',
+                      color: '#FFFFFF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.95rem',
+                      fontWeight: 800,
+                      fontFamily: 'Cairo, sans-serif',
+                    }}
+                  >
+                    {(profile?.full_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'ط')[0].toUpperCase()}
+                  </div>
+                )}
+                <span
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    insetInlineEnd: 0,
+                    width: 10,
+                    height: 10,
+                    borderRadius: '50%',
+                    backgroundColor: '#10B981',
+                    border: '2px solid #231810',
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ color: '#FFFFFF', fontWeight: 800, fontSize: '0.88rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {profile?.full_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email}
+                </p>
+                {profile?.phone ? (
+                  <p style={{ color: '#CDBFA6', fontSize: '0.74rem', margin: '0.15rem 0 0 0', direction: 'ltr', textAlign: isRtl ? 'right' : 'left' }}>
+                    📱 {profile.phone}
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => { setMobileOpen(false); if (openProfileCompletion) openProfileCompletion(); }}
+                    style={{
+                      marginTop: '0.2rem',
+                      fontSize: '0.72rem',
+                      color: '#FBBF24',
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      fontWeight: 700,
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    {lang === 'ar' ? '⚠️ إضافة رقم الواتساب' : '⚠️ Add WhatsApp'}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Drawer Search */}
           <form onSubmit={(e) => { handleSearch(e); setMobileOpen(false); }} style={{ padding: '0.9rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <div style={{ position: 'relative' }}>
@@ -679,7 +761,7 @@ export const Navbar = () => {
                           fontFamily: 'Cairo, sans-serif',
                         }}
                       >
-                        {(profile?.full_name || user.user_metadata?.full_name || user.email || 'ط')[0].toUpperCase()}
+                        {(profile?.full_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'ط')[0].toUpperCase()}
                       </div>
                     )}
                     <span
@@ -706,7 +788,7 @@ export const Navbar = () => {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {(profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '').split(' ')[0]}
+                    {(profile?.full_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '').split(' ')[0]}
                   </span>
                 </button>
               ) : (
@@ -742,7 +824,7 @@ export const Navbar = () => {
                     <>
                       <div style={{ padding: '0.9rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                         <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.88rem', margin: 0 }}>
-                          {profile?.full_name || user.user_metadata?.full_name || user.email}
+                          {profile?.full_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email}
                         </p>
                         <p style={{ color: 'var(--text-dim)', fontSize: '0.75rem', margin: '0.2rem 0 0 0' }}>{user.email}</p>
                         {profile?.phone && (
