@@ -27,8 +27,10 @@ import {
   ShoppingCart, Heart, Check, Plus, Minus,
   ChevronLeft, ChevronRight, ArrowLeft, ArrowRight,
   Package, AlertCircle, CheckCircle2, Clock, XCircle, Info,
-  Sparkles, Layers, Box, Tag, ArrowLeftRight
+  Sparkles, Layers, Box, Tag, ArrowLeftRight,
+  Maximize2, Download, X, Loader2
 } from 'lucide-react';
+import { downloadWatermarkedImage } from '../utils/watermarkEngine';
 
 const DEFAULT_YEARS = [
   { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى',  name_en: '1st Year', slug: '1st-year' },
@@ -172,6 +174,8 @@ export const ProductDetails = () => {
   const [isBoxProductState, setIsBoxProductState] = useState(false);
   const [boxColors, setBoxColors] = useState({ availableColors: [], unavailableColors: [], allUnavailable: true });
   const [selectedBoxColor, setSelectedBoxColor] = useState(null);
+  const [showZoomModal, setShowZoomModal] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const sizedConfig = product ? getProductSizedConfig(product) : null;
   const resolvedActiveImage = useStorageImage(
     activeImage,
@@ -717,15 +721,25 @@ export const ProductDetails = () => {
 
           {/* ── LEFT COLUMN: PRODUCT IMAGE CARD ── */}
           <div className="product-image-container">
-            <div className="product-image-card">
+            <div
+              className="product-image-card"
+              onClick={() => setShowZoomModal(true)}
+              onContextMenu={e => e.preventDefault()}
+              style={{ cursor: 'zoom-in' }}
+              title={lang === 'ar' ? 'انقر لتكبير الصورة وتفاصيلها' : 'Click to view enlarged image'}
+            >
               {/* Favorite Heart Button */}
               <button
                 type="button"
-                onClick={toggleFav}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFav(e);
+                }}
                 aria-label="Favorite"
                 className="product-fav-floating-btn"
                 style={{
                   insetInlineEnd: '1rem',
+                  zIndex: 4,
                 }}
               >
                 <Heart
@@ -753,12 +767,45 @@ export const ProductDetails = () => {
                 </span>
               )}
 
+              {/* Zoom Hint Pill */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowZoomModal(true);
+                }}
+                style={{
+                  position: 'absolute',
+                  bottom: '0.85rem',
+                  insetInlineStart: '0.85rem',
+                  zIndex: 2,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.3rem 0.65rem',
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid rgba(226, 218, 208, 0.9)',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  color: 'var(--text-main)',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
+                }}
+              >
+                <Maximize2 size={12} />
+                <span>{lang === 'ar' ? 'تكبير' : 'Zoom'}</span>
+              </button>
+
               {/* Main Image */}
               <img
                 src={resolvedActiveImage}
                 alt={displayName}
                 className="product-image-main"
                 decoding="async"
+                draggable={false}
+                onContextMenu={e => e.preventDefault()}
                 onError={e => {
                   e.target.src = 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format';
                 }}
@@ -1474,6 +1521,136 @@ export const ProductDetails = () => {
               ))}
             </div>
           </section>
+        )}
+
+        {/* ── LIGHTBOX ZOOM MODAL WITH WATERMARKS & PROTECTED DOWNLOAD ── */}
+        {showZoomModal && (
+          <div
+            className="animate-fade-in"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 99999,
+              background: 'rgba(15, 12, 10, 0.78)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1rem'
+            }}
+            onClick={() => setShowZoomModal(false)}
+          >
+            <div
+              style={{
+                position: 'relative',
+                maxWidth: '92vw',
+                maxHeight: '90vh',
+                background: '#FFFFFF',
+                borderRadius: 'var(--radius-lg)',
+                overflow: 'hidden',
+                boxShadow: 'var(--shadow-xl)',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Top action bar */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.75rem 1.25rem',
+                borderBottom: '1px solid var(--border-color)',
+                background: 'var(--surface-color)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                    {displayName}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <button
+                    type="button"
+                    disabled={isDownloading}
+                    onClick={async () => {
+                      setIsDownloading(true);
+                      await downloadWatermarkedImage(resolvedActiveImage, `${product.name_en || 'product'}-absolute-dental.jpg`);
+                      setIsDownloading(false);
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      background: 'var(--accent)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '0.4rem 0.85rem',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      color: 'var(--text-main)',
+                      cursor: isDownloading ? 'wait' : 'pointer'
+                    }}
+                    title={lang === 'ar' ? 'حفظ الصورة بالعلامة المائية' : 'Save watermarked image'}
+                  >
+                    {isDownloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                    <span>{lang === 'ar' ? 'حفظ الصورة' : 'Save Image'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowZoomModal(false)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: 34,
+                      height: 34,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      color: 'var(--text-muted)'
+                    }}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Image container with CSS watermark overlay */}
+              <div
+                className="ad-watermarked-container"
+                onContextMenu={e => e.preventDefault()}
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#FAF8F4',
+                  padding: '1.5rem',
+                  maxHeight: 'calc(90vh - 70px)'
+                }}
+              >
+                <img
+                  src={resolvedActiveImage}
+                  alt={displayName}
+                  draggable={false}
+                  onContextMenu={e => e.preventDefault()}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: 'calc(80vh - 80px)',
+                    objectFit: 'contain',
+                    display: 'block'
+                  }}
+                />
+
+                {/* Dual Watermark Overlay */}
+                <div className="ad-watermark-overlay">
+                  <div className="ad-watermark-logo" />
+                  <div className="ad-watermark-text">Absolute Dental</div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
       </div>

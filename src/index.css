@@ -5284,4 +5284,130 @@ table {
   }
 }
 
+/* ==========================================================================
+   PRODUCT IMAGE WATERMARK & COPYRIGHT PROTECTION (CSS OVERLAY)
+   ========================================================================== */
+
+/* Anti-drag & anti-selection protection on product images */
+.product-card-image,
+.product-image-card,
+.ad-watermarked-container {
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.product-card-image img,
+.product-image-card img,
+.product-image-main,
+.ad-watermarked-container img {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* 1. Transparent Watermark Logo on Product Cards (Storefront, Search, Subject catalog) */
+.product-card-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/watermark-logo.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 54px 54px;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.product-card:hover .product-card-image::after {
+  opacity: 0.18;
+}
+
+/* 2. Transparent Watermark Logo on Main Product Details Image (Large View) */
+.product-image-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/watermark-logo.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: clamp(90px, 20vw, 130px) clamp(90px, 20vw, 130px);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* 3. Secondary subtle watermark 'Absolute Dental' on large product image */
+.product-image-card::before {
+  content: 'Absolute Dental';
+  position: absolute;
+  bottom: 0.85rem;
+  inset-inline-end: 1rem;
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1a1612;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 4. Reusable Watermark Layer for Zoom Lightboxes and Custom Modals */
+.ad-watermark-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ad-watermark-overlay .ad-watermark-logo {
+  width: clamp(90px, 26vw, 160px);
+  height: clamp(90px, 26vw, 160px);
+  background-image: url('/watermark-logo.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.15;
+}
+
+.ad-watermark-overlay .ad-watermark-text {
+  position: absolute;
+  bottom: 1.15rem;
+  inset-inline-end: 1.35rem;
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1a1612;
+  opacity: 0.15;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .product-card-image::after {
+    background-size: 46px 46px;
+    opacity: 0.14;
+  }
+  .product-image-card::after {
+    background-size: 85px 85px;
+    opacity: 0.14;
+  }
+  .product-image-card::before {
+    font-size: 0.7rem;
+    bottom: 0.55rem;
+    inset-inline-end: 0.75rem;
+  }
+}
+
+
 

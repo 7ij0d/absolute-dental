@@ -303,10 +303,17 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
       }}
     >
       {/* ── IMAGE WRAPPER WITH 3-VIEW SELECTOR ── */}
-      <div style={{ position: 'relative', background: 'var(--accent)', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer' }} onClick={() => onZoomImage(activeImage, box.name_en || box.size)}>
+      <div
+        className="ad-watermarked-container product-card-image"
+        style={{ position: 'relative', background: 'var(--accent)', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer' }}
+        onClick={() => onZoomImage(activeImage, box.name_en || box.size)}
+        onContextMenu={e => e.preventDefault()}
+      >
         <img
           src={activeImage}
           alt={box.name_en || box.size}
+          draggable={false}
+          onContextMenu={e => e.preventDefault()}
           style={{
             width: '100%',
             height: '100%',
@@ -1009,16 +1016,28 @@ export const AccessoriesPage = () => {
               <X size={20} />
             </button>
 
-            <img
-              src={lightboxImg.url}
-              alt={lightboxImg.title}
-              style={{
-                width: '100%',
-                maxHeight: '75vh',
-                objectFit: 'contain',
-                display: 'block'
-              }}
-            />
+            <div
+              className="ad-watermarked-container"
+              onContextMenu={e => e.preventDefault()}
+              style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <img
+                src={lightboxImg.url}
+                alt={lightboxImg.title}
+                draggable={false}
+                onContextMenu={e => e.preventDefault()}
+                style={{
+                  width: '100%',
+                  maxHeight: '75vh',
+                  objectFit: 'contain',
+                  display: 'block'
+                }}
+              />
+              <div className="ad-watermark-overlay">
+                <div className="ad-watermark-logo" />
+                <div className="ad-watermark-text">Absolute Dental</div>
+              </div>
+            </div>
 
             <div style={{ padding: '0.85rem 1.25rem', background: 'var(--accent)', color: 'var(--text-main)', fontWeight: 800, fontSize: '0.9rem', textAlign: 'center' }}>
               {lightboxImg.title}

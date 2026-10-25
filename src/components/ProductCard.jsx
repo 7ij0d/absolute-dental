@@ -133,12 +133,14 @@ export const ProductCard = ({ product }) => {
       }}
     >
       {/* ── IMAGE AREA ── */}
-      <div className="product-card-image">
+      <div className="product-card-image" onContextMenu={e => e.preventDefault()}>
         <img
           src={resolvedImageSrc}
           alt={displayName}
           loading="lazy"
           decoding="async"
+          draggable={false}
+          onContextMenu={e => e.preventDefault()}
           onError={e => { e.target.src = 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format'; }}
         />
 
