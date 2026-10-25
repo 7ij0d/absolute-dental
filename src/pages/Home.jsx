@@ -120,6 +120,14 @@ export const Home = () => {
         if (parsed.notes) setReqNotes(parsed.notes);
       }
     } catch (_) {}
+
+    // Restore saved student experience draft if any
+    try {
+      const savedExpDraft = sessionStorage.getItem('ad_experience_draft_text');
+      if (savedExpDraft) setExpText(savedExpDraft);
+      const savedExpAnon = sessionStorage.getItem('ad_experience_draft_anon');
+      if (savedExpAnon !== null) setExpIsAnonymous(savedExpAnon === 'true');
+    } catch (_) {}
   }, []);
 
   // Auto-fill contact phone from user account when logged in (if not already edited in draft)
@@ -139,6 +147,13 @@ export const Home = () => {
       if (pendingAction) {
         sessionStorage.removeItem(POST_AUTH_ACTION_KEY);
         if (pendingAction === 'open_add_experience') {
+          // Restore saved experience draft text
+          try {
+            const savedExpDraft = sessionStorage.getItem('ad_experience_draft_text');
+            if (savedExpDraft) setExpText(savedExpDraft);
+            const savedExpAnon = sessionStorage.getItem('ad_experience_draft_anon');
+            if (savedExpAnon !== null) setExpIsAnonymous(savedExpAnon === 'true');
+          } catch (_) {}
           setAddExpModalOpen(true);
         } else if (pendingAction === 'open_product_request') {
           setProdReqModalOpen(true);
@@ -210,6 +225,10 @@ export const Home = () => {
   const handleSubmitExperience = async (e) => {
     e.preventDefault();
     if (!isLoggedInStudent) {
+      try {
+        sessionStorage.setItem('ad_experience_draft_text', expText);
+        sessionStorage.setItem('ad_experience_draft_anon', String(expIsAnonymous));
+      } catch (_) {}
       requireStudentAuth('open_add_experience');
       return;
     }
@@ -224,17 +243,24 @@ export const Home = () => {
 
     setExpSubmitting(true);
     try {
-      await submitStudentExperience({
+      const created = await submitStudentExperience({
         user,
         profile,
         text: expText,
         imageFiles: expFiles,
         isAnonymous: expIsAnonymous
       });
+      if (created) {
+        setExperiences((prev) => [created, ...prev.filter((x) => x.id !== created.id)]);
+      }
       setExpSuccess(true);
       setExpText('');
       setExpFiles([]);
       setExpPreviews([]);
+      try {
+        sessionStorage.removeItem('ad_experience_draft_text');
+        sessionStorage.removeItem('ad_experience_draft_anon');
+      } catch (_) {}
     } catch (err) {
       setExpError(err.message || 'حدث خطأ أثناء إرسال التجربة، يرجى المحاولة مرة أخرى.');
     } finally {
@@ -464,7 +490,7 @@ export const Home = () => {
         </div>
       </div>
 
-      {/* ── 2. STUDENT EXPERIENCES SECTION (تجارب طلبة الأسنان) ── */}
+      {/* ── 2. STUDENT EXPERIENCES SECTION (تجارب الطلبة مع ابسلوت دنتال) ── */}
       <div className="container home-gateway-container">
         <section className="home-experiences-section" aria-labelledby="student-experiences-heading">
           {/* Decorative Section Header */}
@@ -479,7 +505,7 @@ export const Home = () => {
                   strokeWidth="1.8"
                 />
               </svg>
-              <span>{lang === 'ar' ? 'تجارب طلبة الأسنان' : 'Dental Students Experiences'}</span>
+              <span>{lang === 'ar' ? 'تجارب الطلبة مع ابسلوت دنتال' : 'Student Experiences with Absolute Dental'}</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="home-tooth-icon-sm">
                 <path
                   d="M7 3C4.2 3 2.5 5.2 2.5 8.2C2.5 10.6 3.7 12.6 4.5 14.8C5.3 17 5.8 21 7.8 21C9.3 21 9.8 17.5 12 17.5C14.2 17.5 14.7 21 16.2 21C18.2 21 18.7 17 19.5 14.8C20.3 12.6 21.5 10.6 21.5 8.2C21.5 5.2 19.8 3 17 3C15.2 3 13.8 4 12 4C10.2 4 8.8 3 7 3Z"
@@ -568,8 +594,8 @@ export const Home = () => {
               <div className="home-experiences-feed-toolbar">
                 <p style={{ margin: 0, color: '#6E5D50', fontWeight: 700, fontSize: '0.92rem' }}>
                   {lang === 'ar'
-                    ? `مشاركات حقيقية من طلبة طب الأسنان (${experiences.length})`
-                    : `Verified Dental Student Experiences (${experiences.length})`}
+                    ? `تجارب الطلبة مع ابسلوت دنتال (${experiences.length})`
+                    : `Student Experiences with Absolute Dental (${experiences.length})`}
                 </p>
                 <button
                   type="button"
@@ -935,9 +961,9 @@ export const Home = () => {
               {expSuccess ? (
                 <div className="ad-modal-success-box">
                   <CheckCircle2 size={46} style={{ color: '#059669', margin: '0 auto 0.75rem' }} />
-                  <h4>تم إرسال تجربتك للمراجعة بنجاح!</h4>
+                  <h4>تم نشر تجربتك بنجاح! ✨</h4>
                   <p>
-                    شكراً لمشاركتك تجربتك معنا. ستظهر مشاركتك في قسم تجارب طلبة الأسنان فور مراجعتها واعتمادها من قبل الإدارة.
+                    شكراً لمشاركتك تجربتك معنا! تم نشر مشاركتك في قسم «تجارب الطلبة مع ابسلوت دنتال» وتظهر الآن مباشرة لجميع الزملاء.
                   </p>
                   <button
                     type="button"

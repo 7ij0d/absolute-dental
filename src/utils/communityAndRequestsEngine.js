@@ -212,11 +212,11 @@ function normalizeProductRequestRecord(item) {
 }
 
 /* ============================================================================
-   1. STUDENT EXPERIENCES ENGINE (تجارب طلبة الأسنان)
+   1. STUDENT EXPERIENCES ENGINE (تجارب الطلبة مع ابسلوت دنتال)
    ============================================================================ */
 
 /**
- * Fetches ONLY admin-approved experiences for the public storefront.
+ * Fetches approved experiences for the public storefront.
  */
 export async function fetchApprovedExperiences() {
   try {
@@ -240,7 +240,7 @@ export async function fetchApprovedExperiences() {
 export const fetchPublishedExperiences = fetchApprovedExperiences;
 
 /**
- * Submits a new student experience with status = 'pending' (requires admin approval before public display).
+ * Submits a new student experience and publishes it immediately to the feed.
  */
 export async function submitStudentExperience({ user, profile, text, imageFiles = [], isAnonymous = false }) {
   if (!user || !user.id) {
@@ -285,17 +285,17 @@ export async function submitStudentExperience({ user, profile, text, imageFiles 
     academic_year: profile?.academic_year || user.user_metadata?.academic_year || null,
     text: cleanText,
     images: uploadedUrls,
-    status: 'pending',
+    status: 'approved',
     likes: [],
     comments: [],
     created_at: now,
-    published_at: null,
+    published_at: now,
   };
 
   const { error } = await supabase
     .from('settings')
     .upsert({
-      key: `student_exp_pending_${id}`,
+      key: `student_exp_pub_${id}`,
       value: experienceRecord,
     });
 

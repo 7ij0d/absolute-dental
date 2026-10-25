@@ -140,7 +140,7 @@ export const StudentExperiences = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--primary)' }}>
-            {isRtl ? '🦷 إدارة تجارب طلبة الأسنان' : '🦷 Student Experiences Moderation'}
+            {isRtl ? '🦷 إدارة تجارب الطلبة مع ابسلوت دنتال' : '🦷 Student Experiences with Absolute Dental'}
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
             مراجعة تجارب الطلبة وصورهم، اعتماد النشر في الصفحة الرئيسية، وإدارة التعليقات.

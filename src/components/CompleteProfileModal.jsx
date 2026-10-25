@@ -144,12 +144,16 @@ export const CompleteProfileModal = () => {
       }
 
       // 3. Update local auth state
-      setProfile({
+      const finalObj = {
         ...(updatedProfile || profilePayload),
         username: cleanUser,
         academic_year: academicYear,
         avatar_url: avatarUrl,
-      });
+      };
+      setProfile(finalObj);
+      try {
+        localStorage.setItem('ad_cached_profile', JSON.stringify(finalObj));
+      } catch (_) {}
 
       setSuccessMsg(
         lang === 'ar'

@@ -163,6 +163,9 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .maybeSingle();
       
+      const targetUser = currentUser || user;
+      const meta = targetUser?.user_metadata || {};
+
       if (data) {
         if (data.status === 'disabled') {
           await supabase.auth.signOut();
@@ -177,25 +180,36 @@ export const AuthProvider = ({ children }) => {
           alert('تم تعطيل حسابك من قبل الإدارة. / Your account has been disabled by the admin.');
           return null;
         } else {
-          setProfile(data);
+          // Merge metadata so fields not in profiles table (username, avatar_url, academic_year, is_anonymous_default) are preserved!
+          const merged = {
+            ...data,
+            username: meta.username || data.username || (targetUser?.email ? targetUser.email.split('@')[0] : ''),
+            avatar_url: meta.avatar_url || meta.picture || data.avatar_url || '',
+            academic_year: meta.academic_year || data.academic_year || '2nd-year',
+            is_anonymous_default: meta.is_anonymous_default !== undefined ? meta.is_anonymous_default : false,
+            phone: data.phone || meta.phone || '',
+            full_name: data.full_name || meta.full_name || meta.name || '',
+          };
+          setProfile(merged);
           try {
-            localStorage.setItem('ad_cached_profile', JSON.stringify(data));
+            localStorage.setItem('ad_cached_profile', JSON.stringify(merged));
           } catch (_) {}
-          return data;
+          return merged;
         }
       } else {
         // Fallback: construct profile from user metadata if no profile row exists yet
-        const meta = currentUser?.user_metadata || {};
         const fallbackProfile = {
           id: userId,
-          email: currentUser?.email,
+          email: targetUser?.email || '',
           full_name: meta.full_name || meta.name || '',
           phone: meta.phone || '',
           phone_secondary: meta.phone_secondary || '',
           university: meta.university || 'جامعة طرابلس',
           college: meta.college || 'كلية طب الأسنان',
-          username: meta.username || '',
+          username: meta.username || (targetUser?.email ? targetUser.email.split('@')[0] : ''),
           academic_year: meta.academic_year || '2nd-year',
+          avatar_url: meta.avatar_url || meta.picture || '',
+          is_anonymous_default: meta.is_anonymous_default || false,
           status: 'active',
           role: meta.role || 'student'
         };
@@ -373,43 +387,84 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (updates) => {
     if (!user) return { error: 'No user authenticated' };
     try {
-      const payload = {
+      // 1. Allowed database columns in public.profiles table
+      const allowedDbCols = [
+        'id', 'email', 'full_name', 'phone', 'phone_secondary',
+        'university', 'college', 'role', 'status', 'address_text',
+        'latitude', 'longitude'
+      ];
+
+      const profilePayload = {
         id: user.id,
         email: user.email,
-        ...updates
       };
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .upsert(payload)
-        .select()
-        .maybeSingle();
-      
-      if (!error) {
-        // Also update auth user metadata for immediate cross-session persistence
+      for (const col of allowedDbCols) {
+        if (updates[col] !== undefined) {
+          profilePayload[col] = updates[col];
+        }
+      }
+      if (updates.name && !profilePayload.full_name) {
+        profilePayload.full_name = updates.name;
+      }
+
+      // Safe upsert to profiles table
+      let updatedDbProfile = null;
+      try {
+        const { data: dbData, error: dbErr } = await supabase
+          .from('profiles')
+          .upsert(profilePayload)
+          .select()
+          .maybeSingle();
+        if (dbErr) {
+          console.warn('Profiles table upsert notice:', dbErr);
+        } else {
+          updatedDbProfile = dbData;
+        }
+      } catch (dbEx) {
+        console.warn('Profiles table upsert exception:', dbEx);
+      }
+
+      // 2. Persist in Supabase Auth user metadata (stores username, avatar, academic_year, phone, etc.)
+      const authData = {};
+      if (updates.full_name || updates.name) authData.full_name = updates.full_name || updates.name;
+      if (updates.username) authData.username = updates.username;
+      if (updates.avatar_url) authData.avatar_url = updates.avatar_url;
+      if (updates.phone) authData.phone = updates.phone;
+      if (updates.university) authData.university = updates.university;
+      if (updates.college) authData.college = updates.college;
+      if (updates.academic_year) authData.academic_year = updates.academic_year;
+      if (updates.is_anonymous_default !== undefined) authData.is_anonymous_default = updates.is_anonymous_default;
+
+      if (Object.keys(authData).length > 0) {
         try {
-          const authData = {};
-          if (updates.full_name) authData.full_name = updates.full_name;
-          if (updates.name) authData.name = updates.name;
-          if (updates.username) authData.username = updates.username;
-          if (updates.avatar_url) authData.avatar_url = updates.avatar_url;
-          if (updates.phone) authData.phone = updates.phone;
-          if (updates.university) authData.university = updates.university;
-          if (updates.college) authData.college = updates.college;
-          if (updates.academic_year) authData.academic_year = updates.academic_year;
-          if (updates.is_anonymous_default !== undefined) authData.is_anonymous_default = updates.is_anonymous_default;
-          if (Object.keys(authData).length > 0) {
-            await supabase.auth.updateUser({ data: authData });
+          const { data: authRes } = await supabase.auth.updateUser({ data: authData });
+          if (authRes?.user) {
+            setUser(authRes.user);
+            try {
+              localStorage.setItem('ad_cached_user', JSON.stringify(authRes.user));
+            } catch (_) {}
           }
         } catch (metaErr) {
           console.warn('Metadata sync warning:', metaErr);
         }
-
-        // Refresh local profile
-        setProfile((prev) => ({ ...(prev || {}), ...payload, ...(data || {}) }));
       }
-      return { data: data || payload, error };
+
+      // 3. Update and cache merged profile immediately
+      const nextMergedProfile = {
+        ...(profile || {}),
+        ...profilePayload,
+        ...(updatedDbProfile || {}),
+        ...updates
+      };
+      setProfile(nextMergedProfile);
+      try {
+        localStorage.setItem('ad_cached_profile', JSON.stringify(nextMergedProfile));
+      } catch (_) {}
+
+      return { data: nextMergedProfile, error: null };
     } catch (err) {
+      console.error('Update profile error:', err);
       return { data: null, error: err };
     }
   };
