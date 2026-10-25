@@ -44,7 +44,7 @@ const handleEarlyOAuthTokens = async () => {
     const error = hashParams.get('error') || searchParams.get('error');
 
     if (error) {
-      console.warn('Google OAuth returned error:', error);
+      console.warn('OAuth returned notice/error:', error);
     }
 
     // Retrieve intended return path or fallback to home
@@ -61,14 +61,53 @@ const handleEarlyOAuthTokens = async () => {
 
     const cleanHashTarget = returnPath.startsWith('/') ? `#${returnPath}` : `#/${returnPath}`;
 
-    // Establish session in client storage
-    if (accessToken) {
-      await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken || ''
-      });
-    } else if (code) {
-      await supabase.auth.exchangeCodeForSession(code);
+    // Establish session in client storage & immediate cache
+    if (code) {
+      try {
+        const { data } = await supabase.auth.exchangeCodeForSession(code);
+        if (data?.session?.user) {
+          localStorage.setItem('ad_cached_user', JSON.stringify(data.session.user));
+          localStorage.setItem('ad_cached_session', JSON.stringify(data.session));
+        }
+      } catch (exchangeErr) {
+        console.warn('Code exchange handled or caught:', exchangeErr);
+      }
+    } else if (accessToken) {
+      if (refreshToken) {
+        try {
+          const { data } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          if (data?.session?.user) {
+            localStorage.setItem('ad_cached_user', JSON.stringify(data.session.user));
+            localStorage.setItem('ad_cached_session', JSON.stringify(data.session));
+          }
+        } catch (setErr) {
+          console.warn('setSession notice:', setErr);
+        }
+      } else {
+        // If implicit token without explicit refresh token
+        try {
+          const { data: { user } } = await supabase.auth.getUser(accessToken);
+          if (user) {
+            const expiresIn = parseInt(hashParams.get('expires_in') || '3600', 10);
+            const synthSession = {
+              access_token: accessToken,
+              refresh_token: '',
+              expires_in: expiresIn,
+              expires_at: Math.floor(Date.now() / 1000) + expiresIn,
+              token_type: 'bearer',
+              user: user
+            };
+            localStorage.setItem('ad_cached_user', JSON.stringify(user));
+            localStorage.setItem('ad_cached_session', JSON.stringify(synthSession));
+            localStorage.setItem('ad_auth_session', JSON.stringify(synthSession));
+          }
+        } catch (getErr) {
+          console.warn('getUser notice:', getErr);
+        }
+      }
     }
 
     // Clean hash and query string in browser bar before HashRouter evaluates
@@ -78,7 +117,7 @@ const handleEarlyOAuthTokens = async () => {
       window.location.hash = cleanHashTarget;
     }
   } catch (err) {
-    console.error('OAuth token handling error:', err);
+    console.error('OAuth token handling notice:', err);
   }
 };
 

@@ -43,7 +43,7 @@ const ACADEMIC_YEARS = [
 
 export const ProfilePage = () => {
   const { t, lang, isRtl } = useLanguage();
-  const { user, profile, updateProfile, signOut } = useAuth();
+  const { user, profile, updateProfile, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   // Active tab: 'profile' or 'orders'
@@ -70,8 +70,9 @@ export const ProfilePage = () => {
   const [message, setMessage] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Route Guard & Initial population
+  // Route Guard & Initial population: Wait for authLoading to finish before redirecting
   useEffect(() => {
+    if (authLoading) return;
     if (!user) {
       navigate('/signin?redirect=/profile');
       return;
@@ -179,6 +180,25 @@ export const ProfilePage = () => {
     const yr = ACADEMIC_YEARS.find((y) => y.id === yrId);
     return yr ? (lang === 'ar' ? yr.labelAr : yr.labelEn) : yrId;
   };
+
+  if (authLoading) {
+    return (
+      <div
+        className="container animate-fade-in"
+        style={{
+          padding: '3rem 1rem',
+          maxWidth: '1080px',
+          marginInline: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.5rem',
+        }}
+      >
+        <div className="skeleton" style={{ height: '140px', borderRadius: '24px' }} />
+        <div className="skeleton" style={{ height: '350px', borderRadius: '24px' }} />
+      </div>
+    );
+  }
 
   return (
     <div

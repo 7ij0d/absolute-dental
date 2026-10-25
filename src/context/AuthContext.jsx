@@ -3,16 +3,63 @@ import supabase from '../supabaseClient';
 
 const AuthContext = createContext();
 
+const getInitialUser = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const cachedUser = localStorage.getItem('ad_cached_user');
+    if (cachedUser) return JSON.parse(cachedUser);
+
+    const rawSession = localStorage.getItem('ad_auth_session') ||
+                       localStorage.getItem('sb-api-auth-token') ||
+                       localStorage.getItem('ad_cached_session');
+    if (rawSession) {
+      const parsed = JSON.parse(rawSession);
+      if (parsed?.user) return parsed.user;
+    }
+  } catch (_) {}
+  return null;
+};
+
+const getInitialProfile = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const cached = localStorage.getItem('ad_cached_profile');
+    if (cached) return JSON.parse(cached);
+  } catch (_) {}
+  return null;
+};
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(getInitialUser);
+  const [profile, setProfile] = useState(getInitialProfile);
+  const [loading, setLoading] = useState(() => !getInitialUser());
   const [showProfileCompletion, setShowProfileCompletion] = useState(false);
+
+  // Sync cache whenever user or profile is updated
+  useEffect(() => {
+    if (user) {
+      try {
+        localStorage.setItem('ad_cached_user', JSON.stringify(user));
+      } catch (_) {}
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (profile) {
+      try {
+        localStorage.setItem('ad_cached_profile', JSON.stringify(profile));
+      } catch (_) {}
+    }
+  }, [profile]);
 
   // Check if student profile needs completion (name, whatsapp, etc.)
   const checkProfileCompleteness = (loadedProfile, currentUser) => {
     if (!currentUser || currentUser.email === 'admin@smylodent.com') return;
-    const hasPhone = Boolean(loadedProfile?.phone && String(loadedProfile.phone).trim());
+    const meta = currentUser.user_metadata || {};
+    const hasPhone = Boolean(
+      (loadedProfile?.phone && String(loadedProfile.phone).trim()) ||
+      (meta.phone && String(meta.phone).trim())
+    );
     if (!hasPhone) {
       setShowProfileCompletion(true);
     }
@@ -23,11 +70,14 @@ export const AuthProvider = ({ children }) => {
     let active = true;
 
     const fetchSession = async () => {
-      setLoading(true);
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user && active) {
           setUser(session.user);
+          try {
+            localStorage.setItem('ad_cached_user', JSON.stringify(session.user));
+            localStorage.setItem('ad_cached_session', JSON.stringify(session));
+          } catch (_) {}
           const p = await fetchUserProfile(session.user.id, session.user);
           checkProfileCompleteness(p, session.user);
 
@@ -38,12 +88,16 @@ export const AuthProvider = ({ children }) => {
             const cleanHash = savedReturn.startsWith('/') ? `#${savedReturn}` : `#/${savedReturn}`;
             window.location.hash = cleanHash;
           }
-        } else {
-          setUser(null);
-          setProfile(null);
+        } else if (!session && active) {
+          // Only wipe user if there is no cached user in localStorage
+          const hasCache = localStorage.getItem('ad_auth_session') || localStorage.getItem('ad_cached_user');
+          if (!hasCache) {
+            setUser(null);
+            setProfile(null);
+          }
         }
       } catch (err) {
-        console.error('Session fetch failed', err);
+        console.warn('Session fetch notice:', err);
       } finally {
         if (active) setLoading(false);
       }
@@ -54,8 +108,29 @@ export const AuthProvider = ({ children }) => {
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!active) return;
+
+      // ONLY sign out if explicitly requested
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setProfile(null);
+        try {
+          localStorage.removeItem('ad_cached_user');
+          localStorage.removeItem('ad_cached_profile');
+          localStorage.removeItem('ad_cached_session');
+          localStorage.removeItem('ad_auth_session');
+          localStorage.removeItem('sb-api-auth-token');
+          localStorage.removeItem('mock_user_session');
+        } catch (_) {}
+        setLoading(false);
+        return;
+      }
+
       if (session?.user) {
         setUser(session.user);
+        try {
+          localStorage.setItem('ad_cached_user', JSON.stringify(session.user));
+          localStorage.setItem('ad_cached_session', JSON.stringify(session));
+        } catch (_) {}
         const p = await fetchUserProfile(session.user.id, session.user);
         checkProfileCompleteness(p, session.user);
 
@@ -66,7 +141,7 @@ export const AuthProvider = ({ children }) => {
           const cleanHash = savedReturn.startsWith('/') ? `#${savedReturn}` : `#/${savedReturn}`;
           window.location.hash = cleanHash;
         }
-      } else {
+      } else if (!session && event === 'USER_DELETED') {
         setUser(null);
         setProfile(null);
       }
@@ -187,11 +262,22 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       await supabase.auth.signOut();
+    } catch (err) {
+      console.warn('Sign out notice:', err);
+    } finally {
       setUser(null);
       setProfile(null);
-    } catch (err) {
-      console.error('Sign out error', err);
-    } finally {
+      try {
+        localStorage.removeItem('ad_cached_user');
+        localStorage.removeItem('ad_cached_profile');
+        localStorage.removeItem('ad_cached_session');
+        localStorage.removeItem('ad_auth_session');
+        localStorage.removeItem('sb-api-auth-token');
+        localStorage.removeItem('mock_user_session');
+        sessionStorage.removeItem('admin_pin');
+        localStorage.removeItem('admin_pin');
+        localStorage.removeItem('admin_passcode');
+      } catch (_) {}
       setLoading(false);
     }
   };

@@ -482,6 +482,21 @@ const mockStorage = {
 export let mockDonations = [];
 export let mockStudentRequests = [];
 
+export const AUTH_STORAGE_KEY = 'ad_auth_session';
+
+// Migrate any legacy session keys to ad_auth_session so existing logins are preserved
+if (typeof window !== 'undefined' && window.localStorage) {
+  try {
+    const currentSession = window.localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!currentSession) {
+      const legacySession = window.localStorage.getItem('sb-api-auth-token') || window.localStorage.getItem('ad_supabase_session');
+      if (legacySession) {
+        window.localStorage.setItem(AUTH_STORAGE_KEY, legacySession);
+      }
+    }
+  } catch (_) {}
+}
+
 export const supabase = useMock
   ? {
       from: (table) => new MockQueryBuilder(table),
@@ -489,7 +504,17 @@ export const supabase = useMock
       storage: mockStorage,
       isMock: true
     }
-  : createClient(supabaseUrl, supabaseAnonKey);
+  : createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+        storageKey: AUTH_STORAGE_KEY,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce'
+      }
+    });
 
 export default supabase;
+
 

@@ -9,7 +9,7 @@ import { Heart, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export const Favorites = () => {
   const { t, isRtl } = useLanguage();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
@@ -40,16 +40,17 @@ export const Favorites = () => {
     }
   };
 
-  // Guard routing
+  // Guard routing: Wait for authLoading to complete before any redirect decision
   useEffect(() => {
+    if (authLoading) return;
     if (!user) {
-      navigate('/signin');
+      navigate('/signin?redirect=/favorites');
       return;
     }
     fetchFavorites();
-  }, [user]);
+  }, [user, authLoading]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="container" style={{ padding: '2rem 0' }}>
         <div className="skeleton" style={{ height: '35px', width: '200px', marginBottom: '2rem' }}></div>
