@@ -13,39 +13,47 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 1. حل مشكلة عدم فتح صفحات المواد (Subject Opening Bug Fix):
-- **سبب المشكلة:** في بطاقة المنتج [`src/components/ProductCard.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/ProductCard.jsx)، كان المتغير `displayName` مستخدماً في شرط بطاقة المجموعة (`if (isBurGroup)`) قبل تعريفه لاحقاً في المكون، مما تسبب في خطأ برمجي (`ReferenceError: Cannot access 'displayName' before initialization`) أدى لتعطل عرض صفحات المواد التي تحتوي على بـارات.
-- **الحل:** تم نقل تعريف `displayName` لأعلى المكون قبل أي شروط، وعادت جميع صفحات المواد والبحث للعمل بسلاسة فائقة وبدون أي أخطاء.
+### 🔹 1. حذف منتجات الكشافيتي بنوعيه:
+- **المنتجات المحذوفة:**
+  1. `كشافيتي` (المعرف: `7e990001-0000-4000-8000-000000000001`).
+  2. `كشافيتي تفك بيه الكاست` (المعرف: `7e990002-0000-4000-8000-000000000002`).
+- **الإجراء المنفذ:**
+  - فك وحذف ربطهما بجميع المواد في جدول `product_subjects`.
+  - تحويل حالتهما إلى غير نشط ومؤرشف وغير متوفر (`is_active: false`, `is_archived: true`, `availability: 'unavailable'`, `stock_quantity: 0`) في قاعدة البيانات الحية لمنع ظهورهما نهائياً للزبائن أو إمكانية طلبهما مجدداً، مع الحفاظ الآمن على سجلات الطلبات التاريخية المرتبطة بهما.
+  - إزالتهما من ملف النسخة المحلية `src/defaultProducts.json`.
 
-### 🔹 2. ربط واعتماد صورة بير TC 09 (TC Needle Bur):
-- تم حفظ الصورة عالية الجودة في المسار المحلي [`public/products/bur-tc-9.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/bur-tc-9.png).
-- تم رفع الصورة إلى التخزين السحابي `smylodent-assets/products/bur-tc-9.png`.
-- تم تحديث سجل المنتج في قاعدة البيانات الحية (معرف `22000000-0000-0000-0000-000000000211`) بالصورة الجديدة والاسم `TC 9 – Blue` وتوفر المخزون (20 قطعة).
-- تم تحديث محرك المجموعات [`src/utils/burGroupingEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/burGroupingEngine.js) لربط خيار `TC 9` وصورة المجموعة الأساسية (`base_image`).
-- تم تحديث ملف البيانات المرجعية [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json).
+### 🔹 2. حذف باقات البيرات لمادتي الكونس والكراون:
+- **الباقات المحذوفة:**
+  1. `Fixed Prosthodontics Burs Bundle` (باقة الكراون / الفكسد - معرف: `22000000-0000-0000-0000-000000000201`).
+  2. `Conservative Dentistry Burs Bundle` (باقة الكونس / علاج الأسنان التحفظي - معرف: `22000000-0000-0000-0000-000000000202`).
+- **الإجراء المنفذ:**
+  - فك ربطهما من جدول `product_subjects` وإيقاف نشاطهما وأرشفتهما في قاعدة البيانات الحية.
+  - حذفهما من محرك البكجات `src/utils/productInventoryEngine.js` (`CANONICAL_BUNDLES`).
+  - حذفهما من `src/defaultProducts.json`.
+  - الحفاظ التام على سجلات وفواتير الطلبات السابقة التي تحتوي عليهما.
+
+### 🔹 3. تحديث الكاش التلقائي:
+- ترقية بادئة الكاش في [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) إلى `ad8:` لضمان تجديد بيانات الكتالوج فوراً عند جميع الزوار دون الحاجة لإعادة تحميل يدوي.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/components/ProductCard.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/ProductCard.jsx) | تصحيح موضع تعريف `displayName` لمنع انهيار صفحات المواد والبحث |
-| [`src/utils/burGroupingEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/burGroupingEngine.js) | ربط صورة بير TC 09 بالمجموعة وخيار TC 9 – Blue |
-| [`public/products/bur-tc-9.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/bur-tc-9.png) | إضافة ملف صورة TC 09 في مجلد المنتجات العام |
-| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | تحديث صورة وبيانات TC 9 في النسخة الاحتياطية |
-| قاعدة البيانات والتخزين السحابي | رفع الصورة وتحديث سجل منتج TC 9 |
+| [`src/utils/productInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/productInventoryEngine.js) | إزالة تعريف بكجات البيرات للكراون والكونس من `CANONICAL_BUNDLES` |
+| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | حذف منتجات الكشافيتي وبكجات البيرات من القائمة المحلية |
+| [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) | ترقية بادئة الكاش إلى `ad8:` لإفراغ الذاكرة المؤقتة القديمة تلقائياً |
+| قاعدة البيانات الحية (`products` & `product_subjects`) | فك الربط بالمواد وأرشفة المنتجات الأربعة وتحويلها إلى غير نشطة |
 
 ---
 
 ## 3. ما تم إنجازه ويعمل بنجاح
-- [x] **حل مشكلة فتح صفحات المواد وإصلاح خطأ `displayName` البرمجي** ✅
-- [x] **ربط صورة بير TC 09 السحابية بالمنتج والمجموعة والنافذة المنبثقة** ✅
-- [x] **تجميع بـارات الأسنان في 6 مجموعات موحدة ببطاقة واحدة لكل مجموعة** ✅
-- [x] **نافذة منبثقة تفاعلية لعرض المقاسات والألوان مع زر إضافة مستقل لكل خيار** ✅
-- [x] **حجب كمية المخزون وأرقام القطع تماماً عن واجهة الزبائن** ✅
-- [x] **إتمام البناء الإنتاجي (`npm run build`) بنجاح تام وبدون أي أخطاء** ✅
+- [x] **حذف منتجي الكشافيتي بنوعيه من المتجر والمواد وقوائم البيع** ✅
+- [x] **حذف باقة بيرات الكونس وباقة بيرات الكراون/الفكسد** ✅
+- [x] **حفظ سجلات وفواتير الطلبات التاريخية السابقة بأمان تام** ✅
+- [x] **تحديث الكاش الفوري وإتمام البناء الإنتاجي (`npm run build`) بنجاح (4.00s)** ✅
 
 ---
 
 ## 4. الخطوة التالية المباشرة (Immediate Next Step)
-- متابعة الملاحظات الإضافية للعميل، وإضافة أي صور أو أدوات دراسية جديدة حسب رغبة المتجر.
+- متابعة أي إضافات أو تعديلات إضافية مطلوبة من العميل في المتجر.
