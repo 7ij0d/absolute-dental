@@ -8,7 +8,7 @@ export const BUR_GROUPS = [
     groupId: 'bur-group-tc-needle',
     name_en: 'TC Needle',
     name_ar: 'بير إبرة TC Needle',
-    base_image: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/627bdb62-3364-497b-8aa6-3b911ad78f26.jpg',
+    base_image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-tc-9.png',
     base_price: 2,
     productIds: [
       '22000000-0000-0000-0000-000000000211', // TC 9
@@ -18,18 +18,19 @@ export const BUR_GROUPS = [
       {
         productId: '22000000-0000-0000-0000-000000000211',
         code: 'TC 9',
-        color: null,
-        label_en: 'TC 9',
-        label_ar: 'TC 9',
-        image: null
+        color: 'Blue',
+        colorHex: '#2563EB',
+        label_en: 'TC 9 – Blue',
+        label_ar: 'TC 9 – أزرق',
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-tc-9.png'
       },
       {
         productId: '627bdb62-3364-497b-8aa6-3b911ad78f26',
         code: 'TC 10',
         color: 'Blue',
         colorHex: '#2563EB',
-        label_en: 'TC 10',
-        label_ar: 'TC 10',
+        label_en: 'TC 10 – Blue',
+        label_ar: 'TC 10 – أزرق',
         image: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/627bdb62-3364-497b-8aa6-3b911ad78f26.jpg'
       }
     ]

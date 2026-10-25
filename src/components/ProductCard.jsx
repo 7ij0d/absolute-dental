@@ -121,6 +121,7 @@ export const ProductCard = ({ product }) => {
     ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
     : 0;
 
+  const displayName = product.name_en || product.name_ar || 'Dental Tool';
   const [showBurModal, setShowBurModal] = useState(false);
   const isBurGroup = Boolean(product?.isBurGroup);
 
