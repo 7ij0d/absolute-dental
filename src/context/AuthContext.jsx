@@ -19,6 +19,14 @@ export const AuthProvider = ({ children }) => {
         if (session?.user && active) {
           setUser(session.user);
           await fetchUserProfile(session.user.id);
+
+          // If the URL has an OAuth token fragment (#access_token=...), clean it up and restore HashRouter route
+          if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
+            const savedReturn = sessionStorage.getItem('ad_auth_return_url') || '/';
+            sessionStorage.removeItem('ad_auth_return_url');
+            const cleanHash = savedReturn.startsWith('/') ? `#${savedReturn}` : `#/${savedReturn}`;
+            window.location.hash = cleanHash;
+          }
         } else {
           setUser(null);
           setProfile(null);
@@ -38,6 +46,14 @@ export const AuthProvider = ({ children }) => {
       if (session?.user) {
         setUser(session.user);
         await fetchUserProfile(session.user.id);
+
+        // If the URL has an OAuth token fragment (#access_token=...), clean it up and restore HashRouter route
+        if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
+          const savedReturn = sessionStorage.getItem('ad_auth_return_url') || '/';
+          sessionStorage.removeItem('ad_auth_return_url');
+          const cleanHash = savedReturn.startsWith('/') ? `#${savedReturn}` : `#/${savedReturn}`;
+          window.location.hash = cleanHash;
+        }
       } else {
         setUser(null);
         setProfile(null);
@@ -119,11 +135,26 @@ export const AuthProvider = ({ children }) => {
   const signInWithGoogle = async (redirectPath = '/') => {
     setLoading(true);
     try {
-      const safeRedirect = redirectPath && redirectPath.startsWith('/') ? redirectPath : '/';
+      const origin = window.location.origin;
+      // Extract Vite base URL (e.g. '/absolute-dental/' on GitHub Pages)
+      const rawBase = (import.meta.env.BASE_URL || '/').replace(/^\/+|\/+$/g, '');
+      const subpath = rawBase ? `/${rawBase}` : '';
+
+      // Save user target destination to sessionStorage
+      const safeRedirect = redirectPath && redirectPath.startsWith('/') ? redirectPath : `/${redirectPath || ''}`;
+      try {
+        sessionStorage.setItem('ad_auth_return_url', safeRedirect);
+      } catch (e) {
+        console.warn('Could not store return url in sessionStorage', e);
+      }
+
+      // Root application URL where Google redirects back (e.g. https://7ij0d.github.io/absolute-dental/)
+      const finalRedirect = `${origin}${subpath}/`.replace(/([^:]\/)\/+/g, '$1');
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}${safeRedirect}`
+          redirectTo: finalRedirect
         }
       });
       if (error) throw error;
