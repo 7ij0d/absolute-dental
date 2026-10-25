@@ -37,7 +37,7 @@ const DEFAULT_NAV_SUBJECTS = [
 export const Navbar = () => {
   const { lang, t, toggleLanguage, isRtl } = useLanguage();
   const { cartCount } = useCart();
-  const { user, profile, isAdmin, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut, openProfileCompletion } = useAuth();
 
   // Side Drawer closed by default
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -637,15 +637,90 @@ export const Navbar = () => {
 
             {/* User Account Menu / Icon */}
             <div ref={profileRef} style={{ position: 'relative' }}>
-              <button
-                type="button"
-                className="nav-icon-btn"
-                onClick={() => setProfileOpen(!profileOpen)}
-                aria-label={lang === 'ar' ? 'حساب المستخدم' : 'User Account'}
-                style={{ color: '#FFFFFF' }}
-              >
-                <User size={20} />
-              </button>
+              {user && user.email !== 'admin@smylodent.com' ? (
+                <button
+                  type="button"
+                  className="nav-user-pill-btn"
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  aria-label={lang === 'ar' ? 'حساب المستخدم' : 'User Account'}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.45rem',
+                    padding: '0.22rem 0.65rem 0.22rem 0.25rem',
+                    borderRadius: '999px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: '#FFFFFF',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <div style={{ position: 'relative', width: 28, height: 28, flexShrink: 0 }}>
+                    {profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture ? (
+                      <img
+                        src={profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture}
+                        alt="Avatar"
+                        style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: '50%',
+                          backgroundColor: '#684835',
+                          color: '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.78rem',
+                          fontWeight: 800,
+                          fontFamily: 'Cairo, sans-serif',
+                        }}
+                      >
+                        {(profile?.full_name || user.user_metadata?.full_name || user.email || 'ط')[0].toUpperCase()}
+                      </div>
+                    )}
+                    <span
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        insetInlineEnd: 0,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: '#10B981',
+                        border: '1.5px solid #231810',
+                      }}
+                    />
+                  </div>
+                  <span
+                    style={{
+                      fontFamily: 'Cairo, sans-serif',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      maxWidth: 85,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {(profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '').split(' ')[0]}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="nav-icon-btn"
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  aria-label={lang === 'ar' ? 'حساب المستخدم' : 'User Account'}
+                  style={{ color: '#FFFFFF' }}
+                >
+                  <User size={20} />
+                </button>
+              )}
+
               {profileOpen && (
                 <div
                   className="animate-slide-down"
@@ -653,7 +728,7 @@ export const Navbar = () => {
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
                     insetInlineEnd: 0,
-                    width: 228,
+                    width: 240,
                     maxWidth: 'calc(100vw - 1rem)',
                     background: '#2A1D15',
                     border: '1px solid rgba(255,255,255,0.14)',
@@ -666,13 +741,38 @@ export const Navbar = () => {
                   {user && user.email !== 'admin@smylodent.com' ? (
                     <>
                       <div style={{ padding: '0.9rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                        <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.88rem' }}>
+                        <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.88rem', margin: 0 }}>
                           {profile?.full_name || user.user_metadata?.full_name || user.email}
                         </p>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>{user.email}</p>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '0.75rem', margin: '0.2rem 0 0 0' }}>{user.email}</p>
+                        {profile?.phone && (
+                          <p style={{ color: '#CDBFA6', fontSize: '0.74rem', margin: '0.15rem 0 0 0', direction: 'ltr', textAlign: isRtl ? 'right' : 'left' }}>
+                            📱 {profile.phone}
+                          </p>
+                        )}
                       </div>
+
+                      {(!profile?.phone || !profile.phone.trim()) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileOpen(false);
+                            if (openProfileCompletion) openProfileCompletion();
+                          }}
+                          style={{
+                            ...dropItemStyle,
+                            width: '100%',
+                            backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                            color: '#FBBF24',
+                            fontWeight: 800,
+                          }}
+                        >
+                          <Phone size={15} /> {lang === 'ar' ? 'إضافة رقم الواتساب' : 'Add WhatsApp'}
+                        </button>
+                      )}
+
                       <Link to="/profile" style={dropItemStyle} onClick={() => setProfileOpen(false)}>
-                        <User size={15} /> {lang === 'ar' ? 'حسابي' : 'My Account'}
+                        <User size={15} /> {lang === 'ar' ? 'حسابي وبياناتي' : 'My Profile'}
                       </Link>
                       <Link to="/track" style={dropItemStyle} onClick={() => setProfileOpen(false)}>
                         <ClipboardList size={15} /> {lang === 'ar' ? 'طلباتي' : 'My Orders'}

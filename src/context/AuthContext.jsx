@@ -7,6 +7,16 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showProfileCompletion, setShowProfileCompletion] = useState(false);
+
+  // Check if student profile needs completion (name, whatsapp, etc.)
+  const checkProfileCompleteness = (loadedProfile, currentUser) => {
+    if (!currentUser || currentUser.email === 'admin@smylodent.com') return;
+    const hasPhone = Boolean(loadedProfile?.phone && String(loadedProfile.phone).trim());
+    if (!hasPhone) {
+      setShowProfileCompletion(true);
+    }
+  };
 
   // Load and subscribe to session updates
   useEffect(() => {
@@ -18,7 +28,8 @@ export const AuthProvider = ({ children }) => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user && active) {
           setUser(session.user);
-          await fetchUserProfile(session.user.id);
+          const p = await fetchUserProfile(session.user.id, session.user);
+          checkProfileCompleteness(p, session.user);
 
           // If the URL has an OAuth token fragment (#access_token=...), clean it up and restore HashRouter route
           if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
@@ -45,7 +56,8 @@ export const AuthProvider = ({ children }) => {
       if (!active) return;
       if (session?.user) {
         setUser(session.user);
-        await fetchUserProfile(session.user.id);
+        const p = await fetchUserProfile(session.user.id, session.user);
+        checkProfileCompleteness(p, session.user);
 
         // If the URL has an OAuth token fragment (#access_token=...), clean it up and restore HashRouter route
         if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
@@ -68,13 +80,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Fetch full student details from profile table
-  const fetchUserProfile = async (userId) => {
+  const fetchUserProfile = async (userId, currentUser = null) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
       
       if (data) {
         if (data.status === 'disabled') {
@@ -83,14 +95,19 @@ export const AuthProvider = ({ children }) => {
           setProfile(null);
           localStorage.removeItem('mock_user_session');
           alert('تم تعطيل حسابك من قبل الإدارة. / Your account has been disabled by the admin.');
+          return null;
         } else {
           setProfile(data);
+          return data;
         }
-      } else if (error) {
-        console.warn('Profile fetch error', error);
+      } else {
+        // No row in profiles yet (e.g. fresh Google login)
+        setProfile(null);
+        return null;
       }
     } catch (err) {
       console.error('Error fetching user profile', err);
+      return null;
     }
   };
 
@@ -203,7 +220,11 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         profile,
+        setProfile,
         loading,
+        showProfileCompletion,
+        setShowProfileCompletion,
+        openProfileCompletion: () => setShowProfileCompletion(true),
         isAdmin: profile?.role === 'admin',
         signUp,
         signIn,

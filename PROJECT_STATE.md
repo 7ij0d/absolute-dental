@@ -14,31 +14,37 @@
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
 ### 🔹 التعديل:
-إصلاح مشكلة تسجيل الدخول عبر Google (Google OAuth) على GitHub Pages، وتصحيح رابط إعادة التوجيه (`redirectTo`) ليشمل مسار المستودع الفرعي (`/absolute-dental/`) تلقائيًا بدلًا من الرابط الجذري غير الموجود (`7ij0d.github.io/`)، مع تنظيف الـ Hash وإعادة المستخدم للصفحة المطلوبة بعد إتمام المصادقة.
+إضافة **نظام استكمال وتأكيد بيانات الطالب بعد تسجيل الدخول عبر Google (`CompleteProfileModal`)**، وإظهار بيانات المستخدم (الاسم، الصورة/الحرف الأول، النقطة الخضراء للحساب النشط، ورقم الواتساب) في الهيدر، وحل مشكلة عدم إنشاء سجل في جدول `profiles` عند تسجيل الدخول بحساب Google بسبب قيد `NOT NULL` على حقل الهاتف.
 
 ### 🔹 تشخيص المشكلة وإصلاحها:
-1. **سبب خطأ 404 بعد تسجيل الدخول بـ Google**:
-   - كان دالة `signInWithGoogle` ترسل `redirectTo: ${window.location.origin}${safeRedirect}`.
-   - على GitHub Pages يكون `window.location.origin` هو `https://7ij0d.github.io` فقط بدون اسم المستودع، مما جعل جوجل تعيد توجيه المستخدم إلى `https://7ij0d.github.io/#access_token=...`.
-   - نظرًا لعدم وجود موقع على الجذر `7ij0d.github.io` (الموقع منشور في المستودع الفرعي `7ij0d.github.io/absolute-dental/`)، يظهر خطأ 404 من خوادم GitHub Pages.
-2. **الحل البرمجي المطبق في [`src/context/AuthContext.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/context/AuthContext.jsx)**:
-   - استخراج مسار المستودع تلقائيًا من `import.meta.env.BASE_URL` ودمجه برابط الأصل: `https://7ij0d.github.io/absolute-dental/`.
-   - حفظ وجهة المستخدم السابقة في `sessionStorage` قبل بدء تسجيل الدخول.
-   - عند استقبال الـ Hash الحاوي للـ `access_token`، يتم استلام الجلسة وتنظيف الـ Hash ونقل المستخدم تلقائيًا لوجهته الأصلية دون أي تعارض مع `HashRouter`.
+1. **سبب ظهور رسالة "هذه ميزة متاحة للمستخدمين" وكأن الحساب لم يسجل**:
+   - تسجيل الدخول عبر Google يوفر الاسم والإيميل وصورة الحساب، لكن Google لا يوفر رقم الهاتف/الواتساب.
+   - جدول `profiles` في قاعدة البيانات يحتوي على قيد إلزامي (`NOT NULL`) على حقل الهاتف `phone`، مما منع إدراج سجل للطالب تلقائيًا وظل ملفه الشخصي بدون رقم هاتف.
+   - بالإضافة إلى ذلك، كان الهيدر يعرض أيقونة مستخدم مفرغة بيضاء دون إظهار الاسم أو الصورة أو حالة التسجيل، مما جعل المستخدم يشعر وكأنه غير مسجل.
+2. **الحل المنفذ**:
+   - إنشاء نافذة ترحيبية وتأكيدية راقية **[`src/components/CompleteProfileModal.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/CompleteProfileModal.jsx)** تظهر فور تسجيل الدخول عبر Google أو في حال عدم اكتمال رقم الهاتف.
+   - تسترجع النافذة تلقائيًا: الاسم من Google، الإيميل الموثق، صورة الحساب الشخصية (Avatar)، وتطلب من الطالب تأكيد **رقم الواتساب (إلزامي لمتابعة الطلبات وتأكيد الشحن)**، وتحديد **اسم المستخدم (اليوزر)**، والجامعة، والسنة الدراسية.
+   - عند الحفظ، يتم عمل `upsert` لجدول `profiles` وحفظ البيانات وتحديث بيانات الجلسة، وتفعيل كل الصلاحيات فوراً.
+   - تحديث زر الحساب في الهيدر ([`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx)) ليعرض اسم الطالب وصورته الشخصية ونقطة اتصال خضراء للدلالة المرئية الفورية على أنه مسجل ونشط.
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/context/AuthContext.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/context/AuthContext.jsx) | تصحيح رابط إعادة توجيه Google OAuth ليتضمن مجلد المستودع ومعالجة رموز الدخول |
+| [`src/components/CompleteProfileModal.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/CompleteProfileModal.jsx) | إنشاء مكون نافذة تأكيد بيانات الطالب (الاسم، الواتساب، اليوزر، الجامعة، والسنة) |
+| [`src/context/AuthContext.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/context/AuthContext.jsx) | فحص اكتمال بيانات الطالب وتشغيل نافذة الاستكمال تلقائياً بعد الدخول بـ Google |
+| [`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx) | إظهار الاسم والصورة والنقطة الخضراء للمستخدم المسجل في الهيدر وتوفير وصول سريع لتأكيد البيانات |
+| [`src/App.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/App.jsx) | تثبيت المكون عالمياً ليعمل عبر جميع صفحات المتجر |
 
 ---
 
 ## 3. ما تم إنجازه ويعمل بنجاح
-- [x] **تعديل رابط إعادة التوجيه ليشمل `/absolute-dental/` دائماً** ✅
-- [x] **معالجة توكن الـ Hash وعودة التوجيه بعد المصادقة بنجاح** ✅
-- [x] **بناء المشروع للإنتاج (`npm run build`) بنجاح تام وبدون أخطاء** ✅
+- [x] **فتح نافذة تأكيد البيانات فور إتمام تسجيل الدخول بـ Google** ✅
+- [x] **جلب الاسم وصورة الحساب تلقائياً وإتاحة إدخال رقم الواتساب واليوزر والجامعة** ✅
+- [x] **إجراء upsert ناجح لقاعدة البيانات بدون أخطاء القيود** ✅
+- [x] **تحديث الهيدر لإظهار هوية وصورة واسم الطالب المسجل** ✅
+- [x] **اجتياز بناء المشروع للإنتاج (`npm run build`) بنجاح تام** ✅
 
 ---
 
 ## 4. الخطوة القادمة المطلوبة (Immediate Next Step)
-- توجيه المستخدم للتأكد من إدراج `https://7ij0d.github.io/absolute-dental/**` ضمن قائمة Redirect URLs في لوحة تحكم المصادقة.
+- متابعة أي تجربة استخدام أو ملاحظات إضافية من المستخدم.

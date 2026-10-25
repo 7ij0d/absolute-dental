@@ -43,6 +43,7 @@ import { clearStaleCache } from './cache';
 
 
 import FloatingCart from './components/FloatingCart';
+import CompleteProfileModal from './components/CompleteProfileModal';
 
 // Public Layout Wrapper
 const PublicLayout = () => {
@@ -79,7 +80,9 @@ export const App = () => {
 
 
   return (
-    <Routes>
+    <>
+      <CompleteProfileModal />
+      <Routes>
 
       {/* 1. PUBLIC STOREFRONT ROUTES */}
       <Route path="/" element={<PublicLayout />}>
@@ -126,6 +129,7 @@ export const App = () => {
       </Route>
 
     </Routes>
+    </>
   );
 };
 
