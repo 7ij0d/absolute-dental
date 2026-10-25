@@ -123,6 +123,58 @@
     "sort_order": 0
   },
   {
+    "id": "29e6eeb8-378c-4270-b16b-e09a92f8c0ea",
+    "name_ar": "معيار ماء (Water Gauge - Green)",
+    "name_en": "Water Gauge (Green)",
+    "sku": "WG-GREEN-001",
+    "description_ar": "معيار ماء لقياس السوائل وتدريج خلط المواد السنية والألجينات (Alginate / Plaster) بلون أخضر، مزود بمقياس مدرج أسطواني ومغرفة قياس دقيقة. كود المنتج: WG-GREEN-001",
+    "description_en": "Dental Water Gauge (Green) for measuring water ratio during alginate and stone mixing. Features calibrated measuring cylinder and powder scoop. SKU: WG-GREEN-001",
+    "details_ar": "• كود المنتج (SKU): WG-GREEN-001\n• النوع: معيار ماء لمواد الأسنان (Water Gauge)\n• اللون: أخضر (Green)\n• الاستخدام: قياس نسب خلط الألجينات والجبس بدقة\n• التصميم: أسطوانة قياس مدرجة مع مغرفة قياس ملحقة",
+    "details_en": "• SKU: WG-GREEN-001\n• Type: Dental Water Gauge\n• Color: Green\n• Usage: Accurate water-powder ratio measurement for alginate and dental stone\n• Design: Calibrated measuring cylinder with dosing scoop",
+    "price": 11,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 25,
+    "year_id": "10000000-0000-0000-0000-000000000001",
+    "subject_id": "11000000-0000-0000-0000-000000000012",
+    "discount_label_en": "other_supplies",
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000022",
+      "33000000-0000-0000-0000-000000000034"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/water-gauge-green.png",
+    "is_featured": false,
+    "is_active": true,
+    "is_archived": false,
+    "sort_order": 2
+  },
+  {
+    "id": "28647b17-8bc9-4834-a9d9-abbb45c88fca",
+    "name_ar": "معيار ماء (Water Gauge - LASGOD)",
+    "name_en": "Water Gauge (LASGOD)",
+    "sku": "WG-LASGOD-002",
+    "description_ar": "طقم معيار ماء ومسحوق أصلي من LASCOD مكون من قطعتين باللون الأخضر الفسفوري الشفاف (Fluorescent Neon Green)، يشمل مغرفة قياس بودرة الألجينات وكوب قياس الماء المدرج للحصول على قوام خلط متجانس تماماً. كود المنتج: WG-LASGOD-002",
+    "description_en": "Genuine LASCOD 2-Piece Water and Powder Gauge set in fluorescent neon green. Includes calibrated water cup and dosing powder scoop for perfect alginate consistency. SKU: WG-LASGOD-002",
+    "details_ar": "• كود المنتج (SKU): WG-LASGOD-002\n• العلامة التجارية: LASCOD\n• المكونات: طقم قطعتين (كوب قياس ماء مدرج + مغرفة بودرة)\n• اللون: أخضر فسفوري نيون (Neon Green)\n• الاستخدام: ضبط نسب خلط الألجينات والجبس بأعلى دقة ومعيارية\n• الخامة: بلاستيك طبي شفاف متين وعالي التحمل",
+    "details_en": "• SKU: WG-LASGOD-002\n• Brand: LASCOD\n• Components: 2-Piece Set (Graduated Water Measure Cup + Powder Scoop)\n• Color: Fluorescent Neon Green\n• Usage: Precise water-to-powder ratio for dental impression materials\n• Material: High-grade transparent dental plastic",
+    "price": 15,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 25,
+    "year_id": "10000000-0000-0000-0000-000000000001",
+    "subject_id": "11000000-0000-0000-0000-000000000012",
+    "discount_label_en": "other_supplies",
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000022",
+      "33000000-0000-0000-0000-000000000034"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/water-gauge-lasgod.png",
+    "is_featured": false,
+    "is_active": true,
+    "is_archived": false,
+    "sort_order": 3
+  },
+  {
     "id": "0c18deeb-a571-419b-adf2-8060db42d8cf",
     "name_ar": "Student Glass Slab (Mixing Glass Slab)",
     "name_en": "Student Glass Slab (Mixing Glass Slab)",

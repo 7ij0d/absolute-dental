@@ -13,58 +13,60 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 إضافة منتج جديد مستقر لقاعدة البيانات والمخزون (Westcode Handpiece XM-H300 M4):
-1. **إنشاء سجل مستقل للمنتج في قاعدة البيانات الحية (`Database & Inventory Entry`)**:
-   - **اسم المنتج:** Westcode High-Speed Air Turbine Handpiece (XM-H300 M4)
-   - **الاسم بالعربية:** قبضة توربين هوائية Westcode (XM-H300 M4)
-   - **المعرّف الفريد (ID):** `f325cfaa-c6b0-4330-966e-262cdced4635`
-   - **كود المنتج (SKU):** `WH-WESTCODE-XMH300M4`
-   - **سعر البيع:** 190 دينار ليبي (قابل للتعديل عبر لوحة التحكم)
-   - **المخزون الأولي وحالة التوفر:** 15 قطعة، حالة التوفر `available`، مرتبط بنظام خصم وتتبع المخزون
-   - **الربط بالمواد والسنوات (`product_subjects`):**
-     - علاج الأسنان التحفظي (السنة الثانية - `22000000-0000-0000-0000-000000000021`)
-     - صناعة الأسنان الثابتة (السنة الثانية - `22000000-0000-0000-0000-000000000023`)
-     - علاج الأسنان التحفظي 2 (السنة الثالثة - `33000000-0000-0000-0000-000000000031`)
-     - صناعة الأسنان الثابتة 2 (السنة الثالثة - `33000000-0000-0000-0000-000000000033`)
-   - **عدم الدمج:** سجل مستقل بالكامل عن قبضات COXO و NSK دون المساس بأي منتج سابق أو أسعاره أو مخزونه.
+### 🔹 إضافة منتجي Water Gauge كمنتجين منفصلين تماماً في قاعدة البيانات والمخزون:
+1. **المنتج الأول: Water Gauge (Green) — `WG-GREEN-001`**:
+   - **الاسم:** Water Gauge (Green) / معيار ماء (Water Gauge - Green)
+   - **السعر:** 11 دينار ليبي
+   - **المعرّف الفريد (ID):** `29e6eeb8-378c-4270-b16b-e09a92f8c0ea`
+   - **كود المنتج (SKU):** `WG-GREEN-001`
+   - **المخزون وحالة التوفر:** 25 قطعة مستقلة، `available`
+   - **الصورة:** رُفعت الصورة الأولى الخاصة به إلى التخزين السحابي:
+     `https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/water-gauge-green.png`
+     ونسخة محلية في [`public/products/water-gauge-green.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/water-gauge-green.png)
+   - **الربط الأكاديمي:** مواد طب الأسنان (سنة أولى) + صناعة الأسنان المتحركة 1 و 2 + قسم «مستلزمات أخرى».
 
-2. **معالجة الصورة والربط السحابي (`Asset & Storage Deployment`)**:
-   - رُفعت الصورة الأصلية (القبضة البنفسجية مع العلبة وشهادة الجودة QC) إلى حاوية التخزين السحابي:
-     `https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/westcode-handpiece-xmh300m4.png`
-   - حُفظت نسخة محلية في [`public/products/westcode-handpiece-xmh300m4.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/westcode-handpiece-xmh300m4.png) كمسار احتياطي محلي دائم.
+2. **المنتج الثاني: Water Gauge (LASGOD) — `WG-LASGOD-002`**:
+   - **الاسم:** Water Gauge (LASGOD) / معيار ماء (Water Gauge - LASGOD)
+   - **السعر:** 15 دينار ليبي
+   - **المعرّف الفريد (ID):** `28647b17-8bc9-4834-a9d9-abbb45c88fca`
+   - **كود المنتج (SKU):** `WG-LASGOD-002`
+   - **المخزون وحالة التوفر:** 25 قطعة مستقلة تماماً، `available`
+   - **الصورة:** رُفعت الصورة الثانية (طقم قطعتين نيون أخضر فسفوري LASCOD) إلى التخزين السحابي:
+     `https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/water-gauge-lasgod.png`
+     ونسخة محلية في [`public/products/water-gauge-lasgod.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/water-gauge-lasgod.png)
+   - **الربط الأكاديمي:** مواد طب الأسنان (سنة أولى) + صناعة الأسنان المتحركة 1 و 2 + قسم «مستلزمات أخرى».
 
-3. **دعم البحث والظهور في السلة والطلبات والفواتير (`Search, Specs & Order Pipeline`)**:
-   - في [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json): إضافة السجل إلى الكتالوج الاحتياطي لضمان العمل أوفلاين وفي كافة أوضاع التشغيل.
-   - في [`src/pages/SearchPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SearchPage.jsx): دعم البحث عن طريق كود المنتج (SKU) وموديل الجهاز عبر تضمين حقول `details_ar` و `details_en`.
-   - في [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx): إظهار سطر كود المنتج (SKU) وقائمة المواصفات الفنية المعتمدة للمنتج.
-   - في [`src/pages/admin/Products.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/Products.jsx): إظهار الاسم الإنجليزي وشارة الـ SKU والبحث المباشر عن المنتج وتعديل سعره ومخزونه.
+3. **ضمانات الفصل التام والاستقلالية وعدم الدمج**:
+   - سجلان مستقلان في جدول `products` برقمين تسلسليين ومعرّفين UUID فريدين تماماً.
+   - كودان فريدان غير مكررين (`WG-GREEN-001` و `WG-LASGOD-002`).
+   - أسعار ومخزون منفصل بالكامل؛ تعديل سعر أو مخزون أحدهما أو خصمه عند الطلب لا يؤثر إطلاقاً على الآخر.
+   - ظهور مستقل في نتائج البحث والسلة والفواتير والطلبات وتقارير المبيعات ولوحة تحكم الإدارة.
+   - الحفاظ على كافة المنتجات السابقة دون مساس.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| `قاعدة البيانات السحابية` | إدراج سجل المنتج المستقل في جدول `products` وجدول `product_subjects` |
-| `حاوية التخزين السحابي` | رفع صورة القبضة بالعلبة وشهادة الجودة إلى `smylodent-assets/products/` |
-| [`public/products/westcode-handpiece-xmh300m4.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/westcode-handpiece-xmh300m4.png) | إضافة ملف الصورة في أصول المتجر |
-| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | توثيق المنتج في الكتالوج المحلي للنسخ الاحتياطي |
-| [`src/pages/SearchPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SearchPage.jsx) | دعم البحث بواسطة كود الـ SKU والموديل |
-| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | عرض كود الـ SKU والمواصفات الفنية في بطاقة تفاصيل المنتج |
-| [`src/pages/admin/Products.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/Products.jsx) | عرض كود الـ SKU في جدول الإدارة والبحث بمواصفات المنتج |
+| `قاعدة البيانات السحابية` | إدراج سجلي المنتجين المستقلين في `products` وربطهما في `product_subjects` |
+| `حاوية التخزين السحابي` | رفع صورتي المنتجين المستقلتين إلى `smylodent-assets/products/` |
+| [`public/products/water-gauge-green.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/water-gauge-green.png) | حفظ الصورة الأولى للمنتج الأخضر |
+| [`public/products/water-gauge-lasgod.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/water-gauge-lasgod.png) | حفظ الصورة الثانية لطقم LASCOD النيون |
+| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | توثيق المنتجين في الكتالوج الاحتياطي لحالات الأوفلاين |
 
 ---
 
 ## 3. ما تم إنجازه ويعمل بنجاح
-- [x] **إضافة المنتج إلى قاعدة البيانات كسجل مستقل مع معرّف فريد UUID** ✅
-- [x] **ربط صورة المنتج السحابية والمحلية وتأكيد ظهورها** ✅
-- [x] **تحديد السعر 190 ديناراً ليبياً مع قابلية التعديل من الإدارة** ✅
-- [x] **تفعيل كود المنتج `WH-WESTCODE-XMH300M4` والتأكد من عدم تكراره** ✅
-- [x] **ربطه بنظام المخزون الحالي (15 قطعة، قابل للخصم والتتبع)** ✅
-- [x] **ظهوره في البحث والسلة والطلبات والفواتير وتقارير المبيعات** ✅
-- [x] **عدم دمجه مع أي قبضة أخرى مع الحفاظ على COXO و NSK دون أي مساس** ✅
+- [x] **إضافة المنتجين كسجلين مستقلين تماماً في قاعدة البيانات السحابية** ✅
+- [x] **تخصيص كود فريد لكل منتج (`WG-GREEN-001` و `WG-LASGOD-002`)** ✅
+- [x] **تحديد سعر ومخزون منفصل لكل منهما (11 د.ل و 15 د.ل)** ✅
+- [x] **ربط كل صورة بمنتجها الصحيح ورفعها للتخزين السحابي وحفظها محلياً** ✅
+- [x] **ظهور المنتجين كخيارين مستقلين في البحث، السلة، الفواتير، وتقارير المبيعات** ✅
+- [x] **ربطهما بمحرك خصم المخزون المستقل لكل منتج على حدة** ✅
+- [x] **عدم دمج المنتجين أو التأثير على أي منتجات قديمة** ✅
 - [x] **بناء المشروع للإنتاج (`npm run build`) بنجاح تام 100% وبدون أي أخطاء** ✅
 
 ---
 
 ## 4. الخطوة القادمة المطلوبة (Immediate Next Step)
-- معاينة المنتج في صفحة المتجر، تجربة البحث برمز الـ SKU `WH-WESTCODE-XMH300M4`، أو تعديل الكمية والسعر من لوحة الإدارة.
+- فحص المنتجين في صفحة مواد طب الأسنان وقسم مستلزمات أخرى، وتجربة البحث بكود `WG-GREEN-001` أو `WG-LASGOD-002`.
