@@ -93,7 +93,9 @@ export const SearchPage = ({ categoryMode = null }) => {
               (p.name_ar && p.name_ar.toLowerCase().includes(keyword)) ||
               (p.name_en && p.name_en.toLowerCase().includes(keyword)) ||
               (p.description_ar && p.description_ar.toLowerCase().includes(keyword)) ||
-              (p.description_en && p.description_en.toLowerCase().includes(keyword))
+              (p.description_en && p.description_en.toLowerCase().includes(keyword)) ||
+              (p.details_ar && p.details_ar.toLowerCase().includes(keyword)) ||
+              (p.details_en && p.details_en.toLowerCase().includes(keyword))
             ));
           }
 
@@ -123,7 +125,9 @@ export const SearchPage = ({ categoryMode = null }) => {
         (p.name_ar && p.name_ar.toLowerCase().includes(kw)) ||
         (p.name_en && p.name_en.toLowerCase().includes(kw)) ||
         (p.description_ar && p.description_ar.toLowerCase().includes(kw)) ||
-        (p.description_en && p.description_en.toLowerCase().includes(kw))
+        (p.description_en && p.description_en.toLowerCase().includes(kw)) ||
+        (p.details_ar && p.details_ar.toLowerCase().includes(kw)) ||
+        (p.details_en && p.details_en.toLowerCase().includes(kw))
       );
     }
 

@@ -651,6 +651,7 @@ export const ProductDetails = () => {
 
   // Strict English name requirement
   const displayName = product.name_en || product.name_ar || 'Dental Tool';
+  const productSku = product.sku || (product.details_ar && product.details_ar.match(/SKU:\s*([^\n\r]+)/i)?.[1]) || (product.details_en && product.details_en.match(/SKU:\s*([^\n\r]+)/i)?.[1]) || null;
 
   return (
     <div className="product-details-page">
@@ -1372,6 +1373,12 @@ export const ProductDetails = () => {
                   <span className="spec-label">{lang === 'ar' ? 'اسم الأداة' : 'Product Name'}</span>
                   <span className="spec-value" style={{ direction: 'ltr' }}>{displayName}</span>
                 </div>
+                {productSku && (
+                  <div className="product-spec-row">
+                    <span className="spec-label">{lang === 'ar' ? 'كود المنتج (SKU)' : 'SKU'}</span>
+                    <span className="spec-value" style={{ direction: 'ltr', fontWeight: 800, fontFamily: 'monospace' }}>{productSku.trim()}</span>
+                  </div>
+                )}
                 <div className="product-spec-row">
                   <span className="spec-label">{lang === 'ar' ? 'المادة الدراسية' : 'Subject'}</span>
                   <span className="spec-value" style={{ direction: 'ltr' }}>{subjectTitleEn}</span>

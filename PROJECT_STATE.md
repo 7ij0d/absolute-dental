@@ -13,43 +13,58 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 المتطلبات المنفذة (إصلاح قراءة صور تجارب الطلبة وجعل النص والصورة اختياريين):
-1. **معالجة خطأ «فشل قراءة ملف الصورة» (`Resilient Image Processing Engine`)**:
-   - في [`src/utils/communityAndRequestsEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/communityAndRequestsEngine.js):
-     - استخدام `URL.createObjectURL(file)` المباشر لمعالجة الصور داخل عنصر صورة وكانفاس بدلاً من الاعتماد الحصري على `FileReader.readAsDataURL` الذي كان يتعطل عند التقاط صور عالية الدقة من كاميرات الهواتف أو أجهزة iOS و Android.
-     - إضافة مسار استرجاع احتياطي تلقائي (`Graceful Fallback`) للملف الأصلي دون رمي خطأ أو إيقاف تجربة المستخدم في حال حدوث أي استثناء أثناء القراءة.
-     - توسيع أنواع الصور المدعومة لتشمل `.heic` و `.heif` وجميع صيغ الصور الشائعة، ورفع الحد الأقصى للحجم قبل الضغط إلى 15 ميجابايت.
-     - تصدير ثابت `PRODUCT_REQUEST_STATUSES` لضمان تكامل لوحة تحكم طلبات توفير المنتجات.
+### 🔹 إضافة منتج جديد مستقر لقاعدة البيانات والمخزون (Westcode Handpiece XM-H300 M4):
+1. **إنشاء سجل مستقل للمنتج في قاعدة البيانات الحية (`Database & Inventory Entry`)**:
+   - **اسم المنتج:** Westcode High-Speed Air Turbine Handpiece (XM-H300 M4)
+   - **الاسم بالعربية:** قبضة توربين هوائية Westcode (XM-H300 M4)
+   - **المعرّف الفريد (ID):** `f325cfaa-c6b0-4330-966e-262cdced4635`
+   - **كود المنتج (SKU):** `WH-WESTCODE-XMH300M4`
+   - **سعر البيع:** 190 دينار ليبي (قابل للتعديل عبر لوحة التحكم)
+   - **المخزون الأولي وحالة التوفر:** 15 قطعة، حالة التوفر `available`، مرتبط بنظام خصم وتتبع المخزون
+   - **الربط بالمواد والسنوات (`product_subjects`):**
+     - علاج الأسنان التحفظي (السنة الثانية - `22000000-0000-0000-0000-000000000021`)
+     - صناعة الأسنان الثابتة (السنة الثانية - `22000000-0000-0000-0000-000000000023`)
+     - علاج الأسنان التحفظي 2 (السنة الثالثة - `33000000-0000-0000-0000-000000000031`)
+     - صناعة الأسنان الثابتة 2 (السنة الثالثة - `33000000-0000-0000-0000-000000000033`)
+   - **عدم الدمج:** سجل مستقل بالكامل عن قبضات COXO و NSK دون المساس بأي منتج سابق أو أسعاره أو مخزونه.
 
-2. **جعل النص والصورة اختياريين بالتبادل (`Flexible Text or Image Submission`)**:
-   - في [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx):
-     - تحديث فحص الإرسال في `handleSubmitExperience` للسماح بنشر تجربة بنص فقط، أو بصورة/صور فقط، أو بالنص والصور معاً.
-     - منع الإرسال فقط إذا كان النص فارغاً ولم يرفق الطالب أي صورة.
-     - إزالة سمة الإلزام `required` من حقل النص وتعديل مسميات الحقول في النافذة المنبثقة: `صور التجربة (اختياري)` و `نص التجربة (اختياري عند إرفاق صورة)`.
-     - تحسين عرض التجارب في واجهة المتجر بحيث لا يُدرج وسم نص فارغ إذا كانت المشاركة عبارة عن صور فقط `{exp.text && <p className="home-exp-text">{exp.text}</p>}`.
+2. **معالجة الصورة والربط السحابي (`Asset & Storage Deployment`)**:
+   - رُفعت الصورة الأصلية (القبضة البنفسجية مع العلبة وشهادة الجودة QC) إلى حاوية التخزين السحابي:
+     `https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/westcode-handpiece-xmh300m4.png`
+   - حُفظت نسخة محلية في [`public/products/westcode-handpiece-xmh300m4.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/westcode-handpiece-xmh300m4.png) كمسار احتياطي محلي دائم.
 
-3. **لوحة تحكم الإدارة (`Admin Moderation`)**:
-   - في [`src/pages/admin/StudentExperiences.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/StudentExperiences.jsx):
-     - إظهار علامة واضحة `(مشاركة بصور فقط)` في جدول الإدارة وعند فتح تفاصيل التجربة في حال تم نشر التجربة بدون نص.
+3. **دعم البحث والظهور في السلة والطلبات والفواتير (`Search, Specs & Order Pipeline`)**:
+   - في [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json): إضافة السجل إلى الكتالوج الاحتياطي لضمان العمل أوفلاين وفي كافة أوضاع التشغيل.
+   - في [`src/pages/SearchPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SearchPage.jsx): دعم البحث عن طريق كود المنتج (SKU) وموديل الجهاز عبر تضمين حقول `details_ar` و `details_en`.
+   - في [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx): إظهار سطر كود المنتج (SKU) وقائمة المواصفات الفنية المعتمدة للمنتج.
+   - في [`src/pages/admin/Products.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/Products.jsx): إظهار الاسم الإنجليزي وشارة الـ SKU والبحث المباشر عن المنتج وتعديل سعره ومخزونه.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/utils/communityAndRequestsEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/communityAndRequestsEngine.js) | معالجة قراءة الصور بـ `URL.createObjectURL` ورفع الحد إلى 15MB وتصدير ثوابت حالات الطلبات |
-| [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx) | فحص الإرسال المرن (نص فقط، صور فقط، كلاهما)، وتحديث مسميات الحقول والواجهة |
-| [`src/pages/admin/StudentExperiences.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/StudentExperiences.jsx) | عرض تنبيه المشاركة بصور فقط في جدول ومودال الإدارة |
+| `قاعدة البيانات السحابية` | إدراج سجل المنتج المستقل في جدول `products` وجدول `product_subjects` |
+| `حاوية التخزين السحابي` | رفع صورة القبضة بالعلبة وشهادة الجودة إلى `smylodent-assets/products/` |
+| [`public/products/westcode-handpiece-xmh300m4.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/products/westcode-handpiece-xmh300m4.png) | إضافة ملف الصورة في أصول المتجر |
+| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | توثيق المنتج في الكتالوج المحلي للنسخ الاحتياطي |
+| [`src/pages/SearchPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SearchPage.jsx) | دعم البحث بواسطة كود الـ SKU والموديل |
+| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | عرض كود الـ SKU والمواصفات الفنية في بطاقة تفاصيل المنتج |
+| [`src/pages/admin/Products.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/Products.jsx) | عرض كود الـ SKU في جدول الإدارة والبحث بمواصفات المنتج |
 
 ---
 
 ## 3. ما تم إنجازه ويعمل بنجاح
-- [x] **حل مشكلة «فشل قراءة ملف الصورة» نهائياً عند رفع الصور من الهاتف أو المتصفح** ✅
-- [x] **إمكانية إرسال التجربة بنص فقط أو بصور فقط أو بالاثنين معاً** ✅
-- [x] **التحقق من عدم الإرسال فقط إذا كان كلاهما فارغين** ✅
+- [x] **إضافة المنتج إلى قاعدة البيانات كسجل مستقل مع معرّف فريد UUID** ✅
+- [x] **ربط صورة المنتج السحابية والمحلية وتأكيد ظهورها** ✅
+- [x] **تحديد السعر 190 ديناراً ليبياً مع قابلية التعديل من الإدارة** ✅
+- [x] **تفعيل كود المنتج `WH-WESTCODE-XMH300M4` والتأكد من عدم تكراره** ✅
+- [x] **ربطه بنظام المخزون الحالي (15 قطعة، قابل للخصم والتتبع)** ✅
+- [x] **ظهوره في البحث والسلة والطلبات والفواتير وتقارير المبيعات** ✅
+- [x] **عدم دمجه مع أي قبضة أخرى مع الحفاظ على COXO و NSK دون أي مساس** ✅
 - [x] **بناء المشروع للإنتاج (`npm run build`) بنجاح تام 100% وبدون أي أخطاء** ✅
 
 ---
 
 ## 4. الخطوة القادمة المطلوبة (Immediate Next Step)
-- تجربة نشر رأي أو تجربة بصورة فقط، وبنص فقط، وبكليهما معاً للتأكد من سهولة ومرونة الاستخدام لدى الطلبة.
+- معاينة المنتج في صفحة المتجر، تجربة البحث برمز الـ SKU `WH-WESTCODE-XMH300M4`، أو تعديل الكمية والسعر من لوحة الإدارة.

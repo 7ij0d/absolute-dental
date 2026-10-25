@@ -97,6 +97,32 @@
     ]
   },
   {
+    "id": "f325cfaa-c6b0-4330-966e-262cdced4635",
+    "name_ar": "قبضة توربين هوائية Westcode (XM-H300 M4)",
+    "name_en": "Westcode High-Speed Air Turbine Handpiece (XM-H300 M4)",
+    "sku": "WH-WESTCODE-XMH300M4",
+    "description_ar": "قبضة توربين هوائية عالية السرعة من Westcode موديل XM-H300 M4 باللون البنفسجي، مزودة بتوصيل 4 فتحات (Midwest M4) وتأتي مع علبتها الأصلية وشهادة الجودة والفحص المعتمدة CE و EN ISO 13485:2016. كود المنتج: WH-WESTCODE-XMH300M4",
+    "description_en": "Westcode High-Speed Air Turbine Handpiece (Model: XM-H300 M4) in metallic purple finish with 4-hole Midwest connection, complete with original protective case and inspection certificate (CE & EN ISO 13485:2016). SKU: WH-WESTCODE-XMH300M4",
+    "details_ar": "• كود المنتج (SKU): WH-WESTCODE-XMH300M4\n• العلامة التجارية: Westcode\n• الموديل: XM-H300 M4\n• النوع: قبضة توربين هوائية عالية السرعة (High-Speed Air Turbine)\n• نظام التوصيل: 4 فتحات قياسي (Midwest M4)\n• اللون: بنفسجي معدني (Metallic Purple)\n• نظام الرذاذ: رذاذ مائي للتبريد الفعال\n• شهادات المطابقة: CE / EN ISO 13485:2016\n• الملحقات: علبة بلاستيكية مبطنة أصلية + بطاقة شهادة الجودة والرقم التسلسلي",
+    "details_en": "• SKU: WH-WESTCODE-XMH300M4\n• Brand: Westcode\n• Model: XM-H300 M4\n• Type: High-Speed Air Turbine Handpiece\n• Connection: Standard 4-Hole (Midwest M4)\n• Color: Metallic Purple\n• Spray: Water spray cooling system\n• Standards: CE / EN ISO 13485:2016 Certified\n• Package: Original hard storage case + QC certificate with serial number",
+    "price": 190,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 15,
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "subject_id": "22000000-0000-0000-0000-000000000021",
+    "extra_subject_ids": [
+      "22000000-0000-0000-0000-000000000023",
+      "33000000-0000-0000-0000-000000000031",
+      "33000000-0000-0000-0000-000000000033"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/westcode-handpiece-xmh300m4.png",
+    "is_featured": true,
+    "is_active": true,
+    "is_archived": false,
+    "sort_order": 0
+  },
+  {
     "id": "0c18deeb-a571-419b-adf2-8060db42d8cf",
     "name_ar": "Student Glass Slab (Mixing Glass Slab)",
     "name_en": "Student Glass Slab (Mixing Glass Slab)",

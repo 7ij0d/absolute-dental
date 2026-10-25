@@ -822,8 +822,12 @@ export const Products = () => {
     const q = searchQuery.toLowerCase();
     return products.filter(
       (p) =>
-        p.name_ar.toLowerCase().includes(q) ||
-        p.name_en.toLowerCase().includes(q)
+        (p.name_ar && p.name_ar.toLowerCase().includes(q)) ||
+        (p.name_en && p.name_en.toLowerCase().includes(q)) ||
+        (p.description_ar && p.description_ar.toLowerCase().includes(q)) ||
+        (p.description_en && p.description_en.toLowerCase().includes(q)) ||
+        (p.details_ar && p.details_ar.toLowerCase().includes(q)) ||
+        (p.details_en && p.details_en.toLowerCase().includes(q))
     );
   };
 
@@ -887,6 +891,16 @@ export const Products = () => {
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem' }}>
                     <p style={{ fontWeight: 700, margin: 0 }}>{prod.name_ar}</p>
+                    {prod.name_en && (
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0.1rem 0 0 0', direction: 'ltr', textAlign: 'start' }}>
+                        {prod.name_en}
+                      </p>
+                    )}
+                    {((prod.sku) || (prod.details_ar && prod.details_ar.match(/SKU:\s*([^\n\r]+)/i)?.[1])) && (
+                      <span style={{ fontSize: '0.68rem', fontFamily: 'monospace', fontWeight: 700, color: '#4B382A', backgroundColor: '#F0E8DD', padding: '1px 6px', borderRadius: '4px', display: 'inline-block', marginTop: '0.2rem', direction: 'ltr' }}>
+                        SKU: {(prod.sku || prod.details_ar.match(/SKU:\s*([^\n\r]+)/i)?.[1]).trim()}
+                      </span>
+                    )}
                     <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
                       {(prod.discount_label_en === 'universal' || prod.all_subjects || prod.is_universal) ? (
                         <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '1px 6px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#047857', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
