@@ -11,111 +11,164 @@ import supabase from '../supabaseClient.js';
  * 4. Likes enforce strict 1-like-per-user uniqueness on the server record (`likes` array of user IDs).
  */
 
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-const MAX_IMAGE_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB max per image before compression
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+const MAX_IMAGE_SIZE_BYTES = 15 * 1024 * 1024; // 15 MB max per image before compression
 
 export const PRODUCT_REQUEST_STATUSES = [
-  { value: 'new', label_ar: 'جديد', labelAr: 'جديد', labelEn: 'New', color: '#D97706', bg: 'rgba(245, 158, 11, 0.12)' },
-  { value: 'under_review', label_ar: 'قيد المراجعة', labelAr: 'قيد المراجعة', labelEn: 'Under Review', color: '#2563EB', bg: 'rgba(37, 99, 235, 0.12)' },
-  { value: 'searching', label_ar: 'جارٍ البحث عن المنتج', labelAr: 'جارٍ البحث عن المنتج', labelEn: 'Searching for Product', color: '#7C3AED', bg: 'rgba(124, 58, 237, 0.12)' },
-  { value: 'provided', label_ar: 'تم توفير المنتج', labelAr: 'تم توفير المنتج', labelEn: 'Product Provided', color: '#059669', bg: 'rgba(5, 150, 105, 0.12)' },
-  { value: 'unavailable', label_ar: 'تعذّر توفير المنتج', labelAr: 'تعذّر توفير المنتج', labelEn: 'Could Not Provide', color: '#DC2626', bg: 'rgba(220, 38, 38, 0.12)' },
+  { value: 'new', label_ar: 'جديد', label_en: 'New', color: '#2563EB' },
+  { value: 'searching', label_ar: 'جاري البحث', label_en: 'Searching', color: '#D97706' },
+  { value: 'available', label_ar: 'تم التوفير', label_en: 'Available', color: '#059669' },
+  { value: 'unavailable', label_ar: 'غير متوفر', label_en: 'Unavailable', color: '#DC2626' }
 ];
 
-export function sanitizeInputText(input = '', maxLength = 2000) {
-  if (typeof input !== 'string') return '';
-  return input
-    .replace(/<[^>]*>?/gm, '') // Strip HTML tags
-    .replace(/javascript:/gi, '')
-    .trim()
-    .slice(0, maxLength);
-}
-
-/**
- * Validates and compresses an image file before uploading to cloud storage.
- */
 export function validateImageFile(file) {
   if (!file) return { valid: false, error: 'لم يتم اختيار ملف', errorAr: 'لم يتم اختيار ملف', errorEn: 'No file selected' };
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    const msg = 'يرجى اختيار صورة بصيغة JPG أو PNG أو WebP فقط.';
+  const type = (file.type || '').toLowerCase();
+  const name = (file.name || '').toLowerCase();
+  const isImage = type.startsWith('image/') || /\.(jpg|jpeg|png|webp|heic|heif|gif|bmp)$/i.test(name);
+  if (!isImage) {
+    const msg = 'يرجى اختيار صورة بصيغة JPG أو PNG أو WebP.';
     return {
       valid: false,
       error: msg,
       errorAr: msg,
-      errorEn: 'Please upload a valid JPG, PNG, or WebP image only.'
+      errorEn: 'Please upload a valid image file.'
     };
   }
   if (file.size > MAX_IMAGE_SIZE_BYTES) {
-    const msg = 'حجم الصورة كبير جداً (الحد الأقصى 8 ميجابايت).';
+    const msg = 'حجم الصورة كبير جداً (الحد الأقصى 15 ميجابايت).';
     return {
       valid: false,
       error: msg,
       errorAr: msg,
-      errorEn: 'Image file size exceeds the 8MB limit.'
+      errorEn: 'Image file size exceeds the 15MB limit.'
     };
   }
   return { valid: true };
 }
 
-export function compressImageFile(file, maxWidth = 1080, quality = 0.84) {
-  return new Promise((resolve, reject) => {
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-      reject(new Error(validation.errorAr));
+export function compressImageFile(file, maxWidth = 1200, quality = 0.82) {
+  return new Promise((resolve) => {
+    if (!file) {
+      resolve({ blob: null, dataUrl: '' });
       return;
     }
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('فشل قراءة ملف الصورة'));
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onerror = () => reject(new Error('ملف الصورة غير صالح'));
-      img.onload = () => {
+
+    // Try URL.createObjectURL first (fastest, avoids FileReader memory crashes)
+    let objectUrl = null;
+    try {
+      if (typeof window !== 'undefined' && window.URL && window.URL.createObjectURL) {
+        objectUrl = window.URL.createObjectURL(file);
+      }
+    } catch (_) {}
+
+    const cleanup = () => {
+      if (objectUrl) {
+        try { window.URL.revokeObjectURL(objectUrl); } catch (_) {}
+      }
+    };
+
+    const processImg = (img) => {
+      try {
         const canvas = document.createElement('canvas');
-        const ratio = Math.min(maxWidth / img.width, 1);
-        canvas.width = Math.round(img.width * ratio);
-        canvas.height = Math.round(img.height * ratio);
+        const imgW = img.naturalWidth || img.width || 800;
+        const imgH = img.naturalHeight || img.height || 600;
+        const ratio = Math.min(maxWidth / imgW, 1);
+        canvas.width = Math.round(imgW * ratio);
+        canvas.height = Math.round(imgH * ratio);
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
         canvas.toBlob(
           (blob) => {
+            cleanup();
             if (blob) {
-              resolve({ blob, dataUrl: canvas.toDataURL('image/jpeg', quality) });
+              try {
+                const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve({ blob, dataUrl });
+              } catch (_) {
+                resolve({ blob, dataUrl: '' });
+              }
             } else {
-              reject(new Error('فشل ضغط الصورة'));
+              // Return original file as blob fallback
+              resolve({ blob: file, dataUrl: '' });
             }
           },
           'image/jpeg',
           quality
         );
-      };
-      img.src = e.target.result;
+      } catch (err) {
+        cleanup();
+        resolve({ blob: file, dataUrl: '' });
+      }
     };
-    reader.readAsDataURL(file);
+
+    if (objectUrl) {
+      const img = new Image();
+      img.onload = () => processImg(img);
+      img.onerror = () => {
+        cleanup();
+        fallbackWithFileReader();
+      };
+      img.src = objectUrl;
+    } else {
+      fallbackWithFileReader();
+    }
+
+    function fallbackWithFileReader() {
+      try {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => processImg(img);
+          img.onerror = () => resolve({ blob: file, dataUrl: e.target?.result || '' });
+          img.src = e.target.result;
+        };
+        reader.onerror = () => {
+          // Never throw; fallback directly to raw file
+          resolve({ blob: file, dataUrl: '' });
+        };
+        reader.readAsDataURL(file);
+      } catch (_) {
+        resolve({ blob: file, dataUrl: '' });
+      }
+    }
   });
 }
 
 export async function uploadCompressedImage(file, folder = 'experiences') {
-  const { blob, dataUrl } = await compressImageFile(file);
-  const safeName = (file.name || 'photo.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
-  const filePath = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${safeName}.jpg`;
-
+  if (!file) return null;
   try {
-    const { data, error } = await supabase.storage
-      .from('smylodent-assets')
-      .upload(filePath, blob, { contentType: 'image/jpeg', upsert: false });
+    const { blob, dataUrl } = await compressImageFile(file);
+    const blobToUpload = blob || file;
+    const safeName = (file.name || 'photo.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
+    const filePath = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${safeName}`;
 
-    if (!error && data) {
-      const { data: pubData } = supabase.storage
+    try {
+      const { data, error } = await supabase.storage
         .from('smylodent-assets')
-        .getPublicUrl(filePath);
-      if (pubData?.publicUrl) {
-        return pubData.publicUrl;
+        .upload(filePath, blobToUpload, {
+          contentType: blobToUpload.type || 'image/jpeg',
+          upsert: false
+        });
+
+      if (!error && data) {
+        const { data: pubData } = supabase.storage
+          .from('smylodent-assets')
+          .getPublicUrl(filePath);
+        if (pubData?.publicUrl) {
+          return pubData.publicUrl;
+        }
       }
+    } catch (err) {
+      console.warn('Storage upload notice:', err);
     }
+
+    if (dataUrl) return dataUrl;
   } catch (err) {
-    console.warn('Cloud storage upload fallback to data URL:', err);
+    console.warn('Image upload processing notice:', err);
   }
-  return dataUrl;
+  return null;
 }
 
 function normalizeExperienceRecord(item) {

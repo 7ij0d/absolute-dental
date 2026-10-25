@@ -215,12 +215,10 @@ export const Home = () => {
     }
     setExpError('');
 
-    if (expFiles.length === 0) {
-      setExpError('يرجى إرفاق صورة واحدة على الأقل لتجربتك.');
-      return;
-    }
-    if (!expText.trim()) {
-      setExpError('يرجى كتابة نص التجربة قبل الإرسال.');
+    const hasText = Boolean(expText.trim());
+    const hasImages = Boolean(expFiles && expFiles.length > 0);
+    if (!hasText && !hasImages) {
+      setExpError('يرجى كتابة نص التجربة أو إرفاق صورة واحدة على الأقل.');
       return;
     }
 
@@ -648,7 +646,7 @@ export const Home = () => {
                       </div>
 
                       {/* Experience Text */}
-                      <p className="home-exp-text">{exp.text}</p>
+                      {exp.text && <p className="home-exp-text">{exp.text}</p>}
 
                       {/* Experience Images */}
                       {Array.isArray(exp.images) && exp.images.length > 0 && (
@@ -959,11 +957,11 @@ export const Home = () => {
 
                   {/* Image Upload Field */}
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">صور التجربة (صورة واحدة على الأقل) *</label>
+                    <label className="form-label">صور التجربة (اختياري)</label>
                     <input
                       ref={expFileInputRef}
                       type="file"
-                      accept="image/jpeg,image/png,image/webp"
+                      accept="image/*"
                       multiple
                       onChange={handleExpFilesChange}
                       style={{ display: 'none' }}
@@ -974,7 +972,7 @@ export const Home = () => {
                       className="ad-upload-dropzone"
                     >
                       <Camera size={24} style={{ color: '#684835' }} />
-                      <span>اضغط لاختيار صورة أو أكثر (JPG, PNG, WEBP)</span>
+                      <span>اضغط لاختيار صورة أو أكثر (اختياري)</span>
                       <small>يمكنك إرفاق حتى 5 صور مع معاينتها قبل الإرسال</small>
                     </button>
 
@@ -999,13 +997,12 @@ export const Home = () => {
 
                   {/* Experience Text Field */}
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">نص التجربة *</label>
+                    <label className="form-label">نص التجربة (اختياري عند إرفاق صورة)</label>
                     <textarea
                       rows={4}
-                      required
                       value={expText}
                       onChange={(e) => setExpText(e.target.value)}
-                      placeholder="احكِ لزملائك عن جودة الأدوات، التغليف، وسرعة التوصيل..."
+                      placeholder="احكِ لزملائك عن تجربتك مع جودة الأدوات، التغليف، وسرعة التوصيل..."
                       className="form-input"
                       style={{ resize: 'vertical' }}
                     />

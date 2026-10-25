@@ -253,7 +253,7 @@ export const StudentExperiences = () => {
 
                   <td style={{ padding: '0.85rem 0.75rem', maxWidth: '280px' }}>
                     <div style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.5 }}>
-                      {item.text}
+                      {item.text || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>مشاركة بصور فقط</span>}
                     </div>
                   </td>
 
@@ -373,7 +373,7 @@ export const StudentExperiences = () => {
                     نص التجربة:
                   </div>
                   <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: 1.65, whiteSpace: 'pre-line' }}>
-                    {selectedExp.text}
+                    {selectedExp.text || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>لا يوجد نص — مشاركة بصور فقط</span>}
                   </p>
                 </div>
 
