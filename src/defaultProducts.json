@@ -582,8 +582,8 @@
   },
   {
     "id": "99000000-0000-0000-0000-000000000001",
-    "name_ar": "كمامات طبية جراحية MedProtect (أزرق وأسود)",
-    "name_en": "MedProtect Disposable Surgical Face Masks (Blue & Black)",
+    "name_ar": "كمامات طبية جراحية (Mask أزرق وأسود)",
+    "name_en": "Disposable Face Masks (Blue & Black)",
     "price": 0.5,
     "compare_at_price": null,
     "availability": "available",
@@ -597,7 +597,7 @@
     "details_en": "Brand: MedProtect\nFeatures: Latex-free, nickel-free, cadmium-free\nAvailable Colors:\n• Blue: 50 pcs (Cost: 0.12 LYD)\n• Black: 100 pcs (Cost: 0.13 LYD)\nAcademic Year: All Subjects",
     "sort_order": 1,
     "is_universal": true,
-    "discount_label_en": "universal",
+    "discount_label_en": "other_supplies",
     "extra_subject_ids": [
       "11000000-0000-0000-0000-000000000012",
       "22000000-0000-0000-0000-000000000021",
@@ -631,8 +631,8 @@
   },
   {
     "id": "33000000-0000-0000-0000-000000000103",
-    "name_ar": "مفرش عيادة أسنان طبي واقي وعازل - Cover Sheet (وردي وأزرق)",
-    "name_en": "Cover Sheet Disposable Waterproof Dental Bib (Pink & Blue)",
+    "name_ar": "مفرش عيادة أسنان Cover Sheet (وردي)",
+    "name_en": "Cover Sheet (Pink)",
     "price": 0.5,
     "compare_at_price": null,
     "availability": "available",
@@ -654,7 +654,7 @@
     "details_en": "Available Colors:\n• Pink\n• Blue\nType: Disposable Waterproof Dental Bib / Cover Sheet\nAcademic Year: 3rd Year (All Subjects)",
     "sort_order": 3,
     "is_universal": true,
-    "discount_label_en": "universal"
+    "discount_label_en": "other_supplies"
   },
   {
     "id": "33000000-0000-0000-0000-000000000105",
@@ -729,8 +729,8 @@
   },
   {
     "id": "33000000-0000-0000-0000-000000000109",
-    "name_ar": "قفازات نايتريل طبية فاحصة OverseasGlove (غير معقمة)",
-    "name_en": "OverseasGlove Disposable Nitrile Gloves (Non-Sterile)",
+    "name_ar": "قفازات نايتريل طبية OverseasGlove (غير معقمة)",
+    "name_en": "OverseasGlove Nitrile Examination Gloves",
     "price": 1,
     "compare_at_price": null,
     "availability": "available",
@@ -752,7 +752,7 @@
     "details_en": "Brand: OverseasGlove\nType: Disposable Non-Sterile Nitrile Gloves\nAvailable Colors & Sizes:\n• Black - Size Small (S)\n• Blue - Size Medium (M)\nAcademic Year: 3rd Year (All 4 Subjects)",
     "sort_order": 9,
     "is_universal": true,
-    "discount_label_en": "universal"
+    "discount_label_en": "other_supplies"
   },
   {
     "id": "33000000-0000-0000-0000-000000000110",
@@ -921,5 +921,61 @@
     "details_ar": "المنتج: مصلب سيليكون لاصقود إنرسيل (Lascod Enersyl Activator Paste)\nالحجم: 60 مل\nالنوع: Universal Catalyst Paste\nحالة التوفر: متوفر بالطلب (By Order - يتم تأكيده وتوفيره عبر الإدارة)\nالمادة الدراسية: صناعة الأسنان الثابتة (الفكسد برستودونتيكس)",
     "details_en": "Product: Lascod Enersyl Activator Paste (Catalyst)\nVolume: 60 ml\nAvailability: By Order (Confirmed upon request by administration)\nSubject: Fixed Prosthodontics",
     "sort_order": 15
+  },
+  {
+    "id": "33000000-0000-0000-0000-000000000104",
+    "name_ar": "مفرش عيادة أسنان Cover Sheet (أزرق)",
+    "name_en": "Cover Sheet (Blue)",
+    "price": 0.5,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 125,
+    "subject_id": "33000000-0000-0000-0000-000000000031",
+    "year_id": "30000000-0000-0000-0000-000000000003",
+    "extra_subject_ids": [
+      "33000000-0000-0000-0000-000000000032",
+      "33000000-0000-0000-0000-000000000033",
+      "33000000-0000-0000-0000-000000000034",
+      "22000000-0000-0000-0000-000000000021",
+      "22000000-0000-0000-0000-000000000022",
+      "22000000-0000-0000-0000-000000000023"
+    ],
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-blue.png",
+    "description_ar": "مفرش طبي واقي للاستخدام لمرة واحدة (Waterproof Dental Bib) بلون أزرق عيادي أنيق، مصنوع من طبقات ورقية ماصة عالية الجودة مدعمة بطبقة عازلة ومقاومة للماء تماماً لحماية ملابس المرضى وأسطح العمل في العيادات.",
+    "description_en": "Disposable waterproof dental bib / cover sheet in clinic blue. 2-ply absorbent paper backing laminated with 1-ply waterproof PE film to protect patients and clinic trays from liquids.",
+    "details_ar": "اللون: أزرق (Blue)\nالكمية في المخزون: 125 قطعة\nالنوع: مفرش واقي عازل ومقاوم للماء (Waterproof Dental Bib)\nسعر البيع: 0.5 د.ل للقطعة\nسعر التكلفة: 0.11 د.ل\nالسنة الدراسية: السنة الثالثة (جميع المواد)",
+    "details_en": "Color: Blue\nQuantity in Stock: 125 pieces\nType: Disposable Waterproof Dental Bib / Cover Sheet\nSelling Price: 0.5 LYD\nCost Price: 0.11 LYD\nAcademic Year: 3rd Year (All Subjects)",
+    "sort_order": 4,
+    "is_universal": true,
+    "discount_label_en": "other_supplies"
+  },
+  {
+    "id": "99000000-0000-0000-0000-000000000003",
+    "name_ar": "طقم كمامة وقفازات (Mask & Gloves Set)",
+    "name_en": "Mask and Gloves Set",
+    "price": 1.5,
+    "compare_at_price": null,
+    "availability": "available",
+    "stock_quantity": 100,
+    "subject_id": "11000000-0000-0000-0000-000000000011",
+    "all_subjects": true,
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-medprotect-blue.png",
+    "description_ar": "طقم وقائي متكامل للاستخدام العيادي والمعملي يجمع بين كمامات طبية جراحية ثلاثية الطبقات وقفازات نايتريل عالية الجودة لحماية تامة للطلبة أثناء جلسات التدريب والعيادات.",
+    "description_en": "Complete protective set for dental clinics and laboratories combining 3-ply surgical face mask and premium nitrile examination gloves.",
+    "details_ar": "المحتويات:\n• كمامة طبية جراحية ثلاثية الطبقات خالية من اللاتكس\n• زوج قفازات نايتريل فاحصة عالية الحماية\nالقسم: مستلزمات أخرى لجميع السنوات",
+    "details_en": "Contents:\n• 1x 3-Ply Surgical Face Mask (Latex-Free)\n• 1x Pair Nitrile Examination Gloves\nDepartment: Other Supplies for All Years",
+    "sort_order": 0,
+    "is_universal": true,
+    "discount_label_en": "other_supplies",
+    "extra_subject_ids": [
+      "11000000-0000-0000-0000-000000000012",
+      "22000000-0000-0000-0000-000000000021",
+      "22000000-0000-0000-0000-000000000022",
+      "22000000-0000-0000-0000-000000000023",
+      "33000000-0000-0000-0000-000000000031",
+      "33000000-0000-0000-0000-000000000032",
+      "33000000-0000-0000-0000-000000000033",
+      "33000000-0000-0000-0000-000000000034"
+    ]
   }
 ]

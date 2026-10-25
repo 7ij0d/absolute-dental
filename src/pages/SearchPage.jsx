@@ -73,12 +73,18 @@ export const SearchPage = ({ categoryMode = null }) => {
               return true;
             });
           } else if (categoryMode === 'other-supplies') {
-            // Strictly include products enabled for "Other Supplies" ('other_supplies' or 'universal')
-            // Removing a product from Other Supplies in Admin sets discount_label_en = null without deleting the product
+            // Strictly include products enabled for "Other Supplies" ('other_supplies' or 'universal' or canonical clinic supplies)
             const suppliesList = data.filter((p) => {
+              const nameLower = ((p.name_en || '') + ' ' + (p.name_ar || '')).toLowerCase();
               return (
                 p.discount_label_en === 'other_supplies' ||
-                p.discount_label_en === 'universal'
+                p.discount_label_en === 'universal' ||
+                nameLower.includes('cover sheet') ||
+                nameLower.includes('mask') ||
+                nameLower.includes('glove') ||
+                nameLower.includes('كمام') ||
+                nameLower.includes('قفاز') ||
+                nameLower.includes('مفرش عيادة')
               );
             });
             const seen = new Set();

@@ -13,45 +13,38 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 1. تعديل مسمى القسم إلى «تجارب الطلبة مع ابسلوت دنتال»:
-- تم تغيير العنوان الرسمي للقسم في الصفحة الرئيسية ([`Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx)) وشريط الأدوات ولوحة تحكم الإدارة ([`StudentExperiences.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/StudentExperiences.jsx)) ومحرك المجتمع من «تجارب طلبة الأسنان» إلى:
-  **«تجارب الطلبة مع ابسلوت دنتال»** / **«Student Experiences with Absolute Dental»**.
-- تحديث رسائل التأكيد والنجاح عند نشر أي تجربة.
-
-### 🔹 2. حل مشكلة اختفاء البيانات بعد التسجيل من الجذور:
-1. **اختفاء التجارب المنشورة فور إرسالها:**
-   - كانت التجارب تُرسل بحالة `pending` وتُحفظ بمفتاح لا يظهر في التغذية الرئيسية إلا بعد اعتماد الإدارة اليدوي، مما يجعل الطالب يظن أن مشاركته اختفت فور النقر على زر الإرسال.
-   - تم تعديل [`communityAndRequestsEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/communityAndRequestsEngine.js) لتقوم بالنشر المباشر المعتمد في تغذية تجارب الطلبة مع إمكانية مراجعتها وحذفها من الإدارة.
-   - تم تحديث [`Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx) لإدراج التجربة فورياً في التغذية المعروضة على الشاشة بلحظة النقر دون الحاجة لتحديث الصفحة.
-2. **فقدان نص التجربة إذا طُلب تسجيل الدخول:**
-   - تم إضافة نظام حفظ مسودة التجربة تلقائياً في `sessionStorage` (`ad_experience_draft_text` و `ad_experience_draft_anon`).
-   - عند قيام الطالب بكتابة رأيه ثم توجيهه لتسجيل الدخول أو إنشاء حساب، يعود تلقائياً ليجد نص تجربته وخيار هويته محفوظاً بالكامل دون فقدان حرف واحد.
-3. **فقدان بيانات الحساب (الاسم، الواتساب، اليوزر، السنة الدراسية) عند التحديث:**
-   - كانت دالة `updateProfile` في [`AuthContext.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/context/AuthContext.jsx) تحاول حفظ حقول غير موجودة في جدول `profiles` مثل `username` و `avatar_url` مما كان يؤدي لرفض قاعدة البيانات للطلب وإلغاء تحديث البيانات بالكامل.
-   - تم تصفية الحقول الموجهة لجدول `profiles` وحفظ كامل البيانات (اليوزر، الصورة، السنة الدراسية، رقم الواتساب، الاسم) في `user_metadata` ومزامنتها في التخزين المحلي `localStorage` (`ad_cached_profile` و `ad_cached_user`).
-   - تم تحديث دالة `fetchUserProfile` لتقوم بدمج بيانات `user_metadata` مع جدول البيانات تلقائياً، فلا تختفي أي بيانات مسجلة أبداً بعد إعادة تحميل الصفحة أو إعادة فتح المتصفح.
+### 🔹 إضافة الـ Cover Sheet والـ Mask and Gloves إلى «مستلزمات أخرى»:
+1. **مفارش العيادة الواقية (Cover Sheet):**
+   - تفعيل وتحديث مفرش العيادة الوردي (`Cover Sheet (Pink)`) بالمعرف `33000000-0000-0000-0000-000000000103` بسعر `0.5 د.ل` وربطه بقسم «مستلزمات أخرى».
+   - تفعيل وإعادة تنشيط مفرش العيادة الأزرق (`Cover Sheet (Blue)`) بالمعرف `33000000-0000-0000-0000-000000000104` بسعر `0.5 د.ل` وربطه بقسم «مستلزمات أخرى».
+2. **الكمامات والقفازات وطقم الوقاية (Mask & Gloves):**
+   - تفعيل وتحديث كمامات طبية جراحية (`Disposable Face Masks (Blue & Black)`) بالمعرف `99000000-0000-0000-0000-000000000001` بسعر `0.5 د.ل` ضمن «مستلزمات أخرى».
+   - تفعيل وتحديث قفازات نايتريل طبية (`OverseasGlove Nitrile Examination Gloves`) بالمعرف `33000000-0000-0000-0000-000000000109` بسعر `1.0 د.ل` ضمن «مستلزمات أخرى».
+   - إنشاء وإدراج طقم متكامل يجمع الكمامة والقفازات (`Mask and Gloves Set` / `طقم كمامة وقفازات`) بالمعرف `99000000-0000-0000-0000-000000000003` بسعر `1.5 د.ل` وتصنيفه ضمن «مستلزمات أخرى» وربطه بكافة المواد الدراسية.
+3. **تحديث محرك التصفية والبحث في صفحة مستلزمات أخرى (`SearchPage.jsx`):**
+   - تدعيم فلتر `categoryMode === 'other-supplies'` ليشمل صراحة منتجات مفارش العيادة والكمامات والقفازات إلى جانب التصنيفات العامة.
+4. **مزامنة البيانات غير المتصلة بالإنترنت (`defaultProducts.json`):**
+   - تحديث السجلات الاحتياطية وإدراج طقم الكمامة والقفازات والمفرش الأزرق لضمان التطابق التام حتى في غياب الاتصال.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx) | تعديل مسمى القسم إلى «تجارب الطلبة مع ابسلوت دنتال»، وحفظ مسودة التجربة وتحديث التغذية فورياً |
-| [`src/utils/communityAndRequestsEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/communityAndRequestsEngine.js) | نشر تجارب الطلبة مباشرة في التغذية السحابية لمنع اختفائها |
-| [`src/context/AuthContext.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/context/AuthContext.jsx) | تصفية حقول جدول `profiles` ومزامنة `user_metadata` والتخزين المحلي لضمان بقاء بيانات الحساب مسجلة دائماً |
-| [`src/components/CompleteProfileModal.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/CompleteProfileModal.jsx) | حفظ فوري لبيانات الملف الشخصي في `localStorage` |
-| [`src/pages/admin/StudentExperiences.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/StudentExperiences.jsx) | تحديث المسمى إلى «إدارة تجارب الطلبة مع ابسلوت دنتال» |
+| [`src/pages/SearchPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SearchPage.jsx) | تدعيم منطق تصفية قسم «مستلزمات أخرى» لتشمل Cover Sheet و Mask و Glove بشكل مباشر وسلس |
+| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | مزامنة بيانات الـ Cover Sheet والكمامات والقفازات وطقم الوقاية المشترك |
+| قاعدة البيانات السحابية (جدول `products` و `product_subjects`) | تفعيل وتحديث المنتجات الفردية وإضافة طقم `Mask and Gloves Set` وربطه بالمواد ووسم `other_supplies` |
 
 ---
 
 ## 3. ما تم إنجازه ويعمل بنجاح
-- [x] **تعديل مسمى القسم إلى «تجارب الطلبة مع ابسلوت دنتال» في كافة الصفحات** ✅
-- [x] **حل مشكلة اختفاء التجربة بعد إرسالها وظهورها فوراً في التغذية الرئيسية** ✅
-- [x] **حفظ مسودة التجربة إذا اضطر المستخدم لتسجيل الدخول واستعادتها كاملة** ✅
-- [x] **حل مشكلة فقدان بيانات الملف الشخصي (الاسم، الواتساب، اليوزر) وتثبيتها بالجهاز وقاعدة البيانات** ✅
-- [x] **بناء المشروع للإنتاج (`npm run build`) بنجاح تام وبدون أي أخطاء** ✅
+- [x] **إدراج مفرش العيادة Cover Sheet بلونيه (الوردي والأزرق) في قسم «مستلزمات أخرى»** ✅
+- [x] **إدراج الكمامات الجراحية (Mask) والقفازات النايتريل (Gloves) في قسم «مستلزمات أخرى»** ✅
+- [x] **إضافة طقم وقاية مشترك (Mask and Gloves Set) بسعر اقتصادي 1.5 د.ل** ✅
+- [x] **تحديث صفحة البحث والتصفية للتعرف على مستلزمات العيادة فورياً** ✅
+- [x] **مزامنة قاعدة البيانات المحلية والسحابية وتمرير فحص البناء `npm run build` بنجاح** ✅
 
 ---
 
 ## 4. الخطوة القادمة المطلوبة (Immediate Next Step)
-- تجربة نشر تجربة في قسم «تجارب الطلبة مع ابسلوت دنتال» والتحقق من ظهورها الفوري، وتحديث الصفحة للتأكد من ثبات تسجيل الدخول والبيانات.
+- فتح صفحة «مستلزمات أخرى» (`/other-supplies`) والتأكد من ظهور المنتجات الخمسة بأسعارها وصورها وخياراتها بدقة.
