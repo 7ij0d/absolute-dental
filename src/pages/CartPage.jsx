@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { Trash2, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
 import { isBundleProduct, getBundleDefinition, getBundleUnitLabel, getBundleSingleItemLabel } from '../utils/productInventoryEngine';
+import { buildProductUrl, recordProductOrigin } from '../utils/navigationTrail';
 
 export const CartPage = () => {
   const { t, isRtl } = useLanguage();
@@ -123,14 +124,25 @@ export const CartPage = () => {
               >
                 
                 {/* Product Image */}
-                <Link to={`/product/${item.id}`} style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-sm)', overflow: 'hidden', backgroundColor: 'var(--border-color)', flexShrink: 0 }}>
+                <Link
+                  to={buildProductUrl(item.base_product_id || (typeof item.id === 'string' && item.id.includes('-') && item.id.length > 36 ? item.id.substring(0, 36) : item.id), { from: 'cart' })}
+                  state={{ from: '/cart', returnPath: '/cart' }}
+                  onClick={() => recordProductOrigin(item.base_product_id || item.id, { from: 'cart', returnPath: '/cart' })}
+                  style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-sm)', overflow: 'hidden', backgroundColor: 'var(--border-color)', flexShrink: 0 }}
+                >
                   <img src={item.image_url} alt={item.name_en} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </Link>
 
                 {/* Info and Quantity count */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <Link to={`/product/${item.id}`} style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }} className="product-title-link">
+                    <Link
+                      to={buildProductUrl(item.base_product_id || (typeof item.id === 'string' && item.id.includes('-') && item.id.length > 36 ? item.id.substring(0, 36) : item.id), { from: 'cart' })}
+                      state={{ from: '/cart', returnPath: '/cart' }}
+                      onClick={() => recordProductOrigin(item.base_product_id || item.id, { from: 'cart', returnPath: '/cart' })}
+                      style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}
+                      className="product-title-link"
+                    >
                       {isRtl ? item.name_ar : item.name_en}
                     </Link>
                     {isOffer && (

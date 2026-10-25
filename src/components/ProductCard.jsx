@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -7,8 +7,9 @@ import { useStorageImage } from '../utils/storageImage';
 import { isBundleProduct, getBundleDefinition, getProductSizedConfig, getStudentGuideInfo } from '../utils/productInventoryEngine';
 import { ShoppingCart, Check, Heart, Sparkles, BookOpen, AlertCircle, Layers } from 'lucide-react';
 import { BurGroupModal } from './BurGroupModal';
+import { buildProductUrl, recordProductOrigin } from '../utils/navigationTrail';
 
-export const ProductCard = ({ product }) => {
+export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
   const { lang, t, isRtl } = useLanguage();
   const auth = useAuth();
   const isAdmin = auth?.isAdmin;
@@ -22,6 +23,55 @@ export const ProductCard = ({ product }) => {
   );
   const { addToCart, cartItems } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleCardClick = () => {
+    let originInfo = { from: 'general', returnPath: location.pathname + location.search };
+    if (location.pathname.startsWith('/subject/')) {
+      const subSlug = subjectContext?.subjectSlug || location.pathname.replace('/subject/', '').split('/')[0];
+      originInfo = {
+        from: 'subject',
+        subjectSlug: subSlug,
+        yearSlug: subjectContext?.yearSlug,
+        returnPath: location.pathname + location.search
+      };
+    } else if (location.pathname === '/accessories') {
+      originInfo = { from: 'accessories', returnPath: '/accessories' };
+    } else if (location.pathname === '/boxes' || location.pathname === '/dental-boxes') {
+      originInfo = { from: 'boxes', returnPath: '/boxes' };
+    } else if (location.pathname === '/other-supplies') {
+      originInfo = { from: 'other-supplies', returnPath: '/other-supplies' };
+    } else if (location.pathname === '/offers') {
+      originInfo = { from: 'offers', returnPath: '/offers' };
+    } else if (location.pathname === '/search') {
+      const q = new URLSearchParams(location.search).get('q') || '';
+      originInfo = { from: 'search', q, returnPath: location.pathname + location.search };
+    } else if (location.pathname === '/favorites') {
+      originInfo = { from: 'favorites', returnPath: '/favorites' };
+    } else if (location.pathname === '/cart') {
+      originInfo = { from: 'cart', returnPath: '/cart' };
+    } else if (location.pathname.startsWith('/year/')) {
+      const yrSlug = location.pathname.replace('/year/', '').split('/')[0];
+      originInfo = { from: 'year', yearSlug: yrSlug, returnPath: location.pathname };
+    } else if (location.pathname.startsWith('/product/')) {
+      const params = new URLSearchParams(location.search);
+      const parentFrom = params.get('from');
+      if (parentFrom) {
+        originInfo = {
+          from: parentFrom,
+          subjectSlug: params.get('sub') || undefined,
+          yearSlug: params.get('yr') || undefined,
+          q: params.get('q') || undefined,
+          returnPath: location.pathname + location.search
+        };
+      }
+    }
+
+    recordProductOrigin(product.id, originInfo);
+    navigate(buildProductUrl(product.id, originInfo), {
+      state: originInfo
+    });
+  };
 
   // Live cart quantity calculation (synchronized across all subject appearances)
   const currentCartQuantity = useMemo(() => {
@@ -217,7 +267,7 @@ export const ProductCard = ({ product }) => {
 
   return (
     <div
-      onClick={() => navigate(`/product/${product.id}`)}
+      onClick={handleCardClick}
       className="product-card"
       style={{
         opacity: isUnavailable ? 0.72 : 1,

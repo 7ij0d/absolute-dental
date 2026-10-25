@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -32,6 +32,7 @@ import {
   Maximize2, Download, X, Loader2
 } from 'lucide-react';
 import { downloadWatermarkedImage } from '../utils/watermarkEngine';
+import { resolveNavigationContext, buildProductUrl, recordProductOrigin } from '../utils/navigationTrail';
 
 const DEFAULT_YEARS = [
   { id: '10000000-0000-0000-0000-000000000001', name_ar: 'السنة الأولى',  name_en: '1st Year', slug: '1st-year' },
@@ -155,6 +156,8 @@ export const ProductDetails = () => {
 
   const { cartItems, addToCart } = useCart();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   const [product, setProduct] = useState(null);
   const [subject, setSubject] = useState(null);
@@ -668,40 +671,41 @@ export const ProductDetails = () => {
     <div className="product-details-page">
       <div className="container" style={{ maxWidth: '1140px', paddingInline: '1.25rem' }}>
 
-        {/* ── 1. DYNAMIC BREADCRUMB (Requirement 2) ── */}
+        {/* ── 1. DYNAMIC USER BROWSE BREADCRUMB ── */}
         <nav
           aria-label="breadcrumb"
           className="product-breadcrumb"
           style={{ direction: isRtl ? 'rtl' : 'ltr' }}
         >
-          <Link to="/" className="breadcrumb-link">
-            {lang === 'ar' ? 'الرئيسية' : 'Home'}
-          </Link>
-          <ChevronSep size={13} className="breadcrumb-separator" />
-          <Link to={`/year/${year?.slug || '1st-year'}`} className="breadcrumb-link">
-            {lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}
-          </Link>
-          <ChevronSep size={13} className="breadcrumb-separator" />
-          <Link to={`/year/${year?.slug || '1st-year'}`} className="breadcrumb-link">
-            {yearDisplayName}
-          </Link>
-          <ChevronSep size={13} className="breadcrumb-separator" />
-          <Link to={`/subject/${subject?.slug || 'dental-anatomy'}`} className="breadcrumb-link">
-            {subjectTitleEn}
-          </Link>
-          <ChevronSep size={13} className="breadcrumb-separator" />
-          <span className="breadcrumb-current" style={{ direction: 'ltr', display: 'inline-block' }}>
-            {displayName}
-          </span>
+          {navContext.breadcrumbs.map((crumb, idx) => {
+            const isLast = idx === navContext.breadcrumbs.length - 1;
+            return (
+              <React.Fragment key={idx}>
+                {idx > 0 && <ChevronSep size={13} className="breadcrumb-separator" />}
+                {isLast || !crumb.path ? (
+                  <span
+                    className="breadcrumb-current"
+                    style={{ direction: isRtl ? 'rtl' : 'ltr', display: 'inline-block' }}
+                  >
+                    {crumb.label}
+                  </span>
+                ) : (
+                  <Link to={crumb.path} className="breadcrumb-link">
+                    {crumb.label}
+                  </Link>
+                )}
+              </React.Fragment>
+            );
+          })}
         </nav>
 
-        {/* ── 2. BACK BUTTON (Requirement 3) ── */}
+        {/* ── 2. DYNAMIC USER BACK BUTTON ── */}
         <div style={{ marginTop: '0.75rem', marginBottom: '1.25rem', direction: isRtl ? 'rtl' : 'ltr' }}>
           <button
             type="button"
             onClick={() => {
-              if (subject?.slug) {
-                navigate(`/subject/${subject.slug}`);
+              if (navContext.backButton?.path) {
+                navigate(navContext.backButton.path);
               } else {
                 navigate(-1);
               }
@@ -710,9 +714,7 @@ export const ProductDetails = () => {
           >
             <BackArrow size={16} />
             <span>
-              {lang === 'ar'
-                ? `العودة إلى ${subjectTitleAr}`
-                : `Back to ${subjectTitleEn}`}
+              {navContext.backButton?.label || (lang === 'ar' ? 'العودة' : 'Back')}
             </span>
           </button>
         </div>
@@ -1033,7 +1035,18 @@ export const ProductDetails = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
                     <button
                       type="button"
-                      onClick={() => navigate(`/product/${siblingProduct.id}`)}
+                      onClick={() => {
+    const parentFrom = searchParams.get('from') || navContext.originType;
+    const originInfo = {
+      from: parentFrom,
+      sub: searchParams.get('sub'),
+      yr: searchParams.get('yr'),
+      q: searchParams.get('q'),
+      returnPath: navContext.backButton?.path
+    };
+    recordProductOrigin(siblingProduct.id, originInfo);
+    navigate(buildProductUrl(siblingProduct.id, originInfo), { state: originInfo });
+  }}
                       className="btn btn-outline tabular-nums"
                       style={{
                         fontSize: '0.82rem',

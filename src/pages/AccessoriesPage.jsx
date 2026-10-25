@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
+import { buildProductUrl, recordProductOrigin } from '../utils/navigationTrail';
 
 import {
   Shirt,
@@ -45,6 +46,13 @@ export const AccessoriesPage = () => {
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const activeImage = product.images[activeImageIndex] || product.images[0];
+  
+  const handleOpenProduct = () => {
+    recordProductOrigin(product.id, { from: 'accessories', returnPath: '/accessories' });
+    navigate(buildProductUrl(product.id, { from: 'accessories' }), {
+      state: { from: '/accessories', fromCategory: 'accessories', returnPath: '/accessories' }
+    });
+  };
   
 
   const handleToggleFav = (e) => {
@@ -297,7 +305,7 @@ export const AccessoriesPage = () => {
 
               {/* Main Image */}
               <div
-                onClick={() => navigate(`/product/${product.id}`)}
+                onClick={handleOpenProduct}
                 style={{
                   width: '100%',
                   aspectRatio: '4/3.4',
@@ -378,7 +386,7 @@ export const AccessoriesPage = () => {
             >
               {/* Product Title */}
               <h2
-                onClick={() => navigate(`/product/${product.id}`)}
+                onClick={handleOpenProduct}
                 style={{
                   margin: 0,
                   fontFamily: "'Cairo', sans-serif",
@@ -423,7 +431,9 @@ export const AccessoriesPage = () => {
 
               {/* Action Button: عرض التفاصيل 🛒 */}
               <Link
-                to={`/product/${product.id}`}
+                to={buildProductUrl(product.id, { from: 'accessories' })}
+                state={{ from: '/accessories', fromCategory: 'accessories', returnPath: '/accessories' }}
+                onClick={() => recordProductOrigin(product.id, { from: 'accessories', returnPath: '/accessories' })}
                 style={{
                   marginTop: '0.75rem',
                   width: '100%',

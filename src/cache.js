@@ -4,7 +4,7 @@
  * instantly invalidates ALL old cached data from the previous branding.
  */
 
-const CACHE_PREFIX = 'ad12:';
+const CACHE_PREFIX = 'ad13:';
 const memCache = new Map();
 
 /**

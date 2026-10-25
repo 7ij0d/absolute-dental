@@ -765,7 +765,7 @@ export const SubjectPage = () => {
                   {/* Products Grid for this Group */}
                   <div className="subject-products-grid">
                     {group.items.map((product) => (
-                      <ProductCard key={product.id} product={product} />
+                      <ProductCard key={product.id} product={product} subjectContext={{ subjectSlug: subjectData?.slug || slug, yearSlug: yearData?.slug }} />
                     ))}
                   </div>
                 </section>
