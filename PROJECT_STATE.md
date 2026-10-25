@@ -7,68 +7,42 @@
 
 ## 1. نظرة عامة على المشروع والتقنيات (Project Overview & Tech Stack)
 - **المنصة:** متجر ومستودع الأدوات والمستلزمات الطبية الدراسية لطلبة طب وجراحة الفم والأسنان (**Absolute Dental Equipment**).
-- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + Vanilla Semantic CSS Design System (Reference Mockup Grade) + Bur Grouping & Popup Engine + Subject Categorization Engine + Boxes & Accessories Gateway Architecture.
+- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + Vanilla Semantic CSS Design System (Reference Mockup Grade) + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture.
 
 ---
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 1. حذف الشريط العلوي المتحرك نهائياً:
-- تم حذف شريط الإعلانات المتحرك (`AnnouncementBar`) بالكامل من الكود المصدري عبر كافة الصفحات (`src/App.jsx`).
-- أزيلت المساحة التي كان يشغلها ليبدأ الهيدر من أعلى الشاشة مباشرة بدون أي إزاحة رأسية غير ضرورية.
-
-### 🔹 2. إعادة تصميم الهيدر بالكامل بنمط كريمي أنيق (RTL):
-- **الخلفية والمظهر:** خلفية كريمية دافئة (`#FAF7F2`) وحدود سفلية ناعمة راقية (`#ECE4DA`).
-- **أقصى اليمين (RTL):** زر القائمة الجانبية (Hamburger) + شعار Absolute Dental الدائري الفاخر + اسم المتجر `Absolute Dental`.
-- **المنتصف:** شريط بحث بيضاوي كبسولي (Pill-shaped) بخلفية بيج هادئة (`#F0E9DF`)، أيقونة بحث دقيقة، ونص استرشادي واضح («ابحث عن أداة طبية...»).
-- **أقصى اليسار (RTL):**
-  - أيقونة سلة المشتريات مع شارة عداد بني داكن أنيق (`ad-cart-badge-count`) وتحتها تسمية نصية واضحة («سلة المشتريات»).
-  - أيقونة الحساب الشخصي وتحتها تسمية نصية واضحة («حسابي»).
-  - تفعيل كامل لكافة الروابط المنبثقة والسلال الجانبية ولوحة التسجيل.
-
-### 🔹 3. مسار التنقل وبانر القسم المرجعي (Section Banner):
-- إضافة مسار التنقل مباشرة أسفل الهيدر على اليمين: `الرئيسية › الإكسسوارات`.
-- بانر تعريفي عريض متناسق بألوان بيج دافئة متدرجة (`linear-gradient(135deg, #F3ECE2 0%, #EBE1D3 100%)`) وزوايا مستديرة (18px):
-  - أيقونة القسم ضمن مربع مستدير أنيق.
-  - عنوان رئيسي بارز («الإكسسوارات»).
-  - نص وصفي دقيق للمستلزمات المتوفرة.
-  - صورة فوتوغرافية حقيقية للمنتج على يسار البانر مستخرجة ومجهزة من التصميم المرجعي (`accessories-banner-art.png`).
-  - تفعيل نفس البانر التوافقي عبر صفحات المواد والسنوات الدراسية وصفحة البوكسات.
-
-### 🔹 4. عرض المنتجات وبطاقة المنتج المرجعية المطابقة للصورة (No Fake Products):
-- عرض المنتج الفعلي المتوفر فقط: **«لاب كوت أبيض FIGS محلي»** بسعر **45 د.ل**.
-- تموضع البطاقة على اليمين طبيعياً في شبكة الـ RTL بمقاس مثالي (`minmax(290px, 330px)`) دون تمديد غير مبرر ودون ملء وهمي.
-- تشريح البطاقة:
-  - زر القلب العائم للمفضلة على يسار أعلى البطاقة مع حفظ الحالة تلقائياً في المتصفح (`localStorage`).
-  - الصورة الرئيسية على خلفية حجرية فاتحة ناعمة.
-  - صف من 4 صور مصغرة تفاعلية (الياقة، الجيب بشعار FIGS الأحمر، ثنية الصدر، الصورة الكاملة) للتبديل الفوري بين الزوايا عند الضغط.
-  - عنوان المنتج، السعر (45 د.ل)، شارة التوفر الخضراء («✓ متوفر وجاهز للتوصيل»).
-  - زر الشراء الأنيق باللون البني الداكن المرجعي: «عرض التفاصيل 🛒».
-
-### 🔹 5. حذف شريط الفلاتر نهائياً:
-- إزالة الشريط الجانبي للفلاتر بالكامل، سلايدر الأسعار، وفلاتر التوفر في صفحات الأقسام والسنوات.
-- تخصيص المساحة الكاملة لعرض المنتجات بسلاسة ودون مساحات محجوزة فارغة.
-
-### 🔹 6. التجاوب الكامل وتحديث الكاش:
-- تجاوب تلقائي وسلس عبر شاشات الموبايل، الآيباد/التابلت، وأجهزة الكمبيوتر الكبيرة.
-- ترقية بادئة الكاش إلى `ad11:` لضمان التحديث التلقائي الفوري لدى جميع الزوار.
+### 🔹 1. إضافة مقاس 2XL لمنتج «لاب كوت أبيض FIGS محلي»:
+- **المقاسات المتوفرة:** أصبحت تشمل رسمياً: **M, L, XL, 2XL**.
+- **تحديث محرك المقاسات (`productInventoryEngine.js`):**
+  - إضافة تعريف المقاس:
+    - الكود: `2XL`
+    - التسمية بالعربية: `مقاس 2XL (كبير مضاعف)`
+    - التسمية بالإنجليزية: `Size 2XL (Double Large)`
+    - التسمية المختصرة: `2XL`
+    - السعر: 45 دينار
+    - المخزون: متوفر وجاهز للطلب
+  - تحديث نصوص التوجيه: «اختر المقاس المتوفر (M, L, XL, 2XL)».
+- **تحديث قاعدة البيانات والبيانات المحلية:**
+  - تحديث سجل المنتج في قاعدة البيانات الحية ليحتوي على `2XL` في كل من `description_ar`، `description_en`، `details_ar` وزيادة المخزون الكلي التقديري.
+  - تحديث `src/defaultProducts.json`.
+- **ربط السلة وتفاصيل المنتج:**
+  - يظهر زر مقاس `2XL` تفاعلياً وبشكل تلقائي في بطاقة المنتج السريعة وفي صفحة تفاصيل المنتج [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx).
+  - يُضاف المقاس المحدد بدقة إلى السلة مع الحفاظ على التسمية واختيار المقاس الإلزامي وملاحظة القياس.
+- **ترقية الكاش:** ترقية بادئة الكاش إلى `ad12:` لضمان ظهور مقاس `2XL` فوراً لجميع المستخدمين والزوار.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/App.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/App.jsx) | حذف `AnnouncementBar` بالكامل من الكود |
-| [`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx) | إعادة هيكلة الهيدر المرجعي الكريمي مع التسميات الرأسية وشريط البحث |
-| [`src/pages/AccessoriesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/AccessoriesPage.jsx) | إعادة بناء الصفحة بالكامل وفق التصميم المرجعي مع البطاقة التفاعلية والمصغرات |
-| [`src/pages/SubjectPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SubjectPage.jsx) | تطبيق بانر القسم المرجعي وإزالة الفلاتر الجانبية تماماً |
-| [`src/pages/BoxesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/BoxesPage.jsx) | تطبيق بانر القسم المرجعي وإزالة الشاشات القديمة |
-| [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) | إضافة ستايلات الهيدر المرجعي والبانر والبطاقة والتجاوب |
-| [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) | ترقية بادئة الكاش إلى `ad11:` |
-| `public/products/labcoat-figs-white-collar.jpg` | تجهيز المصغر الرابع للياقة |
-| `src/assets/images/accessories-banner-art.png` | صورة البانر المرجعي الشفافة |
+| [`src/utils/productInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/productInventoryEngine.js) | إضافة مقاس `2XL` وتسمياته ومؤشراته في مصفوفة المقاسات المعتمدة |
+| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | تحديث نصوص الوصف والتفاصيل للمنتج لتشمل مقاس 2XL |
+| [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) | ترقية بادئة الكاش إلى `ad12:` |
+| `قاعدة البيانات المباشرة` | تحديث الحقول الحية لمنتج اللاب كوت وإضافة 2XL |
 
 ---
 
 ## 3. الخطوة التالية المباشرة (Immediate Next Step)
-- متابعة طلبات المستخدم وتطبيق أي تعديلات إضافية على باقي الأقسام أو تفاصيل المنتجات.
+- متابعة أي تعديلات إضافية على المنتجات أو الأسعار أو خيارات المقاسات حسب طلب المستخدم.

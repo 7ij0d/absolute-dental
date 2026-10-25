@@ -390,8 +390,8 @@ export const CANONICAL_SIZED_PRODUCTS = {
     productId: '55000000-0000-0000-0000-000000000001',
     nameAr: 'لاب كوت ابيض FIGS محلي',
     nameEn: 'White FIGS Lab Coat (Local)',
-    optionsLabelAr: 'اختر المقاس المتوفر (M, L, XL)',
-    optionsLabelEn: 'Select Size (M, L, XL)',
+    optionsLabelAr: 'اختر المقاس المتوفر (M, L, XL, 2XL)',
+    optionsLabelEn: 'Select Size (M, L, XL, 2XL)',
     optionsPromptAr: '⚠️ يرجى تحديد مقاس اللاب كوت أولاً',
     optionsPromptEn: '⚠️ Please select a lab coat size first',
     buttonPromptAr: 'اختر المقاس وأضف للسلة',
@@ -431,6 +431,16 @@ export const CANONICAL_SIZED_PRODUCTS = {
         labelAr: 'مقاس XL (كبير جداً)',
         labelEn: 'Size XL',
         shortLabel: 'XL',
+        stock: 10,
+        price: 45.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/labcoat-figs-white-1.jpg'
+      },
+      {
+        size: '2XL',
+        code: '2XL',
+        labelAr: 'مقاس 2XL (كبير مضاعف)',
+        labelEn: 'Size 2XL',
+        shortLabel: '2XL',
         stock: 10,
         price: 45.00,
         image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/labcoat-figs-white-1.jpg'
