@@ -7,9 +7,11 @@ import ProductCard from '../components/ProductCard';
 import { cacheGet, cacheSet } from '../cache';
 import defaultProductsList from '../defaultProducts.json';
 import { groupProductsList } from '../utils/burGroupingEngine';
+import { getSubjectProductGroups } from '../utils/subjectGroupEngine';
 import {
   SlidersHorizontal, ChevronLeft, ChevronRight,
-  Package, Search, X, RotateCcw, Layers, Sparkles
+  Package, Search, X, RotateCcw, Layers, Sparkles,
+  Disc, Wrench, Flame, Droplets, ShieldCheck, Box
 } from 'lucide-react';
 
 const DEFAULT_YEARS = [
@@ -386,6 +388,25 @@ export const SubjectPage = () => {
     return groupProductsList(list);
   }, [products, inPageSearch, maxPrice, selectedStock, sortBy]);
 
+  const productGroups = useMemo(() => {
+    return getSubjectProductGroups(slug || lookupSlug, filteredList);
+  }, [slug, lookupSlug, filteredList]);
+
+  const renderGroupIcon = (iconName) => {
+    switch (iconName) {
+      case 'Disc': return <Disc size={18} strokeWidth={2.4} />;
+      case 'Wrench': return <Wrench size={18} strokeWidth={2.4} />;
+      case 'Search': return <Search size={18} strokeWidth={2.4} />;
+      case 'Sparkles': return <Sparkles size={18} strokeWidth={2.4} />;
+      case 'Flame': return <Flame size={18} strokeWidth={2.4} />;
+      case 'Droplets': return <Droplets size={18} strokeWidth={2.4} />;
+      case 'ShieldCheck': return <ShieldCheck size={18} strokeWidth={2.4} />;
+      case 'Layers': return <Layers size={18} strokeWidth={2.4} />;
+      case 'Package': return <Package size={18} strokeWidth={2.4} />;
+      default: return <Box size={18} strokeWidth={2.4} />;
+    }
+  };
+
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
 
   const filterOptions = [
@@ -613,7 +634,7 @@ export const SubjectPage = () => {
 
           {/* Direct Unified Product Grid Area */}
           <main className="subject-products-container">
-            {filteredList.length === 0 ? (
+            {filteredList.length === 0 || productGroups.length === 0 ? (
               <div className="subject-empty-state">
                 {products.length === 0 ? (
                   <>
@@ -649,9 +670,30 @@ export const SubjectPage = () => {
                 )}
               </div>
             ) : (
-              <div className="subject-products-grid">
-                {filteredList.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+              <div className="subject-grouped-stack">
+                {productGroups.map((group) => (
+                  <section key={group.id} className="subject-group-section">
+                    {/* Visual Semantic Header */}
+                    <div className="subject-group-header">
+                      <div className="subject-group-icon-badge">
+                        {renderGroupIcon(group.icon)}
+                      </div>
+                      <div className="subject-group-titles">
+                        <h2 className="subject-group-title-en">{group.titleEn}</h2>
+                        <span className="subject-group-title-ar">{group.titleAr}</span>
+                      </div>
+                      <span className="subject-group-pill">
+                        {group.items.length} {lang === 'ar' ? 'منتج' : 'items'}
+                      </span>
+                    </div>
+
+                    {/* Products Grid for this Group */}
+                    <div className="subject-products-grid">
+                      {group.items.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </section>
                 ))}
               </div>
             )}

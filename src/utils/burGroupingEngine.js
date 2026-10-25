@@ -5,40 +5,9 @@
 
 export const BUR_GROUPS = [
   {
-    groupId: 'bur-group-tc-needle',
-    name_en: 'TC Needle',
-    name_ar: 'بير إبرة TC Needle',
-    base_image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-tc-9.png',
-    base_price: 2,
-    productIds: [
-      '22000000-0000-0000-0000-000000000211', // TC 9
-      '627bdb62-3364-497b-8aa6-3b911ad78f26'  // TC 10
-    ],
-    options: [
-      {
-        productId: '22000000-0000-0000-0000-000000000211',
-        code: 'TC 9',
-        color: 'Blue',
-        colorHex: '#2563EB',
-        label_en: 'TC 9 – Blue',
-        label_ar: 'TC 9 – أزرق',
-        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-tc-9.png'
-      },
-      {
-        productId: '627bdb62-3364-497b-8aa6-3b911ad78f26',
-        code: 'TC 10',
-        color: 'Blue',
-        colorHex: '#2563EB',
-        label_en: 'TC 10 – Blue',
-        label_ar: 'TC 10 – أزرق',
-        image: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/627bdb62-3364-497b-8aa6-3b911ad78f26.jpg'
-      }
-    ]
-  },
-  {
     groupId: 'bur-group-tf-flat-end',
     name_en: 'Tapered Fissure with Flat End',
-    name_ar: 'Tapered Fissure with Flat End',
+    name_ar: 'Tapered Fissure with Flat End (TF)',
     base_image: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/c78f57a0-54d0-4602-aa05-d92a82398a2f.jpg',
     base_price: 2,
     productIds: [
@@ -67,9 +36,38 @@ export const BUR_GROUPS = [
     ]
   },
   {
+    groupId: 'bur-group-round-bur',
+    name_en: 'Round Bur',
+    name_ar: 'Round Bur (BR)',
+    base_image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-br-41.png',
+    base_price: 2,
+    productIds: [
+      '22000000-0000-0000-0000-000000000214', // BR 41
+      '4caab5ef-1c9c-411e-8b6e-76781a07fd97'  // BR 46
+    ],
+    options: [
+      {
+        productId: '22000000-0000-0000-0000-000000000214',
+        code: 'BR 41',
+        color: null,
+        label_en: 'BR 41',
+        label_ar: 'BR 41',
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-br-41.png'
+      },
+      {
+        productId: '4caab5ef-1c9c-411e-8b6e-76781a07fd97',
+        code: 'BR 46',
+        color: null,
+        label_en: 'BR 46',
+        label_ar: 'BR 46',
+        image: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/4caab5ef-1c9c-411e-8b6e-76781a07fd97.jpg'
+      }
+    ]
+  },
+  {
     groupId: 'bur-group-diamond-flame',
     name_en: 'Diamond Flame Bur',
-    name_ar: 'Diamond Flame Bur',
+    name_ar: 'Diamond Flame Bur (FO)',
     base_image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-fo-32-blue.png',
     base_price: 2,
     productIds: [
@@ -100,7 +98,7 @@ export const BUR_GROUPS = [
   {
     groupId: 'bur-group-fisher-bur',
     name_en: 'Fisher Bur',
-    name_ar: 'Fisher Bur',
+    name_ar: 'Fisher Bur (SF / CD)',
     base_image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-sf-41-blue.png',
     base_price: 2,
     productIds: [
@@ -139,31 +137,33 @@ export const BUR_GROUPS = [
     ]
   },
   {
-    groupId: 'bur-group-round-bur',
-    name_en: 'Round Bur',
-    name_ar: 'Round Bur',
-    base_image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-br-41.png',
+    groupId: 'bur-group-tc-needle',
+    name_en: 'TC Needle',
+    name_ar: 'بير إبرة TC Needle',
+    base_image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-tc-9.png',
     base_price: 2,
     productIds: [
-      '22000000-0000-0000-0000-000000000214', // BR 41
-      '4caab5ef-1c9c-411e-8b6e-76781a07fd97'  // BR 46
+      '22000000-0000-0000-0000-000000000211', // TC 9
+      '627bdb62-3364-497b-8aa6-3b911ad78f26'  // TC 10
     ],
     options: [
       {
-        productId: '22000000-0000-0000-0000-000000000214',
-        code: 'BR 41',
-        color: null,
-        label_en: 'BR 41',
-        label_ar: 'BR 41',
-        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-br-41.png'
+        productId: '22000000-0000-0000-0000-000000000211',
+        code: 'TC 9',
+        color: 'Blue',
+        colorHex: '#2563EB',
+        label_en: 'TC 9 – Blue',
+        label_ar: 'TC 9 – أزرق',
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-tc-9.png'
       },
       {
-        productId: '4caab5ef-1c9c-411e-8b6e-76781a07fd97',
-        code: 'BR 46',
-        color: null,
-        label_en: 'BR 46',
-        label_ar: 'BR 46',
-        image: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/4caab5ef-1c9c-411e-8b6e-76781a07fd97.jpg'
+        productId: '627bdb62-3364-497b-8aa6-3b911ad78f26',
+        code: 'TC 10',
+        color: 'Blue',
+        colorHex: '#2563EB',
+        label_en: 'TC 10 – Blue',
+        label_ar: 'TC 10 – أزرق',
+        image: 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/627bdb62-3364-497b-8aa6-3b911ad78f26.jpg'
       }
     ]
   },
