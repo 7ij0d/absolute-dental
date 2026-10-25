@@ -46,9 +46,12 @@ export const SignInPage = () => {
 
   const completeRedirect = () => {
     const savedReturn = sessionStorage.getItem('ad_auth_return_url');
-    const target = searchParams.get('redirect') || savedReturn || '/profile';
+    let target = searchParams.get('redirect') || savedReturn || '/profile';
     sessionStorage.removeItem('ad_auth_return_url');
-    navigate(target.startsWith('/') ? target : '/profile');
+    if (target.includes('/signin')) {
+      target = '/profile';
+    }
+    navigate(target.startsWith('/') ? target : '/profile', { replace: true });
   };
 
   // Redirect if already authenticated

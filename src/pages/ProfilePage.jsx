@@ -74,7 +74,13 @@ export const ProfilePage = () => {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      navigate('/signin?redirect=/profile');
+      const hasLocal = typeof window !== 'undefined' && (
+        localStorage.getItem('ad_cached_user') ||
+        localStorage.getItem('ad_auth_session')
+      );
+      if (!hasLocal) {
+        navigate('/signin?redirect=/profile');
+      }
       return;
     }
 

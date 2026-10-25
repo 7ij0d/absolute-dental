@@ -168,20 +168,45 @@ export const AuthProvider = ({ children }) => {
           await supabase.auth.signOut();
           setUser(null);
           setProfile(null);
-          localStorage.removeItem('mock_user_session');
+          try {
+            localStorage.removeItem('ad_cached_user');
+            localStorage.removeItem('ad_cached_profile');
+            localStorage.removeItem('ad_cached_session');
+            localStorage.removeItem('ad_auth_session');
+          } catch (_) {}
           alert('تم تعطيل حسابك من قبل الإدارة. / Your account has been disabled by the admin.');
           return null;
         } else {
           setProfile(data);
+          try {
+            localStorage.setItem('ad_cached_profile', JSON.stringify(data));
+          } catch (_) {}
           return data;
         }
       } else {
-        // No row in profiles yet (e.g. fresh Google login)
-        setProfile(null);
-        return null;
+        // Fallback: construct profile from user metadata if no profile row exists yet
+        const meta = currentUser?.user_metadata || {};
+        const fallbackProfile = {
+          id: userId,
+          email: currentUser?.email,
+          full_name: meta.full_name || meta.name || '',
+          phone: meta.phone || '',
+          phone_secondary: meta.phone_secondary || '',
+          university: meta.university || 'جامعة طرابلس',
+          college: meta.college || 'كلية طب الأسنان',
+          username: meta.username || '',
+          academic_year: meta.academic_year || '2nd-year',
+          status: 'active',
+          role: meta.role || 'student'
+        };
+        setProfile(fallbackProfile);
+        try {
+          localStorage.setItem('ad_cached_profile', JSON.stringify(fallbackProfile));
+        } catch (_) {}
+        return fallbackProfile;
       }
     } catch (err) {
-      console.error('Error fetching user profile', err);
+      console.warn('Notice fetching user profile:', err);
       return null;
     }
   };
@@ -198,6 +223,47 @@ export const AuthProvider = ({ children }) => {
         }
       });
       if (error) throw error;
+
+      if (data?.user) {
+        setUser(data.user);
+        try {
+          localStorage.setItem('ad_cached_user', JSON.stringify(data.user));
+          if (data.session) {
+            localStorage.setItem('ad_cached_session', JSON.stringify(data.session));
+            localStorage.setItem('ad_auth_session', JSON.stringify(data.session));
+          }
+        } catch (_) {}
+
+        // Automatically upsert student profile row into database
+        const profilePayload = {
+          id: data.user.id,
+          email: email,
+          full_name: metadata?.full_name || '',
+          phone: metadata?.phone || '',
+          phone_secondary: metadata?.phone_secondary || '',
+          university: metadata?.university || 'جامعة طرابلس',
+          college: metadata?.college || 'كلية طب الأسنان',
+          status: 'active',
+          role: 'student'
+        };
+
+        try {
+          const { data: createdProfile } = await supabase
+            .from('profiles')
+            .upsert(profilePayload)
+            .select()
+            .maybeSingle();
+          const finalProfile = createdProfile || profilePayload;
+          setProfile(finalProfile);
+          try {
+            localStorage.setItem('ad_cached_profile', JSON.stringify(finalProfile));
+          } catch (_) {}
+        } catch (profErr) {
+          console.warn('Profile upsert notice:', profErr);
+          setProfile(profilePayload);
+        }
+      }
+
       return { data, error: null };
     } catch (err) {
       return { data: null, error: err };
@@ -215,6 +281,27 @@ export const AuthProvider = ({ children }) => {
         password
       });
       if (error) throw error;
+
+      if (data?.user) {
+        setUser(data.user);
+        try {
+          localStorage.setItem('ad_cached_user', JSON.stringify(data.user));
+          if (data.session) {
+            localStorage.setItem('ad_cached_session', JSON.stringify(data.session));
+            localStorage.setItem('ad_auth_session', JSON.stringify(data.session));
+          }
+        } catch (_) {}
+
+        const p = await fetchUserProfile(data.user.id, data.user);
+        if (p) {
+          setProfile(p);
+          try {
+            localStorage.setItem('ad_cached_profile', JSON.stringify(p));
+          } catch (_) {}
+        }
+        checkProfileCompleteness(p, data.user);
+      }
+
       return { data, error: null };
     } catch (err) {
       return { data: null, error: err };
