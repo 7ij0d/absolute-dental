@@ -7,51 +7,58 @@
 
 ## 1. نظرة عامة على المشروع والتقنيات (Project Overview & Tech Stack)
 - **المنصة:** متجر ومستودع الأدوات والمستلزمات الطبية الدراسية لطلبة طب وجراحة الفم والأسنان (**Absolute Dental Equipment**).
-- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + Vanilla Semantic CSS Design System (v4.0) مع نظام حماية مرئية خفيف الوزن للصور (CSS Overlay + Canvas Engine).
+- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + Vanilla Semantic CSS Design System (v4.0) + Bur Grouping & Popup Engine.
 
 ---
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 إضافة نظام حماية مرئية خفيف وفوري لحقوق صور المنتجات (Watermark System):
-1. **شعار Absolute Dental كعلامة مائية شفافة عبر CSS Overlay:**
-   - تم استخدام شعار Absolute Dental الدائري المرفق كعلامة مائية فوق جميع صور المنتجات الحالية والجديدة بنسبة شفافية محسوبة (15% - تقع بدقة بين 12% و 18%).
-   - يتموضع الشعار في المنتصف بحجم متناسق لا يحجب تفاصيل الأدوات الطبية والأسنان.
-2. **علامة مائية ثانية باسم `Absolute Dental` على الصور الكبيرة:**
-   - تم دمج علامة مائية نصية خفيفة `Absolute Dental` في الزاوية السفلية عبر `::before` للصور الكبيرة وصفحة المنتج والنافذة المكبرة، مما يصعّب إزالة العلامة عن طريق قص أطراف الصورة (Anti-crop).
-3. **التطبيق التلقائي دون تعديل يدوي للصور:**
-   - يطبق النظام تلقائياً على كل بطاقة منتج (`.product-card-image`)، وصفحة تفاصيل المنتج الرئيسية (`.product-image-card`)، وأدوات الحافظات والإكسسوارات (`AccessoriesPage.jsx`).
-   - أي منتج جديد يضاف للمتجر يحصل فوراً على العلامة المائية تلقائياً بدون أي معالجة جماعية أو إعادة رفع.
-4. **نافذة التكبير (Lightbox Zoom Modal) وميزة الحفظ المائي:**
-   - إمكانية تكبير الصورة في صفحة المنتج بالنقر المباشر أو عبر زر «تكبير».
-   - توفير زر «حفظ الصورة» الذي يستخدم محرك Canvas لتضمين العلامة المائية والشعار ماديًا في الصورة قبل تنزيلها، بحيث لا يمكن حفظ نسخة نظيفة عبر الموقع.
-   - حماية السحب والزر الأيمن (`onContextMenu` و `draggable={false}` و `user-select: none`).
-5. **توافق كامل مع مختلف الشاشات:**
-   - تم ضبط القياسات عبر `clamp()` و Media Queries لتظهر العلامة بشكل متناسق ومريح على الهاتف والآيباد وسطح المكتب.
+### 🔹 تطوير نظام عرض بـارات الأسنان (Dental Burs Grouping & Popup System):
+1. **تنظيم البارات في 6 مجموعات موحدة في صفحات العرض والبحث:**
+   - **TC Needle:** خيارات `TC 9` و `TC 10` (أزرق).
+   - **Tapered Fissure with Flat End:** خيارات `TF 12 – Blue` و `TF 12 – Yellow`.
+   - **Diamond Flame Bur:** خيارات `FO 32 – Blue` (الصورة الجديدة) و `FO 32 – Yellow`.
+   - **Fisher Bur:** خيارات `SF 41 – Blue` (الصورة الجديدة)، `SF 46 – Blue`، و `CD 52 – Red`.
+   - **Round Bur:** خيارات `BR 41` (الصورة الجديدة) و `BR 46` مع اعتماد كود ورمز `BR`.
+   - **SI Bur:** خيار `SI 46 – Blue` مباشرة داخل النافذة.
+2. **بطاقة موحدة وزر «اختيار البير»:**
+   - تظهر بطاقة واحدة لكل مجموعة بورتريت أنيق وصورة أساسية بدون نصوص عشوائية، مع السعر الفعلي وزر «اختيار البير».
+3. **نافذة منبثقة تفاعلية (Bur Group Modal):**
+   - تعرض النافذة صورة المجموعة والخيارات المتوفرة مع صورها الصغيرة وألوانها وأسعارها الفعلية.
+   - إمكانية إضافة كل خيار إلى السلة بصورة مستقلة ومباشرة مع محدد كمية وسرعة استجابة، دون مغادرة النافذة.
+4. **حجب كمية المخزون بالكامل عن واجهة الزبون:**
+   - لا تظهر أي أرقام أو كميات قطع في بطاقة المنتج أو داخل النافذة المنبثقة أو في أي جزء من واجهة المتجر، مع بقاء المخزون متاحاً وخاضعاً للرقابة في لوحة الإدارة ونظام صرف الطلبات.
+5. **إضافة المنتجات والصور الجديدة وربطها بالمخزون:**
+   - إضافة سجلات المنتجات الجديدة في قاعدة البيانات (`TC 9`, `FO 32 – Blue`, `SF 41 – Blue`, `BR 41`).
+   - ربط الصور الجديدة ورفعها للتخزين السحابي وحفظها في `public/products/`.
+   - ربط المنتجات بمواد السنة الثانية في `product_subjects`.
+   - الحفاظ التام على بقية المنتجات والطلبات والفواتير السابقة دون أدنى مساس.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`public/watermark-logo.png`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/watermark-logo.png) | الشعار المعتمد للعلامة المائية بدقة عالية وخلفية شفافة |
-| [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) | قواعد CSS Overlay الشفافة (15%) للعلامة المائية والشعار والنص الثاني، وحماية السحب والتحديد |
-| [`src/utils/watermarkEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/watermarkEngine.js) | محرك دمج العلامات المائية في Canvas عند التنزيل |
-| [`src/components/ProductCard.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/ProductCard.jsx) | منع الزر الأيمن والسحب وتفعيل العلامة المائية التلقائية للبطاقات |
-| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | تفعيل العلامة المائية المزدوجة، إضافة نافذة التكبير Lightbox وزر الحفظ المائي المدمج |
-| [`src/pages/AccessoriesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/AccessoriesPage.jsx) | حماية صور الصناديق ونافذة تكبير الحافظات بالعلامة المائية المزدوجة |
+| [`src/utils/burGroupingEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/burGroupingEngine.js) | محرك تنظيم وتجميع المجموعات الست للبارات وربط الخيارات بالمنتجات الفعلية |
+| [`src/components/BurGroupModal.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/BurGroupModal.jsx) | النافذة المنبثقة لاختيار البير مع الإضافة المستقلة للسلة وحجب كمية المخزون |
+| [`src/components/ProductCard.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/ProductCard.jsx) | دعم بطاقات مجموعات البارات وزر «اختيار البير» وفتح النافذة |
+| [`src/pages/SubjectPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SubjectPage.jsx) | دمج المجموعات الست تلقائياً في صفحات المواد الدراسية |
+| [`src/pages/SearchPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SearchPage.jsx) | دمج المجموعات في صفحة البحث وتصفية المنتجات |
+| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | دمج مجموعات البارات في قسم المنتجات ذات الصلة |
+| [`src/defaultProducts.json`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/defaultProducts.json) | مزامنة البارات الجديدة وتحديث أسماء البارات الحالية |
+| `public/products/` & قاعدة البيانات السحابية | حفظ الصور الجديدة (`bur-br-41.png`, `bur-sf-41-blue.png`, `bur-fo-32-blue.png`) وإدراج المنتجات في جدول `products` و `product_subjects` |
 
 ---
 
 ## 3. ما تم إنجازه ويعمل بنجاح
-- [x] **تطبيق الشعار الدائري كعلامة مائية شفافة بنسبة 15% عبر CSS Overlay على جميع المنتجات** ✅
-- [x] **تطبيق العلامة المائية الثانية باسم `Absolute Dental` على الصور الكبيرة لمنع القص** ✅
-- [x] **عمل النظام تلقائياً لكافة المنتجات القديمة وأي منتج جديد يُضاف مستقبلاً** ✅
-- [x] **توفير نافذة تكبير عالية الدقة مع إمكانية حفظ الصورة مدمجة بالعلامة المائية عبر Canvas** ✅
-- [x] **منع السحب والنسخ المباشر من المتصفح (`user-select: none` و `draggable: false`)** ✅
-- [x] **بناء المشروع للإنتاج (`npm run build`) بنجاح تام وبدون أي أخطاء** ✅
+- [x] **تجميع بـارات الأسنان في 6 مجموعات موحدة ببطاقة واحدة لكل مجموعة** ✅
+- [x] **نافذة منبثقة تفاعلية لعرض المقاسات والألوان مع زر إضافة مستقل لكل خيار** ✅
+- [x] **إضافة المنتجات والصور الجديدة (BR 41, SF 41 Blue, FO 32 Blue, TC 9) وربطها بالمخزون** ✅
+- [x] **حجب كمية المخزون وأرقام القطع تماماً عن واجهة الزبائن** ✅
+- [x] **اعتماد رمز BR لمنتجات الـ Round Bur في الأسماء والأكواد** ✅
+- [x] **إتمام البناء الإنتاجي (`npm run build`) بنجاح تام وبدون أي أخطاء** ✅
 
 ---
 
 ## 4. الخطوة القادمة المطلوبة (Immediate Next Step)
-- اختبار تصفح بطاقات المنتجات وفتح صفحة تفاصيل المنتج بالنقر على الصورة للتأكد من المظهر الأنيق للعلامة المائية وسلاسة التكبير.
+- فتح صفحة مادة علاج الأسنان التحفظي 2 أو صناعة الأسنان الثابتة 2، والنقر على «اختيار البير» لتجربة إضافة خيارات متعددة إلى السلة والتأكد من انسيابية التجربة.

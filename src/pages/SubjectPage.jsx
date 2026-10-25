@@ -6,6 +6,7 @@ import supabase from '../supabaseClient';
 import ProductCard from '../components/ProductCard';
 import { cacheGet, cacheSet } from '../cache';
 import defaultProductsList from '../defaultProducts.json';
+import { groupProductsList } from '../utils/burGroupingEngine';
 import {
   SlidersHorizontal, ChevronLeft, ChevronRight,
   Package, Search, X, RotateCcw, Layers, Sparkles
@@ -382,7 +383,7 @@ export const SubjectPage = () => {
       list.sort((a, b) => Number(b.price) - Number(a.price));
     }
 
-    return list;
+    return groupProductsList(list);
   }, [products, inPageSearch, maxPrice, selectedStock, sortBy]);
 
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;

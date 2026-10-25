@@ -186,8 +186,8 @@
   },
   {
     "id": "8a2c351d-359c-4f5e-8c37-3d4ecb1eba19",
-    "name_ar": "Fissure Bur - SF 46",
-    "name_en": "Fissure Bur - SF 46",
+    "name_ar": "بير فيشر SF 46 - أزرق",
+    "name_en": "SF 46 – Blue",
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
@@ -228,8 +228,8 @@
   },
   {
     "id": "2ebc663e-0967-4d6a-b8be-b07b9e84659c",
-    "name_ar": "Inverted cone bur - SI 46",
-    "name_en": "Inverted cone bur - SI 46",
+    "name_ar": "بير SI 46 - أزرق",
+    "name_en": "SI 46 – Blue",
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
@@ -342,8 +342,8 @@
   },
   {
     "id": "e625888c-c1b0-4479-9117-76a1215a75f4",
-    "name_ar": "Fissure bur - CD 52F (red)",
-    "name_en": "Fissure bur - CD 52F (red)",
+    "name_ar": "بير فيشر CD 52 - أحمر",
+    "name_en": "CD 52 – Red",
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
@@ -421,8 +421,8 @@
   },
   {
     "id": "4caab5ef-1c9c-411e-8b6e-76781a07fd97",
-    "name_ar": "Round Bur – BR 46",
-    "name_en": "Round Bur – BR 46",
+    "name_ar": "بير كروي BR 46 (Round Bur)",
+    "name_en": "BR 46",
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
@@ -433,8 +433,8 @@
   },
   {
     "id": "187f6429-fee1-4f50-8edc-2a18bac1de35",
-    "name_ar": "diamond flame bur - FO 32 (yellow)",
-    "name_en": "diamond flame bur - FO 32 (yellow)",
+    "name_ar": "بير FO 32 - أصفر",
+    "name_en": "FO 32 – Yellow",
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
@@ -445,8 +445,8 @@
   },
   {
     "id": "36e0d204-3613-44b0-b74e-0ba7869420c4",
-    "name_ar": "Long taper with flat end - TF12 (yellow)",
-    "name_en": "Long taper with flat end - TF12 (yellow)",
+    "name_ar": "بير TF 12 - أصفر",
+    "name_en": "TF 12 – Yellow",
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
@@ -457,8 +457,8 @@
   },
   {
     "id": "c78f57a0-54d0-4602-aa05-d92a82398a2f",
-    "name_ar": "Long taper with flat end - TF12 (blue)",
-    "name_en": "Long taper with flat end - TF12 (blue)",
+    "name_ar": "بير TF 12 - أزرق",
+    "name_en": "TF 12 – Blue",
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
@@ -469,8 +469,8 @@
   },
   {
     "id": "627bdb62-3364-497b-8aa6-3b911ad78f26",
-    "name_ar": "niddle bur - TC 10 (Blue)",
-    "name_en": "niddle bur - TC 10 (Blue)",
+    "name_ar": "بير إبرة TC 10 (TC Needle)",
+    "name_en": "TC 10",
     "price": 2,
     "compare_at_price": null,
     "availability": "available",
@@ -977,5 +977,57 @@
       "33000000-0000-0000-0000-000000000033",
       "33000000-0000-0000-0000-000000000034"
     ]
+  },
+  {
+    "id": "22000000-0000-0000-0000-000000000211",
+    "subject_id": "22000000-0000-0000-0000-000000000023",
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "name_en": "TC 9",
+    "name_ar": "بير إبرة TC 9 (TC Needle)",
+    "price": 2,
+    "stock_quantity": 10,
+    "availability": "available",
+    "image_url": null,
+    "description_en": "TC 9 Needle Bur for dental cavity and margin preparation.",
+    "description_ar": "بير إبرة TC 9 لتحضير وتنعيم الحواف والتجاويف السنية."
+  },
+  {
+    "id": "22000000-0000-0000-0000-000000000212",
+    "subject_id": "22000000-0000-0000-0000-000000000023",
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "name_en": "FO 32 – Blue",
+    "name_ar": "بير لهب FO 32 - أزرق (Diamond Flame Bur)",
+    "price": 2,
+    "stock_quantity": 15,
+    "availability": "available",
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-fo-32-blue.png",
+    "description_en": "FO 32 Blue Diamond Flame Bur for crown preparation and beveling.",
+    "description_ar": "بير ماسي شعلة FO 32 أزرق لتحضير التيجان والجسور."
+  },
+  {
+    "id": "22000000-0000-0000-0000-000000000213",
+    "subject_id": "22000000-0000-0000-0000-000000000021",
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "name_en": "SF 41 – Blue",
+    "name_ar": "بير فيشر SF 41 - أزرق (Fisher Bur)",
+    "price": 2,
+    "stock_quantity": 15,
+    "availability": "available",
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-sf-41-blue.png",
+    "description_en": "SF 41 Blue Straight Flat Fissure Bur for cavity preparation.",
+    "description_ar": "بير فيشر مستقيم مسطح SF 41 أزرق لحفر التجاويف السنية."
+  },
+  {
+    "id": "22000000-0000-0000-0000-000000000214",
+    "subject_id": "22000000-0000-0000-0000-000000000021",
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "name_en": "BR 41",
+    "name_ar": "بير كروي BR 41 (Round Bur)",
+    "price": 2,
+    "stock_quantity": 15,
+    "availability": "available",
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-br-41.png",
+    "description_en": "BR 41 Round Bur for caries removal and initial cavity access.",
+    "description_ar": "بير كروي مدور BR 41 لإزالة التسوس وفتح التجاويف."
   }
 ]

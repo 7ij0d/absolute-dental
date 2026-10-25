@@ -5,7 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useStorageImage } from '../utils/storageImage';
 import { isBundleProduct, getBundleDefinition, getProductSizedConfig, getStudentGuideInfo } from '../utils/productInventoryEngine';
-import { ShoppingCart, Check, Heart, Sparkles, BookOpen, AlertCircle } from 'lucide-react';
+import { ShoppingCart, Check, Heart, Sparkles, BookOpen, AlertCircle, Layers } from 'lucide-react';
+import { BurGroupModal } from './BurGroupModal';
 
 export const ProductCard = ({ product }) => {
   const { lang, t, isRtl } = useLanguage();
@@ -120,8 +121,98 @@ export const ProductCard = ({ product }) => {
     ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
     : 0;
 
-  // Strict requirement: English name ONLY inside the card
-  const displayName = product.name_en || product.name_ar || 'Dental Tool';
+  const [showBurModal, setShowBurModal] = useState(false);
+  const isBurGroup = Boolean(product?.isBurGroup);
+
+  if (isBurGroup) {
+    return (
+      <>
+        <div
+          onClick={() => setShowBurModal(true)}
+          className="product-card bur-group-card"
+          style={{ cursor: 'pointer' }}
+        >
+          {/* ── IMAGE AREA ── */}
+          <div className="product-card-image" onContextMenu={e => e.preventDefault()}>
+            <img
+              src={resolvedImageSrc || product.image_url}
+              alt={displayName}
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+              onContextMenu={e => e.preventDefault()}
+              onError={e => { e.target.src = 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format'; }}
+            />
+
+            {/* Group Options Count Badge */}
+            <div className="product-card-badge">
+              <span
+                className="badge"
+                style={{
+                  background: 'linear-gradient(135deg, #684835, #4A3325)',
+                  color: '#fff',
+                  boxShadow: '0 2px 6px rgba(104,72,53,0.3)',
+                  gap: '0.25rem'
+                }}
+              >
+                <Layers size={11} />
+                <span>{lang === 'ar' ? `${product.resolvedOptions?.length || 2} خيارات` : `${product.resolvedOptions?.length || 2} Options`}</span>
+              </span>
+            </div>
+          </div>
+
+          {/* ── BODY AREA: Name + Price + Select Bur Button ── */}
+          <div className="product-card-body">
+            <h3
+              className="product-card-name"
+              style={{
+                direction: 'ltr',
+                textAlign: isRtl ? 'right' : 'left',
+              }}
+            >
+              {displayName}
+            </h3>
+
+            {/* Price Row */}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45rem', marginTop: 'auto', marginBottom: '0.75rem' }}>
+              <span className="product-card-price tabular-nums">
+                {product.price}{' '}
+                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                  {t('cart.currency') || 'د.ل'}
+                </span>
+              </span>
+            </div>
+
+            {/* Select Bur CTA Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowBurModal(true);
+              }}
+              className="product-card-cta-btn"
+              style={{
+                background: 'linear-gradient(135deg, var(--secondary, #684835), #4A3325)',
+                color: '#FFFFFF',
+                boxShadow: '0 3px 10px rgba(104, 72, 53, 0.28)'
+              }}
+            >
+              <Layers size={15} strokeWidth={2.2} />
+              <span>{lang === 'ar' ? 'اختيار البير' : 'Select Bur'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Bur Options Modal */}
+        <BurGroupModal
+          isOpen={showBurModal}
+          onClose={() => setShowBurModal(false)}
+          groupItem={product}
+        />
+      </>
+    );
+  }
 
   return (
     <div

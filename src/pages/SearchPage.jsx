@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import supabase from '../supabaseClient';
 import { cacheGet, cacheSet } from '../cache';
 import ProductCard from '../components/ProductCard';
+import { groupProductsList } from '../utils/burGroupingEngine';
 import {
   Search, Sparkles, Layers, Package, ChevronLeft, ChevronRight,
   X, SlidersHorizontal, RotateCcw
@@ -159,7 +160,7 @@ export const SearchPage = ({ categoryMode = null }) => {
       list.sort((a, b) => Number(b.price) - Number(a.price));
     }
 
-    return list;
+    return groupProductsList(list);
   }, [results, inPageSearch, maxPrice, selectedStock, sortBy]);
 
   const filterOptions = [

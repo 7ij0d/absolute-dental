@@ -7,6 +7,7 @@ import supabase from '../supabaseClient';
 import ProductCard from '../components/ProductCard';
 import { useStorageImage } from '../utils/storageImage';
 import defaultProductsList from '../defaultProducts.json';
+import { groupProductsList } from '../utils/burGroupingEngine';
 import {
   isBundleProduct,
   getBundleDefinition,
@@ -1516,7 +1517,7 @@ export const ProductDetails = () => {
               </p>
             </div>
             <div className="product-related-grid">
-              {relatedProducts.map(relProd => (
+              {groupProductsList(relatedProducts).map(relProd => (
                 <ProductCard key={relProd.id} product={relProd} />
               ))}
             </div>
