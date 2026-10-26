@@ -3,6 +3,8 @@
  * Organizes similar dental burs into 6 unified display groups with options popups.
  */
 
+import defaultProductsList from '../defaultProducts.json';
+
 export const BUR_GROUPS = [
   {
     groupId: 'bur-group-tf-flat-end',
@@ -216,9 +218,14 @@ export function getBurGroup(productId) {
  * Resolves a product record by ID from a loaded products array or default fallback
  */
 export function resolveBurProduct(productId, pool = []) {
-  const foundInPool = pool.find(p => p.id === productId);
-  if (foundInPool) return foundInPool;
-  return defaultProductsList.find(p => p.id === productId) || null;
+  if (Array.isArray(pool)) {
+    const foundInPool = pool.find(p => p && p.id === productId);
+    if (foundInPool) return foundInPool;
+  }
+  if (Array.isArray(defaultProductsList)) {
+    return defaultProductsList.find(p => p && p.id === productId) || null;
+  }
+  return null;
 }
 
 /**

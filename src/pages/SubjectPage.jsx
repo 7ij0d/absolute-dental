@@ -165,7 +165,7 @@ export const SubjectPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const CACHE_KEY = `subject_v32:${slug}`;
+    const CACHE_KEY = `subject_v33:${slug}`;
 
     const applyData = ({ subject, year, prods }) => {
       setSubjectData(subject);
@@ -404,12 +404,29 @@ export const SubjectPage = () => {
       list.sort((a, b) => Number(b.price) - Number(a.price));
     }
 
-    return groupProductsList(list);
+    try {
+      return groupProductsList(list);
+    } catch (e) {
+      console.warn('Error in groupProductsList:', e);
+      return list;
+    }
   }, [products, inPageSearch, maxPrice, selectedStock, sortBy]);
 
   const productGroups = useMemo(() => {
-    return getSubjectProductGroups(slug || lookupSlug, filteredList);
-  }, [slug, lookupSlug, filteredList]);
+    try {
+      return getSubjectProductGroups(slug || lookupSlug, filteredList);
+    } catch (e) {
+      console.warn('Error in getSubjectProductGroups:', e);
+      return [{
+        id: 'all_tools',
+        key: 'all_tools',
+        titleEn: subjectData?.name_en || 'Tools and Supplies',
+        titleAr: subjectData?.name_ar || 'الأدوات والمستلزمات',
+        icon: 'Package',
+        items: filteredList
+      }];
+    }
+  }, [slug, lookupSlug, filteredList, subjectData]);
 
   const renderGroupIcon = (iconName) => {
     switch (iconName) {
