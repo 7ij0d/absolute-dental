@@ -258,6 +258,11 @@ export const Navbar = () => {
               </Link>
             ))}
 
+            <Link to="/boxes" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+              <Box size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
+              <span>{lang === 'ar' ? 'البوكسات' : 'Dental Boxes'}</span>
+            </Link>
+
             <Link to="/accessories" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
               <Box size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
               <span>{lang === 'ar' ? 'إكسسوارات الأسنان' : 'Dental Accessories'}</span>

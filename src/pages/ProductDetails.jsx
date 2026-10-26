@@ -22,7 +22,9 @@ import BoxColorVariantSelector from '../components/BoxColorVariantSelector';
 import {
   isBoxProduct,
   splitBoxColorsByAvailability,
-  cleanColorLabel
+  cleanColorLabel,
+  FALLBACK_BOXES,
+  getBoxProductById
 } from '../utils/boxInventoryEngine';
 import {
   ShoppingCart, Heart, Check, Plus, Minus,
@@ -324,6 +326,20 @@ export const ProductDetails = () => {
             }
           } catch (accErr) {
             console.warn('Accessory product check notice:', accErr);
+          }
+
+          // Fallback to static boxes dictionary if not in DB
+          if (!fetchedProd) {
+            const fallbackBox = getBoxProductById(id);
+            if (fallbackBox) {
+              isBox = true;
+              fetchedProd = {
+                ...fallbackBox,
+                is_box: true,
+                image_url: fallbackBox.main_image
+              };
+              fetchedImages = [fallbackBox.main_image, fallbackBox.inside_image].filter(Boolean);
+            }
           }
         }
 

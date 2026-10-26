@@ -363,3 +363,106 @@ export async function resetAllBoxStockToZero() {
 
   return updatedVariants;
 }
+
+const BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || '/';
+
+export const FALLBACK_BOXES = [
+  {
+    id: 'box-14',
+    size: '14 inch',
+    name_ar: '14" Dental Tool Box',
+    name_en: '14" Dental Tool Box',
+    price: 45,
+    stock_quantity: 1,
+    desc_ar: 'Compact Arradent dental toolbox with a colored lid, top organizer compartments, and durable carry handle.',
+    desc_en: 'Compact Arradent dental toolbox with a colored lid, top organizer compartments, and durable carry handle.',
+    features_ar: ['Top organizer compartments', 'Single front latch', 'Compact portable size', 'Comfortable carry handle'],
+    features_en: ['Top organizer compartments', 'Single front latch', 'Compact portable size', 'Comfortable carry handle'],
+    main_image: `${BASE}accessories/box14-pink.jpg`,
+    inside_image: `${BASE}accessories/box14-pink.jpg`,
+    colors: [
+      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 1, physical_stock: 1, reserved_stock: 0, image_url: `${BASE}accessories/box14-pink.jpg` }
+    ]
+  },
+  {
+    id: 'box-16',
+    size: '16 inch',
+    name_ar: '16" Dental Tool Box',
+    name_en: '16" Dental Tool Box',
+    price: 65,
+    stock_quantity: 12,
+    desc_ar: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
+    desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
+    features_ar: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
+    features_en: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
+    main_image: `${BASE}accessories/box16-purple.jpg`,
+    inside_image: `${BASE}accessories/box16-inside-blue.jpg`,
+    colors: [
+      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', available_stock: 6, physical_stock: 6, reserved_stock: 0, image_url: `${BASE}accessories/box16-purple.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
+      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 6, physical_stock: 6, reserved_stock: 0, image_url: `${BASE}accessories/box16-pink.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
+      { id: 'maroon', hex_code: '#800020', label_ar: 'خمري / عنابي', label_en: 'Maroon', status: 'in_stock', available_stock: 1, physical_stock: 1, reserved_stock: 0, image_url: `${BASE}accessories/box16-maroon.jpg`, inside_image_url: `${BASE}accessories/box16-inside-maroon.jpg`, base_image_url: `${BASE}accessories/box16-base-maroon.jpg` },
+      { id: 'blue', hex_code: '#1565C0', label_ar: 'أزرق [out_of_stock]', label_en: 'Blue [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-blue.jpg`, inside_image_url: `${BASE}accessories/box16-inside-blue.jpg`, base_image_url: `${BASE}accessories/box16-base-blue.jpg` },
+      { id: 'red', hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]', label_en: 'Red [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-red.jpg`, inside_image_url: `${BASE}accessories/box16-inside-red.jpg`, base_image_url: `${BASE}accessories/box16-base-red.jpg` },
+      { id: 'yellow', hex_code: '#F5C518', label_ar: 'أصفر [out_of_stock]', label_en: 'Yellow [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-yellow.jpg`, inside_image_url: `${BASE}accessories/box16-inside-yellow.jpg`, base_image_url: `${BASE}accessories/box16-base-yellow.jpg` },
+    ]
+  },
+  {
+    id: 'box-16-5',
+    size: '16.5 inch',
+    name_ar: '16.5" Organizer Box',
+    name_en: '16.5" Organizer Box',
+    price: 85,
+    stock_quantity: 4,
+    desc_ar: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
+    desc_en: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
+    features_ar: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
+    features_en: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
+    main_image: `${BASE}accessories/box16_5-real.jpg`,
+    inside_image: `${BASE}accessories/box16_5-inside.png`,
+    colors: [
+      { id: 'black', hex_code: '#1F2937', label_ar: 'أسود', label_en: 'Black', status: 'in_stock', available_stock: 4, physical_stock: 4, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-black.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside.png` },
+      { id: 'red', hex_code: '#D32F2F', label_ar: 'أحمر [out_of_stock]', label_en: 'Red [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-red.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-red.jpg` },
+      { id: 'blue', hex_code: '#2196F3', label_ar: 'أزرق فاتح [out_of_stock]', label_en: 'Light Blue [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-blue.png`, inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
+      { id: 'navy', hex_code: '#0D47A1', label_ar: 'أزرق داكن [out_of_stock]', label_en: 'Dark Navy Blue [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-blue.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
+      { id: 'purple', hex_code: '#6A3093', label_ar: 'بنفسجي [out_of_stock]', label_en: 'Purple [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-purple.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-purple.jpg` },
+      { id: 'teal', hex_code: '#00ACC1', label_ar: 'تركوازي [out_of_stock]', label_en: 'Teal [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-teal.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-teal.jpg` },
+      { id: 'green', hex_code: '#7CB342', label_ar: 'أخضر [out_of_stock]', label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-green.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-green.jpg` },
+      { id: 'orange', hex_code: '#F57C00', label_ar: 'برتقالي [out_of_stock]', label_en: 'Orange [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-orange.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-orange.jpg` },
+    ]
+  },
+  {
+    id: 'box-17',
+    size: '17.5 inch',
+    name_ar: '17.5" Professional Box — GT-MAX',
+    name_en: '17.5" Professional Box — GT-MAX',
+    price: 95,
+    stock_quantity: 10,
+    desc_ar: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
+    desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
+    features_ar: ['Clear lid organizer', 'Wide main storage space', 'Two side + front latches', 'Strong & Durable plastic'],
+    features_en: ['Clear lid organizer', 'Wide main storage space', 'Two side + front latches', 'Strong & Durable plastic'],
+    main_image: `${BASE}accessories/box17_5-dark-blue.jpg`,
+    inside_image: `${BASE}accessories/box17-inside-black.jpg`,
+    colors: [
+      { id: 'blue', hex_code: '#0D47A1', label_ar: 'أزرق داكن', label_en: 'Dark Blue', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: `${BASE}accessories/box17_5-dark-blue.jpg`, inside_image_url: `${BASE}accessories/box17-inside-blue.jpg` },
+      { id: 'black', hex_code: '#111111', label_ar: 'أسود [out_of_stock]', label_en: 'Black [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-black.jpg`, inside_image_url: `${BASE}accessories/box17-inside-black.jpg` },
+      { id: 'purple', hex_code: '#A880C8', label_ar: 'بنفسجي [out_of_stock]', label_en: 'Purple [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-purple.jpg`, inside_image_url: `${BASE}accessories/box17-inside-purple.jpg` },
+      { id: 'red', hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]', label_en: 'Red [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-red.jpg`, inside_image_url: `${BASE}accessories/box17-inside-red.jpg` },
+      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي [out_of_stock]', label_en: 'Pink [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-pink.jpg`, inside_image_url: `${BASE}accessories/box17-inside-pink.jpg` },
+      { id: 'beige', hex_code: '#C8A882', label_ar: 'بيج [out_of_stock]', label_en: 'Beige [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-beige.jpg`, inside_image_url: `${BASE}accessories/box17-inside-beige.jpg` },
+      { id: 'teal', hex_code: '#00897B', label_ar: 'تركوازي [out_of_stock]', label_en: 'Teal [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-colors.png` },
+      { id: 'lime', hex_code: '#7CB342', label_ar: 'أخضر فسفوري [out_of_stock]', label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-colors.png` },
+    ]
+  }
+];
+
+export function getBoxProductById(id) {
+  if (!id) return null;
+  const strId = String(id).toLowerCase().trim();
+  return FALLBACK_BOXES.find(b =>
+    String(b.id).toLowerCase() === strId ||
+    (b.size && b.size.toLowerCase() === strId) ||
+    (b.name_en && b.name_en.toLowerCase().includes(strId)) ||
+    (b.name_ar && b.name_ar.includes(strId))
+  ) || null;
+}

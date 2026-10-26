@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { recordProductOrigin } from '../utils/navigationTrail';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import supabase from '../supabaseClient';
@@ -20,106 +21,25 @@ import dentalBoxesFaded from '../assets/images/dental-boxes-faded.png';
 import {
   splitBoxColorsByAvailability,
   cleanColorLabel,
-  fetchCanonicalBoxInventory
+  fetchCanonicalBoxInventory,
+  FALLBACK_BOXES,
+  getBoxProductById
 } from '../utils/boxInventoryEngine';
 
 const BASE = import.meta.env.BASE_URL || '/';
-
-/* ─── HARDCODED FALLBACKS (Used if DB returns 0 rows) ─── */
-const FALLBACK_BOXES = [
-  {
-    id: 'box-14',
-    size: '14 inch',
-    name_ar: '14" Dental Tool Box',
-    name_en: '14" Dental Tool Box',
-    price: 45,
-    stock_quantity: 1,
-    desc_ar: 'Compact Arradent dental toolbox with a colored lid, top organizer compartments, and durable carry handle.',
-    desc_en: 'Compact Arradent dental toolbox with a colored lid, top organizer compartments, and durable carry handle.',
-    features_ar: ['Top organizer compartments', 'Single front latch', 'Compact portable size', 'Comfortable carry handle'],
-    features_en: ['Top organizer compartments', 'Single front latch', 'Compact portable size', 'Comfortable carry handle'],
-    main_image: `${BASE}accessories/box14-pink.jpg`,
-    inside_image: `${BASE}accessories/box14-pink.jpg`,
-    colors: [
-      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 1, physical_stock: 1, reserved_stock: 0, image_url: `${BASE}accessories/box14-pink.jpg` }
-    ]
-  },
-  {
-    id: 'box-16',
-    size: '16 inch',
-    name_ar: '16" Dental Tool Box',
-    name_en: '16" Dental Tool Box',
-    price: 65,
-    stock_quantity: 0,
-    desc_ar: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
-    desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
-    features_ar: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
-    features_en: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
-    main_image: `${BASE}accessories/box16-purple.jpg`,
-    inside_image: `${BASE}accessories/box16-inside-blue.jpg`,
-    colors: [
-      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', available_stock: 6, physical_stock: 6, reserved_stock: 0, image_url: `${BASE}accessories/box16-purple.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
-      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 6, physical_stock: 6, reserved_stock: 0, image_url: `${BASE}accessories/box16-pink.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
-      { id: 'blue', hex_code: '#1565C0', label_ar: 'أزرق [out_of_stock]', label_en: 'Blue [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-blue.jpg`, inside_image_url: `${BASE}accessories/box16-inside-blue.jpg`, base_image_url: `${BASE}accessories/box16-base-blue.jpg` },
-      { id: 'red', hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]', label_en: 'Red [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-red.jpg`, inside_image_url: `${BASE}accessories/box16-inside-red.jpg`, base_image_url: `${BASE}accessories/box16-base-red.jpg` },
-      { id: 'yellow', hex_code: '#F5C518', label_ar: 'أصفر [out_of_stock]', label_en: 'Yellow [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-yellow.jpg`, inside_image_url: `${BASE}accessories/box16-inside-yellow.jpg`, base_image_url: `${BASE}accessories/box16-base-yellow.jpg` },
-      { id: 'maroon', hex_code: '#800020', label_ar: 'خمري / عنابي', label_en: 'Maroon', status: 'in_stock', available_stock: 1, physical_stock: 1, reserved_stock: 0, image_url: `${BASE}accessories/box16-maroon.jpg`, inside_image_url: `${BASE}accessories/box16-inside-maroon.jpg`, base_image_url: `${BASE}accessories/box16-base-maroon.jpg` },
-    ]
-  },
-  {
-    id: 'box-16-5',
-    size: '16.5 inch',
-    name_ar: '16.5" Organizer Box',
-    name_en: '16.5" Organizer Box',
-    price: 85,
-    stock_quantity: 4,
-    desc_ar: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
-    desc_en: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
-    features_ar: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
-    features_en: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
-    main_image: `${BASE}accessories/box16_5-real.jpg`,
-    inside_image: `${BASE}accessories/box16_5-inside.png`,
-    colors: [
-      { id: 'black', hex_code: '#1F2937', label_ar: 'أسود', label_en: 'Black', status: 'in_stock', available_stock: 4, physical_stock: 4, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-black.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside.png` },
-      { id: 'red', hex_code: '#D32F2F', label_ar: 'أحمر [out_of_stock]', label_en: 'Red [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-red.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-red.jpg` },
-      { id: 'blue', hex_code: '#2196F3', label_ar: 'أزرق فاتح [out_of_stock]', label_en: 'Light Blue [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-blue.png`, inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
-      { id: 'navy', hex_code: '#0D47A1', label_ar: 'أزرق داكن [out_of_stock]', label_en: 'Dark Navy Blue [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-blue.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
-      { id: 'purple', hex_code: '#6A3093', label_ar: 'بنفسجي [out_of_stock]', label_en: 'Purple [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-purple.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-purple.jpg` },
-      { id: 'teal', hex_code: '#00ACC1', label_ar: 'تركوازي [out_of_stock]', label_en: 'Teal [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-teal.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-teal.jpg` },
-      { id: 'green', hex_code: '#7CB342', label_ar: 'أخضر [out_of_stock]', label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-green.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-green.jpg` },
-      { id: 'orange', hex_code: '#F57C00', label_ar: 'برتقالي [out_of_stock]', label_en: 'Orange [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-orange.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-orange.jpg` },
-    ]
-  },
-  {
-    id: 'box-17',
-    size: '17.5 inch',
-    name_ar: '17.5" Professional Box — GT-MAX',
-    name_en: '17.5" Professional Box — GT-MAX',
-    price: 95,
-    stock_quantity: 10,
-    desc_ar: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
-    desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
-    features_ar: ['Clear lid organizer', 'Wide main storage space', 'Two side + front latches', 'Strong & Durable plastic'],
-    features_en: ['Clear lid organizer', 'Wide main storage space', 'Two side + front latches', 'Strong & Durable plastic'],
-    main_image: `${BASE}accessories/box17_5-dark-blue.jpg`,
-    inside_image: `${BASE}accessories/box17-inside-black.jpg`,
-    colors: [
-      { id: 'blue', hex_code: '#0D47A1', label_ar: 'أزرق داكن', label_en: 'Dark Blue', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: `${BASE}accessories/box17_5-dark-blue.jpg`, inside_image_url: `${BASE}accessories/box17-inside-blue.jpg` },
-      { id: 'black', hex_code: '#111111', label_ar: 'أسود [out_of_stock]', label_en: 'Black [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-black.jpg`, inside_image_url: `${BASE}accessories/box17-inside-black.jpg` },
-      { id: 'purple', hex_code: '#A880C8', label_ar: 'بنفسجي [out_of_stock]', label_en: 'Purple [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-purple.jpg`, inside_image_url: `${BASE}accessories/box17-inside-purple.jpg` },
-      { id: 'red', hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]', label_en: 'Red [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-red.jpg`, inside_image_url: `${BASE}accessories/box17-inside-red.jpg` },
-      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي [out_of_stock]', label_en: 'Pink [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-pink.jpg`, inside_image_url: `${BASE}accessories/box17-inside-pink.jpg` },
-      { id: 'beige', hex_code: '#C8A882', label_ar: 'بيج [out_of_stock]', label_en: 'Beige [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-beige.jpg`, inside_image_url: `${BASE}accessories/box17-inside-beige.jpg` },
-      { id: 'teal', hex_code: '#00897B', label_ar: 'تركوازي [out_of_stock]', label_en: 'Teal [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-colors.png` },
-      { id: 'lime', hex_code: '#7CB342', label_ar: 'أخضر فسفوري [out_of_stock]', label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-colors.png` },
-    ]
-  }
-];
 
 /* ─── SINGLE DENTAL BOX PRODUCT CARD ────────────────────── */
 const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} }) => {
   const { addToCart } = useCart();
   const { lang, isRtl } = useLanguage();
+  const navigate = useNavigate();
+
+  const handleOpenDetails = () => {
+    recordProductOrigin(box.id, { from: 'boxes', returnPath: '/boxes' });
+    navigate(`/product/${box.id}?from=boxes`, {
+      state: { from: '/boxes', returnPath: '/boxes' }
+    });
+  };
 
   const { availableColors, unavailableColors } = splitBoxColorsByAvailability(
     box.colors && box.colors.length > 0
@@ -228,7 +148,8 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
       <div
         className="ad-watermarked-container product-card-image"
         style={{ position: 'relative', background: 'var(--accent)', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer' }}
-        onClick={() => onZoomImage(activeImage, box.name_en || box.size)}
+        onClick={handleOpenDetails}
+        title={lang === 'ar' ? 'انقر لفتح تفاصيل البوكس' : 'Click to view box details'}
         onContextMenu={e => e.preventDefault()}
       >
         <img
@@ -244,20 +165,30 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
           }}
         />
 
-        {/* Zoom Hint */}
-        <div style={{
-          position: 'absolute',
-          top: '0.85rem',
-          left: '0.85rem',
-          background: 'rgba(0,0,0,0.55)',
-          color: '#ffffff',
-          borderRadius: '50%',
-          width: 32,
-          height: 32,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
+        {/* Zoom Button */}
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onZoomImage(activeImage, box.name_en || box.size);
+          }}
+          title={lang === 'ar' ? 'تكبير الصورة' : 'Zoom Image'}
+          style={{
+            position: 'absolute',
+            top: '0.85rem',
+            left: '0.85rem',
+            background: 'rgba(0,0,0,0.6)',
+            color: '#ffffff',
+            borderRadius: '50%',
+            width: 32,
+            height: 32,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 4,
+            cursor: 'pointer',
+            transition: 'transform 0.15s ease'
+          }}
+        >
           <Maximize2 size={15} />
         </div>
 
@@ -350,7 +281,11 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
       {/* ── CARD BODY ── */}
       <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1, gap: '0.75rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
+          <h3
+            onClick={handleOpenDetails}
+            style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, cursor: 'pointer', transition: 'color 0.15s ease' }}
+            title={lang === 'ar' ? 'عرض تفاصيل البوكس' : 'View Box Details'}
+          >
             {lang === 'ar' ? box.name_ar : (box.name_en || box.name_ar)}
           </h3>
           <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--secondary)', whiteSpace: 'nowrap' }}>
@@ -373,15 +308,39 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
           />
         </div>
 
-        {/* Action Button */}
-        <div style={{ paddingTop: '0.5rem' }}>
+        {/* Action Buttons Row */}
+        <div style={{ display: 'flex', gap: '0.55rem', paddingTop: '0.5rem' }}>
+          <button
+            type="button"
+            onClick={handleOpenDetails}
+            className="btn btn-outline"
+            style={{
+              padding: '0.65rem 0.95rem',
+              borderRadius: 'var(--radius-md)',
+              borderColor: '#D5C7B8',
+              backgroundColor: '#FAF7F2',
+              color: '#3E271D',
+              fontSize: '0.84rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              whiteSpace: 'nowrap'
+            }}
+            title={lang === 'ar' ? 'فتح صفحة تفاصيل البوكس' : 'View full box details'}
+          >
+            <span>{lang === 'ar' ? 'التفاصيل' : 'Details'}</span>
+            {isRtl ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
+          </button>
+
           <button
             type="button"
             disabled={!isSelectedColorAvailable}
             onClick={handleAddToCart}
             style={{
-              width: '100%',
-              padding: '0.7rem 1rem',
+              flex: 1,
+              padding: '0.65rem 1rem',
               borderRadius: 'var(--radius-md)',
               border: 'none',
               background: addedNotice
@@ -391,11 +350,11 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
                   : 'rgba(100, 116, 139, 0.2)',
               color: isSelectedColorAvailable ? '#ffffff' : 'var(--text-muted)',
               fontWeight: 800,
-              fontSize: '0.9rem',
+              fontSize: '0.88rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '0.5rem',
+              gap: '0.45rem',
               cursor: isSelectedColorAvailable ? 'pointer' : 'not-allowed',
               transition: 'background 0.2s ease, transform 0.15s ease'
             }}
@@ -413,7 +372,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
             ) : (
               <>
                 <Ban size={18} />
-                <span>{lang === 'ar' ? 'اللون غير متوفر حالياً' : 'Color Out of Stock'}</span>
+                <span>{lang === 'ar' ? 'اللون غير متوفر' : 'Out of Stock'}</span>
               </>
             )}
           </button>
@@ -627,39 +586,40 @@ export const BoxesPage = () => {
           </div>
         ) : (
           <div>
-            {/* Temporary Paused Notice Banner */}
+            {/* Available Direct Order Info Banner */}
             <div className="card animate-fade-in" style={{
-              padding: '1.25rem 1.5rem',
-              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(217, 119, 6, 0.05))',
-              border: '1.5px solid rgba(245, 158, 11, 0.35)',
-              borderRadius: 'var(--radius-lg)',
+              padding: '1.15rem 1.45rem',
+              background: 'linear-gradient(135deg, #FAF7F2 0%, #F5ECE1 100%)',
+              border: '1.5px solid #E6DDD2',
+              borderRadius: '16px',
               marginBottom: '2rem',
               display: 'flex',
               alignItems: 'center',
-              gap: '1.2rem',
-              boxShadow: '0 4px 16px rgba(245, 158, 11, 0.08)'
+              gap: '1.1rem',
+              boxShadow: '0 4px 16px rgba(35, 24, 16, 0.04)'
             }}>
               <div style={{
-                width: 48,
-                height: 48,
-                borderRadius: '50%',
-                background: 'rgba(245, 158, 11, 0.18)',
+                width: 46,
+                height: 46,
+                borderRadius: '12px',
+                background: '#F0E5D8',
+                color: '#684835',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.5rem',
+                fontSize: '1.4rem',
                 flexShrink: 0
               }}>
-                ⏳
+                📦
               </div>
               <div style={{ flex: 1 }}>
-                <h4 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 900, color: '#92400E' }}>
-                  {lang === 'ar' ? 'طلب البوكسات متوقف مؤقتاً — سنعاود الفتح قريباً جداً 📦✨' : 'Dental Box Orders Temporarily Paused — Reopening Very Soon 📦✨'}
+                <h4 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 900, color: '#2C1A11', fontFamily: 'Cairo, sans-serif' }}>
+                  {lang === 'ar' ? 'بوكسات تنظيم وحفظ الأدوات الطبية — متوفرة للطلب المباشر' : 'Dental Tool Boxes & Organizers — Available for Direct Order'}
                 </h4>
-                <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.88rem', color: '#B45309', lineHeight: 1.6 }}>
+                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.84rem', color: '#684835', lineHeight: 1.5 }}>
                   {lang === 'ar'
-                    ? 'نعمل حالياً على فحص وتجهيز الدفعة القادمة من البوكسات وحقائب تنظيم الأدوات، وسيتم إعادة فتح استقبال الطلبات المباشرة قريباً جداً بإذن الله.'
-                    : 'We are currently restocking and preparing the next batch of dental tool boxes. Direct orders will be reopened very soon!'}
+                    ? 'اختر الحجم المناسب واضغط على أي بوكس لعرض تفاصيله الكاملة واختيار اللون المطلوب وإضافته إلى سلتك.'
+                    : 'Choose your desired size, click any box to view full specifications, select available color, and add to your cart.'}
                 </p>
               </div>
             </div>
