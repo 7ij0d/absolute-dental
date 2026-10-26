@@ -7,35 +7,34 @@
 
 ## 1. نظرة عامة على المشروع والتقنيات (Project Overview & Tech Stack)
 - **المنصة:** متجر ومستودع الأدوات والمستلزمات الطبية الدراسية لطلبة طب وجراحة الفم والأسنان (**Absolute Dental Equipment**).
-- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + High-Res Asset Pipeline + Dynamic Navigation Trail & Browse Context Engine + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture + Student Experiences & Store Deal Sharing Engine.
+- **الدومين الرسمي المخصص:** `absolutedental.ly`
+- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + High-Res Asset Pipeline + Dynamic Navigation Trail & Browse Context Engine + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture + Custom Domain CNAME & Root Base Setup.
 
 ---
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 1. إتاحة نشر تعاملات وصور المتجر والطلبيات دون إلزام الزبون بكتابة نص:
-- **تحرير متطلبات النشر وإلغاء إجبارية النص:**
-  - أصبح بإمكان الزبون أو الطالب رفع ومشاركة صور تعامله مع المتجر أو صور الأدوات أو الطلبيات المستلمة (حتى 5 صور) ونشرها فوراً دون كتابة أي نص على الإطلاق.
-  - تعريف وتضمين دالة `sanitizeInputText` المفقودة في [`src/utils/communityAndRequestsEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/communityAndRequestsEngine.js) والتي كانت تسبب خطأ برمجياً غير ظاهر عند الإرسال.
-  - تحديث معايير التحقق البرمجي: التحقق الآن يسمح بالمشاركة في حال وجود نص **أو** وجود صورة واحدة على الأقل.
-- **تحسين واجهة نافذة المشاركة (Modal Experience UI):**
-  - تحديث نصوص التسمية وحقل الكتابة في [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx):
-    - تغيير التسمية إلى: «نص التجربة أو الملاحظة (اختياري تماماً)» عند اختيار الصور.
-    - تحديث النص التوضيحي (Placeholder) ليصبح: «اكتب تعليقاً إن أحببت، أو اضغط «إرسال للمراجعة» لنشر الصور مباشرة...».
-    - توضيح منطقة الرفع: «يمكنك إرفاق حتى 5 صور، ويمكنك النشر بصور فقط دون كتابة نص».
-- **تحسين عرض الصور في بطاقات الصفحة الرئيسية:**
-  - تحسين ارتفاع حاوية الصورة الواحدة في شبكة الصور إلى `220px` في [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) لتظهر صور الفواتير أو الأدوات أو التعامل بوضوح تام دون تشويه أو اقتصاص غير مريح.
+### 🔹 1. تهيئة المشروع البرمجية لربط الدومين الجديد `absolutedental.ly`:
+- **إنشاء ملف `CNAME` في `public/CNAME`:**
+  - تم تضمين الدومين الرسمي `absolutedental.ly` بحيث يتم تصديره تلقائياً إلى مجلد الإنتاج `dist/CNAME` في كل عملية بناء.
+- **تحديث مسار الجذر في `vite.config.js`:**
+  - تحويل `base` من `/absolute-dental/` إلى المسار المباشر `'/'` لضمان تحميل جميع ملفات CSS وJS والأصول من المسار الرئيسي للدومين بدون أي أخطاء 404.
+- **تحديث معالج التوجيه الفردي SPA في `public/404.html` و `404.html`:**
+  - جعل تحديد عدد أجزاء الرابط (`segmentCount`) ديناميكياً بحيث يتعرف تلقائياً على الدومين المخصص (`segmentCount = 0`) مع الحفاظ على التوافق مع نطاقات GitHub الفرعية القديمة (`segmentCount = 1`).
+- **بناء الإنتاج:**
+  - تم تنفيذ `npm run build` بنجاح واختبار وجود ملف `CNAME` وتوليد المسارات بشكل سليم.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/utils/communityAndRequestsEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/communityAndRequestsEngine.js) | تعريف `sanitizeInputText` ودعم النشر بالصور فقط دون نص |
-| [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx) | تكييف نصوص نافذة الإرسال والتحقق ليصبح النص اختيارياً تماماً عند وجود صور |
-| [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) | تحسين عرض الصور الفردية في بطاقات التجارب |
+| [`public/CNAME`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/CNAME) | إنشاء ملف الدومين المخصص `absolutedental.ly` لـ GitHub Pages |
+| [`vite.config.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/vite.config.js) | تعيين `base: '/'` للمسار المباشر للدومين الرسمي |
+| [`public/404.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/404.html) | جعل توجيه SPA ديناميكياً للدومين المخصص |
+| [`404.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/404.html) | تحديث ملف 404 الاحتياطي |
 
 ---
 
 ## 3. الخطوة التالية المباشرة (Immediate Next Step)
-- متابعة تجربة المستخدمين أثناء إرسال الصور والتأكد من انسيابية العرض والتفاعل.
+- شرح إعدادات DNS للمستخدم لإدخالها في لوحة تحكم مزود الدومين الليبي (`.ly`) وإكمال خطوة GitHub Pages Settings.

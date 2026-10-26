@@ -4,5 +4,5 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/absolute-dental/', // Matches the GitHub Pages repository subfolder URL
+  base: '/', // Custom domain absolutedental.ly is hosted at root '/'
 })
