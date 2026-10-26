@@ -239,7 +239,7 @@ export const Home = () => {
     const hasText = Boolean(expText.trim());
     const hasImages = Boolean(expFiles && expFiles.length > 0);
     if (!hasText && !hasImages) {
-      setExpError('يرجى كتابة نص التجربة أو إرفاق صورة واحدة على الأقل.');
+      setExpError('يرجى كتابة نص أو إرفاق صورة واحدة على الأقل للمشاركة.');
       return;
     }
 
@@ -1015,7 +1015,7 @@ export const Home = () => {
 
                   {/* Image Upload Field */}
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">صور التجربة (اختياري)</label>
+                    <label className="form-label">صور التعامل أو الأدوات (اختياري)</label>
                     <input
                       ref={expFileInputRef}
                       type="file"
@@ -1030,8 +1030,8 @@ export const Home = () => {
                       className="ad-upload-dropzone"
                     >
                       <Camera size={24} style={{ color: '#684835' }} />
-                      <span>اضغط لاختيار صورة أو أكثر (اختياري)</span>
-                      <small>يمكنك إرفاق حتى 5 صور مع معاينتها قبل الإرسال</small>
+                      <span>اضغط لاختيار صورة أو أكثر (صور التعامل أو المستلزمات)</span>
+                      <small>يمكنك إرفاق حتى 5 صور، ويمكنك النشر بصور فقط دون كتابة نص</small>
                     </button>
 
                     {expPreviews.length > 0 && (
@@ -1055,12 +1055,14 @@ export const Home = () => {
 
                   {/* Experience Text Field */}
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">نص التجربة (اختياري عند إرفاق صورة)</label>
+                    <label className="form-label">
+                      نص التجربة أو الملاحظة {expPreviews.length > 0 ? '(اختياري تماماً)' : '(أو يمكنك إرفاق صورة بدلاً منه)'}
+                    </label>
                     <textarea
                       rows={4}
                       value={expText}
                       onChange={(e) => setExpText(e.target.value)}
-                      placeholder="احكِ لزملائك عن تجربتك مع جودة الأدوات، التغليف، وسرعة التوصيل..."
+                      placeholder={expPreviews.length > 0 ? 'اكتب تعليقاً إن أحببت، أو اضغط «إرسال للمراجعة» لنشر الصور مباشرة...' : 'احكِ لزملائك عن تجربتك مع جودة الأدوات، التغليف، وسرعة التوصيل... أو ارفق صور فقط'}
                       className="form-input"
                       style={{ resize: 'vertical' }}
                     />

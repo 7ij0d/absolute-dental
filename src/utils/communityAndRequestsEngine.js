@@ -21,6 +21,15 @@ export const PRODUCT_REQUEST_STATUSES = [
   { value: 'unavailable', label_ar: 'غير متوفر', label_en: 'Unavailable', color: '#DC2626' }
 ];
 
+export function sanitizeInputText(str, maxLength = 1500) {
+  if (!str || typeof str !== 'string') return '';
+  const trimmed = str.trim();
+  if (maxLength && trimmed.length > maxLength) {
+    return trimmed.slice(0, maxLength);
+  }
+  return trimmed;
+}
+
 export function validateImageFile(file) {
   if (!file) return { valid: false, error: 'لم يتم اختيار ملف', errorAr: 'لم يتم اختيار ملف', errorEn: 'No file selected' };
   const type = (file.type || '').toLowerCase();
@@ -242,14 +251,15 @@ export const fetchPublishedExperiences = fetchApprovedExperiences;
 /**
  * Submits a new student experience and publishes it immediately to the feed.
  */
-export async function submitStudentExperience({ user, profile, text, imageFiles = [], isAnonymous = false }) {
+export async function submitStudentExperience({ user, profile, text = '', imageFiles = [], isAnonymous = false }) {
   if (!user || !user.id) {
     throw new Error('AUTH_REQUIRED');
   }
 
-  const cleanText = sanitizeInputText(text, 1500);
-  if (!cleanText && (!imageFiles || imageFiles.length === 0)) {
-    throw new Error('يرجى كتابة نص التجربة أو إرفاق صورة واحدة على الأقل.');
+  const cleanText = sanitizeInputText(text || '', 1500);
+  const hasImages = Array.isArray(imageFiles) && imageFiles.length > 0;
+  if (!cleanText && !hasImages) {
+    throw new Error('يرجى كتابة نص أو إرفاق صورة واحدة على الأقل للمشاركة.');
   }
 
   const uploadedUrls = [];

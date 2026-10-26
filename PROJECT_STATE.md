@@ -7,35 +7,35 @@
 
 ## 1. نظرة عامة على المشروع والتقنيات (Project Overview & Tech Stack)
 - **المنصة:** متجر ومستودع الأدوات والمستلزمات الطبية الدراسية لطلبة طب وجراحة الفم والأسنان (**Absolute Dental Equipment**).
-- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + High-Res Asset Pipeline + Dynamic Navigation Trail & Browse Context Engine + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture.
+- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + High-Res Asset Pipeline + Dynamic Navigation Trail & Browse Context Engine + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture + Student Experiences & Store Deal Sharing Engine.
 
 ---
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 1. إصلاح الخلل الجذري في فتح صفحة مادة Fixed Prosthodontics (صناعة الأسنان الثابتة - السنة الثانية):
-- **سبب المشكلة (Root Cause Identified):**
-  - عند الضغط على مادة «صناعة الأسنان الثابتة» من صفحة السنة الثانية، يقوم محرك تجميع البيرات (`groupProductsList`) في [`src/utils/burGroupingEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/burGroupingEngine.js) بمعالجة خيارات مجموعات البيرات المخصصة للمادة.
-  - عند محاولة جلب بيانات خيار من خيارات البير غير المتوفر مباشرة في مصفوفة النتائج الأولية، استدعى الكود دالة `resolveBurProduct(opt.productId, products)` في السطر 221 والتي كانت تستدعي `defaultProductsList.find(...)`.
-  - المتغير `defaultProductsList` لم يكن مستورداً (`ReferenceError: defaultProductsList is not defined`)، مما أدى إلى حدوث استثناء جافاسكريبت فوري غير معالج أثناء تصيير الصفحة، والتقطته شاشة الخطأ العامة (React Error Boundary) لتظهر الرسالة: «حدثت مشكلة أثناء تحميل الصفحة».
-- **الإصلاح الجذري المنفّذ (Fix Implemented):**
-  1. استيراد `defaultProductsList from '../defaultProducts.json'` بشكل صريح في [`src/utils/burGroupingEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/burGroupingEngine.js).
-  2. تدريع دالة `resolveBurProduct` بفحوصات أمان (`Array.isArray`) والتحقق من سلامة معرّفات المنتجات لتفادي أي انهيار غير متوقع.
-  3. تدريع استدعاء `groupProductsList` و `getSubjectProductGroups` داخل [`src/pages/SubjectPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SubjectPage.jsx) بكتل `try / catch` دفاعية تضمن ظهور المنتجات حتى في حال حدوث أي خطأ عارض في أحد العناصر.
-  4. ترقية مفتاح كاش الصفحة إلى `subject_v33:` وترقية بادئة الكاش العام إلى `ad16:` في [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) لتجاوز أي كاش متصفح قديم على هواتف وآيبادات المستخدمين.
-  5. تحسين أوزان وأحجام صور المادة والموقع وتوفير نسخ WebP خفيفة للغاية مع إزالة `no-cache` القسري لتسريع التحميل الفوري.
+### 🔹 1. إتاحة نشر تعاملات وصور المتجر والطلبيات دون إلزام الزبون بكتابة نص:
+- **تحرير متطلبات النشر وإلغاء إجبارية النص:**
+  - أصبح بإمكان الزبون أو الطالب رفع ومشاركة صور تعامله مع المتجر أو صور الأدوات أو الطلبيات المستلمة (حتى 5 صور) ونشرها فوراً دون كتابة أي نص على الإطلاق.
+  - تعريف وتضمين دالة `sanitizeInputText` المفقودة في [`src/utils/communityAndRequestsEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/communityAndRequestsEngine.js) والتي كانت تسبب خطأ برمجياً غير ظاهر عند الإرسال.
+  - تحديث معايير التحقق البرمجي: التحقق الآن يسمح بالمشاركة في حال وجود نص **أو** وجود صورة واحدة على الأقل.
+- **تحسين واجهة نافذة المشاركة (Modal Experience UI):**
+  - تحديث نصوص التسمية وحقل الكتابة في [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx):
+    - تغيير التسمية إلى: «نص التجربة أو الملاحظة (اختياري تماماً)» عند اختيار الصور.
+    - تحديث النص التوضيحي (Placeholder) ليصبح: «اكتب تعليقاً إن أحببت، أو اضغط «إرسال للمراجعة» لنشر الصور مباشرة...».
+    - توضيح منطقة الرفع: «يمكنك إرفاق حتى 5 صور، ويمكنك النشر بصور فقط دون كتابة نص».
+- **تحسين عرض الصور في بطاقات الصفحة الرئيسية:**
+  - تحسين ارتفاع حاوية الصورة الواحدة في شبكة الصور إلى `220px` في [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) لتظهر صور الفواتير أو الأدوات أو التعامل بوضوح تام دون تشويه أو اقتصاص غير مريح.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/utils/burGroupingEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/burGroupingEngine.js) | استيراد `defaultProductsList` وتدريع دالة `resolveBurProduct` لحل الـ ReferenceError نهائياً |
-| [`src/pages/SubjectPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/SubjectPage.jsx) | إضافة كتل دفاعية `try/catch` وترقية مفتاح كاش المادة إلى `subject_v33:` |
-| [`src/cache.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/cache.js) | ترقية بادئة الكاش إلى `ad16:` |
-| [`index.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/index.html) | ترقية preconnect وإزالة وسوم منع الكاش الثابت |
+| [`src/utils/communityAndRequestsEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/communityAndRequestsEngine.js) | تعريف `sanitizeInputText` ودعم النشر بالصور فقط دون نص |
+| [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx) | تكييف نصوص نافذة الإرسال والتحقق ليصبح النص اختيارياً تماماً عند وجود صور |
+| [`src/index.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/index.css) | تحسين عرض الصور الفردية في بطاقات التجارب |
 
 ---
 
 ## 3. الخطوة التالية المباشرة (Immediate Next Step)
-- عمل Commit وتحديث الفرع الرئيسي `main` ونشر التعديل ليعمل مباشرة وبسلاسة تامة لجميع الطلبة.
+- متابعة تجربة المستخدمين أثناء إرسال الصور والتأكد من انسيابية العرض والتفاعل.

@@ -4912,6 +4912,10 @@ table {
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
 }
 
+.home-exp-images-grid.count-1 .home-exp-img-btn {
+  height: 220px;
+}
+
 .home-exp-img-btn {
   border: 1px solid rgba(138, 108, 82, 0.18);
   border-radius: 12px;
