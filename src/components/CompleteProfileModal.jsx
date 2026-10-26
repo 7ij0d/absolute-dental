@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import supabase from '../supabaseClient';
+import { uploadCompressedImage, validateImageFile } from '../utils/communityAndRequestsEngine';
 import {
   User,
   Phone,
@@ -47,6 +48,33 @@ export const CompleteProfileModal = () => {
   const [university, setUniversity] = useState(LIBYAN_UNIVERSITIES[0]);
   const [academicYear, setAcademicYear] = useState('2nd-year');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef(null);
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      setErrorMsg(lang === 'ar' ? validation.errorAr : validation.errorEn);
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setErrorMsg('');
+    try {
+      const url = await uploadCompressedImage(file, 'avatars');
+      if (url) {
+        setAvatarUrl(url);
+      }
+    } catch (err) {
+      console.error('Avatar upload in modal error:', err);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -237,62 +265,115 @@ export const CompleteProfileModal = () => {
           <X size={18} />
         </button>
 
-        {/* Header / Avatar Profile Visual */}
+        {/* Header / Avatar Profile Visual with Upload */}
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ position: 'relative', display: 'inline-block', marginBottom: '0.85rem' }}>
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={fullName || 'Avatar'}
-                style={{
-                  width: '76px',
-                  height: '76px',
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                  border: '3px solid #684835',
-                  boxShadow: '0 4px 16px rgba(104, 72, 53, 0.2)',
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: '76px',
-                  height: '76px',
-                  borderRadius: '50%',
-                  backgroundColor: '#F5ECE1',
-                  color: '#684835',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '3px solid #684835',
-                  boxShadow: '0 4px 16px rgba(104, 72, 53, 0.2)',
-                  fontSize: '1.75rem',
-                  fontWeight: 900,
-                  fontFamily: 'Cairo, sans-serif',
-                }}
-              >
-                {fullName ? fullName.trim()[0].toUpperCase() : <User size={34} />}
-              </div>
-            )}
-            <span
+          <div style={{ position: 'relative', display: 'inline-block', marginBottom: '0.45rem' }}>
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                borderRadius: '50%',
+                display: 'block',
+                position: 'relative',
+              }}
+              title={lang === 'ar' ? 'انقر لتغيير الصورة الشخصية' : 'Click to change profile picture'}
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={fullName || 'Avatar'}
+                  style={{
+                    width: '76px',
+                    height: '76px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '3px solid #684835',
+                    boxShadow: '0 4px 16px rgba(104, 72, 53, 0.2)',
+                    opacity: uploadingAvatar ? 0.5 : 1,
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '76px',
+                    height: '76px',
+                    borderRadius: '50%',
+                    backgroundColor: '#F5ECE1',
+                    color: '#684835',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '3px solid #684835',
+                    boxShadow: '0 4px 16px rgba(104, 72, 53, 0.2)',
+                    fontSize: '1.75rem',
+                    fontWeight: 900,
+                    fontFamily: 'Cairo, sans-serif',
+                    opacity: uploadingAvatar ? 0.5 : 1,
+                  }}
+                >
+                  {fullName ? fullName.trim()[0].toUpperCase() : <User size={34} />}
+                </div>
+              )}
+              {uploadingAvatar && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(0,0,0,0.45)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                  }}
+                >
+                  <Loader2 size={24} className="animate-spin" />
+                </div>
+              )}
+            </button>
+
+            {/* Camera Edit Badge */}
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={uploadingAvatar}
               style={{
                 position: 'absolute',
-                bottom: 0,
-                insetInlineEnd: 0,
-                backgroundColor: '#10B981',
-                color: '#FFFFFF',
+                top: -2,
+                insetInlineEnd: -2,
+                width: '26px',
+                height: '26px',
                 borderRadius: '50%',
-                width: '24px',
-                height: '24px',
+                backgroundColor: '#684835',
+                color: '#FFFFFF',
+                border: '2px solid #FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                cursor: 'pointer',
               }}
-              title={lang === 'ar' ? 'تم تسجيل الدخول' : 'Logged In'}
+              title={lang === 'ar' ? 'تغيير الصورة' : 'Change photo'}
             >
-              <CheckCircle2 size={15} strokeWidth={2.8} />
-            </span>
+              <Camera size={13} strokeWidth={2.4} />
+            </button>
+
+            {/* Hidden Input */}
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleAvatarChange}
+            />
+          </div>
+          <div style={{ fontSize: '0.74rem', color: '#73665C', marginBottom: '0.65rem' }}>
+            {lang === 'ar' ? 'اضغط على الصورة لتغييرها 📸' : 'Click photo to change 📸'}
           </div>
 
           <div

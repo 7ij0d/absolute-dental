@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import supabase from '../supabaseClient';
+import { uploadCompressedImage, validateImageFile } from '../utils/communityAndRequestsEngine';
 import {
   User,
   ClipboardList,
@@ -18,7 +19,11 @@ import {
   ShieldCheck,
   Loader2,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Camera,
+  Trash2,
+  RotateCcw,
+  UploadCloud
 } from 'lucide-react';
 
 const LIBYAN_UNIVERSITIES = [
@@ -60,6 +65,9 @@ export const ProfilePage = () => {
   const [academicYear, setAcademicYear] = useState('2nd-year');
   const [isAnonymousDefault, setIsAnonymousDefault] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarFeedback, setAvatarFeedback] = useState('');
+  const avatarInputRef = useRef(null);
 
   // Orders State
   const [orders, setOrders] = useState([]);
@@ -88,7 +96,7 @@ export const ProfilePage = () => {
     const initialName = profile?.full_name || meta.full_name || meta.name || '';
     const initialPhone = profile?.phone || meta.phone || '';
     const initialPhoneSec = profile?.phone_secondary || meta.phone_secondary || '';
-    const initialAvatar = profile?.avatar_url || meta.avatar_url || meta.picture || '';
+    const initialAvatar = (meta.avatar_url !== undefined && meta.avatar_url !== null) ? meta.avatar_url : (profile?.avatar_url || meta.picture || '');
     const emailPrefix = (user.email || '').split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_');
     const initialUsername = profile?.username || meta.username || emailPrefix;
     const initialYear = profile?.academic_year || meta.academic_year || '2nd-year';
@@ -134,6 +142,73 @@ export const ProfilePage = () => {
     fetchUserOrders();
   }, [user, profile]);
 
+  const handleAvatarFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      setErrorMsg(lang === 'ar' ? validation.errorAr : validation.errorEn);
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setAvatarFeedback(lang === 'ar' ? 'جاري ضغط ورفع صورتك الشخصية...' : 'Processing & uploading photo...');
+    setErrorMsg('');
+
+    try {
+      const newUrl = await uploadCompressedImage(file, 'avatars');
+      if (!newUrl) {
+        throw new Error(lang === 'ar' ? 'تعذر رفع الصورة، يرجى المحاولة مرة أخرى.' : 'Failed to upload photo.');
+      }
+
+      setAvatarUrl(newUrl);
+
+      // Save directly to user profile and session
+      await updateProfile({ avatar_url: newUrl });
+
+      setMessage(lang === 'ar' ? 'تم تحديث صورتك الشخصية بنجاح! 📸' : 'Profile photo updated successfully! 📸');
+      setTimeout(() => setMessage(''), 4000);
+    } catch (err) {
+      console.error('Avatar upload error:', err);
+      setErrorMsg(err.message || (lang === 'ar' ? 'فشل رفع الصورة' : 'Failed to upload photo'));
+    } finally {
+      setUploadingAvatar(false);
+      setAvatarFeedback('');
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setUploadingAvatar(true);
+    try {
+      setAvatarUrl('');
+      await updateProfile({ avatar_url: '' });
+      setMessage(lang === 'ar' ? 'تمت إزالة الصورة الشخصية واستخدام الحرف الأول' : 'Profile photo removed');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      console.error('Remove avatar error:', err);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleRestoreGoogleAvatar = async () => {
+    const googlePic = user?.user_metadata?.picture;
+    if (!googlePic) return;
+    setUploadingAvatar(true);
+    try {
+      setAvatarUrl(googlePic);
+      await updateProfile({ avatar_url: googlePic });
+      setMessage(lang === 'ar' ? 'تمت استعادة صورة حساب Google بنجاح' : 'Google account photo restored');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      console.error('Restore Google avatar error:', err);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -169,7 +244,7 @@ export const ProfilePage = () => {
       college: college.trim() || 'كلية طب الأسنان',
       academic_year: academicYear,
       is_anonymous_default: isAnonymousDefault,
-      avatar_url: avatarUrl || undefined,
+      avatar_url: avatarUrl || '',
       status: 'active'
     });
 
@@ -236,47 +311,117 @@ export const ProfilePage = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
-          {/* Avatar with Green Active Dot */}
-          <div style={{ position: 'relative', width: 72, height: 72, flexShrink: 0 }}>
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={fullName || 'Avatar'}
-                style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                  border: '3px solid #684835',
-                  boxShadow: '0 4px 14px rgba(104, 72, 53, 0.25)',
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: '50%',
-                  backgroundColor: '#F5ECE1',
-                  color: '#684835',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.8rem',
-                  fontWeight: 900,
-                  fontFamily: 'Cairo, sans-serif',
-                  border: '3px solid #684835',
-                  boxShadow: '0 4px 14px rgba(104, 72, 53, 0.25)',
-                }}
-              >
-                {(fullName || user?.email || 'ط')[0].toUpperCase()}
-              </div>
-            )}
+          {/* Avatar with Camera Button & Active Dot */}
+          <div style={{ position: 'relative', width: 76, height: 76, flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: uploadingAvatar ? 'wait' : 'pointer',
+                borderRadius: '50%',
+                display: 'block',
+                position: 'relative',
+                width: 76,
+                height: 76,
+              }}
+              title={lang === 'ar' ? 'انقر لتغيير الصورة الشخصية' : 'Click to change profile photo'}
+              aria-label={lang === 'ar' ? 'تغيير الصورة الشخصية' : 'Change profile photo'}
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={fullName || 'Avatar'}
+                  style={{
+                    width: 76,
+                    height: 76,
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '3px solid #684835',
+                    boxShadow: '0 4px 14px rgba(104, 72, 53, 0.25)',
+                    opacity: uploadingAvatar ? 0.6 : 1,
+                    transition: 'opacity 0.2s',
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 76,
+                    height: 76,
+                    borderRadius: '50%',
+                    backgroundColor: '#F5ECE1',
+                    color: '#684835',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.85rem',
+                    fontWeight: 900,
+                    fontFamily: 'Cairo, sans-serif',
+                    border: '3px solid #684835',
+                    boxShadow: '0 4px 14px rgba(104, 72, 53, 0.25)',
+                    opacity: uploadingAvatar ? 0.6 : 1,
+                  }}
+                >
+                  {(fullName || user?.email || 'ط')[0].toUpperCase()}
+                </div>
+              )}
+
+              {/* Uploading Spinner Overlay */}
+              {uploadingAvatar && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(30, 20, 14, 0.55)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFFFFF',
+                  }}
+                >
+                  <Loader2 size={26} className="animate-spin" />
+                </div>
+              )}
+            </button>
+
+            {/* Tactile Camera Edit Badge */}
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              style={{
+                position: 'absolute',
+                top: -2,
+                insetInlineEnd: -2,
+                width: 26,
+                height: 26,
+                borderRadius: '50%',
+                backgroundColor: '#684835',
+                color: '#FFFFFF',
+                border: '2px solid #FFFFFF',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'transform 0.15s ease',
+              }}
+              title={lang === 'ar' ? 'تغيير الصورة الشخصية' : 'Change photo'}
+              aria-label={lang === 'ar' ? 'تغيير الصورة الشخصية' : 'Change photo'}
+            >
+              <Camera size={13} strokeWidth={2.3} />
+            </button>
+
+            {/* Green Online / Active Dot */}
             <span
               style={{
                 position: 'absolute',
                 bottom: 2,
-                insetInlineEnd: 2,
+                insetInlineStart: 2,
                 width: 14,
                 height: 14,
                 borderRadius: '50%',
@@ -485,6 +630,180 @@ export const ProfilePage = () => {
           )}
 
           <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1.35rem' }}>
+            {/* Hidden File Input for Avatar */}
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleAvatarFileSelect}
+            />
+
+            {/* Dedicated Profile Picture Control Box */}
+            <div
+              style={{
+                padding: '1.25rem 1.35rem',
+                backgroundColor: '#FAF7F2',
+                borderRadius: '16px',
+                border: '1.5px solid #ECE4DA',
+                boxShadow: 'inset 0 1px 0 #FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1.25rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '240px' }}>
+                <div style={{ position: 'relative', width: 62, height: 62, flexShrink: 0 }}>
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={fullName || 'Avatar'}
+                      style={{
+                        width: 62,
+                        height: 62,
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2.5px solid #684835',
+                        boxShadow: '0 3px 10px rgba(104, 72, 53, 0.2)',
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 62,
+                        height: 62,
+                        borderRadius: '50%',
+                        backgroundColor: '#F5ECE1',
+                        color: '#684835',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.5rem',
+                        fontWeight: 900,
+                        fontFamily: 'Cairo, sans-serif',
+                        border: '2.5px solid #684835',
+                      }}
+                    >
+                      {(fullName || user?.email || 'ط')[0].toUpperCase()}
+                    </div>
+                  )}
+                  {uploadingAvatar && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        borderRadius: '50%',
+                        backgroundColor: 'rgba(30, 20, 14, 0.55)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#FFFFFF',
+                      }}
+                    >
+                      <Loader2 size={20} className="animate-spin" />
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#2C1A11', fontFamily: 'Cairo, sans-serif' }}>
+                    {lang === 'ar' ? 'الصورة الشخصية للحساب' : 'Profile Picture'}
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#73665C', marginTop: '2px', lineHeight: 1.4 }}>
+                    {avatarFeedback || (lang === 'ar'
+                      ? 'تظهر في ملفك الشخصي وتجاربك ومشاركاتك الطلابية.'
+                      : 'Visible on your profile, student experiences, and requests.')}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="btn btn-primary"
+                  style={{
+                    padding: '0.55rem 1rem',
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    borderRadius: '12px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.45rem',
+                    backgroundColor: '#684835',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    cursor: uploadingAvatar ? 'wait' : 'pointer',
+                  }}
+                >
+                  <Camera size={15} />
+                  <span>
+                    {uploadingAvatar
+                      ? (lang === 'ar' ? 'جاري الرفع...' : 'Uploading...')
+                      : (avatarUrl ? (lang === 'ar' ? 'تغيير الصورة' : 'Change Photo') : (lang === 'ar' ? 'رفع صورة شخصية' : 'Upload Photo'))}
+                  </span>
+                </button>
+
+                {/* Google user restore button if custom avatar was chosen */}
+                {user?.user_metadata?.picture && avatarUrl && avatarUrl !== user.user_metadata.picture && (
+                  <button
+                    type="button"
+                    onClick={handleRestoreGoogleAvatar}
+                    disabled={uploadingAvatar}
+                    className="btn btn-outline"
+                    style={{
+                      padding: '0.55rem 0.85rem',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      borderRadius: '12px',
+                      borderColor: '#D5C7B8',
+                      color: '#4B3621',
+                      backgroundColor: '#FFFFFF',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      cursor: 'pointer',
+                    }}
+                    title={lang === 'ar' ? 'استعادة صورة حساب Google الأصلية' : 'Restore original Google picture'}
+                  >
+                    <RotateCcw size={14} />
+                    <span>{lang === 'ar' ? 'صورة Google' : 'Google Photo'}</span>
+                  </button>
+                )}
+
+                {/* Remove photo button if avatar is set */}
+                {avatarUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveAvatar}
+                    disabled={uploadingAvatar}
+                    className="btn btn-outline"
+                    style={{
+                      padding: '0.55rem 0.85rem',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      borderRadius: '12px',
+                      borderColor: '#FCA5A5',
+                      color: '#B91C1C',
+                      backgroundColor: '#FEF2F2',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      cursor: 'pointer',
+                    }}
+                    title={lang === 'ar' ? 'إزالة الصورة واستخدام الحرف الأول' : 'Remove picture'}
+                  >
+                    <Trash2 size={14} />
+                    <span>{lang === 'ar' ? 'إزالة' : 'Remove'}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Grid 1: Basic Info */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
               {/* Full Name */}

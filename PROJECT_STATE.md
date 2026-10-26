@@ -8,34 +8,30 @@
 ## 1. نظرة عامة على المشروع والتقنيات (Project Overview & Tech Stack)
 - **المنصة:** متجر ومستودع الأدوات والمستلزمات الطبية الدراسية لطلبة طب وجراحة الفم والأسنان (**Absolute Dental Equipment**).
 - **الدومين الرسمي المخصص:** `absolutedental.ly`
-- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + High-Res Asset Pipeline + Dynamic Navigation Trail & Browse Context Engine + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture + Student Experiences Engine + Product Availability Requests Engine (Guest & Student).
+- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + High-Res Asset Pipeline + Dynamic Navigation Trail & Browse Context Engine + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture + Student Experiences Engine + Product Availability Requests Engine + Avatar Upload & Compression Engine (Google & Custom).
 
 ---
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 1. إصلاح توجيه وعرض مواد السنة الرابعة لتظهر صفحة «السنة الرابعة — قريباً»:
-- **سبب الخلل (Root Cause):**
-  - في صفحة [`src/pages/YearPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/YearPage.jsx)، كان التحقق من السنة مبنياً على `isYear3` و `isYear2` و `isYear1 = !isYear3 && !isYear2`.
-  - عند الدخول إلى رابط السنة الرابعة `/year/4th-year`، كانت قيم `isYear3` و `isYear2` خطأ (`false`)، وبالتالي اعتُبرت السنة الأولى (`isYear1 = true`) مع `targetSlug = '1st-year'`!
-  - كان استدعاء البيانات يجلب مواد السنة الأولى (`YEAR_1_SUBJECTS` — تشريح الأسنان ومواد طب الأسنان) بدلاً من البقاء في حالة "قريباً".
-- **التعديلات المنفّذة (Fixes Applied):**
-  1. إضافة فحص صريح ومباشر للسنة الرابعة `isYear4 = slug === '4th-year' || slug === '4th' || slug?.startsWith('4')` في [`src/pages/YearPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/YearPage.jsx).
-  2. تعيين `targetSlug = isYear4 ? '4th-year' : ...` و `defaultYear = isYear4 ? DEFAULT_YEARS[3] : ...` مع الاحتفاظ بخاصية `is_coming_soon: true`.
-  3. حماية حالة الـ Coming Soon بحيث تُعرض بطاقة «السنة الرابعة — قريباً» مباشرة ومنع الاستبدال ببيانات أي سنة أخرى.
-  4. تحسين زر الرجوع داخل بطاقة «قريباً» ليوجه الطالب بسلاسة إلى صفحة أدوات الدراسة `/study-tools`.
-  5. ربط بطاقة السنة الرابعة في صفحة [`src/pages/StudyToolsPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/StudyToolsPage.jsx) بالمسار `/year/4th-year` لفتح شاشة «قريباً» مباشرة عند النقر عليها.
-  6. نجاح اختبار البناء الإنتاجي (`npm run build`) بنسبة 100% دون أي أخطاء.
+### 🔹 1. تمكين المستخدمين (التسجيل الجديد أو تسجيل الدخول عبر Google) من تغيير وحفظ صورتهم الشخصية:
+- **المتطلبات المنفّذة (Implemented Requirements):**
+  1. **تغيير الصورة من بطاقة الملف الشخصي (Hero Card):** تم تزويد دائرة الصورة في أعلى الصفحة بزر تفاعلي مع أيقونة كاميرا منبثقة ومؤشر تحميل يدعم النقر المباشر لاختيار صورة من الجهاز أو الهاتف.
+  2. **قسم مخصص لإدارة الصورة الشخصية داخل نموذج الملف الشخصي:** تمت إضافة صندوق تحكم أنيق بتصميم Elevation مزدوج يعرض معاينة الصورة الحالية وزر «تغيير الصورة»، وزر «إزالة الصورة»، بالإضافة إلى زر «استعادة صورة Google» التلقائي عند التسجيل بحساب Google.
+  3. **دعم التغيير أثناء إكمال البيانات (Complete Profile Modal):** تمكين الطالب الجديد أو مسجل الدخول عبر Google من النقر على الصورة واختيار صورته المفضلة مباشرة.
+  4. **ضغط ورفع فوري مع حفظ السحابة والبيانات الوصفية:** معالجة الصور وضغطها تلقائياً بتقنية `uploadCompressedImage` وحفظ الرابط في بيانات الحساب الوصفية `avatar_url` مع التحديث الفوري للـ Navbar وتجارب الطلاب.
+  5. نجاح اختبار البناء الإنتاجي (`npm run build`) بنسبة 100% دون أي أخطاء.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/pages/YearPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/YearPage.jsx) | إضافة دعم صريح للسنة الرابعة `isYear4` وعرض واجهة «السنة الرابعة — قريباً» بدلاً من جلب مواد السنة الأولى |
-| [`src/pages/StudyToolsPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/StudyToolsPage.jsx) | ربط بطاقة السنة الرابعة بالمسار `/year/4th-year` مع تفعيل الانتقال لصفحة قريباً |
+| [`src/pages/ProfilePage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProfilePage.jsx) | إضافة آليات رفع وتغيير الصورة الشخصية بالهيرو ونموذج التعديل مع خيارات الاستعادة والإزالة |
+| [`src/context/AuthContext.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/context/AuthContext.jsx) | دعم الأسبقية لـ `avatar_url` المخصصة على صورة Google وحفظها في بيانات الحساب والـ Cache |
+| [`src/components/CompleteProfileModal.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/CompleteProfileModal.jsx) | تفعيل زر الكاميرا واختيار الصورة مباشرة أثناء نافذة إكمال التسجيل |
 
 ---
 
 ## 3. الخطوة التالية المباشرة (Immediate Next Step)
-- مزامنة ورفع الكود عبر `git commit & push` إلى الفرع الرئيسي `main` ليتم نشره فوراً على بيئة الإنتاج للدومين `absolutedental.ly`.
+- رفع التعديلات عبر `git commit & push` إلى الفرع الرئيسي `main` لتصبح ميزة تغيير الصورة الشخصية حية وفورية لجميع المستخدمين والطلبة على `absolutedental.ly`.

@@ -184,7 +184,7 @@ export const AuthProvider = ({ children }) => {
           const merged = {
             ...data,
             username: meta.username || data.username || (targetUser?.email ? targetUser.email.split('@')[0] : ''),
-            avatar_url: meta.avatar_url || meta.picture || data.avatar_url || '',
+            avatar_url: (meta.avatar_url !== undefined && meta.avatar_url !== null) ? meta.avatar_url : (meta.picture || data.avatar_url || ''),
             academic_year: meta.academic_year || data.academic_year || '2nd-year',
             is_anonymous_default: meta.is_anonymous_default !== undefined ? meta.is_anonymous_default : false,
             phone: data.phone || meta.phone || '',
@@ -208,7 +208,7 @@ export const AuthProvider = ({ children }) => {
           college: meta.college || 'كلية طب الأسنان',
           username: meta.username || (targetUser?.email ? targetUser.email.split('@')[0] : ''),
           academic_year: meta.academic_year || '2nd-year',
-          avatar_url: meta.avatar_url || meta.picture || '',
+          avatar_url: (meta.avatar_url !== undefined && meta.avatar_url !== null) ? meta.avatar_url : (meta.picture || ''),
           is_anonymous_default: meta.is_anonymous_default || false,
           status: 'active',
           role: meta.role || 'student'
@@ -429,7 +429,7 @@ export const AuthProvider = ({ children }) => {
       const authData = {};
       if (updates.full_name || updates.name) authData.full_name = updates.full_name || updates.name;
       if (updates.username) authData.username = updates.username;
-      if (updates.avatar_url) authData.avatar_url = updates.avatar_url;
+      if (updates.avatar_url !== undefined) authData.avatar_url = updates.avatar_url;
       if (updates.phone) authData.phone = updates.phone;
       if (updates.university) authData.university = updates.university;
       if (updates.college) authData.college = updates.college;
