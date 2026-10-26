@@ -22,7 +22,8 @@ import {
   ExternalLink,
   EyeOff,
   UserCheck,
-  Shield
+  Shield,
+  ImageIcon
 } from 'lucide-react';
 
 import homeHeroBgWebp from '../assets/images/home-hero-bg.webp';
@@ -350,20 +351,14 @@ export const Home = () => {
       return;
     }
 
-    // Save draft before checking auth so guest never loses typed data
+    // Save draft so guest never loses typed data
     saveRequestDraft();
-
-    if (!isLoggedInStudent) {
-      setProdReqModalOpen(false);
-      requireStudentAuth('open_product_request');
-      return;
-    }
 
     setReqSubmitting(true);
     try {
       const created = await submitProductAvailabilityRequest({
-        user,
-        profile,
+        user: user || null,
+        profile: profile || null,
         productName: reqProductName,
         specifications: reqSpecifications,
         contactPhone: reqPhone,

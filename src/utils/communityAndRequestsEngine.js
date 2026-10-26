@@ -611,10 +611,6 @@ export async function submitProductAvailabilityRequest({
   contactPhone,
   additionalNotes,
 }) {
-  if (!user || !user.id) {
-    throw new Error('AUTH_REQUIRED');
-  }
-
   const cleanProductName = sanitizeInputText(productName, 200);
   const cleanPhone = sanitizeInputText(contactPhone, 40);
   const cleanDetails = sanitizeInputText(specifications || productDetails || '', 1500);
@@ -639,16 +635,16 @@ export async function submitProductAvailabilityRequest({
 
   const requesterName =
     profile?.full_name ||
-    user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
-    (user.email ? user.email.split('@')[0] : 'طالب طب أسنان');
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    (user?.email ? user.email.split('@')[0] : 'زبون المتجر');
 
   const record = {
     id,
     request_number: requestNumber,
-    user_id: user.id,
+    user_id: user?.id || null,
     user_name: sanitizeInputText(requesterName, 100),
-    user_email: user.email || '',
+    user_email: user?.email || '',
     product_name: cleanProductName,
     image_url: uploadedImageUrl,
     product_image: uploadedImageUrl,
