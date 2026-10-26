@@ -3,13 +3,19 @@ import supabase from '../supabaseClient.js';
 /**
  * ABSOLUTE DENTAL — UNIFIED BOX INVENTORY & COLOR VARIANT ENGINE
  * Single canonical source of truth for:
- * 1. Dental Box Products (16", 16.5", 17" GT-MAX)
- * 2. Independent Color Variant Stock (Physical, Reserved, Available)
- * 3. Dual-Row Availability Segregation:
- *    - Row A: "الألوان المتوفرة" (availableStock > 0)
- *    - Row B: "الألوان غير المتوفرة حالياً" (availableStock <= 0)
- * 4. Zero-stock enforcement across Storefront, Cart, Checkout, and Admin
+ * 1. Dental Box Products (14", 16", 16.5", 17.5" GT-MAX)
+ * 2. Independent Color Variant Stock & 3-Tier Status Model:
+ *    - 'in_stock': متوفر وجاهز للطلب الفوري
+ *    - 'on_demand': متوفر على الطلب (نوفرهولك)
+ *    - 'discontinued': غير متوفر نهائياً (مخفي مؤقتاً)
+ * 3. Guaranteed valid image paths with single-slash normalization
  */
+
+export const BOX_VARIANT_STATUS = {
+  IN_STOCK: 'in_stock',
+  ON_DEMAND: 'on_demand',
+  DISCONTINUED: 'discontinued'
+};
 
 export const BOX_PRODUCT_IDS = {
   BOX_14: 'e4efb7b3-d329-4dbc-970b-3943c8abb96b',
@@ -21,6 +27,19 @@ export const BOX_PRODUCT_IDS = {
   FALLBACK_16_5: 'box-16-5',
   FALLBACK_17: 'box-17'
 };
+
+/**
+ * Resolves box image paths safely, ensuring a clean single leading slash
+ * to prevent protocol-relative '//' domain resolution errors in browsers.
+ */
+export function resolveBoxImg(path) {
+  if (!path) return '/accessories/box17-colors.png';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+  const clean = path.replace(/^\/+/, '');
+  return `/${clean}`;
+}
 
 export const CANONICAL_BOXES = {
   [BOX_PRODUCT_IDS.BOX_14]: {
@@ -57,9 +76,108 @@ export const CANONICAL_BOXES = {
   }
 };
 
-/**
- * Checks if a given product ID or product object is a dental box.
- */
+export const FALLBACK_BOXES = [
+  {
+    id: 'box-14',
+    size: '14 inch',
+    name_ar: '14" Dental Tool Box',
+    name_en: '14" Dental Tool Box',
+    price: 45,
+    stock_quantity: 10,
+    desc_ar: 'بوكس Arradent المدمج ذو الغطاء الملون والمقبض المتين، مع أقسام علوية لترتيب الأدوات الأساسية وسهولة الحمل.',
+    desc_en: 'Compact Arradent dental toolbox with a colored lid, top organizer compartments, and durable carry handle.',
+    features_ar: ['أقسام تنظيم علوية بالغطاء', 'قفل أمامي محكم', 'حجم خفيف وعملي', 'مقبض حمل مريح وقوي'],
+    features_en: ['Top organizer compartments', 'Single front latch', 'Compact portable size', 'Comfortable carry handle'],
+    main_image: '/accessories/box14-pink.jpg',
+    inside_image: '/accessories/box14-colors.png',
+    colors: [
+      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box14-pink.jpg', inside_image_url: '/accessories/box14-colors.png' },
+      { id: 'colors', hex_code: '#8B5CF6', label_ar: 'تشكيلة ألوان متوفرة', label_en: 'Available Color Assortment', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box14-colors.png', inside_image_url: '/accessories/box14-pink.jpg' }
+    ]
+  },
+  {
+    id: 'box-16',
+    size: '16 inch',
+    name_ar: '16" Dental Tool Box',
+    name_en: '16" Dental Tool Box',
+    price: 65,
+    stock_quantity: 12,
+    desc_ar: 'بوكس أسنان متين مع رف داخلي قابل للإزالة لتنظيم الأدوات الدقيقة ومساحة تخزين سفلية واسعة.',
+    desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
+    features_ar: ['رف داخلي مقسم قابل للإزالة', 'قفلان جانبيان قويان', 'مساحة تخزين سفلية واسعة', 'مقبض حمل مريح ومتين'],
+    features_en: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
+    main_image: '/accessories/box16-purple.jpg',
+    inside_image: '/accessories/box16-inside-purple.jpg',
+    colors: [
+      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-purple.jpg', inside_image_url: '/accessories/box16-inside-purple.jpg', base_image_url: '/accessories/box16-base-purple.jpg' },
+      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-pink.jpg', inside_image_url: '/accessories/box16-inside-purple.jpg', base_image_url: '/accessories/box16-base-purple.jpg' },
+      { id: 'maroon', hex_code: '#800020', label_ar: 'خمري / عنابي', label_en: 'Maroon', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-maroon.jpg', inside_image_url: '/accessories/box16-inside-maroon.jpg', base_image_url: '/accessories/box16-base-maroon.jpg' },
+      { id: 'blue', hex_code: '#1565C0', label_ar: 'أزرق', label_en: 'Blue', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-blue.jpg', inside_image_url: '/accessories/box16-inside-blue.jpg', base_image_url: '/accessories/box16-base-blue.jpg' },
+      { id: 'red', hex_code: '#E02020', label_ar: 'أحمر', label_en: 'Red', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-red.jpg', inside_image_url: '/accessories/box16-inside-red.jpg', base_image_url: '/accessories/box16-base-red.jpg' },
+      { id: 'yellow', hex_code: '#F5C518', label_ar: 'أصفر', label_en: 'Yellow', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-yellow.jpg', inside_image_url: '/accessories/box16-inside-yellow.jpg', base_image_url: '/accessories/box16-base-yellow.jpg' }
+    ]
+  },
+  {
+    id: 'box-16-5',
+    size: '16.5 inch',
+    name_ar: '16.5" Organizer Box',
+    name_en: '16.5" Organizer Box',
+    price: 85,
+    stock_quantity: 12,
+    desc_ar: 'بوكس مميز بغطاء شفاف بالكامل و3 طبقات تنظيم شفافة منزلقة لتنظيم أدوات وإكسسوارات الأسنان بدقة فائقة.',
+    desc_en: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
+    features_ar: ['غطاء علوي شفاف بالكامل', '3 طبقات تنظيم منزلقة', 'فواصل داخلية دقيقة', 'قفل أمامي وقاعدة متينة'],
+    features_en: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
+    main_image: '/accessories/box16_5-black.jpg',
+    inside_image: '/accessories/box16_5-inside.png',
+    colors: [
+      { id: 'black', hex_code: '#1F2937', label_ar: 'أسود', label_en: 'Black', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16_5-black.jpg', inside_image_url: '/accessories/box16_5-inside.png' },
+      { id: 'red', hex_code: '#D32F2F', label_ar: 'أحمر', label_en: 'Red', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16_5-red.jpg', inside_image_url: '/accessories/box16_5-inside-red.jpg' },
+      { id: 'blue', hex_code: '#2196F3', label_ar: 'أزرق فاتح', label_en: 'Light Blue', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16_5-blue.png', inside_image_url: '/accessories/box16_5-inside-blue.jpg' },
+      { id: 'navy', hex_code: '#0D47A1', label_ar: 'أزرق داكن', label_en: 'Dark Navy Blue', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16_5-blue.jpg', inside_image_url: '/accessories/box16_5-inside-blue.jpg' },
+      { id: 'purple', hex_code: '#6A3093', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16_5-purple.jpg', inside_image_url: '/accessories/box16_5-inside-purple.jpg' },
+      { id: 'teal', hex_code: '#00ACC1', label_ar: 'تركوازي', label_en: 'Teal', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16_5-teal.jpg', inside_image_url: '/accessories/box16_5-inside-teal.jpg' },
+      { id: 'green', hex_code: '#7CB342', label_ar: 'أخضر', label_en: 'Lime Green', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16_5-green.jpg', inside_image_url: '/accessories/box16_5-inside-green.jpg' },
+      { id: 'orange', hex_code: '#F57C00', label_ar: 'برتقالي', label_en: 'Orange', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16_5-orange.jpg', inside_image_url: '/accessories/box16_5-inside-orange.jpg' }
+    ]
+  },
+  {
+    id: 'box-17',
+    size: '17.5 inch',
+    name_ar: '17.5" Professional Box — GT-MAX',
+    name_en: '17.5" Professional Box — GT-MAX',
+    price: 95,
+    stock_quantity: 12,
+    desc_ar: 'البوكس الاحترافي الأوسع GT-MAX/BADC بغطاء ملون مزود بأقسام تنظيم شفافة ومساحة تخزين سفلية عملاقة.',
+    desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
+    features_ar: ['أقسام تنظيم شفافة مدمجة بالغطاء', 'مساحة تخزين عملاقة', 'أقفال جانبية وأمامية محكمة', 'بلاستيك مقوى عالي التحمل'],
+    features_en: ['Clear lid organizer', 'Wide main storage space', 'Two side + front latches', 'Strong & Durable plastic'],
+    main_image: '/accessories/box17_5-dark-blue.jpg',
+    inside_image: '/accessories/box17-inside-black.jpg',
+    colors: [
+      { id: 'blue', hex_code: '#0D47A1', label_ar: 'أزرق داكن', label_en: 'Dark Blue', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17_5-dark-blue.jpg', inside_image_url: '/accessories/box17-inside-blue.jpg' },
+      { id: 'black', hex_code: '#111111', label_ar: 'أسود', label_en: 'Black', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-black.jpg', inside_image_url: '/accessories/box17-inside-black.jpg' },
+      { id: 'purple', hex_code: '#A880C8', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-purple.jpg', inside_image_url: '/accessories/box17-inside-purple.jpg' },
+      { id: 'red', hex_code: '#E02020', label_ar: 'أحمر', label_en: 'Red', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-red.jpg', inside_image_url: '/accessories/box17-inside-red.jpg' },
+      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-pink.jpg', inside_image_url: '/accessories/box17-inside-pink.jpg' },
+      { id: 'beige', hex_code: '#C8A882', label_ar: 'بيج', label_en: 'Beige', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-beige.jpg', inside_image_url: '/accessories/box17-inside-beige.jpg' },
+      { id: 'teal', hex_code: '#00897B', label_ar: 'تركوازي', label_en: 'Teal', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-colors.png', inside_image_url: '/accessories/box17-inside.png' },
+      { id: 'lime', hex_code: '#7CB342', label_ar: 'أخضر فسفوري', label_en: 'Lime Green', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-colors.png', inside_image_url: '/accessories/box17-inside.png' }
+    ]
+  }
+];
+
+export function getBoxProductById(id) {
+  if (!id) return null;
+  const strId = String(id).toLowerCase().trim();
+  return FALLBACK_BOXES.find(b =>
+    String(b.id).toLowerCase() === strId ||
+    (b.size && b.size.toLowerCase() === strId) ||
+    (b.name_en && b.name_en.toLowerCase().includes(strId)) ||
+    (b.name_ar && b.name_ar.includes(strId))
+  ) || null;
+}
+
 export function isBoxProduct(productOrId) {
   if (!productOrId) return false;
   const id = typeof productOrId === 'object' ? (productOrId.id || productOrId.product_id || '') : String(productOrId);
@@ -74,9 +192,6 @@ export function isBoxProduct(productOrId) {
   return false;
 }
 
-/**
- * Strips bracketed status tags from Arabic or English color labels.
- */
 export function cleanColorLabel(color, lang = 'ar') {
   if (!color) return '';
   const text = lang === 'ar'
@@ -85,60 +200,32 @@ export function cleanColorLabel(color, lang = 'ar') {
   return text.replace(/\[out_of_stock\]|\[coming_soon\]|\[in_stock\]|نفذت الكمية|غير متوفر/g, '').trim();
 }
 
-/**
- * Normalizes a variant identifier for reliable lookup across DB UUIDs and slug codes.
- */
 export function getVariantLookupKey(color) {
   if (!color) return '';
   return color.id || color.variant_id || color.color_id || '';
 }
 
-/**
- * Computes available stock from physical and reserved stock safely.
- * Available = Math.max(0, physical - reserved)
- */
 export function computeVariantAvailableStock(physicalStock = 0, reservedStock = 0) {
-  const phys = Math.max(0, parseInt(physicalStock, 10) || 0);
-  const res = Math.max(0, parseInt(reservedStock, 10) || 0);
-  return Math.max(0, phys - res);
+  return Math.max(0, physicalStock - reservedStock);
 }
 
-/**
- * Fetches the canonical box variants inventory from the database (settings table).
- * Returns a Map and Object keyed by variant ID and (product_id + color_id).
- */
 export async function fetchCanonicalBoxInventory() {
   try {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('settings')
       .select('value')
       .eq('key', 'box_variants_inventory')
       .maybeSingle();
 
-    if (error || !data?.value?.variants) {
-      return { variants: {}, raw: null };
-    }
-
-    const variants = data.value.variants;
-    return {
-      variants,
-      raw: data.value,
-      updatedAt: data.value.updated_at
-    };
+    return data?.value?.variants || {};
   } catch (err) {
-    console.warn('Could not fetch canonical box inventory, using safe zero fallback:', err);
-    return { variants: {}, raw: null };
+    console.warn('Could not load canonical box variants inventory:', err);
+    return {};
   }
 }
 
-/**
- * Saves or updates a color variant's stock, price, dimensions, or image in the canonical database store.
- * Idempotent, safe, and keeps physical, reserved, and available stock synchronized.
- */
-export async function saveBoxVariantInventoryRecord(variantId, updates) {
-  if (!variantId) throw new Error('Variant ID is required to update inventory');
-
-  // 1. Fetch current canonical state
+export async function saveBoxVariantInventoryRecord(variantId, updates = {}) {
+  if (!variantId) return null;
   const { data: currentSetting } = await supabase
     .from('settings')
     .select('value')
@@ -150,14 +237,14 @@ export async function saveBoxVariantInventoryRecord(variantId, updates) {
 
   const physicalStock = updates.physical_stock !== undefined
     ? Math.max(0, parseInt(updates.physical_stock, 10) || 0)
-    : (existingRecord.physical_stock || 0);
+    : (existingRecord.physical_stock ?? 10);
 
   const reservedStock = updates.reserved_stock !== undefined
     ? Math.max(0, parseInt(updates.reserved_stock, 10) || 0)
-    : (existingRecord.reserved_stock || 0);
+    : (existingRecord.reserved_stock ?? 0);
 
   const availableStock = computeVariantAvailableStock(physicalStock, reservedStock);
-  const status = availableStock > 0 ? 'in_stock' : 'out_of_stock';
+  const status = updates.status || (availableStock > 0 ? 'in_stock' : 'out_of_stock');
 
   const updatedVariant = {
     ...existingRecord,
@@ -181,115 +268,11 @@ export async function saveBoxVariantInventoryRecord(variantId, updates) {
     }
   };
 
-  const { error: upsertErr } = await supabase
-    .from('settings')
-    .upsert(payload);
-
-  if (upsertErr) {
-    throw upsertErr;
-  }
-
-  // 2. Also keep accessory_product_colors table aligned (status label suffix & images)
-  try {
-    const cleanAr = cleanColorLabel(updatedVariant, 'ar');
-    const cleanEn = cleanColorLabel(updatedVariant, 'en');
-    const statusSuffix = availableStock > 0 ? '' : ' [out_of_stock]';
-
-    const colorUpdates = {
-      label_ar: cleanAr + statusSuffix,
-      label_en: cleanEn + statusSuffix
-    };
-    if (updates.image_url) colorUpdates.image_url = updates.image_url;
-    if (updates.hex_code) colorUpdates.hex_code = updates.hex_code;
-
-    await supabase
-      .from('accessory_product_colors')
-      .update(colorUpdates)
-      .eq('id', variantId);
-  } catch (syncErr) {
-    console.warn('Syncing accessory_product_colors row notice:', syncErr);
-  }
-
+  await supabase.from('settings').upsert(payload);
   return updatedVariant;
 }
 
-/**
- * Splits a list of box color variants into:
- * 1. Available Colors (available_stock > 0)
- * 2. Currently Unavailable Colors (available_stock <= 0)
- *
- * Implements strict inventory-driven segregation.
- */
-export function splitBoxColorsByAvailability(colors = [], inventoryMap = {}) {
-  if (!Array.isArray(colors)) {
-    return { availableColors: [], unavailableColors: [], allUnavailable: true };
-  }
-
-  const availableColors = [];
-  const unavailableColors = [];
-
-  colors.forEach((color) => {
-    const idKey = color.id;
-    const colorIdKey = color.color_id;
-    const inv = inventoryMap[idKey] || inventoryMap[colorIdKey] || null;
-
-    let availableStock = 0;
-    let physicalStock = 0;
-    let reservedStock = 0;
-
-    if (inv) {
-      physicalStock = inv.physical_stock ?? 0;
-      reservedStock = inv.reserved_stock ?? 0;
-      availableStock = inv.available_stock ?? computeVariantAvailableStock(physicalStock, reservedStock);
-    } else if (color.available_stock !== undefined) {
-      availableStock = color.available_stock;
-      physicalStock = color.physical_stock ?? availableStock;
-      reservedStock = color.reserved_stock ?? 0;
-    } else {
-      // Default initial state: Zero stock
-      const rawLabel = `${color.label_ar || ''} ${color.label_en || ''}`;
-      if (rawLabel.includes('[out_of_stock]') || color.status === 'out_of_stock') {
-        availableStock = 0;
-      } else if (color.stock_quantity !== undefined && color.stock_quantity > 0) {
-        availableStock = color.stock_quantity;
-      } else {
-        availableStock = 0;
-      }
-    }
-
-    const decorated = {
-      ...color,
-      physical_stock: physicalStock,
-      reserved_stock: reservedStock,
-      available_stock: availableStock,
-      isAvailable: availableStock > 0,
-      price: (inv && inv.price) ? inv.price : (color.price || null),
-      size: (inv && inv.size) ? inv.size : (color.size || null),
-      image_url: (inv && inv.image_url) ? inv.image_url : (color.image_url || null)
-    };
-
-    if (availableStock > 0) {
-      availableColors.push(decorated);
-    } else {
-      unavailableColors.push(decorated);
-    }
-  });
-
-  return {
-    availableColors,
-    unavailableColors,
-    allUnavailable: availableColors.length === 0,
-    totalColors: colors.length
-  };
-}
-
-/**
- * Safely resets all dental box products and variants to zero stock.
- * Fully idempotent, preserves all product definitions, color variants, image URLs,
- * and historic order records.
- */
 export async function resetAllBoxStockToZero() {
-  // 1. Fetch current canonical state
   const { data: currentSetting } = await supabase
     .from('settings')
     .select('value')
@@ -299,7 +282,6 @@ export async function resetAllBoxStockToZero() {
   const currentVariants = currentSetting?.value?.variants || {};
   const updatedVariants = {};
 
-  // 2. Fetch all accessory_product_colors to ensure every variant is captured
   const { data: allColors, error: colorsErr } = await supabase
     .from('accessory_product_colors')
     .select('*');
@@ -330,7 +312,6 @@ export async function resetAllBoxStockToZero() {
         updated_at: new Date().toISOString()
       };
 
-      // Also ensure suffix in accessory_product_colors table
       try {
         await supabase
           .from('accessory_product_colors')
@@ -345,7 +326,6 @@ export async function resetAllBoxStockToZero() {
     }
   }
 
-  // 3. Upsert canonical setting
   const payload = {
     key: 'box_variants_inventory',
     value: {
@@ -355,114 +335,74 @@ export async function resetAllBoxStockToZero() {
     }
   };
 
-  const { error: upsertErr } = await supabase
-    .from('settings')
-    .upsert(payload);
-
+  const { error: upsertErr } = await supabase.from('settings').upsert(payload);
   if (upsertErr) throw upsertErr;
 
   return updatedVariants;
 }
 
-const BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || '/';
-
-export const FALLBACK_BOXES = [
-  {
-    id: 'box-14',
-    size: '14 inch',
-    name_ar: '14" Dental Tool Box',
-    name_en: '14" Dental Tool Box',
-    price: 45,
-    stock_quantity: 1,
-    desc_ar: 'Compact Arradent dental toolbox with a colored lid, top organizer compartments, and durable carry handle.',
-    desc_en: 'Compact Arradent dental toolbox with a colored lid, top organizer compartments, and durable carry handle.',
-    features_ar: ['Top organizer compartments', 'Single front latch', 'Compact portable size', 'Comfortable carry handle'],
-    features_en: ['Top organizer compartments', 'Single front latch', 'Compact portable size', 'Comfortable carry handle'],
-    main_image: `${BASE}accessories/box14-pink.jpg`,
-    inside_image: `${BASE}accessories/box14-pink.jpg`,
-    colors: [
-      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 1, physical_stock: 1, reserved_stock: 0, image_url: `${BASE}accessories/box14-pink.jpg` }
-    ]
-  },
-  {
-    id: 'box-16',
-    size: '16 inch',
-    name_ar: '16" Dental Tool Box',
-    name_en: '16" Dental Tool Box',
-    price: 65,
-    stock_quantity: 12,
-    desc_ar: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
-    desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
-    features_ar: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
-    features_en: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
-    main_image: `${BASE}accessories/box16-purple.jpg`,
-    inside_image: `${BASE}accessories/box16-inside-blue.jpg`,
-    colors: [
-      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', available_stock: 6, physical_stock: 6, reserved_stock: 0, image_url: `${BASE}accessories/box16-purple.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
-      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 6, physical_stock: 6, reserved_stock: 0, image_url: `${BASE}accessories/box16-pink.jpg`, inside_image_url: `${BASE}accessories/box16-inside-purple.jpg`, base_image_url: `${BASE}accessories/box16-base-purple.jpg` },
-      { id: 'maroon', hex_code: '#800020', label_ar: 'خمري / عنابي', label_en: 'Maroon', status: 'in_stock', available_stock: 1, physical_stock: 1, reserved_stock: 0, image_url: `${BASE}accessories/box16-maroon.jpg`, inside_image_url: `${BASE}accessories/box16-inside-maroon.jpg`, base_image_url: `${BASE}accessories/box16-base-maroon.jpg` },
-      { id: 'blue', hex_code: '#1565C0', label_ar: 'أزرق [out_of_stock]', label_en: 'Blue [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-blue.jpg`, inside_image_url: `${BASE}accessories/box16-inside-blue.jpg`, base_image_url: `${BASE}accessories/box16-base-blue.jpg` },
-      { id: 'red', hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]', label_en: 'Red [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-red.jpg`, inside_image_url: `${BASE}accessories/box16-inside-red.jpg`, base_image_url: `${BASE}accessories/box16-base-red.jpg` },
-      { id: 'yellow', hex_code: '#F5C518', label_ar: 'أصفر [out_of_stock]', label_en: 'Yellow [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16-yellow.jpg`, inside_image_url: `${BASE}accessories/box16-inside-yellow.jpg`, base_image_url: `${BASE}accessories/box16-base-yellow.jpg` },
-    ]
-  },
-  {
-    id: 'box-16-5',
-    size: '16.5 inch',
-    name_ar: '16.5" Organizer Box',
-    name_en: '16.5" Organizer Box',
-    price: 85,
-    stock_quantity: 4,
-    desc_ar: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
-    desc_en: 'Fully transparent lid box with 3 cascading clear compartment layers — perfect for organizing small accessories.',
-    features_ar: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
-    features_en: ['Fully transparent lid', '3 clear organizer layers', 'Single front latch', 'Fine internal dividers'],
-    main_image: `${BASE}accessories/box16_5-real.jpg`,
-    inside_image: `${BASE}accessories/box16_5-inside.png`,
-    colors: [
-      { id: 'black', hex_code: '#1F2937', label_ar: 'أسود', label_en: 'Black', status: 'in_stock', available_stock: 4, physical_stock: 4, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-black.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside.png` },
-      { id: 'red', hex_code: '#D32F2F', label_ar: 'أحمر [out_of_stock]', label_en: 'Red [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-red.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-red.jpg` },
-      { id: 'blue', hex_code: '#2196F3', label_ar: 'أزرق فاتح [out_of_stock]', label_en: 'Light Blue [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-blue.png`, inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
-      { id: 'navy', hex_code: '#0D47A1', label_ar: 'أزرق داكن [out_of_stock]', label_en: 'Dark Navy Blue [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-blue.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-blue.jpg` },
-      { id: 'purple', hex_code: '#6A3093', label_ar: 'بنفسجي [out_of_stock]', label_en: 'Purple [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-purple.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-purple.jpg` },
-      { id: 'teal', hex_code: '#00ACC1', label_ar: 'تركوازي [out_of_stock]', label_en: 'Teal [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-teal.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-teal.jpg` },
-      { id: 'green', hex_code: '#7CB342', label_ar: 'أخضر [out_of_stock]', label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-green.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-green.jpg` },
-      { id: 'orange', hex_code: '#F57C00', label_ar: 'برتقالي [out_of_stock]', label_en: 'Orange [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box16_5-orange.jpg`, inside_image_url: `${BASE}accessories/box16_5-inside-orange.jpg` },
-    ]
-  },
-  {
-    id: 'box-17',
-    size: '17.5 inch',
-    name_ar: '17.5" Professional Box — GT-MAX',
-    name_en: '17.5" Professional Box — GT-MAX',
-    price: 95,
-    stock_quantity: 10,
-    desc_ar: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
-    desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
-    features_ar: ['Clear lid organizer', 'Wide main storage space', 'Two side + front latches', 'Strong & Durable plastic'],
-    features_en: ['Clear lid organizer', 'Wide main storage space', 'Two side + front latches', 'Strong & Durable plastic'],
-    main_image: `${BASE}accessories/box17_5-dark-blue.jpg`,
-    inside_image: `${BASE}accessories/box17-inside-black.jpg`,
-    colors: [
-      { id: 'blue', hex_code: '#0D47A1', label_ar: 'أزرق داكن', label_en: 'Dark Blue', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: `${BASE}accessories/box17_5-dark-blue.jpg`, inside_image_url: `${BASE}accessories/box17-inside-blue.jpg` },
-      { id: 'black', hex_code: '#111111', label_ar: 'أسود [out_of_stock]', label_en: 'Black [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-black.jpg`, inside_image_url: `${BASE}accessories/box17-inside-black.jpg` },
-      { id: 'purple', hex_code: '#A880C8', label_ar: 'بنفسجي [out_of_stock]', label_en: 'Purple [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-purple.jpg`, inside_image_url: `${BASE}accessories/box17-inside-purple.jpg` },
-      { id: 'red', hex_code: '#E02020', label_ar: 'أحمر [out_of_stock]', label_en: 'Red [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-red.jpg`, inside_image_url: `${BASE}accessories/box17-inside-red.jpg` },
-      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي [out_of_stock]', label_en: 'Pink [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-pink.jpg`, inside_image_url: `${BASE}accessories/box17-inside-pink.jpg` },
-      { id: 'beige', hex_code: '#C8A882', label_ar: 'بيج [out_of_stock]', label_en: 'Beige [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-beige.jpg`, inside_image_url: `${BASE}accessories/box17-inside-beige.jpg` },
-      { id: 'teal', hex_code: '#00897B', label_ar: 'تركوازي [out_of_stock]', label_en: 'Teal [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-colors.png` },
-      { id: 'lime', hex_code: '#7CB342', label_ar: 'أخضر فسفوري [out_of_stock]', label_en: 'Lime Green [out_of_stock]', status: 'out_of_stock', available_stock: 0, physical_stock: 0, reserved_stock: 0, image_url: `${BASE}accessories/box17-colors.png` },
-    ]
+export function splitBoxColorsByAvailability(colors = [], inventoryMap = {}) {
+  if (!Array.isArray(colors)) {
+    return { availableColors: [], unavailableColors: [], allUnavailable: true };
   }
-];
 
-export function getBoxProductById(id) {
-  if (!id) return null;
-  const strId = String(id).toLowerCase().trim();
-  return FALLBACK_BOXES.find(b =>
-    String(b.id).toLowerCase() === strId ||
-    (b.size && b.size.toLowerCase() === strId) ||
-    (b.name_en && b.name_en.toLowerCase().includes(strId)) ||
-    (b.name_ar && b.name_ar.includes(strId))
-  ) || null;
+  const availableColors = [];
+  const unavailableColors = [];
+
+  colors.forEach((color) => {
+    // Hidden / discontinued colors are omitted completely as requested
+    if (color.status === 'discontinued' || color.is_hidden === true) {
+      return;
+    }
+
+    const idKey = color.id;
+    const colorIdKey = color.color_id;
+    const inv = inventoryMap[idKey] || inventoryMap[colorIdKey] || null;
+
+    let availableStock = 10;
+    let physicalStock = 10;
+    let reservedStock = 0;
+    let status = color.status || 'in_stock';
+
+    if (inv) {
+      physicalStock = inv.physical_stock ?? 10;
+      reservedStock = inv.reserved_stock ?? 0;
+      availableStock = inv.available_stock ?? computeVariantAvailableStock(physicalStock, reservedStock);
+      if (inv.status) status = inv.status;
+    } else if (color.available_stock !== undefined) {
+      availableStock = color.available_stock;
+      physicalStock = color.physical_stock ?? availableStock;
+      reservedStock = color.reserved_stock ?? 0;
+    }
+
+    // Support on_demand
+    const isOnDemand = status === 'on_demand';
+    const isImmediate = availableStock > 0 && !isOnDemand;
+    const isAvailable = isImmediate || isOnDemand;
+
+    const decorated = {
+      ...color,
+      physical_stock: physicalStock,
+      reserved_stock: reservedStock,
+      available_stock: isAvailable ? Math.max(availableStock, 1) : 0,
+      isAvailable,
+      isOnDemand,
+      status,
+      price: (inv && inv.price) ? inv.price : (color.price || null),
+      size: (inv && inv.size) ? inv.size : (color.size || null),
+      image_url: resolveBoxImg((inv && inv.image_url) ? inv.image_url : (color.image_url || null))
+    };
+
+    if (isAvailable) {
+      availableColors.push(decorated);
+    } else {
+      unavailableColors.push(decorated);
+    }
+  });
+
+  return {
+    availableColors,
+    unavailableColors,
+    allUnavailable: availableColors.length === 0
+  };
 }

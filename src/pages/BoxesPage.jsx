@@ -7,29 +7,25 @@ import supabase from '../supabaseClient';
 import {
   ChevronRight,
   ChevronLeft,
-  ArrowLeft,
-  ArrowRight,
   Box,
   ShoppingCart,
   Maximize2,
   X,
   Check,
-  Ban
+  Ban,
+  Clock
 } from 'lucide-react';
 import BoxColorVariantSelector from '../components/BoxColorVariantSelector';
 import dentalBoxesFaded from '../assets/images/dental-boxes-faded.png';
 import {
   splitBoxColorsByAvailability,
   cleanColorLabel,
-  fetchCanonicalBoxInventory,
   FALLBACK_BOXES,
-  getBoxProductById
+  resolveBoxImg
 } from '../utils/boxInventoryEngine';
 
-const BASE = import.meta.env.BASE_URL || '/';
-
 /* ─── SINGLE DENTAL BOX PRODUCT CARD ────────────────────── */
-const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} }) => {
+const BoxProductCard = ({ box, onZoomImage, inventoryMap = {} }) => {
   const { addToCart } = useCart();
   const { lang, isRtl } = useLanguage();
   const navigate = useNavigate();
@@ -44,7 +40,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
   const { availableColors, unavailableColors } = splitBoxColorsByAvailability(
     box.colors && box.colors.length > 0
       ? box.colors
-      : [{ id: 'default', hex_code: '#CDBFA6', label_en: 'Standard', image_url: box.main_image || box.image_url }],
+      : [{ id: 'default', hex_code: '#CDBFA6', label_en: 'Standard', label_ar: 'أساسي', image_url: box.main_image || box.image_url }],
     inventoryMap
   );
 
@@ -71,37 +67,37 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
   }, [box, inventoryMap]);
 
   const getActiveViewImage = () => {
-    const colorId = (selectedColor?.color_id || selectedColor?.id || 'maroon').toLowerCase();
+    const colorId = (selectedColor?.color_id || selectedColor?.id || 'pink').toLowerCase();
 
     if (viewMode === 'base') {
-      if (selectedColor?.base_image_url) return selectedColor.base_image_url;
+      if (selectedColor?.base_image_url) return resolveBoxImg(selectedColor.base_image_url);
       if (box.size === '16 inch' || (box.name_en && box.name_en.includes('16'))) {
-        return `${BASE}accessories/box16-base-${colorId}.jpg`;
+        return resolveBoxImg(`accessories/box16-base-${colorId}.jpg`);
       }
-      return box.inside_image || box.main_image;
+      return resolveBoxImg(box.inside_image || box.main_image);
     }
 
     if (viewMode === 'inside') {
-      if (selectedColor?.inside_image_url) return selectedColor.inside_image_url;
+      if (selectedColor?.inside_image_url) return resolveBoxImg(selectedColor.inside_image_url);
       if (box.size === '17 inch' || (box.name_en && box.name_en.includes('17'))) {
-        return `${BASE}accessories/box17-inside-${colorId}.jpg`;
+        return resolveBoxImg(`accessories/box17-inside-${colorId}.jpg`);
       }
       if (box.size === '16.5 inch' || (box.name_en && box.name_en.includes('16.5'))) {
-        return `${BASE}accessories/box16_5-inside-${colorId}.jpg`;
+        return resolveBoxImg(`accessories/box16_5-inside-${colorId}.jpg`);
       }
       if (box.size === '16 inch' || (box.name_en && box.name_en.includes('16'))) {
-        return `${BASE}accessories/box16-inside-${colorId}.jpg`;
+        return resolveBoxImg(`accessories/box16-inside-${colorId}.jpg`);
       }
-      return box.inside_image || box.main_image;
+      return resolveBoxImg(box.inside_image || box.main_image);
     }
 
-    return selectedColor?.image_url || box.main_image || `${BASE}accessories/box17-colors.png`;
+    return resolveBoxImg(selectedColor?.image_url || box.main_image || 'accessories/box17-colors.png');
   };
 
   const activeImage = getActiveViewImage();
 
   const isSelectedColorAvailable = Boolean(
-    selectedColor && selectedColor.available_stock > 0
+    selectedColor && (selectedColor.available_stock > 0 || selectedColor.status === 'on_demand')
   );
 
   const effectivePrice = selectedColor?.price || box.price || 0;
@@ -121,9 +117,9 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
       price: effectivePrice,
       is_box: true,
       selected_color: variantColorLabel,
-      image_url: selectedColor.image_url || activeImage,
-      availableStock: selectedColor.available_stock,
-      stock_quantity: selectedColor.available_stock
+      image_url: resolveBoxImg(selectedColor.image_url || activeImage),
+      availableStock: selectedColor.available_stock || 10,
+      stock_quantity: selectedColor.available_stock || 10
     }, 1);
 
     setAddedNotice(true);
@@ -134,38 +130,42 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
     <div
       className="card animate-fade-in"
       style={{
-        background: 'var(--surface-color)',
-        border: '1px solid var(--border-color)',
-        borderRadius: 'var(--radius-lg)',
+        background: 'var(--surface-color, #FFFFFF)',
+        border: '1.5px solid #E6DDD2',
+        borderRadius: '20px',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: 'var(--shadow-sm)',
+        boxShadow: '0 4px 18px rgba(35, 24, 16, 0.05)',
         transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
     >
       {/* ── IMAGE WRAPPER WITH 3-VIEW SELECTOR ── */}
       <div
         className="ad-watermarked-container product-card-image"
-        style={{ position: 'relative', background: 'var(--accent)', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer' }}
+        style={{ position: 'relative', background: '#F8F4EE', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer' }}
         onClick={handleOpenDetails}
-        title={lang === 'ar' ? 'انقر لفتح تفاصيل البوكس' : 'Click to view box details'}
+        title={lang === 'ar' ? 'انقر لفتح صفحة تفاصيل البوكس' : 'Click to view box details'}
         onContextMenu={e => e.preventDefault()}
       >
         <img
           src={activeImage}
           alt={box.name_en || box.size}
           draggable={false}
+          loading="eager"
+          onError={(e) => {
+            e.currentTarget.src = resolveBoxImg('accessories/box17-colors.png');
+          }}
           onContextMenu={e => e.preventDefault()}
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            opacity: 1
+            display: 'block'
           }}
         />
 
-        {/* Zoom Button */}
+        {/* Zoom Lightbox Trigger */}
         <div
           onClick={(e) => {
             e.stopPropagation();
@@ -176,16 +176,17 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
             position: 'absolute',
             top: '0.85rem',
             left: '0.85rem',
-            background: 'rgba(0,0,0,0.6)',
-            color: '#ffffff',
+            background: 'rgba(35, 24, 16, 0.65)',
+            backdropFilter: 'blur(4px)',
+            color: '#FFFFFF',
             borderRadius: '50%',
             width: 32,
             height: 32,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 4,
             cursor: 'pointer',
+            zIndex: 4,
             transition: 'transform 0.15s ease'
           }}
         >
@@ -197,18 +198,18 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
           position: 'absolute',
           top: '0.85rem',
           right: '0.85rem',
-          background: 'var(--secondary)',
-          color: '#ffffff',
+          background: '#684835',
+          color: '#FFFFFF',
           fontSize: '0.8rem',
           fontWeight: 800,
           padding: '0.25rem 0.65rem',
           borderRadius: '999px',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
         }}>
           {box.size || 'Pro Box'}
         </div>
 
-        {/* View Switcher Chips */}
+        {/* View Switcher Chips (Outside / Inside / Base) */}
         <div
           onClick={e => e.stopPropagation()}
           style={{
@@ -218,7 +219,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
             transform: 'translateX(-50%)',
             display: 'flex',
             gap: '0.35rem',
-            background: 'rgba(15, 23, 42, 0.75)',
+            background: 'rgba(35, 24, 16, 0.78)',
             backdropFilter: 'blur(6px)',
             padding: '3px',
             borderRadius: '999px',
@@ -230,8 +231,8 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
             onClick={() => setViewMode('outside')}
             style={{
               border: 'none',
-              background: viewMode === 'outside' ? 'var(--secondary)' : 'transparent',
-              color: '#ffffff',
+              background: viewMode === 'outside' ? '#684835' : 'transparent',
+              color: '#FFFFFF',
               fontSize: '0.72rem',
               fontWeight: 700,
               padding: '2px 8px',
@@ -246,8 +247,8 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
             onClick={() => setViewMode('inside')}
             style={{
               border: 'none',
-              background: viewMode === 'inside' ? 'var(--secondary)' : 'transparent',
-              color: '#ffffff',
+              background: viewMode === 'inside' ? '#684835' : 'transparent',
+              color: '#FFFFFF',
               fontSize: '0.72rem',
               fontWeight: 700,
               padding: '2px 8px',
@@ -263,8 +264,8 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
               onClick={() => setViewMode('base')}
               style={{
                 border: 'none',
-                background: viewMode === 'base' ? 'var(--secondary)' : 'transparent',
-                color: '#ffffff',
+                background: viewMode === 'base' ? '#684835' : 'transparent',
+                color: '#FFFFFF',
                 fontSize: '0.72rem',
                 fontWeight: 700,
                 padding: '2px 8px',
@@ -283,18 +284,25 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
           <h3
             onClick={handleOpenDetails}
-            style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, cursor: 'pointer', transition: 'color 0.15s ease' }}
+            style={{
+              fontSize: '1.15rem',
+              fontWeight: 900,
+              color: '#2C1A11',
+              margin: 0,
+              cursor: 'pointer',
+              fontFamily: "'Cairo', sans-serif"
+            }}
             title={lang === 'ar' ? 'عرض تفاصيل البوكس' : 'View Box Details'}
           >
             {lang === 'ar' ? box.name_ar : (box.name_en || box.name_ar)}
           </h3>
-          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--secondary)', whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#684835', whiteSpace: 'nowrap' }}>
             {effectivePrice} <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>{lang === 'ar' ? 'د.ل' : 'LYD'}</span>
           </div>
         </div>
 
         {/* Description */}
-        <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
+        <p style={{ fontSize: '0.84rem', color: '#6B5344', margin: 0, lineHeight: 1.45 }}>
           {lang === 'ar' ? (box.desc_ar || box.description_ar) : (box.desc_en || box.description_en || box.desc_ar)}
         </p>
 
@@ -316,7 +324,7 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
             className="btn btn-outline"
             style={{
               padding: '0.65rem 0.95rem',
-              borderRadius: 'var(--radius-md)',
+              borderRadius: '12px',
               borderColor: '#D5C7B8',
               backgroundColor: '#FAF7F2',
               color: '#3E271D',
@@ -341,14 +349,14 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
             style={{
               flex: 1,
               padding: '0.65rem 1rem',
-              borderRadius: 'var(--radius-md)',
+              borderRadius: '12px',
               border: 'none',
               background: addedNotice
                 ? '#10B981'
                 : isSelectedColorAvailable
-                  ? 'var(--primary)'
+                  ? '#684835'
                   : 'rgba(100, 116, 139, 0.2)',
-              color: isSelectedColorAvailable ? '#ffffff' : 'var(--text-muted)',
+              color: isSelectedColorAvailable ? '#FFFFFF' : '#888',
               fontWeight: 800,
               fontSize: '0.88rem',
               display: 'flex',
@@ -367,7 +375,11 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
             ) : isSelectedColorAvailable ? (
               <>
                 <ShoppingCart size={18} />
-                <span>{lang === 'ar' ? 'أضف للسلة' : 'Add to Cart'}</span>
+                <span>
+                  {selectedColor?.status === 'on_demand'
+                    ? (lang === 'ar' ? 'طلب توفير البوكس' : 'Order on Demand')
+                    : (lang === 'ar' ? 'أضف للسلة' : 'Add to Cart')}
+                </span>
               </>
             ) : (
               <>
@@ -385,39 +397,29 @@ const BoxProductCard = ({ box, whatsappNumber, onZoomImage, inventoryMap = {} })
 /* ─── MAIN BOXES PAGE COMPONENT ───────────────────────────── */
 export const BoxesPage = () => {
   const { lang, isRtl } = useLanguage();
+  // Instant render with zero delay
   const [boxesProducts, setBoxesProducts] = useState(FALLBACK_BOXES);
-  const [loading, setLoading] = useState(false);
-  const [whatsappNumber, setWhatsappNumber] = useState('218946859163');
   const [boxInventory, setBoxInventory] = useState({});
   const [lightboxImg, setLightboxImg] = useState(null);
 
-  const ChevronFwd = isRtl ? ChevronLeft : ChevronRight;
-
+  // Silent background sync without blocking spinner
   useEffect(() => {
     let isMounted = true;
 
-    const fetchData = async () => {
-      setLoading(true);
+    const fetchBackgroundUpdates = async () => {
       try {
-        const [contactRes, prodRes, boxInvRes] = await Promise.all([
-          supabase.from('settings').select('value').eq('key', 'contact_links').single(),
+        const [prodRes, boxInvRes] = await Promise.all([
           supabase.from('accessory_products').select('*, colors:accessory_product_colors(*)').eq('is_active', true).order('sort_order', { ascending: true }),
           supabase.from('settings').select('value').eq('key', 'box_variants_inventory').maybeSingle()
         ]);
 
         if (!isMounted) return;
 
-        if (contactRes.data?.value?.whatsapp) {
-          const match = String(contactRes.data.value.whatsapp).match(/\d+/);
-          if (match) setWhatsappNumber(match[0]);
-        }
-
         if (boxInvRes.data?.value?.variants) {
           setBoxInventory(boxInvRes.data.value.variants);
         }
 
         if (!prodRes.error && prodRes.data && prodRes.data.length > 0) {
-          // Filter products that belong to boxes
           const boxList = prodRes.data.filter(p => {
             const name = `${p.name_ar || ''} ${p.name_en || ''} ${p.size || ''}`.toLowerCase();
             return name.includes('box') || name.includes('بوكس') || name.includes('inch');
@@ -428,13 +430,10 @@ export const BoxesPage = () => {
         }
       } catch (err) {
         console.warn('Background boxes sync notice:', err);
-      } finally {
-        if (isMounted) setLoading(false);
       }
     };
 
-    fetchData();
-
+    fetchBackgroundUpdates();
     return () => { isMounted = false; };
   }, []);
 
@@ -577,71 +576,63 @@ export const BoxesPage = () => {
         </section>
       </div>
 
-      {/* ── MAIN CONTENT ── */}
-      <div className="container" style={{ paddingBlock: '3rem', flex: 1 }}>
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
-            <div className="spinner" style={{ margin: '0 auto 1rem auto' }} />
-            <p>{lang === 'ar' ? 'جاري تحميل البوكسات...' : 'Loading boxes...'}</p>
-          </div>
-        ) : (
-          <div>
-            {/* Available Direct Order Info Banner */}
-            <div className="card animate-fade-in" style={{
-              padding: '1.15rem 1.45rem',
-              background: 'linear-gradient(135deg, #FAF7F2 0%, #F5ECE1 100%)',
-              border: '1.5px solid #E6DDD2',
-              borderRadius: '16px',
-              marginBottom: '2rem',
+      {/* ── MAIN CONTENT (INSTANT ZERO DELAY) ── */}
+      <div className="container" style={{ paddingBlock: '1.5rem 3rem', flex: 1, maxWidth: '1280px', paddingInline: '1.25rem' }}>
+        <div>
+          {/* Active Info Banner */}
+          <div className="card animate-fade-in" style={{
+            padding: '1.15rem 1.45rem',
+            background: 'linear-gradient(135deg, #FAF7F2 0%, #F5ECE1 100%)',
+            border: '1.5px solid #E6DDD2',
+            borderRadius: '16px',
+            marginBottom: '2rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.1rem',
+            boxShadow: '0 4px 16px rgba(35, 24, 16, 0.04)'
+          }}>
+            <div style={{
+              width: 46,
+              height: 46,
+              borderRadius: '12px',
+              background: '#F0E5D8',
+              color: '#684835',
               display: 'flex',
               alignItems: 'center',
-              gap: '1.1rem',
-              boxShadow: '0 4px 16px rgba(35, 24, 16, 0.04)'
+              justifyContent: 'center',
+              fontSize: '1.4rem',
+              flexShrink: 0
             }}>
-              <div style={{
-                width: 46,
-                height: 46,
-                borderRadius: '12px',
-                background: '#F0E5D8',
-                color: '#684835',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.4rem',
-                flexShrink: 0
-              }}>
-                📦
-              </div>
-              <div style={{ flex: 1 }}>
-                <h4 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 900, color: '#2C1A11', fontFamily: 'Cairo, sans-serif' }}>
-                  {lang === 'ar' ? 'بوكسات تنظيم وحفظ الأدوات الطبية — متوفرة للطلب المباشر' : 'Dental Tool Boxes & Organizers — Available for Direct Order'}
-                </h4>
-                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.84rem', color: '#684835', lineHeight: 1.5 }}>
-                  {lang === 'ar'
-                    ? 'اختر الحجم المناسب واضغط على أي بوكس لعرض تفاصيله الكاملة واختيار اللون المطلوب وإضافته إلى سلتك.'
-                    : 'Choose your desired size, click any box to view full specifications, select available color, and add to your cart.'}
-                </p>
-              </div>
+              📦
             </div>
-
-            {/* Boxes Products Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '2rem'
-            }}>
-              {boxesProducts.map(box => (
-                <BoxProductCard
-                  key={box.id}
-                  box={box}
-                  whatsappNumber={whatsappNumber}
-                  inventoryMap={boxInventory}
-                  onZoomImage={(url, title) => setLightboxImg({ url, title })}
-                />
-              ))}
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 900, color: '#2C1A11', fontFamily: 'Cairo, sans-serif' }}>
+                {lang === 'ar' ? 'بوكسات تنظيم وحفظ الأدوات الطبية — متوفرة للطلب المباشر' : 'Dental Tool Boxes & Organizers — Available for Direct Order'}
+              </h4>
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.84rem', color: '#684835', lineHeight: 1.5 }}>
+                {lang === 'ar'
+                  ? 'اختر الحجم المناسب واضغط على أي بوكس لعرض تفاصيله الكاملة واختيار اللون المطلوب وإضافته إلى سلتك.'
+                  : 'Choose your desired size, click any box to view full specifications, select available color, and add to your cart.'}
+              </p>
             </div>
           </div>
-        )}
+
+          {/* Boxes Products Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
+            gap: '2rem'
+          }}>
+            {boxesProducts.map(box => (
+              <BoxProductCard
+                key={box.id}
+                box={box}
+                inventoryMap={boxInventory}
+                onZoomImage={(url, title) => setLightboxImg({ url, title })}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* ── LIGHTBOX ZOOM MODAL ── */}
@@ -666,10 +657,10 @@ export const BoxesPage = () => {
               position: 'relative',
               maxWidth: '90vw',
               maxHeight: '85vh',
-              background: 'var(--surface-color)',
-              borderRadius: 'var(--radius-lg)',
+              background: '#FFFFFF',
+              borderRadius: '20px',
               overflow: 'hidden',
-              boxShadow: 'var(--shadow-lg)'
+              boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
             }}
           >
             <button
@@ -680,7 +671,7 @@ export const BoxesPage = () => {
                 top: '1rem',
                 right: '1rem',
                 background: 'rgba(0,0,0,0.7)',
-                color: '#ffffff',
+                color: '#FFFFFF',
                 border: 'none',
                 borderRadius: '50%',
                 width: 36,
@@ -704,6 +695,9 @@ export const BoxesPage = () => {
                 src={lightboxImg.url}
                 alt={lightboxImg.title}
                 draggable={false}
+                onError={(e) => {
+                  e.currentTarget.src = resolveBoxImg('accessories/box17-colors.png');
+                }}
                 onContextMenu={e => e.preventDefault()}
                 style={{
                   width: '100%',
@@ -718,7 +712,7 @@ export const BoxesPage = () => {
               </div>
             </div>
 
-            <div style={{ padding: '0.85rem 1.25rem', background: 'var(--accent)', color: 'var(--text-main)', fontWeight: 800, fontSize: '0.9rem', textAlign: 'center' }}>
+            <div style={{ padding: '0.85rem 1.25rem', background: '#F8F4EE', color: '#2C1A11', fontWeight: 800, fontSize: '0.9rem', textAlign: 'center' }}>
               {lightboxImg.title}
             </div>
           </div>

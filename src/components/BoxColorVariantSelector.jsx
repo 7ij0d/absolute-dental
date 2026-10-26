@@ -106,12 +106,16 @@ export const BoxColorVariantSelector = ({
               style={{
                 fontSize: '0.72rem',
                 fontWeight: 700,
-                color: (selectedColor.available_stock > 0) ? '#059669' : '#DC2626'
+                color: (selectedColor.status === 'on_demand')
+                  ? '#D97706'
+                  : (selectedColor.available_stock > 0) ? '#059669' : '#DC2626'
               }}
             >
-              {selectedColor.available_stock > 0
-                ? (lang === 'ar' ? '(متوفر)' : '(In Stock)')
-                : (lang === 'ar' ? '(غير متوفر)' : '(Out of Stock)')}
+              {selectedColor.status === 'on_demand'
+                ? (lang === 'ar' ? '(متوفر على الطلب)' : '(On Demand)')
+                : selectedColor.available_stock > 0
+                  ? (lang === 'ar' ? '(متوفر فوراً)' : '(In Stock)')
+                  : (lang === 'ar' ? '(غير متوفر)' : '(Out of Stock)')}
             </span>
           </div>
         )}

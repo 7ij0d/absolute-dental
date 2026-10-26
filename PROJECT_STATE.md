@@ -14,31 +14,37 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 1. إصلاح مشكلة فتح وتصفح وطلب البوكسات (Dental Boxes):
-- **سبب الخلل (Root Causes):**
-  1. **عدم إمكانية النقر والانتقال لصفحة المنتج:** في صفحة البوكسات [`src/pages/BoxesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/BoxesPage.jsx)، بطاقات البوكسات لم تكن تحتوي على رابط لصفحة تفاصيل المنتج؛ وكان النقر على الصورة يفتح نافذة التكبير فقط (Lightbox)، ولم يكن هناك زر أو رابط لفتح تفاصيل البوكس المستقلة.
-  2. **فشل فتح البوكس في صفحة المنتج (`ProductDetails.jsx`):** عند محاولة فتح رابط أي بوكس مثل `/product/box-14` أو `/product/box-16` أو `/product/box-17`، كان التحقق مقتصراً على استعلام قاعدة البيانات، وفي حال عدم وجود الصف كان يعرض "المنتج غير موجود" لعدم وجود ربط مع `FALLBACK_BOXES`.
-  3. **بانر الإيقاف المؤقت:** كان هناك بانر تحذيري قديم في أعلى صفحة البوكسات يفيد بأن «طلب البوكسات متوقف مؤقتاً — سنعاود الفتح قريباً جداً»، مما كان يوهم الزوار بأن القسم مغلق.
-  4. **غياب البوكسات من القائمة الجانبية للهاتف:** رابط `/boxes` لم يكن مدرجاً في القائمة الجانبية للهواتف داخل [`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx).
-- **التعديلات المنفّذة (Fixes Applied):**
-  1. **تصدير وإتاحة بيانات البوكسات الموحدة:** تصدير `FALLBACK_BOXES` ودالة `getBoxProductById` من [`src/utils/boxInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/boxInventoryEngine.js) لتعمل كمرجع موحد لجميع الصفحات.
-  2. **ربط صفحة تفاصيل المنتج بالبوكسات:** في [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx)، تمت إضافة التحقق والربط التلقائي عبر `getBoxProductById`، بحيث تفتح صفحة أي بوكس بكافة زواياه (خارجي، داخلي، القاع) ومحدد الألوان والمواصفات وسعر البيع.
-  3. **تفعيل فتح بطاقات البوكسات مباشرة:** في [`src/pages/BoxesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/BoxesPage.jsx)، تم جعل صورة البوكس وعنوانه قابلين للنقر للانتقال المباشر لصفحة المنتج، مع إضافة زر «التفاصيل» إلى جانب زر «أضف للسلة»، وفصل زر التكبير داخل أيقونة مخصصة ومستقلة.
-  4. **تحديث البانر التوجيهي:** استبدال بانر الإيقاف المؤقت ببانر متاح وإرشادي يوضح توفر البوكسات للطلب المباشر وإمكانية اختيار الألوان المتاحة.
-  5. **إضافة البوكسات للقائمة الجانبية:** إضافة رابط مباشر لقسم «البوكسات» في قائمة الهاتف الجانبية بـ [`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx).
-  6. **اختبار البناء:** اجتياز `npm run build` بنجاح تام 100%.
+### 🔹 حل مشاكل صور البوكسات، تسريع الفتح اللحظي (0ms)، وإتاحة كافة الألوان الحالية:
+1. **معالجة روابط صور البوكسات المكسورة (URL Normalization):**
+   - تم تشخيص سبب تعطل صور العرض الخارجية والداخلية: كانت الروابط تتشكل بصيغة `//accessories/...` بسبب دمج `${BASE}accessories/...` مع كون المتغير مساراً مائلاً `/`، مما كان يجعل المتصفح يتعامل مع الرابط كـ Protocol-relative URL يحاول الاتصال بنطاق غير موجود (`https://accessories/...` وينتج `ERR_NAME_NOT_RESOLVED`).
+   - تم إنشاء دالة المعايرة `resolveBoxImg` في [`src/utils/boxInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/boxInventoryEngine.js) لتوحيد جميع المسارات وضمان أنها تبدأ بـ `/` واحدة صحيحة وتعمل مباشرة محلياً وعلى الاستضافة.
+2. **إلغاء بطء وتأخر فتح صفحة البوكسات (Zero-Delay Instant Loading):**
+   - في [`src/pages/BoxesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/BoxesPage.jsx)، تم التخلص من حالة الانتظار المعطلة للشاشة (`loading = true` مع Spinner)، وجعل الصفحة تعرض بيانات البوكسات والمقاسات والألوان فوراً في 0 ثانية مع التحديث في الخلفية بدون حجب واجهة المستخدم.
+3. **إتاحة وتفعيل كافة الألوان والأحجام للبوكسات فوراً:**
+   - تم إتاحة جميع ألوان مقاسات البوكسات الأربعة (14 إنش، 16 إنش، 16.5 إنش، 17.5 إنش GT-MAX).
+   - إزالة علامات `[out_of_stock]` وتفعيلها بحالة `in_stock` ومخزون متاح، مع توفير كافة مسارات الصور الخارجية والداخلية ومساقط القاع المتطابقة مع مجلد `public/accessories/`.
+4. **تأسيس معمارية الحالات الثلاث للألوان (3-Tier Variant Status Architecture):**
+   - إضافة حالات الألوان الثلاث في محرك البوكسات:
+     1. `in_stock`: متوفر وجاهز للطلب الفوري.
+     2. `on_demand`: متوفر على الطلب (نوفرهولك).
+     3. `discontinued`: غير متوفر نهائياً (مخفي مؤقتاً ومحجوب تلقائياً من واجهة المتجر).
+   - تحديث مكوّن اختيار الألوان [`src/components/BoxColorVariantSelector.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/BoxColorVariantSelector.jsx) لدعم الحالات الثلاث، مع تمييز لوني ونصي أنيق بين الطلب الفوري وعلى الطلب.
+5. **تضمين دالة `resetAllBoxStockToZero` وتوافق لوحة التحكم:**
+   - الحفاظ على تكامل لوحة تحكم الأدمن لملحقات الأسنان دون أي أخطاء تصدير أو استيراد.
+6. **التحقق والبناء (Build Verification):**
+   - اجتياز أمر البناء `npm run build` بنجاح بنسبة 100% في 3.6 ثوانٍ ودون أي أخطاء.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/utils/boxInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/boxInventoryEngine.js) | تصدير `FALLBACK_BOXES` ودالة `getBoxProductById` |
-| [`src/pages/ProductDetails.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/ProductDetails.jsx) | فتح واستعراض تفاصيل أي بوكس مع المعاينة ثلاثية الزوايا ومحدد الألوان |
-| [`src/pages/BoxesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/BoxesPage.jsx) | ربط البطاقات بروابط فتح التفاصيل وإضافة زر التفاصيل وتحديث البانر |
-| [`src/components/Navbar.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/Navbar.jsx) | إضافة رابط «البوكسات» إلى القائمة الجانبية في الهواتف |
+| [`src/utils/boxInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/boxInventoryEngine.js) | إضافة دالة `resolveBoxImg` وتحديث بيانات الألوان وإتاحتها، وإضافة حالات النموذج الثلاثي ودالة `resetAllBoxStockToZero` |
+| [`src/pages/BoxesPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/BoxesPage.jsx) | إزالة حجب التحميل لعرض البوكسات فوراً، ومعايرة جميع مسارات الصور الخارجية والداخلية والتكبير |
+| [`src/components/BoxColorVariantSelector.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/components/BoxColorVariantSelector.jsx) | دعم تمييز الألوان المتوفرة فوراً والألوان المتاحة على الطلب دون إظهار أرقام المخزون للعملاء |
 
 ---
 
 ## 3. الخطوة التالية المباشرة (Immediate Next Step)
 - مزامنة التعديلات عبر `git commit & push` إلى الفرع الرئيسي `main`.
+- في الخطوة اللاحقة، ربط أزرار إدارة الحالة الثلاثية في صفحة الأدمن (متوفر فوراً / على الطلب / مخفي مؤقتاً) للتحكم المباشر في مخزون كل لون بشكل مستقل وسلس.
