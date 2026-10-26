@@ -79,7 +79,7 @@ const STUDY_YEARS = [
     subtitleEn: 'Coming Soon',
     descAr: 'سيتم إضافة المواد والأدوات الخاصة بالسنة الرابعة قريباً.',
     descEn: 'Subjects and supplies for 4th Year will be added soon.',
-    href: null,
+    href: '/year/4th-year',
     isComingSoon: true,
     webp: year4ArtWebp,
     png: year4ArtPng,
@@ -185,13 +185,15 @@ export const StudyToolsPage = () => {
 
             if (year.isComingSoon) {
               return (
-                <div
+                <Link
                   key={year.id}
+                  to={year.href || '/year/4th-year'}
                   className="study-year-card study-year-card--disabled"
                   aria-label={`${lang === 'ar' ? year.titleAr : year.titleEn} - ${lang === 'ar' ? 'قريباً' : 'Coming Soon'}`}
+                  style={{ textDecoration: 'none' }}
                 >
                   {innerCard}
-                </div>
+                </Link>
               );
             }
 

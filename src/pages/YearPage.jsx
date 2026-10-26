@@ -112,18 +112,27 @@ export const YearPage = () => {
   const { slug } = useParams();
   const { lang, isRtl } = useLanguage();
 
-  const isYear3 = slug === '3rd-year' || slug === '3rd' || slug?.startsWith('3');
-  const isYear2 = !isYear3 && (slug === '2nd-year' || slug === '2nd' || slug?.startsWith('2'));
-  const isYear1 = !isYear3 && !isYear2;
+  const isYear4 = slug === '4th-year' || slug === '4th' || slug?.startsWith('4');
+  const isYear3 = !isYear4 && (slug === '3rd-year' || slug === '3rd' || slug?.startsWith('3'));
+  const isYear2 = !isYear4 && !isYear3 && (slug === '2nd-year' || slug === '2nd' || slug?.startsWith('2'));
+  const isYear1 = !isYear4 && !isYear3 && !isYear2;
 
-  const targetSlug = isYear3 ? '3rd-year' : (isYear2 ? '2nd-year' : '1st-year');
-  const defaultYear = isYear3 ? DEFAULT_YEARS[2] : (isYear2 ? DEFAULT_YEARS[1] : DEFAULT_YEARS[0]);
+  const targetSlug = isYear4 ? '4th-year' : (isYear3 ? '3rd-year' : (isYear2 ? '2nd-year' : '1st-year'));
+  const defaultYear = isYear4
+    ? DEFAULT_YEARS[3]
+    : (isYear3 ? DEFAULT_YEARS[2] : (isYear2 ? DEFAULT_YEARS[1] : DEFAULT_YEARS[0]));
   const [yearData, setYearData] = useState(() => DEFAULT_YEARS.find(y => y.slug === slug || y.slug === targetSlug) || defaultYear);
 
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
 
   useEffect(() => {
-    const CACHE_KEY = `year_v3:${targetSlug}`;
+    // If year 4, immediately maintain coming soon state without fallback
+    if (isYear4) {
+      setYearData(DEFAULT_YEARS[3]);
+      return;
+    }
+
+    const CACHE_KEY = `year_v4:${targetSlug}`;
 
     const fetchYear = async () => {
       try {
@@ -145,10 +154,11 @@ export const YearPage = () => {
     } else {
       fetchYear();
     }
-  }, [slug, targetSlug]);
+  }, [slug, targetSlug, isYear4]);
 
   // ── COMING SOON VIEW (Year 4 only) ──
-  if (yearData.is_coming_soon) {
+  if (isYear4 || yearData?.is_coming_soon) {
+    const yr = yearData || DEFAULT_YEARS[3];
     return (
       <div className="choose-subject-page">
         <div className="container choose-subject-container">
@@ -158,7 +168,7 @@ export const YearPage = () => {
             <ChevronSep size={13} className="breadcrumb-separator" />
             <Link to="/study-tools" className="breadcrumb-link">{lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}</Link>
             <ChevronSep size={13} className="breadcrumb-separator" />
-            <span className="breadcrumb-current">{lang === 'ar' ? yearData.name_ar : yearData.name_en}</span>
+            <span className="breadcrumb-current">{lang === 'ar' ? yr.name_ar : yr.name_en}</span>
           </nav>
 
           <div className="coming-soon-card">
@@ -166,15 +176,15 @@ export const YearPage = () => {
               <Clock size={36} />
             </div>
             <h1 className="coming-soon-title">
-              {lang === 'ar' ? `${yearData.name_ar} — قريباً` : `${yearData.name_en} — Coming Soon`}
+              {lang === 'ar' ? `${yr.name_ar} — قريباً` : `${yr.name_en} — Coming Soon`}
             </h1>
             <p className="coming-soon-desc">
               {lang === 'ar'
                 ? 'نعمل حالياً على تجهيز وفهرسة كافة الأدوات والمواد المطلوبة لهذه السنة الدراسية.'
                 : 'We are currently preparing and indexing all required tools and supplies for this academic year.'}
             </p>
-            <Link to="/year/1st-year" className="btn btn-secondary">
-              {lang === 'ar' ? 'تصفح السنة الأولى' : 'Browse 1st Year'}
+            <Link to="/study-tools" className="btn btn-secondary">
+              {lang === 'ar' ? 'العودة لأدوات الدراسة' : 'Back to Study Tools'}
             </Link>
           </div>
         </div>

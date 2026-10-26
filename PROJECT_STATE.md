@@ -14,26 +14,28 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 1. إصلاح خطأ فتح وإرسال نموذج «مش متوفر حالياً؟ نقدرو نوفروهولك»:
+### 🔹 1. إصلاح توجيه وعرض مواد السنة الرابعة لتظهر صفحة «السنة الرابعة — قريباً»:
 - **سبب الخلل (Root Cause):**
-  1. عند الضغط على قسم «مش متوفر حالياً؟ نقدرو نوفروهولك» بالصفحة الرئيسية لفتح نموذج طلب توفير المنتج، كان يتم استدعاء الأيقونة `<ImageIcon size={17} />` في السطر 1257 دون أن تكون مستوردة من مكتبة `lucide-react` في [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx)، مما كان يسبب استثناء جافاسكريبت فوري (`ReferenceError: ImageIcon is not defined`) وظهور رسالة خطأ عند محاولة فتح النافذة.
-  2. كانت دالة `submitProductAvailabilityRequest` تفرض شرط تسجيل دخول إجباري `AUTH_REQUIRED`، مما كان يمنع الزوار والزبائن العاديين من إرسال طلباتهم برقم الهاتف مباشرة.
+  - في صفحة [`src/pages/YearPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/YearPage.jsx)، كان التحقق من السنة مبنياً على `isYear3` و `isYear2` و `isYear1 = !isYear3 && !isYear2`.
+  - عند الدخول إلى رابط السنة الرابعة `/year/4th-year`، كانت قيم `isYear3` و `isYear2` خطأ (`false`)، وبالتالي اعتُبرت السنة الأولى (`isYear1 = true`) مع `targetSlug = '1st-year'`!
+  - كان استدعاء البيانات يجلب مواد السنة الأولى (`YEAR_1_SUBJECTS` — تشريح الأسنان ومواد طب الأسنان) بدلاً من البقاء في حالة "قريباً".
 - **التعديلات المنفّذة (Fixes Applied):**
-  1. استيراد أيقونة `ImageIcon` مباشرة من `lucide-react` في [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx).
-  2. تحديث دالة `submitProductAvailabilityRequest` في [`src/utils/communityAndRequestsEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/communityAndRequestsEngine.js) للسماح لأي زبون أو زائر بتقديم طلب توفير المنتج مباشرة برقم هاتفه، مع ربط حسابه تلقائياً إذا كان مسجلاً للدخول.
-  3. تحديث `handleSubmitProductRequest` في [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx) ليعمل بسلاسة فورية دون الحاجة لإعادة التوجيه إلى تسجيل الدخول.
-  4. اختبار الإرسال المباشر للزبائن والزوار بنجاح مع قاعدة البيانات.
-  5. بناء النسخة الإنتاجية (`npm run build`) بنجاح تام بنسبة 100%.
+  1. إضافة فحص صريح ومباشر للسنة الرابعة `isYear4 = slug === '4th-year' || slug === '4th' || slug?.startsWith('4')` في [`src/pages/YearPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/YearPage.jsx).
+  2. تعيين `targetSlug = isYear4 ? '4th-year' : ...` و `defaultYear = isYear4 ? DEFAULT_YEARS[3] : ...` مع الاحتفاظ بخاصية `is_coming_soon: true`.
+  3. حماية حالة الـ Coming Soon بحيث تُعرض بطاقة «السنة الرابعة — قريباً» مباشرة ومنع الاستبدال ببيانات أي سنة أخرى.
+  4. تحسين زر الرجوع داخل بطاقة «قريباً» ليوجه الطالب بسلاسة إلى صفحة أدوات الدراسة `/study-tools`.
+  5. ربط بطاقة السنة الرابعة في صفحة [`src/pages/StudyToolsPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/StudyToolsPage.jsx) بالمسار `/year/4th-year` لفتح شاشة «قريباً» مباشرة عند النقر عليها.
+  6. نجاح اختبار البناء الإنتاجي (`npm run build`) بنسبة 100% دون أي أخطاء.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/pages/Home.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/Home.jsx) | استيراد `ImageIcon` وتمكين الزبائن والزوار من إرسال طلب توفير المنتج مباشرة |
-| [`src/utils/communityAndRequestsEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/communityAndRequestsEngine.js) | إلغاء شرط `AUTH_REQUIRED` الإجباري لطلبات توفير المنتجات ودعم الزوار |
+| [`src/pages/YearPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/YearPage.jsx) | إضافة دعم صريح للسنة الرابعة `isYear4` وعرض واجهة «السنة الرابعة — قريباً» بدلاً من جلب مواد السنة الأولى |
+| [`src/pages/StudyToolsPage.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/StudyToolsPage.jsx) | ربط بطاقة السنة الرابعة بالمسار `/year/4th-year` مع تفعيل الانتقال لصفحة قريباً |
 
 ---
 
 ## 3. الخطوة التالية المباشرة (Immediate Next Step)
-- رفع التحديث إلى الفرع الرئيسي `main` ليصبح النموذج فعالاً وشغالاً 100% أمام الزوار على الدومين الجديد.
+- مزامنة ورفع الكود عبر `git commit & push` إلى الفرع الرئيسي `main` ليتم نشره فوراً على بيئة الإنتاج للدومين `absolutedental.ly`.
