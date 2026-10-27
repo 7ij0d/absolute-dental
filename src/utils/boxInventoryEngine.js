@@ -91,10 +91,11 @@ export const FALLBACK_BOXES = [
     main_image: '/accessories/box14-colors.png',
     inside_image: '/accessories/box14-pink.jpg',
     colors: [
-      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box14-colors.png', inside_image_url: '/accessories/box14-pink.jpg' },
       { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box14-pink.jpg', inside_image_url: '/accessories/box14-colors.png' },
-      { id: 'black', hex_code: '#111111', label_ar: 'أسود', label_en: 'Black', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box14-colors.png', inside_image_url: '/accessories/box14-pink.jpg' },
-      { id: 'blue', hex_code: '#42A5F5', label_ar: 'أزرق فاتح', label_en: 'Light Blue', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box14-colors.png', inside_image_url: '/accessories/box14-pink.jpg' }
+      { id: 'purple', hex_code: '#7B3FE4', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box14-colors.png', inside_image_url: '/accessories/box14-pink.jpg' },
+      { id: 'blue', hex_code: '#42A5F5', label_ar: 'أزرق فاتح', label_en: 'Light Blue', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box14-colors.png', inside_image_url: '/accessories/box14-pink.jpg' },
+      { id: 'red', hex_code: '#D32F2F', label_ar: 'أحمر', label_en: 'Red', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box14-colors.png', inside_image_url: '/accessories/box14-pink.jpg' },
+      { id: 'black', hex_code: '#111111', label_ar: 'أسود', label_en: 'Black', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box14-colors.png', inside_image_url: '/accessories/box14-pink.jpg' }
     ]
   },
   {

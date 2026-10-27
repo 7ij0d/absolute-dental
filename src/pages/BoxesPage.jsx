@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import dentalBoxesArtwork from '../assets/images/dental-boxes-artwork.png';
 import {
-  splitBoxColorsByAvailability,
   cleanColorLabel,
   FALLBACK_BOXES,
   resolveBoxImg
@@ -30,36 +29,36 @@ const BoxProductCard = ({ box, inventoryMap = {} }) => {
     });
   };
 
-  const { availableColors, unavailableColors } = splitBoxColorsByAvailability(
-    box.colors && box.colors.length > 0
-      ? box.colors
-      : [{ id: 'default', hex_code: '#CDBFA6', label_en: 'Standard', label_ar: 'أساسي', image_url: box.main_image || box.image_url }],
-    inventoryMap
-  );
+  // Extract color list preserving order
+  const colorsList = Array.isArray(box.colors) && box.colors.length > 0
+    ? box.colors
+    : [{ id: 'default', hex_code: '#CDBFA6', label_en: 'Standard', label_ar: 'أساسي', image_url: box.main_image || box.image_url }];
 
-  const colorsList = [...availableColors, ...unavailableColors];
-
-  const [selectedColor, setSelectedColor] = useState(
-    availableColors[0] || unavailableColors[0] || colorsList[0] || null
-  );
+  // Stable selected color state
+  const [selectedColor, setSelectedColor] = useState(() => colorsList[0] || null);
   const [addedNotice, setAddedNotice] = useState(false);
 
+  // Synchronize selection safely without disruptive jumps
   useEffect(() => {
-    if (availableColors.length > 0) {
-      setSelectedColor(prev => {
-        const stillAvailable = prev && availableColors.find(c => c.id === prev.id || c.color_id === prev.color_id);
-        return stillAvailable || availableColors[0];
-      });
-    } else if (unavailableColors.length > 0) {
-      setSelectedColor(prev => {
-        const stillMatch = prev && unavailableColors.find(c => c.id === prev.id || c.color_id === prev.color_id);
-        return stillMatch || unavailableColors[0];
-      });
-    }
-  }, [box, inventoryMap]);
+    setSelectedColor(prev => {
+      if (!prev) return colorsList[0] || null;
+      const currentMatch = colorsList.find(c => 
+        (c.id && c.id === prev.id) || 
+        (c.color_id && c.color_id === prev.color_id) ||
+        (c.label_en && c.label_en === prev.label_en)
+      );
+      return currentMatch || colorsList[0] || null;
+    });
+  }, [box.colors]);
 
   const activeImage = resolveBoxImg(selectedColor?.image_url || box.main_image || '/accessories/box17-colors.png');
   const effectivePrice = selectedColor?.price || box.price || 0;
+
+  const handleSelectColor = (color) => {
+    const isUnavailable = color.status === 'out_of_stock' || (color.available_stock !== undefined && color.available_stock <= 0 && color.status !== 'on_demand');
+    if (isUnavailable) return;
+    setSelectedColor(color);
+  };
 
   const handleAddToCart = () => {
     if (!selectedColor) return;
@@ -86,19 +85,7 @@ const BoxProductCard = ({ box, inventoryMap = {} }) => {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: '#FFFFFF',
-        borderRadius: '20px',
-        border: '1px solid rgba(0, 0, 0, 0.05)',
-        boxShadow: '0 4px 20px rgba(44, 26, 17, 0.03)',
-        padding: '1.25rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.65rem',
-        transition: 'transform 0.25s ease, box-shadow 0.25s ease'
-      }}
-    >
+    <div className="dental-box-card">
       {/* ── 1. IMAGE CONTAINER ── */}
       <div
         onClick={handleOpenDetails}
@@ -127,7 +114,7 @@ const BoxProductCard = ({ box, inventoryMap = {} }) => {
             height: '100%',
             objectFit: 'contain',
             padding: '0.75rem',
-            transition: 'opacity 0.2s ease'
+            transition: 'opacity 0.25s ease'
           }}
         />
       </div>
@@ -162,47 +149,94 @@ const BoxProductCard = ({ box, inventoryMap = {} }) => {
       {/* ── 4. THIN HORIZONTAL DIVIDER ── */}
       <div style={{ height: '1px', backgroundColor: '#EFE8DE', width: '100%', margin: '0.2rem 0 0.5rem 0' }} />
 
-      {/* ── 5. COLOR SELECTOR ROW ── */}
+      {/* ── 5. COLOR SELECTOR SECTION ── */}
       <div style={{
         display: 'flex',
-        alignItems: 'center',
-        gap: '0.75rem',
-        margin: '0.1rem 0 0.65rem 0',
-        direction: isRtl ? 'rtl' : 'ltr'
+        flexDirection: 'column',
+        gap: '0.45rem',
+        margin: '0.15rem 0 0.85rem 0',
+        direction: isRtl ? 'rtl' : 'ltr',
+        minHeight: '72px'
       }}>
-        <span style={{
-          fontSize: '0.92rem',
-          fontWeight: 700,
-          color: '#5A4232',
-          fontFamily: "'Cairo', sans-serif"
+        {/* Label & Active Color Name */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '0.5rem'
         }}>
-          {lang === 'ar' ? 'اختر اللون:' : 'Select Color:'}
-        </span>
+          <span style={{
+            fontSize: '0.92rem',
+            fontWeight: 700,
+            color: '#5A4232',
+            fontFamily: "'Cairo', sans-serif"
+          }}>
+            {lang === 'ar' ? 'اختر اللون:' : 'Select Color:'}
+          </span>
 
-        {/* Color Swatch Circles */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
+          {selectedColor && (
+            <span style={{
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              color: '#4A3326',
+              backgroundColor: '#F5ECE1',
+              padding: '0.15rem 0.6rem',
+              borderRadius: '999px',
+              fontFamily: "'Cairo', sans-serif"
+            }}>
+              {cleanColorLabel(selectedColor, lang)}
+            </span>
+          )}
+        </div>
+
+        {/* Swatches Flex Wrap */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.55rem',
+          flexWrap: 'wrap'
+        }}>
           {colorsList.map((c) => {
-            const isSelected = selectedColor && (selectedColor.id === c.id || selectedColor.color_id === c.color_id);
+            const isSelected = selectedColor && (
+              (selectedColor.id && selectedColor.id === c.id) ||
+              (selectedColor.color_id && selectedColor.color_id === c.color_id) ||
+              (selectedColor.label_en && selectedColor.label_en === c.label_en)
+            );
+            const isUnavailable = c.status === 'out_of_stock' || (c.available_stock !== undefined && c.available_stock <= 0 && c.status !== 'on_demand');
+
             return (
               <button
-                key={c.id || c.color_id}
+                key={c.id || c.color_id || c.label_en}
                 type="button"
-                onClick={() => setSelectedColor(c)}
-                title={cleanColorLabel(c, lang)}
+                onClick={() => handleSelectColor(c)}
+                disabled={isUnavailable}
+                title={`${cleanColorLabel(c, lang)}${isUnavailable ? (lang === 'ar' ? ' (غير متوفر حالياً)' : ' (Out of stock)') : ''}`}
+                className="dental-box-swatch-btn"
                 style={{
-                  width: 27,
-                  height: 27,
-                  borderRadius: '50%',
                   backgroundColor: c.hex_code || '#CDBFA6',
-                  border: isSelected ? 'none' : '1px solid rgba(0, 0, 0, 0.12)',
-                  boxShadow: isSelected ? '0 0 0 2.5px #FFFFFF, 0 0 0 4.5px #2C1A11' : 'none',
-                  cursor: 'pointer',
-                  padding: 0,
-                  transform: isSelected ? 'scale(1.08)' : 'scale(1)',
-                  transition: 'all 0.15s ease',
-                  flexShrink: 0
+                  border: isSelected ? '2px solid #FFFFFF' : '1px solid rgba(0, 0, 0, 0.12)',
+                  boxShadow: isSelected
+                    ? '0 0 0 2.5px #4A3326, 0 2px 6px rgba(74, 51, 38, 0.22)'
+                    : '0 1px 3px rgba(0,0,0,0.06)',
+                  cursor: isUnavailable ? 'not-allowed' : 'pointer',
+                  opacity: isUnavailable ? 0.38 : 1
                 }}
-              />
+              >
+                {isUnavailable && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '12%',
+                      right: '12%',
+                      height: '1.5px',
+                      backgroundColor: '#DC2626',
+                      transform: 'rotate(45deg)',
+                      borderRadius: '1px'
+                    }}
+                  />
+                )}
+              </button>
             );
           })}
         </div>
@@ -281,12 +315,24 @@ const BoxProductCard = ({ box, inventoryMap = {} }) => {
   );
 };
 
+/* ─── CANONICAL REFERENCE BLUEPRINTS ─── */
+const CANONICAL_ORDERED_BOXES = [
+  // Index 0: Top-Right in RTL 2-column grid
+  { ...FALLBACK_BOXES[2], name_en: 'Organizer Box 16.5"', name_ar: 'Organizer Box 16.5"', price: 85 },
+  // Index 1: Top-Left in RTL 2-column grid
+  { ...FALLBACK_BOXES[3], name_en: 'Professional Box — GT-MAX 17.5"', name_ar: 'Professional Box — GT-MAX 17.5"', price: 95 },
+  // Index 2: Bottom-Right in RTL 2-column grid
+  { ...FALLBACK_BOXES[0], name_en: 'Dental Tool Box 14"', name_ar: 'Dental Tool Box 14"', price: 45 },
+  // Index 3: Bottom-Left in RTL 2-column grid
+  { ...FALLBACK_BOXES[1], name_en: 'Dental Tool Box 16"', name_ar: 'Dental Tool Box 16"', price: 65 }
+];
+
 /* ─── MAIN DENTAL BOXES PAGE ─── */
 export const BoxesPage = () => {
   const { lang, isRtl } = useLanguage();
 
-  // 4 canonical boxes matching user reference
-  const [boxesProducts, setBoxesProducts] = useState(FALLBACK_BOXES);
+  // Initialize with canonical ordered blueprints
+  const [displayBoxes, setDisplayBoxes] = useState(CANONICAL_ORDERED_BOXES);
   const [boxInventory, setBoxInventory] = useState({});
 
   useEffect(() => {
@@ -301,32 +347,60 @@ export const BoxesPage = () => {
 
         if (!isMounted) return;
 
-        if (boxInvRes.data?.value?.variants) {
-          setBoxInventory(boxInvRes.data.value.variants);
-        }
+        const inventoryMap = boxInvRes.data?.value?.variants || {};
+        setBoxInventory(inventoryMap);
 
-        if (!prodRes.error && prodRes.data && prodRes.data.length > 0) {
-          // Exactly the 4 dental box sizes
-          const boxList = prodRes.data.filter(p => {
-            const name = `${p.name_ar || ''} ${p.name_en || ''} ${p.size || ''}`.toLowerCase();
-            return (name.includes('box') || name.includes('بوكس') || name.includes('inch')) &&
-                   !name.includes('لاب كوت');
+        if (!prodRes.error && Array.isArray(prodRes.data) && prodRes.data.length > 0) {
+          const dbProducts = prodRes.data;
+
+          // Reconcile database products into canonical templates without losing canonical data
+          const reconciled = CANONICAL_ORDERED_BOXES.map(canonical => {
+            // Find match in DB by size keyword
+            const dbMatch = dbProducts.find(p => {
+              const str = `${p.size || ''} ${p.name_en || ''} ${p.name_ar || ''}`.toLowerCase();
+              if (canonical.size.includes('16.5')) return str.includes('16.5');
+              if (canonical.size.includes('17')) return str.includes('17');
+              if (canonical.size.includes('14')) return str.includes('14');
+              if (canonical.size.includes('16')) return str.includes('16') && !str.includes('16.5');
+              return false;
+            });
+
+            if (!dbMatch) return canonical;
+
+            // Merge DB id for proper routing
+            const realId = dbMatch.id || canonical.id;
+            const realPrice = (typeof dbMatch.price === 'number' && dbMatch.price > 0)
+              ? dbMatch.price
+              : canonical.price;
+
+            // Reconcile colors: start from canonical colors so all variants remain present
+            const dbColors = Array.isArray(dbMatch.colors) ? dbMatch.colors : [];
+            const reconciledColors = canonical.colors.map(c => {
+              const matchedColor = dbColors.find(dbc => 
+                (dbc.color_id && dbc.color_id.toLowerCase() === c.id.toLowerCase()) ||
+                (dbc.color_id && dbc.color_id.toLowerCase() === (c.color_id || '').toLowerCase()) ||
+                (dbc.label_en && dbc.label_en.toLowerCase() === c.label_en.toLowerCase())
+              );
+
+              const invKey = matchedColor?.id || c.id || c.color_id;
+              const inv = inventoryMap[invKey] || inventoryMap[c.id] || inventoryMap[c.color_id];
+
+              return {
+                ...c,
+                ...(matchedColor ? { db_color_id: matchedColor.id, hex_code: matchedColor.hex_code || c.hex_code } : {}),
+                ...(inv ? { status: inv.status || c.status, available_stock: inv.available_stock ?? c.available_stock } : {})
+              };
+            });
+
+            return {
+              ...canonical,
+              id: realId,
+              price: realPrice,
+              colors: reconciledColors
+            };
           });
 
-          // Match reference order: 16.5" and 17.5" in row 1, 14" and 16" in row 2
-          const getRank = (b) => {
-            const s = `${b.size || ''} ${b.name_en || ''} ${b.name_ar || ''}`;
-            if (s.includes('16.5')) return 1;
-            if (s.includes('17')) return 2;
-            if (s.includes('14')) return 3;
-            if (s.includes('16')) return 4;
-            return 5;
-          };
-
-          if (boxList.length >= 4) {
-            boxList.sort((a, b) => getRank(a) - getRank(b));
-            setBoxesProducts(boxList.slice(0, 4));
-          }
+          setDisplayBoxes(reconciled);
         }
       } catch (err) {
         console.warn('Background boxes sync notice:', err);
@@ -336,21 +410,6 @@ export const BoxesPage = () => {
     fetchBackgroundUpdates();
     return () => { isMounted = false; };
   }, []);
-
-  // Standard ordered fallback: [16.5", 17.5", 14", 16"]
-  const orderedDisplayBoxes = React.useMemo(() => {
-    const box16_5 = boxesProducts.find(b => (b.size && b.size.includes('16.5')) || (b.name_en && b.name_en.includes('16.5'))) || FALLBACK_BOXES[2];
-    const box17 = boxesProducts.find(b => (b.size && b.size.includes('17')) || (b.name_en && b.name_en.includes('17'))) || FALLBACK_BOXES[3];
-    const box14 = boxesProducts.find(b => (b.size && b.size.includes('14')) || (b.name_en && b.name_en.includes('14'))) || FALLBACK_BOXES[0];
-    const box16 = boxesProducts.find(b => (b.size && (b.size === '16 inch' || (b.size.includes('16') && !b.size.includes('16.5')))) || (b.name_en && b.name_en.includes('16') && !b.name_en.includes('16.5'))) || FALLBACK_BOXES[1];
-
-    // In RTL 2-column grid:
-    // Index 0: Top-Right (Organizer Box 16.5")
-    // Index 1: Top-Left  (Professional Box — GT-MAX 17.5")
-    // Index 2: Bottom-Right (Dental Tool Box 14")
-    // Index 3: Bottom-Left  (Dental Tool Box 16")
-    return [box16_5, box17, box14, box16];
-  }, [boxesProducts]);
 
   return (
     <div style={{
@@ -499,16 +558,10 @@ export const BoxesPage = () => {
         </section>
       </div>
 
-      {/* ── 3. PRODUCT CARDS GRID (2x2 LAYOUT) ── */}
+      {/* ── 3. PRODUCT CARDS GRID (EXACT 2x2 BALANCED LAYOUT) ── */}
       <div style={{ maxWidth: '1160px', margin: '0 auto', width: '100%', padding: '0 1.25rem' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '1.75rem'
-          }}
-        >
-          {orderedDisplayBoxes.map(box => (
+        <div className="dental-boxes-grid-2x2">
+          {displayBoxes.map(box => (
             <BoxProductCard
               key={box.id}
               box={box}
