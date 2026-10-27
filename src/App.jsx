@@ -37,6 +37,7 @@ import AdminDonations from './pages/admin/AdminDonations';
 import AdminRequests from './pages/admin/Requests';
 import AdminAccessories from './pages/admin/AdminAccessories';
 import AdminQuickBoxes from './pages/admin/AdminQuickBoxes';
+import StandaloneBoxManager from './pages/admin/StandaloneBoxManager';
 import ProductRequests from './pages/admin/ProductRequests';
 import StudentExperiences from './pages/admin/StudentExperiences';
 import { runPrefetch } from './prefetch';
@@ -133,6 +134,11 @@ export const App = () => {
         <Route path="accessories" element={<AdminAccessories />} />
         <Route path="boxes" element={<AdminQuickBoxes />} />
       </Route>
+
+      {/* Standalone Dedicated Box Studio (Clean, no sidebar) */}
+      <Route path="/box-manager" element={<StandaloneBoxManager />} />
+      <Route path="/boxes-manager" element={<StandaloneBoxManager />} />
+      <Route path="/box-studio" element={<StandaloneBoxManager />} />
 
       {/* Global Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
