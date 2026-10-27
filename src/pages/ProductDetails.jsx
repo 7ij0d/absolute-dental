@@ -7,7 +7,7 @@ import supabase from '../supabaseClient';
 import ProductCard from '../components/ProductCard';
 import { useStorageImage } from '../utils/storageImage';
 import defaultProductsList from '../defaultProducts.json';
-import { groupProductsList } from '../utils/burGroupingEngine';
+import { groupProductsList, isBurGroupProduct, getBurGroup } from '../utils/burGroupingEngine';
 import {
   isBundleProduct,
   getBundleDefinition,
@@ -212,19 +212,45 @@ export const ProductDetails = () => {
         let fetchedYear = null;
         let fetchedImages = [];
 
+        // Clean ID in case it comes from cart with a size variant suffix like uuid-M
+        const cleanId = (typeof id === 'string' && id.includes('-') && id.length > 36)
+          ? id.substring(0, 36)
+          : id;
+
         // 1. Attempt Supabase fetch
         try {
-          const { data: prod } = await supabase
+          let prod = null;
+          // Attempt query with specific explicit foreign key constraint to avoid PostgREST PGRST201 ambiguity
+          const { data: joinedProd, error: joinErr } = await supabase
             .from('products')
-            .select('*, subjects(id, name_ar, name_en, slug, year_id, years(id, name_ar, name_en, slug))')
-            .eq('id', id)
+            .select('*, subjects:subjects!products_subject_id_fkey(id, name_ar, name_en, slug, year_id, years(id, name_ar, name_en, slug))')
+            .eq('id', cleanId)
             .maybeSingle();
+
+          if (!joinErr && joinedProd) {
+            prod = joinedProd;
+          } else {
+            // Direct query fallback without embedded join so it never fails on schema relationship ambiguity
+            const { data: plainProd } = await supabase
+              .from('products')
+              .select('*')
+              .eq('id', cleanId)
+              .maybeSingle();
+            if (plainProd) {
+              prod = plainProd;
+            }
+          }
 
           if (prod) {
             fetchedProd = prod;
             if (prod.subjects) {
               fetchedSubject = prod.subjects;
               fetchedYear = prod.subjects.years;
+            } else if (prod.subject_id) {
+              fetchedSubject = DEFAULT_SUBJECTS.find(s => s.id === prod.subject_id) || null;
+              if (fetchedSubject) {
+                fetchedYear = DEFAULT_YEARS.find(y => y.id === fetchedSubject.year_id) || DEFAULT_YEARS[0];
+              }
             }
 
             // 1.1 Dynamic Inventory Resolution via Unified Engine
@@ -274,6 +300,11 @@ export const ProductDetails = () => {
               .order('sort_order', { ascending: true });
 
             const allImgs = [prod.image_url];
+            if (Array.isArray(prod.images)) {
+              prod.images.forEach(img => {
+                if (img && !allImgs.includes(img)) allImgs.push(img);
+              });
+            }
             if (extraImgs && extraImgs.length > 0) {
               extraImgs.forEach(item => {
                 if (item.image_url && !allImgs.includes(item.image_url)) {
@@ -287,12 +318,34 @@ export const ProductDetails = () => {
           console.warn('Supabase fetch failed, falling back to local dataset:', dbErr);
         }
 
+        // 1.5 Fallback for Virtual Bur Groups (e.g. bur-group-tf-flat-end)
+        if (!fetchedProd && isBurGroupProduct(cleanId)) {
+          const burGroup = getBurGroup(cleanId);
+          if (burGroup) {
+            fetchedProd = {
+              id: burGroup.groupId,
+              name_en: burGroup.name_en,
+              name_ar: burGroup.name_ar,
+              price: burGroup.options?.[0]?.price || 5,
+              image_url: burGroup.base_image,
+              isBurGroup: true,
+              burGroupDef: burGroup,
+              description_en: 'Precision dental rotary burs available in multiple shapes, head sizes, and diamond grit options.',
+              description_ar: 'بارات أسنان دوارة عالية الدقة متوفرة بمقاسات وأشكال متعددة وخشونات ألماسية مختلفة.',
+              stock_quantity: 999,
+              availability: 'available'
+            };
+            const optionImgs = (burGroup.options || []).map(o => o.image).filter(Boolean);
+            fetchedImages = [burGroup.base_image, ...optionImgs].filter(Boolean);
+          }
+        }
+
         // 2. Fallback to local defaultProductsList if not found in DB
         if (!fetchedProd) {
-          const localProd = defaultProductsList.find(p => String(p.id) === String(id) || p.slug === id);
+          const localProd = defaultProductsList.find(p => String(p.id) === String(cleanId) || p.slug === cleanId);
           if (localProd) {
             fetchedProd = localProd;
-            fetchedImages = [localProd.image_url].filter(Boolean);
+            fetchedImages = [localProd.image_url, ...(localProd.images || [])].filter(Boolean);
             if (isBundleProduct(localProd.id)) {
               const bundleRes = calculateBundleAvailability(localProd.id, defaultProductsList);
               setEffectiveStock(bundleRes.availableCount);
@@ -306,13 +359,13 @@ export const ProductDetails = () => {
         }
 
         // 3. Fallback to accessory_products (Dental Boxes & Storage gear)
-        let isBox = Boolean(fetchedProd && (fetchedProd.is_box || isBoxProduct(fetchedProd.id) || isBoxProduct(id)));
+        let isBox = Boolean(fetchedProd && (fetchedProd.is_box || isBoxProduct(fetchedProd.id) || isBoxProduct(cleanId)));
         if (!fetchedProd) {
           try {
             const { data: accProd } = await supabase
               .from('accessory_products')
               .select('*, colors:accessory_product_colors(*)')
-              .eq('id', id)
+              .eq('id', cleanId)
               .maybeSingle();
 
             if (accProd) {
@@ -330,7 +383,7 @@ export const ProductDetails = () => {
 
           // Fallback to static boxes dictionary if not in DB
           if (!fetchedProd) {
-            const fallbackBox = getBoxProductById(id);
+            const fallbackBox = getBoxProductById(cleanId);
             if (fallbackBox) {
               isBox = true;
               fetchedProd = {

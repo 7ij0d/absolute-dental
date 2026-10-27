@@ -14,45 +14,40 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 إضافة بخاخ الكحول الطبي (Medical Alcohol Spray) في جميع المواد الدراسية:
-1. **المواصفات المعتمدة للمنتج:**
-   - **الاسم:** باللغة الإنجليزية حصراً: **`Medical Alcohol 75% (125ml)`** (في `name_ar` و `name_en`).
-   - **السعر:** **5 د.ل** (5 دينار).
-   - **الصورة:** حفظ الصورة الحقيقية عالية الدقة المرفقة من المستخدم كـ `public/products/medical-alcohol-spray.png` ورفعها إلى Supabase Storage كـ `products/medical-alcohol-spray.png`.
-   - **المعرف الثابت:** `99000000-0000-0000-0000-000000000005`.
-   - **الوسم العام:** `discount_label_en: 'universal'` لإدراجه تلقائياً كمنتج استهلاكي عام في جميع المواد.
-2. **الربط بجميع المواد الدراسية (كل السنوات):**
-   - تم ربط المنتج برمجياً بجميع المواد الـ 9 في قاعدة البيانات عبر جدول الربط `product_subjects`:
-     - Dental Anatomy (سنة أولى)
-     - Dental Materials (سنة أولى)
-     - Conservative Dentistry (سنة ثانية)
-     - Removable Prosthodontics (سنة ثانية)
-     - Fixed Prosthodontics (سنة ثانية)
-     - Conservative Dentistry 2 (سنة ثالثة)
-     - Preventive Dentistry (سنة ثالثة)
-     - Fixed Prosthodontics 2 (سنة ثالثة)
-     - Removable Prosthodontics 2 (سنة ثالثة)
-   - إضافة المنتج مع قائمة `extra_subject_ids` و `all_subjects: true` في `src/defaultProducts.json`.
-3. **الترتيب البصري ومجموعة المستهلكات:**
-   - تم تحديث خوارزمية ترتيب المستهلكات `sortConsumables` في `src/utils/subjectGroupEngine.js` ليظهر بخاخ الكحول بانتظام وأناقة بجانب مفرش العيادة (Cover Sheet)، والقفازات (Gloves)، والكمامات (Masks).
-4. **تحديث الكاش البرمجي:**
-   - ترقية مفتاح الكاش في `src/pages/SubjectPage.jsx` إلى `subject_v36` لضمان إفراغ الكاش القديم في متصفحات الزوار وظهور الكحول الطبي فوراً في جميع المواد.
+### 🔹 تشخيص وإصلاح مشكلة عدم فتح صفحات تفاصيل بعض المنتجات (Fix Product Details & 404 Pages):
+1. **السبب الجذري للمشكلة (Root Cause Diagnosis):**
+   - في صفحة تفاصيل المنتج `ProductDetails.jsx`، كان الاستعلام السحابي يطلب ربط جدول المواد عبر `.select('*, subjects(...)')` دون تحديد المفتاح الخارجي المحدد.
+   - ونظراً لوجود علاقتين بين جدول المنتجات وجدول المواد (علاقة المفتاح الأجنبي `products_subject_id_fkey` وعلاقة الجدول الوسيط متعدد-إلى-متعدد `product_subjects`)، كان PostgREST يُرجع خطأ `PGRST201: Could not embed because more than one relationship was found for products and subjects`.
+   - هذا الخطأ أدّى إلى فشل استعلام قاعدة البيانات لجميع المنتجات الـ 66 في Supabase، مما جعل الصفحة تلجأ إلى القائمة الافتراضية الاحتياطية. أي منتج موجود في قاعدة البيانات ولم يكن مسجلاً في القائمة الاحتياطية (أو منتج أضيف حديثاً أو تم تعديل صوره) كان يظهر كـ 404 ("المنتج غير موجود") ولا يمكن فتحه نهائياً رغم إمكانية إضافته للسلة من صفحات المواد.
+   - في مجموعات البارات (Bur Groups)، كان الضغط على البطاقة يفتح نافذة الاختيار دون توفير رابط للانتقال لصفحة تفاصيل البير لمشاهدة صوره ووصفه الكامل.
+2. **الحلول المنفذة (Permanent Fixes):**
+   - **`src/pages/ProductDetails.jsx`:**
+     - تحديد المفتاح الأجنبي الصريح في الاستعلام: `subjects:subjects!products_subject_id_fkey(...)` لإلغاء التعارض نهائياً.
+     - إضافة استعلام احتياطي مباشر فوري `select('*')` في حال حدوث أي خطأ في علاقات الربط لضمان فتح المنتج 100%.
+     - تنظيف معرف المنتج من أي لاحقة مقاس مثل `-M` أو `-L` عند الانتقال من السلة.
+     - دعم مجموعات البارات الافتراضية `isBurGroupProduct` لعرض تفاصيلها دون أي خطأ 404.
+     - تفعيل جلب الصور الإضافية من جدول `product_images` ليتمكن الطلبة من استعراض معرض الصور الكامل للمنتج.
+   - **`src/components/BurGroupModal.jsx`:**
+     - جعل بطاقات وصور وأسماء البارات داخل نافذة الاختيار تفاعلية وقابلة للنقر (`cursor: pointer`).
+     - إضافة زر ورابط أنيق «التفاصيل والوصف» مزود بأيقونة المعاينة `<Eye />` بجوار كل بير، ينقل الطالب مباشرة إلى صفحة تفاصيل البير لمشاهدة صوره فائقة الدقة وأوصافه ومقاساته السريرية.
+   - **`src/defaultProducts.json`:**
+     - مزامنة كافة المنتجات الـ 67 الموجودة في قاعدة البيانات ودمج أي منتجات ناقصة داخل الملف الاحتياطي.
+   - **`src/pages/SubjectPage.jsx`:**
+     - ترقية مفتاح الكاش إلى `subject_v37` لتحديث واجهات المتصفحات بالكامل فوراً.
 
 ### 📁 الملفات التي تم تعديلها:
-- `src/utils/subjectGroupEngine.js`
-- `src/pages/SubjectPage.jsx`
+- `src/pages/ProductDetails.jsx`
+- `src/components/BurGroupModal.jsx`
 - `src/defaultProducts.json`
-- `public/products/medical-alcohol-spray.png` (صورة المنتج الجديدة)
-- `public/products/medical-alcohol.png` (نسخة احتياطية مطابقة)
+- `src/pages/SubjectPage.jsx`
 
 ---
 
 ## 3. الروابط المباشرة المؤكدة:
-- **صفحة المنتج المباشرة:** `https://absolutedental.ly/#/product/99000000-0000-0000-0000-000000000005`
-- **علاج الأسنان التحفظي (سنة ثانية):** `https://absolutedental.ly/#/subject/restorative-dentistry`
-- **صناعة الأسنان المتحركة (سنة ثانية):** `https://absolutedental.ly/#/subject/removable-prosthodontics`
-- **صناعة الأسنان الثابتة (سنة ثانية):** `https://absolutedental.ly/#/subject/fixed-prosthodontics`
-- **تشريح الأسنان (سنة أولى):** `https://absolutedental.ly/#/subject/dental-anatomy`
+- **صفحة كاست الجبس (Dental Cast 125):** `https://absolutedental.ly/#/product/8f344bd9-91ec-4787-8371-f489cccf635e`
+- **صفحة كاست الجبس الأدرد (Edentulous Dental Cast):** `https://absolutedental.ly/#/product/22000000-0000-0000-0000-000000000099`
+- **صفحة بخاخ الكحول الطبي:** `https://absolutedental.ly/#/product/99000000-0000-0000-0000-000000000005`
+- **صفحة البوكسات:** `https://absolutedental.ly/#/boxes`
 
 ---
 

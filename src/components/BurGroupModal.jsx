@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { useStorageImage } from '../utils/storageImage';
-import { X, ShoppingCart, Check, Plus, Minus, Layers, AlertCircle } from 'lucide-react';
+import { X, ShoppingCart, Check, Plus, Minus, Layers, AlertCircle, Eye } from 'lucide-react';
 
 export const BurGroupModal = ({ isOpen, onClose, groupItem }) => {
+  const navigate = useNavigate();
   const { lang, t, isRtl } = useLanguage();
   const { addToCart, cartItems } = useCart();
   const [quantities, setQuantities] = useState({});
@@ -229,8 +231,24 @@ export const BurGroupModal = ({ isOpen, onClose, groupItem }) => {
                     boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
                   }}
                 >
-                  {/* Left: Thumbnail & Name / Badge */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 0 }}>
+                  {/* Left: Thumbnail & Name / Badge (Clickable to open Product Details) */}
+                  <div
+                    onClick={() => {
+                      if (opt.productId) {
+                        onClose();
+                        navigate(`/product/${opt.productId}`);
+                      }
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.85rem',
+                      minWidth: 0,
+                      cursor: opt.productId ? 'pointer' : 'default',
+                      flex: 1
+                    }}
+                    title={lang === 'ar' ? 'عرض تفاصيل ووصف البير' : 'View bur details and description'}
+                  >
                     <div
                       className="ad-watermarked-container product-card-image"
                       style={{
@@ -281,10 +299,26 @@ export const BurGroupModal = ({ isOpen, onClose, groupItem }) => {
                         )}
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginTop: '0.25rem' }}>
                         <span className="tabular-nums" style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--secondary, #684835)' }}>
                           {opt.price} {lang === 'ar' ? 'د.ل' : 'LYD'}
                         </span>
+                        {opt.productId && (
+                          <span
+                            style={{
+                              fontSize: '0.74rem',
+                              color: 'var(--secondary, #684835)',
+                              textDecoration: 'underline',
+                              fontWeight: 700,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.2rem'
+                            }}
+                          >
+                            <Eye size={12} />
+                            <span>{lang === 'ar' ? 'التفاصيل والوصف' : 'Details & Specs'}</span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
