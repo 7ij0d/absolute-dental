@@ -1,0 +1,25 @@
+{
+  "name": "ابسلوت دنتال | Absolute Dental Equipment",
+  "short_name": "ابسلوت دنتال",
+  "description": "الموقع الرسمي لـ ابسلوت دنتال (أبسلوت دنتال | Absolute Dental) — متجر أدوات ومعدات ومستلزمات طلبة كلية طب الأسنان في طرابلس وليبيا.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#0F172A",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/watermark-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

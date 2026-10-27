@@ -40,6 +40,7 @@
 - `src/components/BurGroupModal.jsx`
 - `src/defaultProducts.json`
 - `src/pages/SubjectPage.jsx`
+- `index.html`, `public/manifest.json`, `public/robots.txt`, `public/sitemap.xml`, `public/google8559ecef1b1b49a2.html`, `public/8559ecef1b1b49a28559ecef1b1b49a2.txt` (تهيئة شاملة لجميع محركات البحث Google, Safari/Applebot, Bing, Yahoo, DuckDuckGo, Yandex وإثبات الملكية)
 
 ---
 
