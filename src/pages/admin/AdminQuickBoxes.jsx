@@ -64,7 +64,7 @@ const STANDARD_BOX_SIZES = [
     labelAr: 'بوكس 17.5 إنش GT-MAX',
     labelEn: '17.5" GT-MAX',
     descAr: 'بوكس احترافي واسع للأدوات الثقيلة',
-    defaultPrice: 85,
+    defaultPrice: 95,
     sampleImg: '/accessories/box17_5-dark-blue.jpg'
   }
 ];
