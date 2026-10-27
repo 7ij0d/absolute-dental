@@ -69,11 +69,9 @@
     "availability": "available",
     "stock_quantity": 15,
     "year_id": "20000000-0000-0000-0000-000000000002",
-    "subject_id": "22000000-0000-0000-0000-000000000021",
+    "subject_id": "22000000-0000-0000-0000-000000000023",
     "extra_subject_ids": [
-      "22000000-0000-0000-0000-000000000023",
-      "33000000-0000-0000-0000-000000000031",
-      "33000000-0000-0000-0000-000000000033"
+      "22000000-0000-0000-0000-000000000022"
     ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/westcode-handpiece-xmh300m4.png",
     "is_featured": true,
