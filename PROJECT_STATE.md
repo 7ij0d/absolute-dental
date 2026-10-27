@@ -7,37 +7,36 @@
 
 ## 1. نظرة عامة على المشروع والتقنيات (Project Overview & Tech Stack)
 - **المنصة:** متجر ومستودع الأدوات والمستلزمات الطبية الدراسية لطلبة طب وجراحة الفم والأسنان (**Absolute Dental Equipment**).
-- **الدومين الرسمي المخصص:** `absolutedental.ly` (مع الاستضافة الاحتياطية على GitHub Pages: `7ij0d.github.io/absolute-dental`).
-- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 (HashRouter) + Lucide React Icons + High-Res Asset Pipeline + Dynamic Navigation Trail & Browse Context Engine + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture + Dental Boxes Unified Inventory Engine + Quick Box & Color Studio + Standalone Box Portal + Static SPA Route Pre-generation Engine.
+- **الاستضافة:** GitHub Pages الرسمية فائقة السرعة والمؤمنة بـ SSL التلقائي: `https://7ij0d.github.io/absolute-dental/`
+- **الدومين المخصص:** `absolutedental.ly` (جاري انتظار استكمال شهادة الحماية SSL من مسجل النطاق / الاستضافة).
+- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 (HashRouter) + Lucide React Icons + High-Res Asset Pipeline + Dynamic Navigation Trail & Browse Context Engine + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture + Dental Boxes Unified Inventory Engine + Quick Box & Color Studio + Standalone Box Portal + Static SPA Route Pre-generation Engine + Relative Asset Resolution Engine (`base: './'`).
 
 ---
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 حل مشكلة الروابط المباشرة وتوفير الرابط المنفصل للبوكسات:
-1. **تشخيص سبب توجيه الرابط إلى الصفحة الرئيسية (Root Cause):**
-   - المشروع يستخدم `HashRouter` في [`src/main.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/main.jsx).
-   - عند فتح الروابط المباشرة مثل `/box-manager` بدون بادئة الهاش `#/`، كان المتصفح إما يعيد التوجيه عبر `404.html` بصيغة استعلام غير متوافقة أو كان `HashRouter` يقرأ المسار الفارغ ويعرض الصفحة الرئيسية فوراً.
-   - بالإضافة إلى أن شهادة SSL على الدومين المخصص `absolutedental.ly` كانت تظهر تحذيراً عند طلب `https://` لحين اكتمال شهادة Let's Encrypt من مزود الاستضافة.
+### 🔹 حل مشكلة عدم فتح الرابط (Fix SSL Certificate & Direct Route Resolution):
+1. **تشخيص سبب عدم فتح الرابط («مايفتحش»):**
+   - كان الرابط المخصص `https://absolutedental.ly/` يواجه خطأ حماية شهادة أمان SSL (`ERR_TLS_CERT_ALTNAME_INVALID` / "Your connection is not private") لأن مزود الاستضافة لم يكمل بعد إصدار شهادة Let's Encrypt للنطاق الليبي `.ly`، مما كان يجعل المتصفحات في الهواتف وأجهزة الكمبيوتر تحجب الموقع بالكامل بشاشة تحذير أمنية حمراء.
+   - بالإضافة إلى أن توجيه CNAME التلقائي كان يجبر الزائر على التحول إلى الرابط المتعطل، بدلاً من استخدام رابط GitHub Pages المباشر والمؤمّن بشهادة SSL خضراء ورسمية 100%.
 2. **الحلول المنفذة (Fixes Applied):**
-   - **تحديث كود التوجيه في [`index.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/index.html) و [`public/404.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/404.html):** تحويل أي مسار مباشر بصرياً وتلقائياً إلى مسار الهاش الخاص بـ `HashRouter` فوراً وبدون أي ارتباك.
-   - **توليد صفحات HTML ثابتة ومستقلة في خطوة البناء عبر [`vite.config.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/vite.config.js):** تم إنشاء إضافة تلقائية تنتج ملفات مستقلة في مجلدات `dist/box-manager/index.html` و `dist/boxes/index.html` بحيث يستجيب الخادم برمز 200 مباشرة دون الحاجة لصفحة الخطأ.
-   - **توفير كافة صيغ الروابط المباشرة (مع الهاش وبدون الهاش):** لتضمن الفتح الفوري على أي متصفح أو جهاز هاتف.
+   - **تفعيل الاستضافة المباشرة المؤمنة فوراً:** إتاحة رابط المنصة المباشر على نطاق GitHub الآمن بدون أي حجب أمني: `https://7ij0d.github.io/absolute-dental/#/box-manager`.
+   - **تعديل مسارات الأصول (`base: './'`):** ضبط مسار البناء ليكون نسبياً (`./`) لتعمل جميع الصور والملفات البرمجية والأيقونات بسلاسة سواء على النطاق المخصص أو على رابط الاستضافة المباشر أو محلياً.
+   - **التوجيه التلقائي الذكي للـ HashRouter:** إدراج نصوص توجيه ذكية في `index.html` و `404.html` تضمن فتح أي صفحة مباشرة دون أي عودة للصفحة الرئيسية.
 3. **التحقق والبناء (Build Verification):**
-   - اجتياز اختبار البناء `npm run build` بنجاح 100% وتوليد النسخ الثابتة.
+   - اجتياز اختبار البناء `npm run build` بنجاح وتوليد النسخ الثابتة.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`index.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/index.html) | دعم التحويل التلقائي الذكي من المسارات العادية إلى مسارات `HashRouter` |
-| [`public/404.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/404.html) | توجيه مسارات GitHub Pages مباشرة إلى `/#/route` فوراً |
-| [`vite.config.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/vite.config.js) | إضافة مولد النسخ الثابتة `generateSpaRoutesPlugin` |
-| [`PROJECT_STATE.md`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/PROJECT_STATE.md) | تحديث وثيقة حالة المشروع وتوثيق الروابط الدقيقة |
+| [`vite.config.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/vite.config.js) | ضبط `base: './'` وتوليد المسارات الثابتة |
+| [`public/CNAME`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/CNAME) | إزالة توجيه CNAME مؤقتاً لفك حجب شهادة SSL والسماح بفتح الرابط المباشر |
+| [`PROJECT_STATE.md`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/PROJECT_STATE.md) | تحديث وثيقة حالة المشروع المستمرة ومزامنة التغييرات |
 
 ---
 
 ## 3. الخطوة التالية المباشرة (Immediate Next Step)
 - دفع التعديلات عبر `git commit & push`.
-- تزويد المشرف برابط الهاش المباشر الصريح لضمان الفتح اللحظي على صفحة البوكسات مباشرة بدون أي تحويل.
+- تزويد المشرف بالرابط المباشر الآمن الذي يفتح فوراً بدون أي شاشة خطأ أو تحذير SSL.
