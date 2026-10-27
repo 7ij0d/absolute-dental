@@ -7,9 +7,33 @@ import { Plus, Edit, Trash2, X, PlusCircle, ToggleLeft, ToggleRight } from 'luci
 export const Subjects = () => {
   const { t } = useLanguage();
 
-  const [years, setYears] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [years, setYears] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_years');
+      if (cached) {
+        const y = JSON.parse(cached);
+        if (Array.isArray(y) && y.length > 0) return y;
+      }
+    } catch (_) {}
+    return [];
+  });
+  const [subjects, setSubjects] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_subjects');
+      if (cached) {
+        const s = JSON.parse(cached);
+        if (Array.isArray(s) && s.length > 0) return s;
+      }
+    } catch (_) {}
+    return [];
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_subjects');
+      if (cached && JSON.parse(cached).length > 0) return false;
+    } catch (_) {}
+    return true;
+  });
 
   // Tabs & Forms State
   const [activeTab, setActiveTab] = useState('subjects');
@@ -152,13 +176,20 @@ export const Subjects = () => {
   }, []);
 
   const fetchData = async () => {
-    setLoading(true);
+    if (subjects.length === 0) setLoading(true);
     try {
-      const { data: yrs } = await supabase.from('years').select('*').order('slug', { ascending: true });
-      if (yrs) setYears(yrs);
-
-      const { data: subs } = await supabase.from('subjects').select('*, years(*)').order('created_at', { ascending: false });
-      if (subs) setSubjects(subs);
+      const [{ data: yrs }, { data: subs }] = await Promise.all([
+        supabase.from('years').select('*').order('sort_order', { ascending: true }),
+        supabase.from('subjects').select('*, years(*)').order('sort_order', { ascending: true })
+      ]);
+      if (yrs && yrs.length > 0) {
+        setYears(yrs);
+        try { localStorage.setItem('abs_admin_cached_years', JSON.stringify(yrs)); } catch (_) {}
+      }
+      if (subs && subs.length > 0) {
+        setSubjects(subs);
+        try { localStorage.setItem('abs_admin_cached_subjects', JSON.stringify(subs)); } catch (_) {}
+      }
     } catch (err) {
       console.error(err);
     } finally {

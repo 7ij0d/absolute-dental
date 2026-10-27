@@ -37,17 +37,56 @@ export const AdminAccessories = () => {
   const [activeTab, setActiveTab] = useState('quick-boxes'); // 'quick-boxes' | 'categories' | 'products' | 'colors' | 'backgrounds'
 
   // Data states
-  const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [colors, setColors] = useState([]);
-  const [boxInventory, setBoxInventory] = useState({});
-  const [selectedProductId, setSelectedProductId] = useState('');
+  const [categories, setCategories] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_acc_cats');
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    return [];
+  });
+  const [products, setProducts] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_acc_prods');
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    return [];
+  });
+  const [colors, setColors] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_acc_colors');
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    return [];
+  });
+  const [boxInventory, setBoxInventory] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_box_inv');
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    return {};
+  });
+  const [selectedProductId, setSelectedProductId] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_acc_prods');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed?.[0]?.id) return parsed[0].id;
+      }
+    } catch (_) {}
+    return '';
+  });
   const [backgrounds, setBackgrounds] = useState({
     accessories_page_bg: '',
     dental_boxes_page_bg: ''
   });
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_acc_prods');
+      if (cached && JSON.parse(cached).length > 0) return false;
+    } catch (_) {}
+    return true;
+  });
   const [saving, setSaving] = useState(false);
   const [resettingStock, setResettingStock] = useState(false);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
@@ -100,50 +139,40 @@ export const AdminAccessories = () => {
 
   // 1. Fetch initial data
   const loadAllData = async () => {
-    setLoading(true);
+    if (products.length === 0) setLoading(true);
     try {
-      // Categories
-      const { data: catData } = await supabase
-        .from('accessory_categories')
-        .select('*')
-        .order('sort_order', { ascending: true });
-      setCategories(catData || []);
+      const [catRes, prodRes, colorRes, invData, bgSettingRes] = await Promise.all([
+        supabase.from('accessory_categories').select('*').order('sort_order', { ascending: true }),
+        supabase.from('accessory_products').select('*').order('sort_order', { ascending: true }),
+        supabase.from('accessory_product_colors').select('*').order('sort_order', { ascending: true }),
+        fetchCanonicalBoxInventory(),
+        supabase.from('settings').select('value').eq('key', 'accessories_bgs').maybeSingle()
+      ]);
 
-      // Products
-      const { data: prodData } = await supabase
-        .from('accessory_products')
-        .select('*')
-        .order('sort_order', { ascending: true });
-      setProducts(prodData || []);
-      if (prodData && prodData.length > 0 && !selectedProductId) {
-        setSelectedProductId(prodData[0].id);
+      if (catRes.data) {
+        setCategories(catRes.data);
+        try { localStorage.setItem('abs_admin_cached_acc_cats', JSON.stringify(catRes.data)); } catch (_) {}
       }
-
-      // Colors
-      const { data: colorData } = await supabase
-        .from('accessory_product_colors')
-        .select('*')
-        .order('sort_order', { ascending: true });
-      setColors(colorData || []);
-
-      // Canonical Box Variants Inventory
-      try {
-        const inv = await fetchCanonicalBoxInventory();
-        setBoxInventory(inv.variants || {});
-      } catch (invErr) {
-        console.warn('Notice loading box variants inventory:', invErr);
+      if (prodRes.data) {
+        setProducts(prodRes.data);
+        try { localStorage.setItem('abs_admin_cached_acc_prods', JSON.stringify(prodRes.data)); } catch (_) {}
+        if (prodRes.data.length > 0 && !selectedProductId) {
+          setSelectedProductId(prodRes.data[0].id);
+        }
       }
-
-      // Backgrounds settings
-      const { data: bgSetting } = await supabase
-        .from('settings')
-        .select('value')
-        .eq('key', 'accessories_bgs')
-        .single();
-      if (bgSetting?.value) {
+      if (colorRes.data) {
+        setColors(colorRes.data);
+        try { localStorage.setItem('abs_admin_cached_acc_colors', JSON.stringify(colorRes.data)); } catch (_) {}
+      }
+      if (invData?.variants || invData) {
+        const vars = invData?.variants || invData || {};
+        setBoxInventory(vars);
+        try { localStorage.setItem('abs_admin_cached_box_inv', JSON.stringify(vars)); } catch (_) {}
+      }
+      if (bgSettingRes.data?.value) {
         setBackgrounds({
-          accessories_page_bg: bgSetting.value.accessories_page_bg || '',
-          dental_boxes_page_bg: bgSetting.value.dental_boxes_page_bg || ''
+          accessories_page_bg: bgSettingRes.data.value.accessories_page_bg || '',
+          dental_boxes_page_bg: bgSettingRes.data.value.dental_boxes_page_bg || ''
         });
       }
     } catch (err) {

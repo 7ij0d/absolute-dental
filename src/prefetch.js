@@ -5,12 +5,12 @@
 import { supabase } from './supabaseClient';
 import { cacheGet, cacheSet } from './cache';
 
-const TTL = 1800; // 30 min
+const TTL = 86400; // 24 hours
 
 async function prefetchYears() {
   if (cacheGet('years')) return;
   try {
-    const { data, error } = await supabase.from('years').select('*').order('id');
+    const { data, error } = await supabase.from('years').select('*').order('sort_order', { ascending: true });
     if (!error && data?.length) cacheSet('years', data, TTL);
   } catch (_) {}
 }
@@ -28,7 +28,7 @@ async function prefetchSubjects() {
   if (cacheGet('subjects:all')) return;
   try {
     const { data, error } = await supabase
-      .from('subjects').select('*').order('sort_order');
+      .from('subjects').select('*').order('sort_order', { ascending: true });
     if (!error && data?.length) {
       cacheSet('subjects:all', data, TTL);
       const byYear = {};
@@ -43,20 +43,20 @@ async function prefetchSubjects() {
   } catch (_) {}
 }
 
-const PRODUCT_LIST_COLUMNS = 'id, name_ar, name_en, price, compare_at_price, image_url, availability, stock_quantity, subject_id, year_id, is_featured, is_active, is_archived, sort_order, created_at';
-
-async function prefetchFeaturedProducts() {
-  if (cacheGet('products:featured')) return;
+async function prefetchAllActiveProducts() {
+  if (cacheGet('products:all')) return;
   try {
     const { data, error } = await supabase
       .from('products')
-      .select(PRODUCT_LIST_COLUMNS)
-      .eq('is_featured', true)
+      .select('*')
       .eq('is_active', true)
       .eq('is_archived', false)
-      .order('sort_order')
-      .limit(8);
-    if (!error && data?.length) cacheSet('products:featured', data, TTL);
+      .order('sort_order', { ascending: true });
+    if (!error && data?.length) {
+      cacheSet('products:all', data, TTL);
+      const featured = data.filter(p => p.is_featured);
+      cacheSet('products:featured', featured, TTL);
+    }
   } catch (_) {}
 }
 
@@ -65,6 +65,6 @@ export function runPrefetch() {
     prefetchYears(),
     prefetchBanners(),
     prefetchSubjects(),
-    prefetchFeaturedProducts(),
+    prefetchAllActiveProducts(),
   ]).catch(() => {});
 }

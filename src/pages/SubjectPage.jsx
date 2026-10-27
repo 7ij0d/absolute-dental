@@ -148,13 +148,35 @@ export const SubjectPage = () => {
   );
 
   const lookupSlug = slug === 'operative-dentistry' ? 'restorative-dentistry' : slug;
+  const CACHE_KEY = `subject_v38:${slug}`;
 
-  const [subjectData, setSubjectData] = useState(() =>
-    DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) || DEFAULT_SUBJECTS[0]
-  );
-  const [yearData, setYearData] = useState(() => DEFAULT_YEARS[0]);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Instant synchronous initialization: check cache, then compute from local defaults (0ms load)
+  const initialPayload = useMemo(() => {
+    const cached = cacheGet(CACHE_KEY);
+    if (cached && Array.isArray(cached.prods) && cached.prods.length > 0) {
+      return cached;
+    }
+    const sub = DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) || DEFAULT_SUBJECTS[0];
+    const yr = DEFAULT_YEARS.find(y => String(y.id) === String(sub.year_id)) || DEFAULT_YEARS[0];
+    const seeded = defaultProductsList.filter(p =>
+      p.subject_id === sub.id ||
+      p.all_subjects === true ||
+      p.discount_label_en === 'universal' ||
+      (Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.includes(sub.id))
+    );
+    for (const p of seeded) {
+      const subsSet = new Set();
+      if (p.subject_id) subsSet.add(p.subject_id);
+      if (Array.isArray(p.extra_subject_ids)) p.extra_subject_ids.forEach(id => subsSet.add(id));
+      p.assigned_subject_ids = Array.from(subsSet);
+    }
+    return { subject: sub, year: yr, prods: seeded };
+  }, [slug, lookupSlug, CACHE_KEY]);
+
+  const [subjectData, setSubjectData] = useState(() => initialPayload.subject);
+  const [yearData, setYearData] = useState(() => initialPayload.year);
+  const [products, setProducts] = useState(() => initialPayload.prods);
+  const [loading, setLoading] = useState(false);
 
   // In-page search, sorting & filtering states
   const [inPageSearch, setInPageSearch] = useState('');
@@ -165,7 +187,15 @@ export const SubjectPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    const CACHE_KEY = `subject_v37:${slug}`;
+    // Sync state if slug changes
+    setSubjectData(initialPayload.subject);
+    setYearData(initialPayload.year);
+    setProducts(initialPayload.prods || []);
+    if (initialPayload.prods && initialPayload.prods.length > 0) {
+      const highest = Math.ceil(Math.max(...initialPayload.prods.map(p => Number(p.price) || 0), 20));
+      setDynamicMaxPrice(highest);
+      setMaxPrice(highest);
+    }
 
     const applyData = ({ subject, year, prods }) => {
       setSubjectData(subject);
@@ -178,71 +208,56 @@ export const SubjectPage = () => {
       }
     };
 
-    const fetchAndCache = async (showLoader) => {
-      if (showLoader) setLoading(true);
+    const fetchAndCache = async () => {
       try {
-        // 1. Fetch Subject
-        const { data: subjectRes } = await supabase
-          .from('subjects')
-          .select('*')
-          .or(`slug.eq.${slug},slug.eq.${lookupSlug}`)
-          .maybeSingle();
+        // Fast parallel fetch: subject + active products + product_subjects junction in 1 network trip
+        const [{ data: subjectRes }, { data: allDbProds }, { data: allJunctions }] = await Promise.all([
+          supabase.from('subjects').select('*, years(*)').or(`slug.eq.${slug},slug.eq.${lookupSlug}`).maybeSingle(),
+          supabase.from('products').select('*').eq('is_active', true).eq('is_archived', false),
+          supabase.from('product_subjects').select('product_id, subject_id')
+        ]);
 
         const subject = subjectRes ||
           DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) ||
           DEFAULT_SUBJECTS[0];
 
-        // 2. Fetch Year + Primary Products + Junction Products + Universal Supplies
-        const [{ data: yearRes }, { data: primaryProds }, { data: junctionLinks }, { data: universalProds }] = await Promise.all([
-          supabase.from('years').select('*').eq('id', subject.year_id).maybeSingle(),
-          supabase.from('products').select('*')
-            .eq('is_active', true).eq('is_archived', false)
-            .eq('subject_id', subject.id),
-          supabase.from('product_subjects').select('product_id').eq('subject_id', subject.id),
-          supabase.from('products').select('*')
-            .eq('is_active', true).eq('is_archived', false)
-            .eq('discount_label_en', 'universal')
-        ]);
-
-        const year = yearRes ||
+        const year = subjectRes?.years ||
           DEFAULT_YEARS.find(y => String(y.id) === String(subject.year_id)) ||
           DEFAULT_YEARS[0];
 
-        // 3. Extra products linked through junction table
-        const primaryIds = new Set((primaryProds || []).map(p => p.id));
-        const extraIds = (junctionLinks || [])
-          .map(r => r.product_id)
-          .filter(id => !primaryIds.has(id));
-
-        let extraProds = [];
-        if (extraIds.length > 0) {
-          const { data: ep } = await supabase.from('products').select('*')
-            .in('id', extraIds)
-            .eq('is_active', true).eq('is_archived', false);
-          extraProds = ep || [];
-        }
-
-        let allProds = [...(primaryProds || []), ...extraProds];
-
-        // 4. Merge Universal Supplies for this subject (only products marked 'universal', not 'other_supplies' only)
-        const junctionIdSet = new Set((junctionLinks || []).map(r => r.product_id));
-
-        if (Array.isArray(universalProds)) {
-          for (const up of universalProds) {
-            const isRelevant =
-              up.discount_label_en === 'universal' ||
-              up.is_universal === true ||
-              up.all_subjects === true ||
-              up.all_years === true ||
-              junctionIdSet.has(up.id) ||
-              up.subject_id === subject.id;
-            if (isRelevant) {
-              allProds.push(up);
+        // Build junction map
+        const junctionMap = {};
+        const junctionSubjectSet = new Set();
+        if (Array.isArray(allJunctions)) {
+          for (const j of allJunctions) {
+            if (!junctionMap[j.product_id]) junctionMap[j.product_id] = new Set();
+            junctionMap[j.product_id].add(j.subject_id);
+            if (j.subject_id === subject.id) {
+              junctionSubjectSet.add(j.product_id);
             }
           }
         }
 
-        // 5. Ensure seeded default products for this subject are merged if not already present in DB
+        let allProds = [];
+        if (Array.isArray(allDbProds) && allDbProds.length > 0) {
+          for (const p of allDbProds) {
+            const isUniv = Boolean(
+              p.is_universal === true ||
+              p.discount_label_en === 'universal' ||
+              p.all_subjects === true ||
+              p.all_years === true
+            );
+            const isAssigned = p.subject_id === subject.id || junctionSubjectSet.has(p.id);
+            if (isUniv || isAssigned) {
+              const subsSet = new Set(junctionMap[p.id] || []);
+              if (p.subject_id) subsSet.add(p.subject_id);
+              p.assigned_subject_ids = Array.from(subsSet);
+              allProds.push(p);
+            }
+          }
+        }
+
+        // Merge any seeded defaults not yet in DB
         const existingIds = new Set(allProds.map(p => p.id));
         const defaultsForSub = defaultProductsList.filter(p =>
           p.subject_id === subject.id ||
@@ -250,116 +265,27 @@ export const SubjectPage = () => {
           p.discount_label_en === 'universal' ||
           (Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.includes(subject.id))
         );
-        // Check if any of these default IDs exist in DB with updated relationships before falling back
-        const missingDefaultIds = defaultsForSub.map(d => d.id).filter(id => !existingIds.has(id));
-        let dbOverriddenIds = new Set();
-        if (missingDefaultIds.length > 0) {
-          const { data: dbExistingRows } = await supabase
-            .from('products')
-            .select('id')
-            .in('id', missingDefaultIds);
-          if (dbExistingRows) {
-            dbOverriddenIds = new Set(dbExistingRows.map(r => r.id));
-          }
-        }
         for (const dp of defaultsForSub) {
-          if (!existingIds.has(dp.id) && !dbOverriddenIds.has(dp.id)) {
+          if (!existingIds.has(dp.id)) {
+            const subsSet = new Set();
+            if (dp.subject_id) subsSet.add(dp.subject_id);
+            if (Array.isArray(dp.extra_subject_ids)) dp.extra_subject_ids.forEach(id => subsSet.add(id));
+            dp.assigned_subject_ids = Array.from(subsSet);
             allProds.push(dp);
             existingIds.add(dp.id);
           }
         }
 
-        // Strictly deduplicate by product id
-        const seenIds = new Set();
-        allProds = allProds.filter(p => {
-          if (!p || !p.id || seenIds.has(p.id)) return false;
-          seenIds.add(p.id);
-          return true;
-        });
-
-        // 6. Gather all junction links for loaded products to determine accurate multi-subject mapping
-        const allLoadedIds = allProds.map(p => p.id);
-        const junctionMap = {};
-        if (allLoadedIds.length > 0) {
-          const { data: allJunctions } = await supabase
-            .from('product_subjects')
-            .select('product_id, subject_id')
-            .in('product_id', allLoadedIds);
-
-          if (allJunctions) {
-            for (const j of allJunctions) {
-              if (!junctionMap[j.product_id]) junctionMap[j.product_id] = new Set();
-              junctionMap[j.product_id].add(j.subject_id);
-            }
-          }
-        }
-
-        // Populate assigned_subject_ids for each product (junction table is authoritative if configured)
-        for (const p of allProds) {
-          const junctionSubs = junctionMap[p.id];
-          let subsSet;
-          if (junctionSubs && junctionSubs.size > 0) {
-            subsSet = new Set(junctionSubs);
-          } else {
-            subsSet = new Set();
-            if (p.subject_id) subsSet.add(p.subject_id);
-            if (Array.isArray(p.extra_subject_ids)) {
-              p.extra_subject_ids.forEach(id => subsSet.add(id));
-            }
-          }
-          p.assigned_subject_ids = Array.from(subsSet);
-        }
-
-        // Strictly keep only products that are universal OR explicitly assigned to this subject
-        allProds = allProds.filter(p => {
-          const isUniv = Boolean(
-            p.is_universal === true ||
-            p.discount_label_en === 'universal' ||
-            p.all_subjects === true ||
-            p.all_years === true
-          );
-          if (isUniv) return true;
-          return (
-            p.subject_id === subject.id ||
-            junctionIdSet.has(p.id) ||
-            (Array.isArray(p.assigned_subject_ids) && p.assigned_subject_ids.includes(subject.id))
-          );
-        });
-
         const bundle = { subject, year: year || null, prods: allProds };
-        cacheSet(CACHE_KEY, bundle, 60);
+        cacheSet(CACHE_KEY, bundle, 86400); // 24 hours persistent cache
         applyData(bundle);
       } catch (err) {
-        console.warn('SubjectPage fetch fallback:', err);
-        const fallbackSub = DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) || DEFAULT_SUBJECTS[0];
-        const fallbackYear = DEFAULT_YEARS.find(y => String(y.id) === String(fallbackSub.year_id)) || DEFAULT_YEARS[0];
-        const fallbackProds = defaultProductsList.filter(p =>
-          p.subject_id === fallbackSub.id ||
-          p.all_subjects === true ||
-          p.discount_label_en === 'universal' ||
-          (Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.includes(fallbackSub.id))
-        );
-        for (const p of fallbackProds) {
-          const subsSet = new Set();
-          if (p.subject_id) subsSet.add(p.subject_id);
-          if (Array.isArray(p.extra_subject_ids)) p.extra_subject_ids.forEach(id => subsSet.add(id));
-          p.assigned_subject_ids = Array.from(subsSet);
-        }
-        applyData({ subject: fallbackSub, year: fallbackYear, prods: fallbackProds });
-      } finally {
-        setLoading(false);
+        console.warn('SubjectPage background refresh notice:', err);
       }
     };
 
-    const cached = cacheGet(CACHE_KEY);
-    if (cached) {
-      applyData(cached);
-      setLoading(false);
-      fetchAndCache(false);
-    } else {
-      fetchAndCache(true);
-    }
-  }, [slug, lookupSlug]);
+    fetchAndCache();
+  }, [slug, lookupSlug, initialPayload, CACHE_KEY]);
 
   // Real-time filtering and sorting calculation (direct unified product list)
   const filteredList = useMemo(() => {

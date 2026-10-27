@@ -113,12 +113,42 @@ export const AdminQuickBoxes = () => {
   const { isRtl, lang } = useLanguage();
 
   // State
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_box_prods');
+      if (cached) {
+        const p = JSON.parse(cached);
+        if (Array.isArray(p) && p.length > 0) return p;
+      }
+    } catch (_) {}
+    return [];
+  });
+  const [colors, setColors] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_box_colors');
+      if (cached) {
+        const c = JSON.parse(cached);
+        if (Array.isArray(c) && c.length > 0) return c;
+      }
+    } catch (_) {}
+    return [];
+  });
+  const [inventoryMap, setInventoryMap] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_box_inv');
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    return {};
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_box_prods');
+      if (cached && JSON.parse(cached).length > 0) return false;
+    } catch (_) {}
+    return true;
+  });
   const [submitting, setSubmitting] = useState(false);
   const [updatingId, setUpdatingId] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [colors, setColors] = useState([]);
-  const [inventoryMap, setInventoryMap] = useState({});
   const [selectedFilterSize, setSelectedFilterSize] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState({ show: false, text: '', type: 'success' });
@@ -142,7 +172,7 @@ export const AdminQuickBoxes = () => {
 
   // 1. Load Data
   const loadBoxesData = async () => {
-    setLoading(true);
+    if (products.length === 0) setLoading(true);
     try {
       const [prodsRes, colorsRes, invData] = await Promise.all([
         supabase.from('accessory_products').select('*').order('sort_order', { ascending: true }),
@@ -150,9 +180,19 @@ export const AdminQuickBoxes = () => {
         fetchCanonicalBoxInventory()
       ]);
 
-      if (prodsRes.data) setProducts(prodsRes.data);
-      if (colorsRes.data) setColors(colorsRes.data);
-      if (invData?.variants) setInventoryMap(invData.variants);
+      if (prodsRes.data) {
+        setProducts(prodsRes.data);
+        try { localStorage.setItem('abs_admin_cached_box_prods', JSON.stringify(prodsRes.data)); } catch (_) {}
+      }
+      if (colorsRes.data) {
+        setColors(colorsRes.data);
+        try { localStorage.setItem('abs_admin_cached_box_colors', JSON.stringify(colorsRes.data)); } catch (_) {}
+      }
+      if (invData?.variants || invData) {
+        const vars = invData?.variants || invData || {};
+        setInventoryMap(vars);
+        try { localStorage.setItem('abs_admin_cached_box_inv', JSON.stringify(vars)); } catch (_) {}
+      }
     } catch (err) {
       console.error('Failed to load boxes manager data:', err);
       showToast(isRtl ? 'حدث خطأ في تحميل البيانات' : 'Failed to load data', 'error');

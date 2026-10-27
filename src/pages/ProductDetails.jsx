@@ -161,14 +161,44 @@ export const ProductDetails = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
-  const [product, setProduct] = useState(null);
+  // Clean ID in case it comes from cart with a size variant suffix like uuid-M
+  const cleanId = useMemo(() => {
+    return (typeof id === 'string' && id.includes('-') && id.length > 36)
+      ? id.substring(0, 36)
+      : id;
+  }, [id]);
+
+  // Instant synchronous product lookup from catalog/boxes (0ms display)
+  const initialProd = useMemo(() => {
+    const found = defaultProductsList.find(p => String(p.id) === String(cleanId) || p.slug === cleanId);
+    if (found) return found;
+    if (isBurGroupProduct(cleanId)) {
+      const bg = getBurGroup(cleanId);
+      if (bg) {
+        return {
+          id: bg.groupId,
+          name_en: bg.name_en,
+          name_ar: bg.name_ar,
+          price: bg.options?.[0]?.price || 5,
+          image_url: bg.base_image,
+          images: [bg.base_image],
+          is_bur_group: true
+        };
+      }
+    }
+    const box = getBoxProductById(cleanId);
+    if (box) return { ...box, is_box: true, image_url: box.main_image || box.image_url };
+    return null;
+  }, [cleanId]);
+
+  const [product, setProduct] = useState(() => initialProd);
   const [subject, setSubject] = useState(null);
   const [year, setYear] = useState(null);
-  const [images, setImages] = useState([]);
-  const [activeImage, setActiveImage] = useState('');
+  const [images, setImages] = useState(() => initialProd ? [initialProd.image_url, ...(initialProd.images || [])].filter(Boolean) : []);
+  const [activeImage, setActiveImage] = useState(() => initialProd?.image_url || '');
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !initialProd);
   const [isFav, setIsFav] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
   const [effectiveStock, setEffectiveStock] = useState(null);
@@ -198,24 +228,26 @@ export const ProductDetails = () => {
     setJustAdded(false);
     setSelectedSize(null);
     setSizeError(false);
-  }, [id]);
+    if (initialProd) {
+      setProduct(initialProd);
+      setImages([initialProd.image_url, ...(initialProd.images || [])].filter(Boolean));
+      setActiveImage(initialProd.image_url || '');
+    }
+  }, [id, initialProd]);
 
   // Main data fetching
   useEffect(() => {
     let isMounted = true;
 
     const fetchProductDetails = async () => {
-      setLoading(true);
+      if (!initialProd) {
+        setLoading(true);
+      }
       try {
         let fetchedProd = null;
         let fetchedSubject = null;
         let fetchedYear = null;
         let fetchedImages = [];
-
-        // Clean ID in case it comes from cart with a size variant suffix like uuid-M
-        const cleanId = (typeof id === 'string' && id.includes('-') && id.length > 36)
-          ? id.substring(0, 36)
-          : id;
 
         // 1. Attempt Supabase fetch
         try {

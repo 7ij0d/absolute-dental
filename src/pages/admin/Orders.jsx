@@ -424,6 +424,16 @@ export const Orders = () => {
         last_status_change: historyEntry
       });
 
+      // 1. OPTIMISTIC INSTANT UPDATE (0ms instant response)
+      setOrders((prev) => {
+        const next = prev.map((ord) => (ord.id === orderId ? { ...ord, status: canonicalNewStatus, status_note: updatedStatusNote } : ord));
+        try { localStorage.setItem('abs_admin_cached_orders', JSON.stringify(next)); } catch (_) {}
+        return next;
+      });
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder((prev) => ({ ...prev, status: canonicalNewStatus, status_note: updatedStatusNote }));
+      }
+
       const { error } = await supabase
         .from('orders')
         .update({
@@ -434,18 +444,6 @@ export const Orders = () => {
         .eq('id', orderId);
 
       if (!error) {
-        // Refresh local orders list
-        setOrders((prev) => {
-          const next = prev.map((ord) => (ord.id === orderId ? { ...ord, status: canonicalNewStatus, status_note: updatedStatusNote } : ord));
-          try { localStorage.setItem('abs_admin_cached_orders', JSON.stringify(next)); } catch (_) {}
-          return next;
-        });
-        
-        // Refresh selected details model
-        if (selectedOrder && selectedOrder.id === orderId) {
-          setSelectedOrder((prev) => ({ ...prev, status: canonicalNewStatus, status_note: updatedStatusNote }));
-        }
-
         // Add Notification for customer
         const statusMeta = getOrderStatusMeta(canonicalNewStatus, isRtl);
         const ordCode = targetOrder?.order_number?.replace(/-/g, '').slice(0, 8) || '';
@@ -459,6 +457,15 @@ export const Orders = () => {
           type: 'order_status'
         });
       } else {
+        // Rollback on network failure
+        setOrders((prev) => {
+          const next = prev.map((ord) => (ord.id === orderId ? { ...ord, status: oldStatus } : ord));
+          try { localStorage.setItem('abs_admin_cached_orders', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
+        if (selectedOrder && selectedOrder.id === orderId) {
+          setSelectedOrder((prev) => ({ ...prev, status: oldStatus }));
+        }
         alert('حدث خطأ أثناء تحديث حالة الطلب: ' + error.message);
       }
     } catch (err) {

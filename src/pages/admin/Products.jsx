@@ -16,6 +16,7 @@ import {
   saveBurHolderColorInventory,
   BUR_HOLDER_COLORS
 } from '../../utils/burHolderInventoryEngine';
+import defaultProductsList from '../../defaultProducts.json';
 import { Plus, Edit, Trash2, Archive, Check, X, FileEdit, PlusCircle, Search, Layers, Globe, Sparkles, BookOpen, AlertCircle, Info } from 'lucide-react';
 
 // Specialized Dental Specialty Icons matching reference mockup
@@ -108,10 +109,43 @@ const renderSubjectSpecialtyIcon = (sub) => {
 export const Products = () => {
   const { t, lang } = useLanguage();
 
-  const [products, setProducts] = useState([]);
-  const [years, setYears] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_products');
+      if (cached) {
+        const p = JSON.parse(cached);
+        if (Array.isArray(p) && p.length > 0) return p;
+      }
+    } catch (_) {}
+    return defaultProductsList || [];
+  });
+  const [years, setYears] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_years');
+      if (cached) {
+        const y = JSON.parse(cached);
+        if (Array.isArray(y) && y.length > 0) return y;
+      }
+    } catch (_) {}
+    return [];
+  });
+  const [subjects, setSubjects] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_subjects');
+      if (cached) {
+        const s = JSON.parse(cached);
+        if (Array.isArray(s) && s.length > 0) return s;
+      }
+    } catch (_) {}
+    return [];
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_cached_products');
+      if (cached && JSON.parse(cached).length > 0) return false;
+    } catch (_) {}
+    return !defaultProductsList || defaultProductsList.length === 0;
+  });
 
   // Form State
   const [editingProduct, setEditingProduct] = useState(null); // null if adding new
@@ -457,106 +491,63 @@ export const Products = () => {
   }, []);
 
   const fetchData = async () => {
-    setLoading(true);
+    if (products.length === 0) {
+      setLoading(true);
+    }
     try {
-      // Load products (all, including archived and inactive)
-      let loadedProds = null;
-
-      // 1. Try comprehensive query with properly qualified joins
-      const { data: prods, error: prodErr } = await supabase
-        .from('products')
-        .select(`
-          *,
-          years (*),
-          subjects!products_subject_id_fkey (*),
-          product_subjects (
-            subject_id,
-            subjects!product_subjects_subject_id_fkey (id, name_ar, name_en, slug)
-          )
-        `)
-        .order('created_at', { ascending: false });
-
-      if (!prodErr && Array.isArray(prods)) {
-        loadedProds = prods;
-      } else {
-        console.warn('Primary products query error, attempting secondary fallback:', prodErr);
-        // 2. Secondary fallback with direct foreign key relations
-        const { data: fallbackProds, error: fbErr } = await supabase
+      // Parallel fetch for maximum throughput
+      const [prodsRes, yrsRes, subsRes] = await Promise.all([
+        supabase
           .from('products')
-          .select('*, years(*), subjects!products_subject_id_fkey(*)')
-          .order('created_at', { ascending: false });
+          .select(`
+            *,
+            years (*),
+            subjects!products_subject_id_fkey (*),
+            product_subjects (
+              subject_id,
+              subjects!product_subjects_subject_id_fkey (id, name_ar, name_en, slug)
+            )
+          `)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('years')
+          .select('*')
+          .order('sort_order', { ascending: true }),
+        supabase
+          .from('subjects')
+          .select('*')
+          .order('sort_order', { ascending: true })
+      ]);
 
-        if (!fbErr && Array.isArray(fallbackProds)) {
-          loadedProds = fallbackProds;
-        } else {
-          console.warn('Secondary fallback error, attempting base select:', fbErr);
-          // 3. Guaranteed base query fallback
-          const { data: baseProds } = await supabase
-            .from('products')
-            .select('*')
-            .order('created_at', { ascending: false });
-          if (Array.isArray(baseProds)) loadedProds = baseProds;
-        }
+      let loadedProds = prodsRes.data;
+      if (!loadedProds || prodsRes.error) {
+        // Fallback base select
+        const { data: baseProds } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+        if (baseProds) loadedProds = baseProds;
       }
 
-      if (loadedProds) {
+      if (Array.isArray(loadedProds) && loadedProds.length > 0) {
         setProducts(loadedProds);
+        try { localStorage.setItem('abs_admin_cached_products', JSON.stringify(loadedProds)); } catch (_) {}
       }
 
-      // Load years ordered by academic progression
-      const { data: yrs, error: yrsErr } = await supabase
-        .from('years')
-        .select('*')
-        .order('sort_order', { ascending: true });
-      if (yrs && !yrsErr && yrs.length > 0) {
-        setYears(yrs);
-      } else {
-        const { data: fallbackYrs } = await supabase.from('years').select('*').order('slug');
-        if (fallbackYrs) setYears(fallbackYrs);
+      if (Array.isArray(yrsRes.data) && yrsRes.data.length > 0) {
+        setYears(yrsRes.data);
+        try { localStorage.setItem('abs_admin_cached_years', JSON.stringify(yrsRes.data)); } catch (_) {}
       }
 
-      // Load all subjects ordered by sort_order
-      const { data: subs, error: subsErr } = await supabase
-        .from('subjects')
-        .select('*')
-        .order('sort_order', { ascending: true });
-      if (subs && !subsErr && subs.length > 0) {
-        setSubjects(subs);
-      } else {
-        const { data: fallbackSubs } = await supabase.from('subjects').select('*').order('name_ar');
-        if (fallbackSubs) setSubjects(fallbackSubs);
+      if (Array.isArray(subsRes.data) && subsRes.data.length > 0) {
+        setSubjects(subsRes.data);
+        try { localStorage.setItem('abs_admin_cached_subjects', JSON.stringify(subsRes.data)); } catch (_) {}
       }
-
     } catch (err) {
       console.error('Error fetching admin product catalog', err);
-      try {
-        const { data: fallbackProds } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-        if (fallbackProds) setProducts(fallbackProds);
-      } catch (_) {}
     } finally {
       setLoading(false);
     }
   };
 
-  const ensureMetadataLoaded = async () => {
-    try {
-      if (years.length === 0 || subjects.length === 0) {
-        const [{ data: liveYrs }, { data: liveSubs }] = await Promise.all([
-          supabase.from('years').select('*').order('sort_order', { ascending: true }),
-          supabase.from('subjects').select('*').order('sort_order', { ascending: true })
-        ]);
-        if (liveYrs && liveYrs.length > 0) setYears(liveYrs);
-        if (liveSubs && liveSubs.length > 0) setSubjects(liveSubs);
-        return { years: liveYrs || years, subjects: liveSubs || subjects };
-      }
-    } catch (e) {
-      console.warn('Could not re-verify academic metadata:', e);
-    }
-    return { years, subjects };
-  };
-
-  const openAddModal = async () => {
-    const meta = await ensureMetadataLoaded();
+  const openAddModal = () => {
     setEditingProduct(null);
     setNameAr('');
     setNameEn('');
@@ -568,8 +559,7 @@ export const Products = () => {
     setComparePrice('');
     setStockQuantity(10);
     setAvailability('available');
-    const availableYears = meta.years || years;
-    setYearId(availableYears.length > 0 ? availableYears[0].id : '');
+    setYearId(years.length > 0 ? years[0].id : '');
     setSubjectId('');
     setSelectedSubjectIds([]);
     setSubjectSelectionMode('custom');
@@ -590,18 +580,8 @@ export const Products = () => {
     setShowFormModal(true);
   };
 
-  const openEditModal = async (prod) => {
-    const meta = await ensureMetadataLoaded();
+  const openEditModal = (prod) => {
     setEditingProduct(prod);
-    if (isBurHolderProduct(prod)) {
-      setLoadingBurColors(true);
-      fetchBurHolderColorInventory().then(inv => {
-        setBurColorStocks({ yellow: inv.yellow, white: inv.white, pink: inv.pink });
-        setLoadingBurColors(false);
-      }).catch(() => setLoadingBurColors(false));
-    } else {
-      setBurColorStocks({ yellow: 12, white: 12, pink: 12 });
-    }
     setNameAr(prod.name_ar || '');
     setNameEn(prod.name_en || '');
     setDescriptionAr(prod.description_ar || '');
@@ -622,16 +602,7 @@ export const Products = () => {
     setSubjectSelectionMode(isUniv ? 'all' : 'custom');
     setSubjectSearchInModal('');
 
-    // Fetch assigned subjects from junction table and combine with legacy fields
-    const { data: ps } = await supabase
-      .from('product_subjects')
-      .select('subject_id')
-      .eq('product_id', prod.id);
-
     const sIds = new Set();
-    if (ps && ps.length > 0) {
-      ps.forEach(r => { if (r.subject_id) sIds.add(r.subject_id); });
-    }
     if (Array.isArray(prod.product_subjects) && prod.product_subjects.length > 0) {
       prod.product_subjects.forEach(r => { if (r.subject_id) sIds.add(r.subject_id); });
     }
@@ -639,8 +610,7 @@ export const Products = () => {
       sIds.add(prod.subject_id);
     }
     if (isUniv && sIds.size === 0) {
-      const allSubList = (meta.subjects && meta.subjects.length > 0) ? meta.subjects : subjects;
-      setSelectedSubjectIds(allSubList.map(s => s.id));
+      setSelectedSubjectIds(subjects.map(s => s.id));
     } else {
       setSelectedSubjectIds(Array.from(sIds));
     }
@@ -654,21 +624,34 @@ export const Products = () => {
     setAudioUrl(prod.audio_url || '');
     setRecordedBlobUrl('');
     setAudioChunks([]);
+    setExtraImageUrls(Array.isArray(prod.images) ? prod.images : []);
 
-    // Fetch extra images
-    const { data: extraImgs } = await supabase
-      .from('product_images')
-      .select('image_url')
-      .eq('product_id', prod.id)
-      .order('sort_order', { ascending: true });
+    // OPEN MODAL IMMEDIATELY WITH 0ms DELAY!
+    setShowFormModal(true);
 
-    if (extraImgs) {
-      setExtraImageUrls(extraImgs.map((img) => img.image_url));
+    // Background asynchronous enrichment without blocking modal popup
+    if (isBurHolderProduct(prod)) {
+      setLoadingBurColors(true);
+      fetchBurHolderColorInventory().then(inv => {
+        setBurColorStocks({ yellow: inv.yellow, white: inv.white, pink: inv.pink });
+        setLoadingBurColors(false);
+      }).catch(() => setLoadingBurColors(false));
     } else {
-      setExtraImageUrls([]);
+      setBurColorStocks({ yellow: 12, white: 12, pink: 12 });
     }
 
-    setShowFormModal(true);
+    supabase.from('product_subjects').select('subject_id').eq('product_id', prod.id).then(({ data: ps }) => {
+      if (ps && ps.length > 0) {
+        ps.forEach(r => { if (r.subject_id) sIds.add(r.subject_id); });
+        setSelectedSubjectIds(Array.from(sIds));
+      }
+    });
+
+    supabase.from('product_images').select('image_url').eq('product_id', prod.id).order('sort_order', { ascending: true }).then(({ data: extraImgs }) => {
+      if (extraImgs && extraImgs.length > 0) {
+        setExtraImageUrls(extraImgs.map(img => img.image_url));
+      }
+    });
   };
 
   const handleFormSubmit = async (e) => {
