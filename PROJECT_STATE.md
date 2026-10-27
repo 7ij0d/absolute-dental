@@ -7,36 +7,37 @@
 
 ## 1. نظرة عامة على المشروع والتقنيات (Project Overview & Tech Stack)
 - **المنصة:** متجر ومستودع الأدوات والمستلزمات الطبية الدراسية لطلبة طب وجراحة الفم والأسنان (**Absolute Dental Equipment**).
-- **الدومين الرسمي المخصص:** `absolutedental.ly`
-- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 + Lucide React Icons + High-Res Asset Pipeline + Dynamic Navigation Trail & Browse Context Engine + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture + Dental Boxes Unified Inventory Engine + Quick Box & Color Studio + Standalone Box Portal.
+- **الدومين الرسمي المخصص:** `absolutedental.ly` (مع الاستضافة الاحتياطية على GitHub Pages: `7ij0d.github.io/absolute-dental`).
+- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 (HashRouter) + Lucide React Icons + High-Res Asset Pipeline + Dynamic Navigation Trail & Browse Context Engine + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture + Dental Boxes Unified Inventory Engine + Quick Box & Color Studio + Standalone Box Portal + Static SPA Route Pre-generation Engine.
 
 ---
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 تدشين صفحة ورابط مستقل ومنفصل تماماً لإدارة البوكسات (`/box-manager`):
-1. **إنشاء صفحة منفصلة خاصة بالبوكسات فقط (`StandaloneBoxManager.jsx`):**
-   - تم بناء واجهة مستقلة ونظيفة تماماً خالية من أي قوائم جانبية أو أقسام أخرى، مخصصة 100% لإدارة البوكسات والألوان فقط.
-   - مزودة بقفل حماية سريع برمز PIN (`9922`) لحفظ الأمان ومنع العبث، مع شريط أدوات علوي يحتوي على زر معاينة المتجر المباشرة وزر قفل فوري ورابط للوحة العامة.
-   - تضمين واجهة الاستوديو السريع [`AdminQuickBoxes.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/AdminQuickBoxes.jsx) بداخلها بكامل المزايا (رفع الصور، اختيار الأحجام، لوحة الألوان السريعة، الحالات الثلاثية، والتحكم اللحظي بنقرة واحدة).
-2. **تسجيل المسارات المنفصلة السريعة في `App.jsx`:**
-   - `/box-manager`
-   - `/boxes-manager`
-   - `/box-studio`
+### 🔹 حل مشكلة الروابط المباشرة وتوفير الرابط المنفصل للبوكسات:
+1. **تشخيص سبب توجيه الرابط إلى الصفحة الرئيسية (Root Cause):**
+   - المشروع يستخدم `HashRouter` في [`src/main.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/main.jsx).
+   - عند فتح الروابط المباشرة مثل `/box-manager` بدون بادئة الهاش `#/`، كان المتصفح إما يعيد التوجيه عبر `404.html` بصيغة استعلام غير متوافقة أو كان `HashRouter` يقرأ المسار الفارغ ويعرض الصفحة الرئيسية فوراً.
+   - بالإضافة إلى أن شهادة SSL على الدومين المخصص `absolutedental.ly` كانت تظهر تحذيراً عند طلب `https://` لحين اكتمال شهادة Let's Encrypt من مزود الاستضافة.
+2. **الحلول المنفذة (Fixes Applied):**
+   - **تحديث كود التوجيه في [`index.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/index.html) و [`public/404.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/404.html):** تحويل أي مسار مباشر بصرياً وتلقائياً إلى مسار الهاش الخاص بـ `HashRouter` فوراً وبدون أي ارتباك.
+   - **توليد صفحات HTML ثابتة ومستقلة في خطوة البناء عبر [`vite.config.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/vite.config.js):** تم إنشاء إضافة تلقائية تنتج ملفات مستقلة في مجلدات `dist/box-manager/index.html` و `dist/boxes/index.html` بحيث يستجيب الخادم برمز 200 مباشرة دون الحاجة لصفحة الخطأ.
+   - **توفير كافة صيغ الروابط المباشرة (مع الهاش وبدون الهاش):** لتضمن الفتح الفوري على أي متصفح أو جهاز هاتف.
 3. **التحقق والبناء (Build Verification):**
-   - اجتياز اختبار البناء `npm run build` بنجاح بنسبة 100% في 2.74 ثانية.
+   - اجتياز اختبار البناء `npm run build` بنجاح 100% وتوليد النسخ الثابتة.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`src/pages/admin/StandaloneBoxManager.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/StandaloneBoxManager.jsx) | صفحة مستقلة ومنفصلة خاصة بالبوكسات فقط بدون أي شريط جانبي مع قفل PIN سريع |
-| [`src/App.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/App.jsx) | تسجيل مسارات الوصول المباشرة `/box-manager` و `/boxes-manager` و `/box-studio` |
-| [`PROJECT_STATE.md`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/PROJECT_STATE.md) | تحديث وثيقة حالة المشروع المستمرة ومزامنة التغييرات |
+| [`index.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/index.html) | دعم التحويل التلقائي الذكي من المسارات العادية إلى مسارات `HashRouter` |
+| [`public/404.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/404.html) | توجيه مسارات GitHub Pages مباشرة إلى `/#/route` فوراً |
+| [`vite.config.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/vite.config.js) | إضافة مولد النسخ الثابتة `generateSpaRoutesPlugin` |
+| [`PROJECT_STATE.md`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/PROJECT_STATE.md) | تحديث وثيقة حالة المشروع وتوثيق الروابط الدقيقة |
 
 ---
 
 ## 3. الخطوة التالية المباشرة (Immediate Next Step)
-- دفع التحديثات إلى المستودع عبر `git commit & push`.
-- تزويد المشرف بالرابط المنفصل المباشر الخاص بالبوكسات فقط.
+- دفع التعديلات عبر `git commit & push`.
+- تزويد المشرف برابط الهاش المباشر الصريح لضمان الفتح اللحظي على صفحة البوكسات مباشرة بدون أي تحويل.
