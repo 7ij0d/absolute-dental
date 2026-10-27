@@ -55,7 +55,7 @@ const STANDARD_BOX_SIZES = [
     labelAr: 'بوكس 16.5 إنش',
     labelEn: '16.5" Box',
     descAr: 'أقسام علوية شفافة متعددة',
-    defaultPrice: 65,
+    defaultPrice: 85,
     sampleImg: '/accessories/box16_5-green.jpg'
   },
   {

@@ -15,28 +15,32 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 حل مشكلة عدم فتح الرابط (Fix SSL Certificate & Direct Route Resolution):
-1. **تشخيص سبب عدم فتح الرابط («مايفتحش»):**
-   - كان الرابط المخصص `https://absolutedental.ly/` يواجه خطأ حماية شهادة أمان SSL (`ERR_TLS_CERT_ALTNAME_INVALID` / "Your connection is not private") لأن مزود الاستضافة لم يكمل بعد إصدار شهادة Let's Encrypt للنطاق الليبي `.ly`، مما كان يجعل المتصفحات في الهواتف وأجهزة الكمبيوتر تحجب الموقع بالكامل بشاشة تحذير أمنية حمراء.
-   - بالإضافة إلى أن توجيه CNAME التلقائي كان يجبر الزائر على التحول إلى الرابط المتعطل، بدلاً من استخدام رابط GitHub Pages المباشر والمؤمّن بشهادة SSL خضراء ورسمية 100%.
-2. **الحلول المنفذة (Fixes Applied):**
-   - **تفعيل الاستضافة المباشرة المؤمنة فوراً:** إتاحة رابط المنصة المباشر على نطاق GitHub الآمن بدون أي حجب أمني: `https://7ij0d.github.io/absolute-dental/#/box-manager`.
-   - **تعديل مسارات الأصول (`base: './'`):** ضبط مسار البناء ليكون نسبياً (`./`) لتعمل جميع الصور والملفات البرمجية والأيقونات بسلاسة سواء على النطاق المخصص أو على رابط الاستضافة المباشر أو محلياً.
-   - **التوجيه التلقائي الذكي للـ HashRouter:** إدراج نصوص توجيه ذكية في `index.html` و `404.html` تضمن فتح أي صفحة مباشرة دون أي عودة للصفحة الرئيسية.
+### 🔹 اعتماد وحصر أحجام وأسعار البوكسات الرسمية حصرياً:
+1. **تحديث وتثبيت قائمة الأحجام والأسعار النهائية للبوكسات:**
+   - 📦 **بوكس 14 إنش:** **45 د.ل**
+   - 📦 **بوكس 16 إنش:** **65 د.ل**
+   - 📦 **بوكس 16.5 إنش:** **85 د.ل**
+   - 📦 **بوكس 17 إنش (17.5 GT-MAX):** **85 د.ل**
+   *(حصر البوكسات في هذه الأحجام والأسعار الأربعة فقط دون غيرها).*
+2. **المزامنة الشاملة في قاعدة البيانات ومحرك المخزون والواجهة:**
+   - تحديث جدول منتجات الملحقات لقيم الأسعار المعتمدة (تعديل 17.5 إنش من 95 إلى 85، وتثبيت 16.5 إنش على 85 د.ل).
+   - تحديث سجلات الأسعار في إعدادات `box_variants_inventory`.
+   - تعديل القيم الافتراضية والبيانات المرجعية في [`src/utils/boxInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/boxInventoryEngine.js) لـ `CANONICAL_BOXES` و `FALLBACK_BOXES`.
+   - تحديث الأسعار الافتراضية للبطاقات في مدير البوكسات السريع [`src/pages/admin/AdminQuickBoxes.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/AdminQuickBoxes.jsx).
 3. **التحقق والبناء (Build Verification):**
-   - اجتياز اختبار البناء `npm run build` بنجاح وتوليد النسخ الثابتة.
+   - اجتياز اختبار البناء `npm run build` بنجاح بنسبة 100% في 3.08 ثوانٍ.
 
 ---
 
 ### 🔹 الملفات المتأثرة في هذا التعديل:
 | الملف | التغيير |
 |---|---|
-| [`vite.config.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/vite.config.js) | ضبط `base: './'` وتوليد المسارات الثابتة |
-| [`public/CNAME`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/public/CNAME) | إزالة توجيه CNAME مؤقتاً لفك حجب شهادة SSL والسماح بفتح الرابط المباشر |
+| [`src/utils/boxInventoryEngine.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/utils/boxInventoryEngine.js) | تثبيت أسعار البوكسات: 14 بـ 45، 16 بـ 65، 16.5 بـ 85، و 17 بـ 85 د.ل |
+| [`src/pages/admin/AdminQuickBoxes.jsx`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/src/pages/admin/AdminQuickBoxes.jsx) | مطابقة الأسعار الافتراضية للبوكسات الأربعة في واجهة الإضافة السريعة |
 | [`PROJECT_STATE.md`](file:///C:/Users/Taha/.gemini/antigravity/scratch/absolute-dental/PROJECT_STATE.md) | تحديث وثيقة حالة المشروع المستمرة ومزامنة التغييرات |
 
 ---
 
 ## 3. الخطوة التالية المباشرة (Immediate Next Step)
 - دفع التعديلات عبر `git commit & push`.
-- تزويد المشرف بالرابط المباشر الآمن الذي يفتح فوراً بدون أي شاشة خطأ أو تحذير SSL.
+- تأكيد ضبط الأسعار الأربعة للمشرف وإرسال الرابط المباشر.

@@ -72,7 +72,7 @@ export const CANONICAL_BOXES = {
     size: '17.5 inch',
     nameAr: '17.5" Professional Box — GT-MAX',
     nameEn: '17.5" Professional Box — GT-MAX',
-    defaultPrice: 95
+    defaultPrice: 85
   }
 };
 
@@ -146,7 +146,7 @@ export const FALLBACK_BOXES = [
     size: '17.5 inch',
     name_ar: '17.5" Professional Box — GT-MAX',
     name_en: '17.5" Professional Box — GT-MAX',
-    price: 95,
+    price: 85,
     stock_quantity: 12,
     desc_ar: 'البوكس الاحترافي الأوسع GT-MAX/BADC بغطاء ملون مزود بأقسام تنظيم شفافة ومساحة تخزين سفلية عملاقة.',
     desc_en: 'Professional GT-MAX/BADC toolbox with a colored lid featuring a clear organizer and wide main storage.',
