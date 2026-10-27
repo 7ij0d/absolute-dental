@@ -155,7 +155,7 @@ function sortExamination(items) {
 }
 
 function sortConsumables(items) {
-  // 1. Bur Holder, 2. Gloves, 3. Masks, 4. Mask & Gloves Set, 5. Cover Sheets
+  // 1. Bur Holder, 2. Gloves, 3. Masks, 4. Mask & Gloves Set, 5. Cover Sheets, 6. Medical Alcohol
   const orderWeight = (p) => {
     const s = ((p.name_en || '') + ' ' + (p.name_ar || '')).toLowerCase();
     if (s.includes('holder') || s.includes('علبة')) return 1;
@@ -163,7 +163,8 @@ function sortConsumables(items) {
     if (s.includes('mask') && !s.includes('set') && !s.includes('طقم')) return 3;
     if (s.includes('set') || s.includes('طقم')) return 4;
     if (s.includes('cover sheet') || s.includes('مفرش')) return 5;
-    return 6;
+    if (s.includes('alcohol') || s.includes('كحول')) return 6;
+    return 7;
   };
 
   return [...items].sort((a, b) => orderWeight(a) - orderWeight(b));
