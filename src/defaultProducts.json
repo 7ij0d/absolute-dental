@@ -287,20 +287,18 @@
     "details_en": "Student Advisory Guide:\nDental wax sheets are highly sensitive to temperature, humidity, and light exposure. For optimal workability, students are strongly advised to purchase them directly from the college store immediately prior to attending practical lab sessions."
   },
   {
-    "id": "2a8f9bde-fb3f-485d-a1bd-d62aa0b83556",
+    "id": "708f14ad-8374-4461-b003-12d975f1252d",
     "name_ar": "السباطلة العريضة (Wide Spatula)",
     "name_en": "Wide spatula",
-    "price": 0,
+    "price": 10,
     "compare_at_price": null,
     "availability": "available",
-    "stock_quantity": 0,
+    "stock_quantity": 50,
     "subject_id": "22000000-0000-0000-0000-000000000022",
-    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/2a8f9bde-fb3f-485d-a1bd-d62aa0b83556.jpg",
+    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/1793108446648-3qlv5rd.jpg",
     "sort_order": 0,
-    "description_ar": "💡 ملاحظة وإرشاد للطلبة: هذه الأداة غير متوفرة لدينا في الموقع؛ يمكنك الذهاب لأي محل مواد بناء وطلب (سباطلة / سكينة معجون) وستفي بالغرض تماماً لتدريب العملي وبسعر رمزي.",
-    "description_en": "💡 Student Guide: This tool is not sold on our store. You can easily obtain a standard spatula from any local building materials / hardware store, which works perfectly for practical dental training.",
-    "details_ar": "ملاحظة هامة للطلبة:\nالسباطلة العريضة (Wide Spatula) ليست متوفرة لدينا في المتجر، ولكن يمكنك شراؤها بسهولة من أي محل مواد بناء قريب (اطلب منه سباطلة / سكينة معجون) وستؤدي الغرض تماماً وبأقل تكلفة.",
-    "details_en": "Important Student Note:\nWide Spatula is not sold on our platform. Students can readily purchase a standard putty spatula from any hardware / building materials shop, which serves the exact same practical purpose."
+    "description_ar": "سباطلة عريضة (سكينة معجون) مقاس 6 إنش بمقبض أزرق مريح مخصصة لخلط وتنعيم الجبس والألجينات في معمل صناعة الأسنان المتحركة.",
+    "description_en": "6-inch wide spatula with comfortable blue handle designed for mixing and smoothing plaster and alginate in removable prosthodontics lab."
   },
   {
     "id": "e009eaf4-f041-4706-b27d-daa394e512d3",

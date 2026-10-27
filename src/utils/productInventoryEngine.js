@@ -805,16 +805,6 @@ export function calculateOrderDeductions(orderItems, currentProducts) {
 }
 
 export const STUDENT_GUIDE_PRODUCTS = {
-  '2a8f9bde-fb3f-485d-a1bd-d62aa0b83556': {
-    id: '2a8f9bde-fb3f-485d-a1bd-d62aa0b83556',
-    type: 'hardware_store',
-    badgeAr: '💡 إرشاد: متوفرة بمحلات مواد البناء',
-    badgeEn: '💡 Guide: Available at Hardware Stores',
-    shortGuideAr: 'غير متوفرة لدينا؛ يمكنك شراؤها كـ (سباطلة / سكينة معجون) من أي محل مواد بناء.',
-    shortGuideEn: 'Not sold on store; available as putty spatula at any hardware store.',
-    noteAr: 'السباطلة العريضة (Wide Spatula) غير متوفرة لدينا في الموقع؛ يمكنك الذهاب لأي محل مواد بناء وطلب (سباطلة / سكينة معجون) وستفي بالغرض تماماً لتدريب العملي وبسعر رمزي واقتصادي.',
-    noteEn: 'Wide Spatula is not sold on our store. You can easily obtain a standard spatula from any local building materials / hardware store, which works perfectly for practical dental training.'
-  },
   '72e1069c-4319-42ff-a38c-2af8f8e4e546': {
     id: '72e1069c-4319-42ff-a38c-2af8f8e4e546',
     type: 'photocopier_lab',
