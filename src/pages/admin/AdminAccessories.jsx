@@ -18,7 +18,8 @@ import {
   ArrowLeft,
   RotateCcw,
   AlertTriangle,
-  ShieldCheck
+  ShieldCheck,
+  Box
 } from 'lucide-react';
 import {
   isBoxProduct,
@@ -29,9 +30,11 @@ import {
   resetAllBoxStockToZero
 } from '../../utils/boxInventoryEngine';
 
+import AdminQuickBoxes from './AdminQuickBoxes';
+
 export const AdminAccessories = () => {
   const { isRtl } = useLanguage();
-  const [activeTab, setActiveTab] = useState('categories'); // 'categories' | 'products' | 'colors' | 'backgrounds'
+  const [activeTab, setActiveTab] = useState('quick-boxes'); // 'quick-boxes' | 'categories' | 'products' | 'colors' | 'backgrounds'
 
   // Data states
   const [categories, setCategories] = useState([]);
@@ -491,6 +494,26 @@ export const AdminAccessories = () => {
       {/* Tabs Bar */}
       <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '2px solid var(--border-color)', overflowX: 'auto', paddingBottom: '0.5rem' }}>
         <button
+          onClick={() => setActiveTab('quick-boxes')}
+          style={{
+            padding: '0.75rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            border: 'none',
+            background: activeTab === 'quick-boxes' ? 'linear-gradient(135deg, #4A3525 0%, #2C1A11 100%)' : 'transparent',
+            color: activeTab === 'quick-boxes' ? '#fff' : 'var(--text-main)',
+            fontWeight: 800,
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            boxShadow: activeTab === 'quick-boxes' ? '0 4px 12px rgba(44, 26, 17, 0.25)' : 'none'
+          }}
+        >
+          <Box size={18} />
+          <span>{isRtl ? '⚡ مدير البوكسات والألوان السريع' : '⚡ Quick Box Manager'}</span>
+        </button>
+        <button
           onClick={() => setActiveTab('categories')}
           style={{
             padding: '0.75rem 1.25rem',
@@ -572,6 +595,8 @@ export const AdminAccessories = () => {
       </div>
 
       {/* ── TAB 1: CATEGORIES MANAGEMENT ── */}
+      {activeTab === 'quick-boxes' && <AdminQuickBoxes />}
+
       {activeTab === 'categories' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

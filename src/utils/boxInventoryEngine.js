@@ -243,7 +243,9 @@ export async function saveBoxVariantInventoryRecord(variantId, updates = {}) {
     ? Math.max(0, parseInt(updates.reserved_stock, 10) || 0)
     : (existingRecord.reserved_stock ?? 0);
 
-  const availableStock = computeVariantAvailableStock(physicalStock, reservedStock);
+  const availableStock = updates.available_stock !== undefined
+    ? updates.available_stock
+    : computeVariantAvailableStock(physicalStock, reservedStock);
   const status = updates.status || (availableStock > 0 ? 'in_stock' : 'out_of_stock');
 
   const updatedVariant = {
@@ -350,25 +352,26 @@ export function splitBoxColorsByAvailability(colors = [], inventoryMap = {}) {
   const unavailableColors = [];
 
   colors.forEach((color) => {
-    // Hidden / discontinued colors are omitted completely as requested
-    if (color.status === 'discontinued' || color.is_hidden === true) {
-      return;
-    }
-
     const idKey = color.id;
     const colorIdKey = color.color_id;
     const inv = inventoryMap[idKey] || inventoryMap[colorIdKey] || null;
 
+    let status = color.status || 'in_stock';
+    if (inv && inv.status) status = inv.status;
+
+    // Discontinued or hidden colors are completely omitted from customer storefront
+    if (status === 'discontinued' || color.status === 'discontinued' || color.is_hidden === true) {
+      return;
+    }
+
     let availableStock = 10;
     let physicalStock = 10;
     let reservedStock = 0;
-    let status = color.status || 'in_stock';
 
     if (inv) {
       physicalStock = inv.physical_stock ?? 10;
       reservedStock = inv.reserved_stock ?? 0;
       availableStock = inv.available_stock ?? computeVariantAvailableStock(physicalStock, reservedStock);
-      if (inv.status) status = inv.status;
     } else if (color.available_stock !== undefined) {
       availableStock = color.available_stock;
       physicalStock = color.physical_stock ?? availableStock;
@@ -380,8 +383,13 @@ export function splitBoxColorsByAvailability(colors = [], inventoryMap = {}) {
     const isImmediate = availableStock > 0 && !isOnDemand;
     const isAvailable = isImmediate || isOnDemand;
 
+    const cleanAr = cleanColorLabel(color, 'ar');
+    const cleanEn = cleanColorLabel(color, 'en');
+
     const decorated = {
       ...color,
+      label_ar: cleanAr,
+      label_en: cleanEn,
       physical_stock: physicalStock,
       reserved_stock: reservedStock,
       available_stock: isAvailable ? Math.max(availableStock, 1) : 0,

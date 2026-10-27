@@ -36,6 +36,7 @@ import Users from './pages/admin/Users';
 import AdminDonations from './pages/admin/AdminDonations';
 import AdminRequests from './pages/admin/Requests';
 import AdminAccessories from './pages/admin/AdminAccessories';
+import AdminQuickBoxes from './pages/admin/AdminQuickBoxes';
 import ProductRequests from './pages/admin/ProductRequests';
 import StudentExperiences from './pages/admin/StudentExperiences';
 import { runPrefetch } from './prefetch';
@@ -130,6 +131,7 @@ export const App = () => {
         <Route path="donations" element={<AdminDonations />} />
         <Route path="requests" element={<AdminRequests />} />
         <Route path="accessories" element={<AdminAccessories />} />
+        <Route path="boxes" element={<AdminQuickBoxes />} />
       </Route>
 
       {/* Global Fallback */}

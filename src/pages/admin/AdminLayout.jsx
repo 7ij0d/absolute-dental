@@ -18,7 +18,8 @@ import {
   Users,
   Gift,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  Box
 } from 'lucide-react';
 
 export const AdminLayout = () => {
@@ -147,6 +148,7 @@ export const AdminLayout = () => {
     { path: '/admin/messages', label: isRtl ? 'الرسائل' : 'Messages', icon: Inbox },
     { path: '/admin/donations', label: isRtl ? 'التبرعات' : 'Donations', icon: Gift },
     { path: '/admin/requests', label: isRtl ? 'نواقص الطلاب' : 'Student Needs', icon: Lock },
+    { path: '/admin/boxes', label: isRtl ? '⚡ مدير البوكسات السريع' : '⚡ Quick Box Manager', icon: Box },
     { path: '/admin/accessories', label: isRtl ? 'الإكسسوارات والبوكسات' : 'Accessories & Boxes', icon: Package },
     { path: '/admin/settings', label: isRtl ? 'الإعدادات' : 'Settings', icon: Settings }
   ];
