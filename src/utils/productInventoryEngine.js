@@ -446,6 +446,75 @@ export const CANONICAL_SIZED_PRODUCTS = {
         image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/labcoat-figs-white-1.jpg'
       }
     ]
+  },
+  '55000000-0000-0000-0000-000000000002': {
+    productId: '55000000-0000-0000-0000-000000000002',
+    nameAr: 'يونيفورم طبي أسود CAYDAS',
+    nameEn: 'Black CAYDAS Medical Scrub Set',
+    optionsLabelAr: 'اختر المقاس المتوفر (S, M, L, XL, 2XL)',
+    optionsLabelEn: 'Select Size (S, M, L, XL, 2XL)',
+    optionsPromptAr: '⚠️ يرجى تحديد مقاس اليونيفورم أولاً',
+    optionsPromptEn: '⚠️ Please select a uniform size first',
+    buttonPromptAr: 'اختر المقاس وأضف للسلة',
+    buttonPromptEn: 'Select Size & Add to Cart',
+    sizingNoticeAr: '💡 ملاحظة المقاس: يمكنك المعاينة وتجربة القياس قبل الدفع والتأكيد.',
+    sizingNoticeEn: '💡 Sizing Note: Fitting and inspection available before payment.',
+    required: true,
+    galleryImages: [
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/uniform-caydas-black.png'
+    ],
+    sizes: [
+      {
+        size: 'S',
+        code: 'S',
+        labelAr: 'مقاس S (صغير)',
+        labelEn: 'Size S',
+        shortLabel: 'S',
+        stock: 10,
+        price: 65.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/uniform-caydas-black.png'
+      },
+      {
+        size: 'M',
+        code: 'M',
+        labelAr: 'مقاس M (وسط)',
+        labelEn: 'Size M',
+        shortLabel: 'M',
+        stock: 10,
+        price: 65.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/uniform-caydas-black.png'
+      },
+      {
+        size: 'L',
+        code: 'L',
+        labelAr: 'مقاس L (كبير)',
+        labelEn: 'Size L',
+        shortLabel: 'L',
+        stock: 10,
+        price: 65.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/uniform-caydas-black.png'
+      },
+      {
+        size: 'XL',
+        code: 'XL',
+        labelAr: 'مقاس XL (كبير جداً)',
+        labelEn: 'Size XL',
+        shortLabel: 'XL',
+        stock: 10,
+        price: 65.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/uniform-caydas-black.png'
+      },
+      {
+        size: '2XL',
+        code: '2XL',
+        labelAr: 'مقاس 2XL (كبير مضاعف)',
+        labelEn: 'Size 2XL',
+        shortLabel: '2XL',
+        stock: 10,
+        price: 65.00,
+        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/uniform-caydas-black.png'
+      }
+    ]
   }
 };
 

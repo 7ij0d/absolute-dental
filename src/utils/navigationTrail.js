@@ -132,7 +132,7 @@ export function getSavedProductOrigin(productId) {
 export function isAccessoryProduct(product) {
   if (!product) return false;
   const pId = String(product.id || '');
-  if (pId === '55000000-0000-0000-0000-000000000001') return true;
+  if (pId === '55000000-0000-0000-0000-000000000001' || pId === '55000000-0000-0000-0000-000000000002') return true;
   const text = `${product.name_ar || ''} ${product.name_en || ''} ${product.description_ar || ''}`.toLowerCase();
   return (
     text.includes('لاب كوت') ||

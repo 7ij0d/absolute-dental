@@ -21,51 +21,65 @@ export const AccessoriesPage = () => {
   const { lang, isRtl } = useLanguage();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const [isFav, setIsFav] = useState(() => {
+
+  const [favoriteIds, setFavoriteIds] = useState(() => {
     try {
-      const favs = JSON.parse(localStorage.getItem('ad_favorites') || '[]');
-      return favs.includes('55000000-0000-0000-0000-000000000001');
-    } catch (_) { return false; }
+      return new Set(JSON.parse(localStorage.getItem('ad_favorites') || '[]'));
+    } catch (_) {
+      return new Set();
+    }
   });
 
-  // Star Lab Coat Product Data
-  const product = {
-    id: '55000000-0000-0000-0000-000000000001',
-    name_ar: 'لاب كوت أبيض FIGS محلي',
-    name_en: 'White FIGS Lab Coat (Local)',
-    price: 45,
-    availability_ar: 'متوفر وجاهز للتوصيل',
-    availability_en: 'In Stock & Ready',
-    images: [
-      `${BASE}products/labcoat-figs-white-1.jpg`,
-      `${BASE}products/labcoat-figs-white-collar.jpg`,
-      `${BASE}products/labcoat-figs-white-3.jpg`,
-      `${BASE}products/labcoat-figs-white-2.jpg`
-    ]
-  };
+  // Showcase Accessories Products Data (Lab coat & Scrub uniform)
+  const ACCESSORY_PRODUCTS = [
+    {
+      id: '55000000-0000-0000-0000-000000000001',
+      name_ar: 'لاب كوت أبيض FIGS محلي',
+      name_en: 'White FIGS Lab Coat (Local)',
+      price: 45,
+      availability_ar: 'متوفر وجاهز للتوصيل',
+      availability_en: 'In Stock & Ready',
+      images: [
+        `${BASE}products/labcoat-figs-white-1.jpg`,
+        `${BASE}products/labcoat-figs-white-collar.jpg`,
+        `${BASE}products/labcoat-figs-white-3.jpg`,
+        `${BASE}products/labcoat-figs-white-2.jpg`
+      ]
+    },
+    {
+      id: '55000000-0000-0000-0000-000000000002',
+      name_ar: 'يونيفورم طبي أسود CAYDAS',
+      name_en: 'Black CAYDAS Medical Scrub Set',
+      price: 65,
+      availability_ar: 'متوفر وجاهز للتوصيل',
+      availability_en: 'In Stock & Ready',
+      images: [
+        `${BASE}products/uniform-caydas-black.png`
+      ]
+    }
+  ];
 
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const activeImage = product.images[activeImageIndex] || product.images[0];
-  
-  const handleOpenProduct = () => {
-    recordProductOrigin(product.id, { from: 'accessories', returnPath: '/accessories' });
-    navigate(buildProductUrl(product.id, { from: 'accessories' }), {
+  const [activeImageMap, setActiveImageMap] = useState({});
+
+  const handleOpenProduct = (productId) => {
+    recordProductOrigin(productId, { from: 'accessories', returnPath: '/accessories' });
+    navigate(buildProductUrl(productId, { from: 'accessories' }), {
       state: { from: '/accessories', fromCategory: 'accessories', returnPath: '/accessories' }
     });
   };
-  
 
-  const handleToggleFav = (e) => {
+  const handleToggleFav = (e, productId) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFav(prev => {
-      const next = !prev;
+    setFavoriteIds(prev => {
+      const next = new Set(prev);
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
       try {
-        const favs = JSON.parse(localStorage.getItem('ad_favorites') || '[]');
-        const updated = next
-          ? Array.from(new Set([...favs, product.id]))
-          : favs.filter(id => id !== product.id);
-        localStorage.setItem('ad_favorites', JSON.stringify(updated));
+        localStorage.setItem('ad_favorites', JSON.stringify(Array.from(next)));
       } catch (_) {}
       return next;
     });
@@ -224,7 +238,7 @@ export const AccessoriesPage = () => {
           </div>
         </section>
 
-        {/* ── 3. PRODUCT COUNT HEADER (1 منتج) ── */}
+        {/* ── 3. PRODUCT COUNT HEADER ── */}
         <div
           style={{
             display: 'flex',
@@ -241,7 +255,7 @@ export const AccessoriesPage = () => {
               color: '#3E271D'
             }}
           >
-            {lang === 'ar' ? '1 منتج' : '1 product'}
+            {lang === 'ar' ? `${ACCESSORY_PRODUCTS.length} منتجات` : `${ACCESSORY_PRODUCTS.length} products`}
           </span>
         </div>
 
@@ -255,219 +269,232 @@ export const AccessoriesPage = () => {
             justifyContent: 'start'
           }}
         >
-          {/* ── SINGLE PRODUCT CARD (FIGS LAB COAT) ── */}
-          <article
-            className="product-reference-card animate-fade-in"
-            style={{
-              background: '#FFFFFF',
-              borderRadius: '16px',
-              border: '1px solid #ECE4DA',
-              boxShadow: '0 4px 20px rgba(35, 24, 16, 0.05)',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-              position: 'relative'
-            }}
-          >
-            {/* Top Media Area with Floating Heart Favorite */}
-            <div style={{ position: 'relative', background: '#F9F7F4' }}>
-              {/* Floating Favorite Button (Top-Left in RTL) */}
-              <button
-                type="button"
-                onClick={handleToggleFav}
-                aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
-                style={{
-                  position: 'absolute',
-                  top: '12px',
-                  [isRtl ? 'left' : 'right']: '12px',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  background: '#FFFFFF',
-                  border: '1px solid rgba(0,0,0,0.06)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  zIndex: 3,
-                  transition: 'transform 0.15s ease'
-                }}
-              >
-                <Heart
-                  size={18}
-                  fill={isFav ? '#E11D48' : 'none'}
-                  color={isFav ? '#E11D48' : '#3E271D'}
-                  strokeWidth={2.2}
-                />
-              </button>
+          {ACCESSORY_PRODUCTS.map((prod) => {
+            const isFav = favoriteIds.has(prod.id);
+            const activeIndex = activeImageMap[prod.id] || 0;
+            const currentImg = prod.images[activeIndex] || prod.images[0];
 
-              {/* Main Image */}
-              <div
-                onClick={handleOpenProduct}
+            return (
+              <article
+                key={prod.id}
+                className="product-reference-card animate-fade-in"
                 style={{
-                  width: '100%',
-                  aspectRatio: '4/3.4',
+                  background: '#FFFFFF',
+                  borderRadius: '16px',
+                  border: '1px solid #ECE4DA',
+                  boxShadow: '0 4px 20px rgba(35, 24, 16, 0.05)',
                   overflow: 'hidden',
-                  cursor: 'pointer'
-                }}
-              >
-                <img
-                  src={activeImage}
-                  alt={product.name_ar}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'center 20%',
-                    display: 'block',
-                    transition: 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
-                  }}
-                />
-              </div>
-
-              {/* 4 Thumbnails Underneath Main Image */}
-              <div
-                style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  padding: '0.65rem 0.85rem',
-                  background: '#FFFFFF',
-                  borderTop: '1px solid #F1EBE4'
+                  flexDirection: 'column',
+                  transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                  position: 'relative'
                 }}
               >
-                {product.images.map((img, idx) => {
-                  const isActive = activeImageIndex === idx;
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setActiveImageIndex(idx)}
+                {/* Top Media Area with Floating Heart Favorite */}
+                <div style={{ position: 'relative', background: '#F9F7F4' }}>
+                  {/* Floating Favorite Button (Top-Left in RTL) */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleToggleFav(e, prod.id)}
+                    aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                    style={{
+                      position: 'absolute',
+                      top: '12px',
+                      [isRtl ? 'left' : 'right']: '12px',
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      background: '#FFFFFF',
+                      border: '1px solid rgba(0,0,0,0.06)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      zIndex: 3,
+                      transition: 'transform 0.15s ease'
+                    }}
+                  >
+                    <Heart
+                      size={18}
+                      fill={isFav ? '#E11D48' : 'none'}
+                      color={isFav ? '#E11D48' : '#3E271D'}
+                      strokeWidth={2.2}
+                    />
+                  </button>
+
+                  {/* Main Image */}
+                  <div
+                    onClick={() => handleOpenProduct(prod.id)}
+                    style={{
+                      width: '100%',
+                      aspectRatio: '4/3.4',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: prod.images.length === 1 ? '#F8F6F2' : '#F9F7F4'
+                    }}
+                  >
+                    <img
+                      src={currentImg}
+                      alt={prod.name_ar}
                       style={{
-                        width: '46px',
-                        height: '46px',
-                        borderRadius: '8px',
-                        border: isActive ? '2px solid #3E271D' : '1px solid #E2E8F0',
-                        overflow: 'hidden',
-                        padding: 0,
-                        cursor: 'pointer',
-                        background: '#F8F6F2',
-                        opacity: isActive ? 1 : 0.7,
-                        transform: isActive ? 'scale(1.04)' : 'none',
-                        transition: 'all 0.15s ease'
+                        width: '100%',
+                        height: '100%',
+                        objectFit: prod.images.length === 1 ? 'contain' : 'cover',
+                        objectPosition: prod.images.length === 1 ? 'center' : 'center 20%',
+                        display: 'block',
+                        transition: 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
                       }}
-                    >
-                      <img
-                        src={img}
-                        alt=""
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover'
-                        }}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                    />
+                  </div>
 
-            {/* Card Content */}
-            <div
-              style={{
-                padding: '1.15rem 1.25rem 1.35rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.55rem',
-                flex: 1
-              }}
-            >
-              {/* Product Title */}
-              <h2
-                onClick={handleOpenProduct}
-                style={{
-                  margin: 0,
-                  fontFamily: "'Cairo', sans-serif",
-                  fontSize: '1.18rem',
-                  fontWeight: 900,
-                  color: '#2C1A11',
-                  cursor: 'pointer',
-                  lineHeight: 1.3
-                }}
-              >
-                {lang === 'ar' ? product.name_ar : product.name_en}
-              </h2>
+                  {/* Thumbnails Underneath Main Image (or spacer for uniform alignment) */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      padding: '0.65rem 0.85rem',
+                      background: '#FFFFFF',
+                      borderTop: '1px solid #F1EBE4',
+                      minHeight: '60px'
+                    }}
+                  >
+                    {prod.images.map((img, idx) => {
+                      const isActive = activeIndex === idx;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setActiveImageMap(prev => ({ ...prev, [prod.id]: idx }))}
+                          style={{
+                            width: '46px',
+                            height: '46px',
+                            borderRadius: '8px',
+                            border: isActive ? '2px solid #3E271D' : '1px solid #E2E8F0',
+                            overflow: 'hidden',
+                            padding: 0,
+                            cursor: 'pointer',
+                            background: '#F8F6F2',
+                            opacity: isActive ? 1 : 0.7,
+                            transform: isActive ? 'scale(1.04)' : 'none',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <img
+                            src={img}
+                            alt=""
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
-              {/* Price */}
-              <div
-                style={{
-                  fontFamily: "'Cairo', sans-serif",
-                  fontSize: '1.25rem',
-                  fontWeight: 900,
-                  color: '#2C1A11'
-                }}
-              >
-                {product.price} {lang === 'ar' ? 'د.ل' : 'LYD'}
-              </div>
+                {/* Card Content */}
+                <div
+                  style={{
+                    padding: '1.15rem 1.25rem 1.35rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.55rem',
+                    flex: 1
+                  }}
+                >
+                  {/* Product Title */}
+                  <h2
+                    onClick={() => handleOpenProduct(prod.id)}
+                    style={{
+                      margin: 0,
+                      fontFamily: "'Cairo', sans-serif",
+                      fontSize: '1.18rem',
+                      fontWeight: 900,
+                      color: '#2C1A11',
+                      cursor: 'pointer',
+                      lineHeight: 1.3
+                    }}
+                  >
+                    {lang === 'ar' ? prod.name_ar : prod.name_en}
+                  </h2>
 
-              {/* In Stock Badge */}
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  color: '#16A34A',
-                  fontFamily: "'Cairo', sans-serif",
-                  fontSize: '0.86rem',
-                  fontWeight: 700,
-                  marginTop: '0.15rem'
-                }}
-              >
-                <CheckCircle2 size={16} strokeWidth={2.5} />
-                <span>{lang === 'ar' ? product.availability_ar : product.availability_en}</span>
-              </div>
+                  {/* Price */}
+                  <div
+                    style={{
+                      fontFamily: "'Cairo', sans-serif",
+                      fontSize: '1.25rem',
+                      fontWeight: 900,
+                      color: '#2C1A11'
+                    }}
+                  >
+                    {prod.price} {lang === 'ar' ? 'د.ل' : 'LYD'}
+                  </div>
 
-              {/* Action Button: عرض التفاصيل 🛒 */}
-              <Link
-                to={buildProductUrl(product.id, { from: 'accessories' })}
-                state={{ from: '/accessories', fromCategory: 'accessories', returnPath: '/accessories' }}
-                onClick={() => recordProductOrigin(product.id, { from: 'accessories', returnPath: '/accessories' })}
-                style={{
-                  marginTop: '0.75rem',
-                  width: '100%',
-                  background: '#3E271D',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '10px',
-                  padding: '0.72rem 1.25rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.55rem',
-                  fontFamily: "'Cairo', sans-serif",
-                  fontSize: '0.92rem',
-                  fontWeight: 800,
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s ease, transform 0.15s ease',
-                  boxShadow: '0 3px 10px rgba(62, 39, 29, 0.2)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#2A180E';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#3E271D';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <span>{lang === 'ar' ? 'عرض التفاصيل' : 'View Details'}</span>
-                <ShoppingCart size={17} strokeWidth={2.2} />
-              </Link>
-            </div>
-          </article>
+                  {/* In Stock Badge */}
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      color: '#16A34A',
+                      fontFamily: "'Cairo', sans-serif",
+                      fontSize: '0.86rem',
+                      fontWeight: 700,
+                      marginTop: '0.15rem'
+                    }}
+                  >
+                    <CheckCircle2 size={16} strokeWidth={2.5} />
+                    <span>{lang === 'ar' ? prod.availability_ar : prod.availability_en}</span>
+                  </div>
+
+                  {/* Action Button: عرض التفاصيل 🛒 */}
+                  <Link
+                    to={buildProductUrl(prod.id, { from: 'accessories' })}
+                    state={{ from: '/accessories', fromCategory: 'accessories', returnPath: '/accessories' }}
+                    onClick={() => recordProductOrigin(prod.id, { from: 'accessories', returnPath: '/accessories' })}
+                    style={{
+                      marginTop: 'auto',
+                      width: '100%',
+                      background: '#3E271D',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '0.72rem 1.25rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.55rem',
+                      fontFamily: "'Cairo', sans-serif",
+                      fontSize: '0.92rem',
+                      fontWeight: 800,
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s ease, transform 0.15s ease',
+                      boxShadow: '0 3px 10px rgba(62, 39, 29, 0.2)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#2A180E';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#3E271D';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    <span>{lang === 'ar' ? 'عرض التفاصيل' : 'View Details'}</span>
+                    <ShoppingCart size={17} strokeWidth={2.2} />
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
         </div>
 
       </div>

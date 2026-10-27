@@ -14,43 +14,50 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 تشخيص وإصلاح مشكلة عدم فتح صفحات تفاصيل بعض المنتجات (Fix Product Details & 404 Pages):
-1. **السبب الجذري للمشكلة (Root Cause Diagnosis):**
-   - في صفحة تفاصيل المنتج `ProductDetails.jsx`، كان الاستعلام السحابي يطلب ربط جدول المواد عبر `.select('*, subjects(...)')` دون تحديد المفتاح الخارجي المحدد.
-   - ونظراً لوجود علاقتين بين جدول المنتجات وجدول المواد (علاقة المفتاح الأجنبي `products_subject_id_fkey` وعلاقة الجدول الوسيط متعدد-إلى-متعدد `product_subjects`)، كان PostgREST يُرجع خطأ `PGRST201: Could not embed because more than one relationship was found for products and subjects`.
-   - هذا الخطأ أدّى إلى فشل استعلام قاعدة البيانات لجميع المنتجات الـ 66 في Supabase، مما جعل الصفحة تلجأ إلى القائمة الافتراضية الاحتياطية. أي منتج موجود في قاعدة البيانات ولم يكن مسجلاً في القائمة الاحتياطية (أو منتج أضيف حديثاً أو تم تعديل صوره) كان يظهر كـ 404 ("المنتج غير موجود") ولا يمكن فتحه نهائياً رغم إمكانية إضافته للسلة من صفحات المواد.
-   - في مجموعات البارات (Bur Groups)، كان الضغط على البطاقة يفتح نافذة الاختيار دون توفير رابط للانتقال لصفحة تفاصيل البير لمشاهدة صوره ووصفه الكامل.
-2. **الحلول المنفذة (Permanent Fixes):**
-   - **`src/pages/ProductDetails.jsx`:**
-     - تحديد المفتاح الأجنبي الصريح في الاستعلام: `subjects:subjects!products_subject_id_fkey(...)` لإلغاء التعارض نهائياً.
-     - إضافة استعلام احتياطي مباشر فوري `select('*')` في حال حدوث أي خطأ في علاقات الربط لضمان فتح المنتج 100%.
-     - تنظيف معرف المنتج من أي لاحقة مقاس مثل `-M` أو `-L` عند الانتقال من السلة.
-     - دعم مجموعات البارات الافتراضية `isBurGroupProduct` لعرض تفاصيلها دون أي خطأ 404.
-     - تفعيل جلب الصور الإضافية من جدول `product_images` ليتمكن الطلبة من استعراض معرض الصور الكامل للمنتج.
-   - **`src/components/BurGroupModal.jsx`:**
-     - جعل بطاقات وصور وأسماء البارات داخل نافذة الاختيار تفاعلية وقابلة للنقر (`cursor: pointer`).
-     - إضافة زر ورابط أنيق «التفاصيل والوصف» مزود بأيقونة المعاينة `<Eye />` بجوار كل بير، ينقل الطالب مباشرة إلى صفحة تفاصيل البير لمشاهدة صوره فائقة الدقة وأوصافه ومقاساته السريرية.
-   - **`src/defaultProducts.json`:**
-     - مزامنة كافة المنتجات الـ 67 الموجودة في قاعدة البيانات ودمج أي منتجات ناقصة داخل الملف الاحتياطي.
-   - **`src/pages/SubjectPage.jsx`:**
-     - ترقية مفتاح الكاش إلى `subject_v37` لتحديث واجهات المتصفحات بالكامل فوراً.
+### 🔹 إضافة اليونيفورم الطبي الأسود CAYDAS إلى قسم الإكسسوارات بجانب البالطو بسعر 65 د.ل:
+1. **معالجة وحفظ الصورة الرسمية:**
+   - حفظ الصورة المرفقة بواسطة المستخدم بجودة فائقة في المسار `public/products/uniform-caydas-black.png`.
+   - رفع الصورة إلى خادم التخزين السحابي Supabase Storage على المسار `products/uniform-caydas-black.png`.
+2. **قاعدة البيانات السحابية (Supabase DB):**
+   - إدراج سجل المنتج في جدول `products`:
+     - المعرف: `55000000-0000-0000-0000-000000000002`
+     - الاسم بالعربية: `يونيفورم طبي أسود CAYDAS`
+     - الاسم بالإنجليزية: `Black CAYDAS Medical Scrub Set`
+     - السعر: `65 د.ل`
+     - التوفر: متوفر وجاهز للتوصيل.
+   - إدراج سجل المنتج في جدول `accessory_products` لربطه رسمياً بقسم الإكسسوارات.
+3. **ملف المنتجات الاحتياطي (Local Seeding):**
+   - إضافة المنتج كاملاً داخل `src/defaultProducts.json` (العدد الإجمالي 68 منتجاً).
+4. **محرك المقاسات وإدارة المخزون (Product Inventory Engine):**
+   - إضافة إعدادات المقاسات المتعددة لليونيفورم في `PRODUCT_SIZED_CONFIGS` داخل `src/utils/productInventoryEngine.js`:
+     - المقاسات المدعومة: `S`, `M`, `L`, `XL`, `2XL`.
+     - سعر كل مقاس: `65.00 د.ل`.
+5. **محرك مسار التنقل والرجوع (Navigation Trail):**
+   - تحديث دالة `isAccessoryProduct` في `src/utils/navigationTrail.js` للتعرف على معرف اليونيفورم والرجوع بسلاسة إلى صفحة الإكسسوارات `#/accessories`.
+6. **واجهة صفحة الإكسسوارات (`src/pages/AccessoriesPage.jsx`):**
+   - تحويل عرض الصفحة من منتج فردي ثابت إلى مصفوفة منتجات ديناميكية تعرض كل من:
+     1. البالطو / لاب كوت أبيض FIGS بسعر 45 د.ل.
+     2. يونيفورم طبي أسود CAYDAS بسعر 65 د.ل.
+   - تحديث عداد المنتجات في الترويسة ليصبح "2 منتجات" / "2 products".
+   - دعم التفضيل الفردي (المفضلة) ومعاينة الصور والتفاصيل لكل بطاقة على حدة.
 
 ### 📁 الملفات التي تم تعديلها:
-- `src/pages/ProductDetails.jsx`
-- `src/components/BurGroupModal.jsx`
+- `public/products/uniform-caydas-black.png`
+- `src/pages/AccessoriesPage.jsx`
+- `src/utils/productInventoryEngine.js`
+- `src/utils/navigationTrail.js`
 - `src/defaultProducts.json`
-- `src/pages/SubjectPage.jsx`
-- `index.html`, `public/manifest.json`, `public/robots.txt`, `public/sitemap.xml`, `public/google8559ecef1b1b49a2.html`, `public/8559ecef1b1b49a28559ecef1b1b49a2.txt` (تهيئة شاملة لجميع محركات البحث Google, Safari/Applebot, Bing, Yahoo, DuckDuckGo, Yandex وإثبات الملكية)
+- `PROJECT_STATE.md`
 
 ---
 
 ## 3. الروابط المباشرة المؤكدة:
-- **صفحة كاست الجبس (Dental Cast 125):** `https://absolutedental.ly/#/product/8f344bd9-91ec-4787-8371-f489cccf635e`
-- **صفحة كاست الجبس الأدرد (Edentulous Dental Cast):** `https://absolutedental.ly/#/product/22000000-0000-0000-0000-000000000099`
-- **صفحة بخاخ الكحول الطبي:** `https://absolutedental.ly/#/product/99000000-0000-0000-0000-000000000005`
+- **صفحة الإكسسوارات:** `https://absolutedental.ly/#/accessories`
+- **صفحة تفاصيل اليونيفورم الطبي CAYDAS:** `https://absolutedental.ly/#/product/55000000-0000-0000-0000-000000000002`
+- **صفحة تفاصيل البالطو FIGS:** `https://absolutedental.ly/#/product/55000000-0000-0000-0000-000000000001`
 - **صفحة البوكسات:** `https://absolutedental.ly/#/boxes`
 
 ---
 
 ## 4. الخطوة التالية المباشرة (Immediate Next Step)
-- إرسال التحديث عبر `git commit` و `git push` ونشره حياً على الدومين الرسمي `absolutedental.ly`.
+- متابعة أي إضافات أو تعديلات إضافية يطلبها المستخدم على المنتجات أو الأسعار أو الأقسام.
