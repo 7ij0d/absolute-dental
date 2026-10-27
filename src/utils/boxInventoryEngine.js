@@ -3,7 +3,7 @@ import supabase from '../supabaseClient.js';
 /**
  * ABSOLUTE DENTAL — UNIFIED BOX INVENTORY & COLOR VARIANT ENGINE
  * Single canonical source of truth for:
- * 1. Dental Box Products (14", 16", 16.5", 17.5" GT-MAX)
+ * 1. Dental Box Products (14", 16", 16.5", 17" GT-MAX)
  * 2. Independent Color Variant Stock & 3-Tier Status Model:
  *    - 'in_stock': متوفر وجاهز للطلب الفوري
  *    - 'on_demand': متوفر على الطلب (نوفرهولك)
@@ -69,9 +69,9 @@ export const CANONICAL_BOXES = {
   [BOX_PRODUCT_IDS.BOX_17]: {
     id: BOX_PRODUCT_IDS.BOX_17,
     fallbackId: 'box-17',
-    size: '17.5 inch',
-    nameAr: '17.5" Professional Box — GT-MAX',
-    nameEn: 'Professional Box — GT-MAX 17.5"',
+    size: '17 inch',
+    nameAr: '17" Professional Box — GT-MAX',
+    nameEn: 'Professional Box — GT-MAX 17"',
     defaultPrice: 95
   }
 };
@@ -109,12 +109,12 @@ export const FALLBACK_BOXES = [
     desc_en: 'Durable plastic toolbox with a colored lid, removable inner tray for organizing tools, and wide storage space at the bottom.',
     features_ar: ['رف داخلي مقسم قابل للإزالة', 'قفلان جانبيان قويان', 'مساحة تخزين سفلية واسعة', 'مقبض حمل مريح ومتين'],
     features_en: ['Removable inner tray', 'Two side latches', 'Extra storage below tray', 'Comfortable carry handle'],
-    main_image: '/accessories/box16-red.jpg',
-    inside_image: '/accessories/box16-inside-red.jpg',
+    main_image: '/accessories/box16-black.jpg',
+    inside_image: '/accessories/box16-inside1.jpg',
     colors: [
-      { id: 'red', hex_code: '#D32F2F', label_ar: 'أحمر', label_en: 'Red', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-red.jpg', inside_image_url: '/accessories/box16-inside-red.jpg', base_image_url: '/accessories/box16-base-red.jpg' },
+      { id: 'black', hex_code: '#111111', label_ar: 'أسود', label_en: 'Black', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-black.jpg', inside_image_url: '/accessories/box16-inside1.jpg' },
       { id: 'blue', hex_code: '#1976D2', label_ar: 'أزرق', label_en: 'Blue', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-blue.jpg', inside_image_url: '/accessories/box16-inside-blue.jpg', base_image_url: '/accessories/box16-base-blue.jpg' },
-      { id: 'black', hex_code: '#111111', label_ar: 'خمري / داكن', label_en: 'Dark / Maroon', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-maroon.jpg', inside_image_url: '/accessories/box16-inside-maroon.jpg', base_image_url: '/accessories/box16-base-maroon.jpg' },
+      { id: 'maroon', hex_code: '#4A1525', label_ar: 'خمري / داكن', label_en: 'Dark / Maroon', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-maroon.jpg', inside_image_url: '/accessories/box16-inside-maroon.jpg', base_image_url: '/accessories/box16-base-maroon.jpg' },
       { id: 'purple', hex_code: '#8B5CF6', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-purple.jpg', inside_image_url: '/accessories/box16-inside-purple.jpg', base_image_url: '/accessories/box16-base-purple.jpg' },
       { id: 'yellow', hex_code: '#FBC02D', label_ar: 'أصفر', label_en: 'Yellow', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-yellow.jpg', inside_image_url: '/accessories/box16-inside-yellow.jpg', base_image_url: '/accessories/box16-base-yellow.jpg' },
       { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box16-pink.jpg', inside_image_url: '/accessories/box16-inside-purple.jpg', base_image_url: '/accessories/box16-base-purple.jpg' }
@@ -145,9 +145,9 @@ export const FALLBACK_BOXES = [
   },
   {
     id: 'box-17',
-    size: '17.5 inch',
-    name_ar: 'Professional Box — GT-MAX 17.5"',
-    name_en: 'Professional Box — GT-MAX 17.5"',
+    size: '17 inch',
+    name_ar: 'Professional Box — GT-MAX 17"',
+    name_en: 'Professional Box — GT-MAX 17"',
     price: 95,
     stock_quantity: 12,
     desc_ar: 'البوكس الاحترافي الأوسع GT-MAX/BADC بغطاء ملون مزود بأقسام تنظيم شفافة ومساحة تخزين سفلية عملاقة.',
@@ -161,7 +161,6 @@ export const FALLBACK_BOXES = [
       { id: 'red', hex_code: '#D32F2F', label_ar: 'أحمر', label_en: 'Red', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-red.jpg', inside_image_url: '/accessories/box17-inside-red.jpg' },
       { id: 'blue', hex_code: '#0D47A1', label_ar: 'أزرق داكن', label_en: 'Dark Blue', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17_5-dark-blue.jpg', inside_image_url: '/accessories/box17-inside-blue.jpg' },
       { id: 'purple', hex_code: '#8B5CF6', label_ar: 'بنفسجي', label_en: 'Purple', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-purple.jpg', inside_image_url: '/accessories/box17-inside-purple.jpg' },
-      { id: 'pink', hex_code: '#F48FB1', label_ar: 'وردي', label_en: 'Pink', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-pink.jpg', inside_image_url: '/accessories/box17-inside-pink.jpg' },
       { id: 'beige', hex_code: '#C8A882', label_ar: 'بيج', label_en: 'Beige', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-beige.jpg', inside_image_url: '/accessories/box17-inside-beige.jpg' },
       { id: 'teal', hex_code: '#00897B', label_ar: 'تركوازي', label_en: 'Teal', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-colors.png', inside_image_url: '/accessories/box17-inside.png' },
       { id: 'lime', hex_code: '#7CB342', label_ar: 'أخضر فسفوري', label_en: 'Lime Green', status: 'in_stock', available_stock: 10, physical_stock: 10, reserved_stock: 0, image_url: '/accessories/box17-colors.png', inside_image_url: '/accessories/box17-inside.png' }

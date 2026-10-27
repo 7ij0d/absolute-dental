@@ -320,7 +320,7 @@ const CANONICAL_ORDERED_BOXES = [
   // Index 0: Top-Right in RTL 2-column grid
   { ...FALLBACK_BOXES[2], name_en: 'Organizer Box 16.5"', name_ar: 'Organizer Box 16.5"', price: 85 },
   // Index 1: Top-Left in RTL 2-column grid
-  { ...FALLBACK_BOXES[3], name_en: 'Professional Box — GT-MAX 17.5"', name_ar: 'Professional Box — GT-MAX 17.5"', price: 95 },
+  { ...FALLBACK_BOXES[3], name_en: 'Professional Box — GT-MAX 17"', name_ar: 'Professional Box — GT-MAX 17"', price: 95 },
   // Index 2: Bottom-Right in RTL 2-column grid
   { ...FALLBACK_BOXES[0], name_en: 'Dental Tool Box 14"', name_ar: 'Dental Tool Box 14"', price: 45 },
   // Index 3: Bottom-Left in RTL 2-column grid

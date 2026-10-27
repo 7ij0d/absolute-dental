@@ -60,12 +60,12 @@ const STANDARD_BOX_SIZES = [
   },
   {
     id: BOX_PRODUCT_IDS.BOX_17,
-    sizeKey: '17.5 inch',
-    labelAr: 'بوكس 17.5 إنش GT-MAX',
-    labelEn: '17.5" GT-MAX',
+    sizeKey: '17 inch',
+    labelAr: 'بوكس 17 إنش GT-MAX',
+    labelEn: '17" GT-MAX',
     descAr: 'بوكس احترافي واسع للأدوات الثقيلة',
     defaultPrice: 95,
-    sampleImg: '/accessories/box17_5-dark-blue.jpg'
+    sampleImg: '/accessories/box17-black.jpg'
   }
 ];
 
@@ -89,8 +89,8 @@ const COLOR_PRESETS = [
 const GALLERY_SHORTCUTS = [
   { path: '/accessories/box14-pink.jpg', name: '14" وردي' },
   { path: '/accessories/box14-colors.png', name: '14" تشكيلة ألوان' },
+  { path: '/accessories/box16-black.jpg', name: '16" أسود' },
   { path: '/accessories/box16-purple.jpg', name: '16" بنفسجي' },
-  { path: '/accessories/box16-red.jpg', name: '16" أحمر' },
   { path: '/accessories/box16-blue.jpg', name: '16" أزرق' },
   { path: '/accessories/box16-yellow.jpg', name: '16" أصفر' },
   { path: '/accessories/box16-pink.jpg', name: '16" وردي' },
@@ -101,13 +101,12 @@ const GALLERY_SHORTCUTS = [
   { path: '/accessories/box16_5-blue.jpg', name: '16.5" أزرق داكن' },
   { path: '/accessories/box16_5-red.jpg', name: '16.5" أحمر' },
   { path: '/accessories/box16_5-black.jpg', name: '16.5" أسود' },
-  { path: '/accessories/box17_5-dark-blue.jpg', name: '17.5" أزرق داكن' },
-  { path: '/accessories/box17-black.jpg', name: '17.5" أسود' },
-  { path: '/accessories/box17-purple.jpg', name: '17.5" بنفسجي' },
-  { path: '/accessories/box17-red.jpg', name: '17.5" أحمر' },
-  { path: '/accessories/box17-pink.jpg', name: '17.5" وردي' },
-  { path: '/accessories/box17-beige.jpg', name: '17.5" بيج' },
-  { path: '/accessories/box17-colors.png', name: '17.5" ملون' }
+  { path: '/accessories/box17_5-dark-blue.jpg', name: '17" أزرق داكن' },
+  { path: '/accessories/box17-black.jpg', name: '17" أسود' },
+  { path: '/accessories/box17-purple.jpg', name: '17" بنفسجي' },
+  { path: '/accessories/box17-red.jpg', name: '17" أحمر' },
+  { path: '/accessories/box17-beige.jpg', name: '17" بيج' },
+  { path: '/accessories/box17-colors.png', name: '17" ملون' }
 ];
 
 export const AdminQuickBoxes = () => {
@@ -679,7 +678,7 @@ export const AdminQuickBoxes = () => {
                     type="text"
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder={isRtl ? 'أو ألصق مسار الصورة هنا مباشرة (مثلاً: /accessories/box16-red.jpg)' : 'Or paste image URL here'}
+                    placeholder={isRtl ? 'أو ألصق مسار الصورة هنا مباشرة (مثلاً: /accessories/box16-black.jpg)' : 'Or paste image URL here'}
                     className="form-input"
                     style={{
                       fontSize: '0.82rem',
