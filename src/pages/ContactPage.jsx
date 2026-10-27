@@ -17,9 +17,9 @@ export const ContactPage = () => {
     whatsapp: 'https://wa.me/218946859163',
     phone_primary: '0946859163',
     phone_secondary: '0925813109',
-    telegram: 'https://t.me/smylodent_libya',
-    instagram: 'https://instagram.com/smylodent',
-    facebook: 'https://facebook.com/smylodent'
+    telegram: 'https://t.me/absolutedental_ly',
+    instagram: 'https://instagram.com/absolutedental.ly',
+    facebook: 'https://facebook.com/absolutedental.ly'
   });
 
   // Load contact links from database settings
@@ -177,7 +177,7 @@ export const ContactPage = () => {
                 </div>
               </a>
 
-              <a href={contacts.telegram || 'https://t.me/smylodent_libya'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }} className="contact-link-row">
+              <a href={contacts.telegram || 'https://t.me/absolutedental_ly'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }} className="contact-link-row">
                 <div style={{ color: '#0088cc' }}><Send size={20} /></div>
                 <div>
                   <p style={{ fontWeight: 700, color: 'var(--text-main)' }}>تيليجرام / Telegram</p>

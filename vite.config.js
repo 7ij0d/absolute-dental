@@ -17,11 +17,19 @@ function generateSpaRoutesPlugin() {
 
       const html = fs.readFileSync(indexHtmlPath, 'utf-8');
       const routes = [
+        'study-tools',
+        'accessories',
         'box-manager',
         'boxes-manager',
         'box-studio',
         'boxes',
         'dental-boxes',
+        'donations',
+        'track',
+        'about',
+        'faq',
+        'shipping-returns',
+        'contact',
         'admin/boxes',
         'admin/accessories',
         'admin'

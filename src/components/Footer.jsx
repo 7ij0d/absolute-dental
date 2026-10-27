@@ -60,14 +60,14 @@ export const Footer = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
               <img
                 src={brandLogoTrimmed}
-                alt="Absolute Dental Logo"
+                alt="ابسلوت دنتال | Absolute Dental Logo"
                 style={{ width: 42, height: 42, objectFit: 'contain', flexShrink: 0 }}
               />
               <div className="footer-brand-name">Absolute Dental</div>
             </div>
             <p className="footer-desc">
               {lang === 'ar'
-                ? 'متجرك الموثوق لجميع الأدوات والمستلزمات الطبية التي يحتاجها طلاب كلية طب الأسنان. جودة عالية، أسعار طلابية، توصيل سريع.'
+                ? 'ابسلوت دنتال (Absolute Dental) — متجرك الموثوق لجميع الأدوات والمستلزمات الطبية التي يحتاجها طلاب كلية طب الأسنان. جودة عالية، أسعار طلابية، توصيل سريع.'
                 : 'Your trusted store for all medical tools and supplies needed by dental college students. High quality, student prices, fast delivery.'}
             </p>
 
@@ -168,7 +168,7 @@ export const Footer = () => {
         {/* Footer Bottom */}
         <div className="footer-bottom">
           <p className="footer-copy tabular-nums">
-            © {currentYear} Absolute Dental — {lang === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
+            © {currentYear} {lang === 'ar' ? 'ابسلوت دنتال | Absolute Dental — جميع الحقوق محفوظة' : 'Absolute Dental — All rights reserved'}
           </p>
           <p className="footer-copy" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             {lang === 'ar' ? 'صُنع بـ' : 'Made with'}
