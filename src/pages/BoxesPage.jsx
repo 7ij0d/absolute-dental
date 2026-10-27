@@ -113,7 +113,7 @@ const BoxProductCard = ({ box, inventoryMap = {} }) => {
             width: '100%',
             height: '100%',
             objectFit: 'contain',
-            padding: '0.75rem',
+            padding: '0.25rem',
             transition: 'opacity 0.25s ease'
           }}
         />
