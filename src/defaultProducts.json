@@ -168,7 +168,11 @@
     "stock_quantity": 23,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/8a2c351d-359c-4f5e-8c37-3d4ecb1eba19.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "106ad65c-3074-4cfb-8643-840f36f833f5",
@@ -210,7 +214,11 @@
     "stock_quantity": 7,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/2ebc663e-0967-4d6a-b8be-b07b9e84659c.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "d2a56c58-bf46-47aa-b803-6546aa7491c5",
@@ -220,12 +228,13 @@
     "compare_at_price": null,
     "availability": "available",
     "stock_quantity": 20,
-    "subject_id": "22000000-0000-0000-0000-000000000021",
+    "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/d2a56c58-bf46-47aa-b803-6546aa7491c5.jpg",
     "sort_order": 0,
-    "extra_subject_ids": [
-      "22000000-0000-0000-0000-000000000023"
-    ]
+    "extra_subject_ids": [],
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "d02e821e-91e3-4ed4-869e-f636142d8247",
@@ -322,7 +331,11 @@
     "stock_quantity": 10,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/e625888c-c1b0-4479-9117-76a1215a75f4.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "af6c097d-6f53-4ce3-8d52-f9b9fc095295",
@@ -401,7 +414,11 @@
     "stock_quantity": 67,
     "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/4caab5ef-1c9c-411e-8b6e-76781a07fd97.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "187f6429-fee1-4f50-8edc-2a18bac1de35",
@@ -413,7 +430,11 @@
     "stock_quantity": 10,
     "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/187f6429-fee1-4f50-8edc-2a18bac1de35.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "36e0d204-3613-44b0-b74e-0ba7869420c4",
@@ -425,7 +446,11 @@
     "stock_quantity": 34,
     "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/36e0d204-3613-44b0-b74e-0ba7869420c4.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "c78f57a0-54d0-4602-aa05-d92a82398a2f",
@@ -437,7 +462,11 @@
     "stock_quantity": 17,
     "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/c78f57a0-54d0-4602-aa05-d92a82398a2f.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "627bdb62-3364-497b-8aa6-3b911ad78f26",
@@ -449,7 +478,11 @@
     "stock_quantity": 29,
     "subject_id": "22000000-0000-0000-0000-000000000023",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/627bdb62-3364-497b-8aa6-3b911ad78f26.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "year_id": "20000000-0000-0000-0000-000000000002",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "c9442057-a22f-4ce8-a237-d37f2024146f",
@@ -972,7 +1005,10 @@
     "availability": "available",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-tc-9.png",
     "description_en": "TC 9 Needle Bur for dental cavity and margin preparation.",
-    "description_ar": "بير إبرة TC 9 لتحضير وتنعيم الحواف والتجاويف السنية."
+    "description_ar": "بير إبرة TC 9 لتحضير وتنعيم الحواف والتجاويف السنية.",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "22000000-0000-0000-0000-000000000212",
@@ -985,7 +1021,10 @@
     "availability": "available",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-fo-32-blue.png",
     "description_en": "FO 32 Blue Diamond Flame Bur for crown preparation and beveling.",
-    "description_ar": "بير ماسي شعلة FO 32 أزرق لتحضير التيجان والجسور."
+    "description_ar": "بير ماسي شعلة FO 32 أزرق لتحضير التيجان والجسور.",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "22000000-0000-0000-0000-000000000213",
@@ -998,7 +1037,10 @@
     "availability": "available",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-sf-41-blue.png",
     "description_en": "SF 41 Blue Straight Flat Fissure Bur for cavity preparation.",
-    "description_ar": "بير فيشر مستقيم مسطح SF 41 أزرق لحفر التجاويف السنية."
+    "description_ar": "بير فيشر مستقيم مسطح SF 41 أزرق لحفر التجاويف السنية.",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "22000000-0000-0000-0000-000000000214",
@@ -1011,7 +1053,10 @@
     "availability": "available",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-br-41.png",
     "description_en": "BR 41 Round Bur for caries removal and initial cavity access.",
-    "description_ar": "بير كروي مدور BR 41 لإزالة التسوس وفتح التجاويف."
+    "description_ar": "بير كروي مدور BR 41 لإزالة التسوس وفتح التجاويف.",
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "99000000-0000-0000-0000-000000000005",

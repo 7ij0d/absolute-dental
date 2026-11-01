@@ -228,9 +228,9 @@ export function getSubjectProductGroups(subjectSlug, products = []) {
   // 1. FIXED PROSTHODONTICS (Year 2)
   // ─────────────────────────────────────────────────────────────
   if (slug === 'fixed-prosthodontics') {
-    // 1. Dental Burs
+    // 1. Crown Preparation Burs (TF, FO, TC, WR)
     const burs = sortBurs(products.filter(p => isBurProduct(p)));
-    addGroup('burs', 'Dental Burs', 'البارات', 'Disc', burs);
+    addGroup('burs', 'Crown Preparation Burs', 'بيرات الكراون والفكسد', 'Disc', burs);
 
     // 2. Handpieces & Casting
     const hp = sortHandpiecesAndCasting(products.filter(p => !placedIds.has(p.id) && isHandpieceOrCast(p)));
@@ -255,9 +255,9 @@ export function getSubjectProductGroups(subjectSlug, products = []) {
   // 2. CONSERVATIVE DENTISTRY (Year 2)
   // ─────────────────────────────────────────────────────────────
   if (slug === 'restorative-dentistry' || slug === 'conservative-dentistry') {
-    // 1. Dental Burs & Rotary
+    // 1. Conservative Burs (Round, Fissure, Inverted)
     const burs = sortBurs(products.filter(p => isBurProduct(p)));
-    addGroup('burs', 'Dental Burs & Rotary', 'البارات والأدوات الدوارة', 'Disc', burs);
+    addGroup('burs', 'Conservative Burs (Round, Fissure, Inverted)', 'بيرات الكونس (راوند، فيشر، انفيرتد)', 'Disc', burs);
 
     // 2. Handpieces & Equipment
     const hp = sortHandpiecesAndCasting(products.filter(p => !placedIds.has(p.id) && isHandpieceOrCast(p)));
