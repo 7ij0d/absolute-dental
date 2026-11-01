@@ -585,6 +585,7 @@ export const ProductDetails = () => {
   const isOrderable = !isGuide;
 
   const selectedSizeDef = (sizedConfig && selectedSize) ? sizedConfig.sizes.find(s => s.size === selectedSize) : null;
+  const isSelectedSizeUnavailable = Boolean(selectedSizeDef && (selectedSizeDef.available === false || selectedSizeDef.isUnavailable === true || selectedSizeDef.stock === 0));
   const maxStockLimit = 9999;
 
   const handleQtyChange = (delta) => {
@@ -635,6 +636,10 @@ export const ProductDetails = () => {
 
     if (sizedConfig && selectedSize) {
       const sizeDef = sizedConfig.sizes.find(s => s.size === selectedSize);
+      if (sizeDef && (sizeDef.available === false || sizeDef.isUnavailable === true || sizeDef.stock === 0)) {
+        setSizeError(true);
+        return;
+      }
       const variantNameEn = sizeDef?.labelEn ? `${product.name_en} (${sizeDef.labelEn})` : `${product.name_en} (Size ${selectedSize})`;
       const variantNameAr = sizeDef?.labelAr ? `${product.name_ar} (${sizeDef.labelAr})` : `${product.name_ar} (مقاس ${selectedSize})`;
       addToCart({
@@ -1382,14 +1387,17 @@ export const ProductDetails = () => {
                       )}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
                       {sizedConfig.sizes.map(s => {
                         const isSelected = selectedSize === s.size;
+                        const isSizeUnavailable = s.available === false || s.isUnavailable === true || s.stock === 0;
                         return (
                           <button
                             key={s.size}
                             type="button"
+                            disabled={isSizeUnavailable}
                             onClick={() => {
+                              if (isSizeUnavailable) return;
                               setSelectedSize(s.size);
                               if (s.image) setActiveImage(s.image);
                               setSizeError(false);
@@ -1400,15 +1408,17 @@ export const ProductDetails = () => {
                               alignItems: 'center',
                               justifyContent: 'center',
                               gap: '0.4rem',
-                              padding: '0.9rem 1rem',
+                              padding: '0.85rem 0.9rem',
                               borderRadius: '10px',
-                              border: isSelected ? '2px solid var(--primary, #3D352E)' : '1px solid #CBD5E1',
-                              background: isSelected ? 'var(--primary, #3D352E)' : '#FFFFFF',
-                              color: isSelected ? '#FFFFFF' : '#1E293B',
-                              cursor: 'pointer',
+                              border: isSelected ? '2px solid var(--primary, #3D352E)' : (isSizeUnavailable ? '1px dashed #CBD5E1' : '1px solid #CBD5E1'),
+                              background: isSelected ? 'var(--primary, #3D352E)' : (isSizeUnavailable ? '#F8FAFC' : '#FFFFFF'),
+                              color: isSelected ? '#FFFFFF' : (isSizeUnavailable ? '#94A3B8' : '#1E293B'),
+                              cursor: isSizeUnavailable ? 'not-allowed' : 'pointer',
+                              opacity: isSizeUnavailable ? 0.6 : 1,
                               transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                               boxShadow: isSelected ? '0 4px 12px rgba(61, 53, 46, 0.25)' : '0 1px 3px rgba(0,0,0,0.05)',
                               transform: isSelected ? 'scale(1.02)' : 'none',
+                              position: 'relative'
                             }}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -1422,7 +1432,7 @@ export const ProductDetails = () => {
                                   border: '1.5px solid rgba(255,255,255,0.8)'
                                 }} />
                               )}
-                              <span style={{ fontSize: '1.2rem', fontWeight: 900 }}>{s.shortLabel}</span>
+                              <span style={{ fontSize: '1.2rem', fontWeight: 900, textDecoration: isSizeUnavailable ? 'line-through' : 'none' }}>{s.shortLabel}</span>
                               <span style={{ fontSize: '0.85rem', fontWeight: 700, opacity: 0.9 }}>
                                 {lang === 'ar' ? s.labelAr : s.labelEn}
                               </span>
@@ -1432,10 +1442,12 @@ export const ProductDetails = () => {
                               fontWeight: 700,
                               padding: '2px 8px',
                               borderRadius: '999px',
-                              background: isSelected ? 'rgba(255, 255, 255, 0.2)' : '#F1F5F9',
-                              color: isSelected ? '#FFFFFF' : '#64748B'
+                              background: isSizeUnavailable ? '#FEE2E2' : (isSelected ? 'rgba(255, 255, 255, 0.2)' : '#F1F5F9'),
+                              color: isSizeUnavailable ? '#DC2626' : (isSelected ? '#FFFFFF' : '#64748B')
                             }}>
-                              {lang === 'ar' ? '✓ متوفر للطلب' : '✓ Available'}
+                              {isSizeUnavailable
+                                ? (lang === 'ar' ? 'غير متوفر حالياً' : 'Out of Stock')
+                                : (lang === 'ar' ? '✓ متوفر للطلب' : '✓ Available')}
                             </span>
                           </button>
                         );
@@ -1472,19 +1484,19 @@ export const ProductDetails = () => {
                   <button
                     type="button"
                     onClick={handleAddToCart}
-                    disabled={isBoxProductState ? (!selectedBoxColor || selectedBoxColor.available_stock <= 0) : false}
+                    disabled={(isBoxProductState ? (!selectedBoxColor || selectedBoxColor.available_stock <= 0) : false) || isSelectedSizeUnavailable}
                     className={`product-detail-add-cart-btn ${justAdded ? 'just-added' : ''}`}
                     style={{
-                      background: (isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0))
+                      background: ((isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0)) || isSelectedSizeUnavailable)
                         ? 'rgba(239, 68, 68, 0.08)'
                         : (sizeError ? '#DC2626' : undefined),
-                      color: (isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0))
+                      color: ((isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0)) || isSelectedSizeUnavailable)
                         ? '#991B1B'
                         : undefined,
-                      border: (isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0))
+                      border: ((isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0)) || isSelectedSizeUnavailable)
                         ? '1.5px solid rgba(239, 68, 68, 0.25)'
                         : undefined,
-                      cursor: (isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0))
+                      cursor: ((isBoxProductState && (!selectedBoxColor || selectedBoxColor.available_stock <= 0)) || isSelectedSizeUnavailable)
                         ? 'not-allowed'
                         : 'pointer',
                       boxShadow: sizeError ? '0 4px 14px rgba(220, 38, 38, 0.35)' : undefined
@@ -1513,12 +1525,17 @@ export const ProductDetails = () => {
                     ) : sizeError ? (
                       <>
                         <AlertCircle size={18} />
-                        <span>{lang === 'ar' ? 'اختر المقاس (M أو L) أولاً' : 'Select Size (M or L) First'}</span>
+                        <span>{lang === 'ar' ? (sizedConfig?.optionsLabelAr ? `اختر ${sizedConfig.optionsLabelAr} أولاً` : 'اختر المقاس أولاً') : (sizedConfig?.optionsLabelEn ? `Select ${sizedConfig.optionsLabelEn} first` : 'Select size first')}</span>
                       </>
                     ) : sizedConfig && !selectedSize ? (
                       <>
                         <ShoppingCart size={18} />
                         <span>{lang === 'ar' ? 'حدد المقاس للإضافة للسلة' : 'Select Size to Add'}</span>
+                      </>
+                    ) : sizedConfig && selectedSize && isSelectedSizeUnavailable ? (
+                      <>
+                        <AlertCircle size={18} />
+                        <span>{lang === 'ar' ? `المقاس غير متوفر حالياً (${selectedSizeDef?.labelAr || selectedSize})` : `Size Out of Stock (${selectedSizeDef?.labelEn || selectedSize})`}</span>
                       </>
                     ) : sizedConfig && selectedSize ? (
                       <>

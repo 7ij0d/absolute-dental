@@ -142,6 +142,11 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
 
     if (sizedConfig && selectedSize) {
       const sizeDef = sizedConfig.sizes.find(s => s.size === selectedSize);
+      if (sizeDef && (sizeDef.available === false || sizeDef.isUnavailable === true || sizeDef.stock === 0)) {
+        setSizePrompt(true);
+        setTimeout(() => setSizePrompt(false), 2200);
+        return;
+      }
       const variantNameEn = sizeDef?.labelEn ? `${product.name_en} (${sizeDef.labelEn})` : `${product.name_en} (Size ${selectedSize})`;
       const variantNameAr = sizeDef?.labelAr ? `${product.name_ar} (${sizeDef.labelAr})` : `${product.name_ar} (مقاس ${selectedSize})`;
       addToCart({
@@ -390,17 +395,21 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
             <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
               {sizedConfig.sizes.map(s => {
                 const isSelected = selectedSize === s.size;
+                const isSizeUnavailable = s.available === false || s.isUnavailable === true || s.stock === 0;
                 return (
                   <button
                     key={s.size}
                     type="button"
+                    disabled={isSizeUnavailable}
+                    title={isSizeUnavailable ? (lang === 'ar' ? `${s.labelAr || s.size} (غير متوفر حالياً)` : `${s.labelEn || s.size} (Out of stock)`) : (lang === 'ar' ? s.labelAr : s.labelEn)}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      if (isSizeUnavailable) return;
                       setSelectedSize(s.size);
                       setSizePrompt(false);
                     }}
-                    className={`product-size-pill ${isSelected ? 'selected' : ''}`}
+                    className={`product-size-pill ${isSelected ? 'selected' : ''} ${isSizeUnavailable ? 'disabled-size' : ''}`}
                   >
                     {s.colorHex && (
                       <span style={{
@@ -460,10 +469,24 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
                 <span>{lang === 'ar' ? (sizedConfig.buttonPromptAr || (sizedConfig.hasColorAndSize ? 'اختر الخيار وأضف' : 'اختر المقاس وأضف')) : (sizedConfig.buttonPromptEn || (sizedConfig.hasColorAndSize ? 'Select Option & Add' : 'Select Size & Add'))}</span>
               </>
             ) : sizedConfig && selectedSize ? (
-              <>
-                <ShoppingCart size={15} strokeWidth={2.2} />
-                <span>{lang === 'ar' ? `أضف للسلة (${sizedConfig.sizes.find(s => s.size === selectedSize)?.shortLabel || selectedSize})` : `Add to Cart (${sizedConfig.sizes.find(s => s.size === selectedSize)?.shortLabel || selectedSize})`}</span>
-              </>
+              (() => {
+                const curSizeDef = sizedConfig.sizes.find(s => s.size === selectedSize);
+                const curUnavailable = curSizeDef && (curSizeDef.available === false || curSizeDef.isUnavailable === true || curSizeDef.stock === 0);
+                if (curUnavailable) {
+                  return (
+                    <>
+                      <AlertCircle size={15} strokeWidth={2.2} />
+                      <span>{lang === 'ar' ? `المقاس غير متوفر (${curSizeDef?.shortLabel || selectedSize})` : `Out of Stock (${curSizeDef?.shortLabel || selectedSize})`}</span>
+                    </>
+                  );
+                }
+                return (
+                  <>
+                    <ShoppingCart size={15} strokeWidth={2.2} />
+                    <span>{lang === 'ar' ? `أضف للسلة (${curSizeDef?.shortLabel || selectedSize})` : `Add to Cart (${curSizeDef?.shortLabel || selectedSize})`}</span>
+                  </>
+                );
+              })()
             ) : isByOrder ? (
               <>
                 <ShoppingCart size={15} strokeWidth={2.2} />
