@@ -14,35 +14,41 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 نقل سن اللور مولار (Lower First Molar) إلى مادة الكونس وحذفه نهائياً من الفكسد للسنة الثانية:
+### 🔹 فصل قوالب الطبعة (Dental Impression Trays) إلى منتجين مستقلين: قالب علوي (Upper Tray) وقالب سفلي (Lower Tray):
 
-1. **حذف Lower First Molar من مادة صناعة الأسنان الثابتة 1 (Fixed Prosthodontics 1):**
-   - تم فك وحذف ارتباط منتج `Artificial Teeth - Lower First Molar` (معرف `5528000b-cde4-4b27-8745-7956dc0e4b78`) بمادة صناعة الأسنان الثابتة 1 (`22000000-0000-0000-0000-000000000023`) نهائياً.
-   - يتبقى في قسم الأسنان الصناعية لمادة الفكسد سن القاطع المركزي فقط (`Artificial Teeth - Central Incisor`).
+1. **قالب طبعة الأسنان - علوي (Upper Impression Tray):**
+   - المعرف: `33000000-0000-0000-0000-000000000101` بسعر 2 د.ل.
+   - الصورة: صورة قالب الفك العلوي المرفقة من المستخدم والمرفوعة على السحابة (`dental-impression-tray-upper-blue.png`).
+   - خيارات المقاسات: مقاس 1، 2 (غير متوفر)، 3، 4.
 
-2. **تثبيت Lower First Molar في مادة علاج الأسنان التحفظي 1 (Conservative Dentistry 1):**
-   - تم ربطه حصرياً بمادة الكونس لسنة ثانية (`22000000-0000-0000-0000-000000000021`).
-   - يظهر الآن في قسم **الأسنان الصناعية (Artificial Teeth)** داخل صفحة مادة الكونس لسنة ثانية للتدريب على حفر وتجهيز حشوات الأسنان.
+2. **قالب طبعة الأسنان - سفلي (Lower Impression Tray):**
+   - المعرف: `33000000-0000-0000-0000-000000000119` بسعر 2 د.ل.
+   - الصورة: صورة قالب الفك السفلي من الموقع (`dental-impression-tray-blue-angle.png`).
+   - خيارات المقاسات: مقاس 1، 2 (غير متوفر)، 3، 4 (نفس مقاسات القالب العلوي تماماً).
 
-3. **المزامنة والتحديث:**
-   - تحديث جدول `products` وجدول الارتباطات `product_subjects` في قاعدة بيانات Supabase.
-   - تحديث ملف `src/defaultProducts.json`.
-   - ترقية مفتاح كاش الواجهة في `SubjectPage.jsx` إلى `subject_v44` لضمان ظهور التعديل للطلبة فوراً.
+3. **المزامنة والتنظيم:**
+   - تحديث `productInventoryEngine.js` بتهيئة المقاسات المستقلة لكلا القالبين.
+   - تحديث وترتيب `sortImpression` في `subjectGroupEngine.js` لظهور القالب العلوي أولاً ويليه القالب السفلي جنباً إلى جنب في صدارة قسم مواد وقوالب الطبعات.
+   - تحديث وحفظ البيانات في جدول `products` وجدول الارتباطات `product_subjects` في Supabase ومزامنة `defaultProducts.json`.
+   - ترقية مفتاح كاش الواجهة في `SubjectPage.jsx` إلى `subject_v45` لضمان التحديث الفوري للطلبة.
    - اجتياز اختبار البناء الكامل (`npm run build`) بنجاح تام.
 
 ### 📁 الملفات التي تم تعديلها:
+- `src/utils/productInventoryEngine.js`
+- `src/utils/subjectGroupEngine.js`
 - `src/defaultProducts.json`
 - `src/pages/SubjectPage.jsx`
+- `public/dental-impression-tray-upper-blue.png`
 - `PROJECT_STATE.md`
 - قاعدة بيانات Supabase (جدول `products` وجدول `product_subjects`)
 
 ---
 
 ## 3. الروابط المباشرة المؤكدة:
-- **علاج الأسنان التحفظي 1 (سنة ثانية):** `https://absolutedental.ly/#/subject/restorative-dentistry`
-- **صناعة الأسنان الثابتة 1 (سنة ثانية):** `https://absolutedental.ly/#/subject/fixed-prosthodontics`
+- **صناعة الأسنان الثابتة 2 (سنة ثالثة):** `https://absolutedental.ly/#/subject/fixed-prosthodontics-2`
+- **صناعة الأسنان المتحركة 2 (سنة ثالثة):** `https://absolutedental.ly/#/subject/removable-prosthodontics-2`
 
 ---
 
 ## 4. الخطوة التالية المباشرة (Immediate Next Step)
-- متابعة أي طلبات إضافية وتحديثات فورية.
+- متابعة أي طلبات أو تعديلات إضافية من الإدارة.

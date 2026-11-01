@@ -53,8 +53,8 @@ export const CANONICAL_MULTI_UNITS = {
 export const CANONICAL_SIZED_PRODUCTS = {
   '33000000-0000-0000-0000-000000000101': {
     productId: '33000000-0000-0000-0000-000000000101',
-    nameAr: 'قالب طبعة الأسنان (Dental impression tray) - أزرق',
-    nameEn: 'Dental impression tray (Blue)',
+    nameAr: 'قالب طبعة الأسنان - علوي (Upper Impression Tray)',
+    nameEn: 'Dental Impression Tray - Upper (Blue)',
     color: 'Blue',
     colorAr: 'أزرق',
     optionsLabelAr: 'اختر المقاس المطلوب (1, 2, 3, 4)',
@@ -65,7 +65,70 @@ export const CANONICAL_SIZED_PRODUCTS = {
     buttonPromptEn: 'Select Size & Add',
     required: true,
     galleryImages: [
-      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-impression-tray-blue.png',
+      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-impression-tray-upper-blue.png'
+    ],
+    sizes: [
+      {
+        size: '1',
+        code: '1',
+        labelAr: 'مقاس 1',
+        labelEn: 'Size 1',
+        shortLabel: '1',
+        stock: 50,
+        available: true,
+        costPrice: 1,
+        price: 2
+      },
+      {
+        size: '2',
+        code: '2',
+        labelAr: 'مقاس 2 (غير متوفر)',
+        labelEn: 'Size 2 (Out of stock)',
+        shortLabel: '2',
+        stock: 0,
+        available: false,
+        isUnavailable: true,
+        costPrice: 1,
+        price: 2
+      },
+      {
+        size: '3',
+        code: '3',
+        labelAr: 'مقاس 3',
+        labelEn: 'Size 3',
+        shortLabel: '3',
+        stock: 50,
+        available: true,
+        costPrice: 1,
+        price: 2
+      },
+      {
+        size: '4',
+        code: '4',
+        labelAr: 'مقاس 4',
+        labelEn: 'Size 4',
+        shortLabel: '4',
+        stock: 50,
+        available: true,
+        costPrice: 1,
+        price: 2
+      }
+    ]
+  },
+  '33000000-0000-0000-0000-000000000119': {
+    productId: '33000000-0000-0000-0000-000000000119',
+    nameAr: 'قالب طبعة الأسنان - سفلي (Lower Impression Tray)',
+    nameEn: 'Dental Impression Tray - Lower (Blue)',
+    color: 'Blue',
+    colorAr: 'أزرق',
+    optionsLabelAr: 'اختر المقاس المطلوب (1, 2, 3, 4)',
+    optionsLabelEn: 'Select Size (1, 2, 3, 4)',
+    optionsPromptAr: '⚠️ يرجى تحديد المقاس المطلوب أولاً',
+    optionsPromptEn: '⚠️ Please select size first',
+    buttonPromptAr: 'اختر المقاس وأضف',
+    buttonPromptEn: 'Select Size & Add',
+    required: true,
+    galleryImages: [
       'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-impression-tray-blue-angle.png'
     ],
     sizes: [

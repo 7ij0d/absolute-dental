@@ -174,6 +174,24 @@ function sortExamination(items) {
   return [...items].sort((a, b) => getWeight(a) - getWeight(b));
 }
 
+function sortImpression(items) {
+  // 1. Upper Tray, 2. Lower Tray, 3. Putty, 4. Light Body, 5. Activator, 6. Alginates
+  const getWeight = (p) => {
+    const s = ((p.name_en || '') + ' ' + (p.name_ar || '')).toLowerCase();
+    if (s.includes('tray') || s.includes('تراي') || s.includes('قالب')) {
+      if (s.includes('upper') || s.includes('علوي')) return 1;
+      if (s.includes('lower') || s.includes('سفلي')) return 2;
+      return 1.5;
+    }
+    if (s.includes('putty') || s.includes('معجون')) return 3;
+    if (s.includes('light body') || s.includes('لايت')) return 4;
+    if (s.includes('activator') || s.includes('مصلب')) return 5;
+    if (s.includes('alginate') || s.includes('الجينات')) return 6;
+    return 7;
+  };
+  return [...items].sort((a, b) => getWeight(a) - getWeight(b));
+}
+
 function sortConsumables(items) {
   // Ordered per user directive:
   // 1. Cover Sheets, 2. Masks, 3. Gloves, 4. Disposable Examination Kit, 5. Medical Alcohol, 6. Bur Holder
@@ -348,7 +366,7 @@ export function getSubjectProductGroups(subjectSlug, products = []) {
     addGroup('handpieces_casting', 'Handpieces & Turbine Equipment', 'قبضة التوربين ومعدات العيادة', 'Wrench', hp);
 
     // 2. Impression Materials & Trays
-    const imp = products.filter(p => !placedIds.has(p.id) && isImpressionOrWaterProduct(p));
+    const imp = sortImpression(products.filter(p => !placedIds.has(p.id) && isImpressionOrWaterProduct(p)));
     addGroup('water_impression', 'Impression Materials & Trays', 'مواد الطبعة وقوالب السيليكون', 'Droplets', imp);
 
     // 3. Clinical & Surgical Instruments
@@ -367,7 +385,7 @@ export function getSubjectProductGroups(subjectSlug, products = []) {
   // ─────────────────────────────────────────────────────────────
   if (slug === 'removable-prosthodontics-2') {
     // 1. Impression Materials & Trays
-    const imp = products.filter(p => isImpressionOrWaterProduct(p) && !p.name_en?.toLowerCase().includes('water gauge'));
+    const imp = sortImpression(products.filter(p => isImpressionOrWaterProduct(p) && !p.name_en?.toLowerCase().includes('water gauge')));
     addGroup('water_impression', 'Impression Materials & Trays', 'مواد الطبعة وقوالب الألجينات', 'Droplets', imp);
 
     // 2. Water Measurement
