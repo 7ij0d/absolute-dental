@@ -179,7 +179,11 @@ function sortConsumables(items) {
   // 1. Cover Sheets, 2. Masks, 3. Gloves, 4. Disposable Examination Kit, 5. Medical Alcohol, 6. Bur Holder
   const orderWeight = (p) => {
     const s = ((p.name_en || '') + ' ' + (p.name_ar || '')).toLowerCase();
-    if (s.includes('cover sheet') || s.includes('مفرش')) return 1;
+    if (s.includes('cover sheet') || s.includes('مفرش') || s.includes('كافر')) {
+      if (s.includes('pink') || s.includes('وردي')) return 1.1;
+      if (s.includes('blue') || s.includes('أزرق')) return 1.2;
+      return 1.0;
+    }
     if (s.includes('mask') || s.includes('كمام')) return 2;
     if (s.includes('glove') || s.includes('قفاز')) return 3;
     if (p.id === '33000000-0000-0000-0000-000000000114' || s.includes('examination kit') || s.includes('طقم فحص')) return 4;

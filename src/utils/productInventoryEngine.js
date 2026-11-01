@@ -257,55 +257,6 @@ export const CANONICAL_SIZED_PRODUCTS = {
       }
     ]
   },
-  '33000000-0000-0000-0000-000000000103': {
-    productId: '33000000-0000-0000-0000-000000000103',
-    nameAr: 'مفرش عيادة أسنان طبي واقي وعازل - Cover Sheet (وردي وأزرق)',
-    nameEn: 'Cover Sheet Disposable Waterproof Dental Bib (Pink & Blue)',
-    hasColorAndSize: true,
-    optionsLabelAr: 'اختر اللون المتوفر',
-    optionsLabelEn: 'Select Color',
-    optionsPromptAr: '⚠️ يرجى تحديد لون المفرش أولاً',
-    optionsPromptEn: '⚠️ Please select cover sheet color',
-    buttonPromptAr: 'اختر اللون وأضف للسلة',
-    buttonPromptEn: 'Select Color & Add',
-    required: true,
-    galleryImages: [
-      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-pink.png',
-      'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-blue.png'
-    ],
-    sizes: [
-      {
-        size: 'pink',
-        code: 'Pink',
-        color: 'Pink',
-        colorAr: 'وردي',
-        colorHex: '#EC4899',
-        labelAr: 'وردي (Pink)',
-        labelEn: 'Pink',
-        shortLabel: 'وردي (Pink)',
-        stock: 375,
-        costPrice: 0.11,
-        price: 0.50,
-        unitNameAr: 'قطعة',
-        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-pink.png'
-      },
-      {
-        size: 'blue',
-        code: 'Blue',
-        color: 'Blue',
-        colorAr: 'أزرق',
-        colorHex: '#3B82F6',
-        labelAr: 'أزرق (Blue)',
-        labelEn: 'Blue',
-        shortLabel: 'أزرق (Blue)',
-        stock: 125,
-        costPrice: 0.11,
-        price: 0.50,
-        unitNameAr: 'قطعة',
-        image: 'https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-blue.png'
-      }
-    ]
-  },
   '22000000-0000-0000-0000-000000000204': {
     productId: '22000000-0000-0000-0000-000000000204',
     nameAr: 'Bur Holder (with Cover)',
@@ -565,9 +516,13 @@ export function getProductSizedConfig(productOrId) {
   const pId = typeof productOrId === 'object' ? productOrId.id : String(productOrId).trim();
   if (!pId) return null;
 
-  // HARDCODED IDENTITY GUARD (catches both string and object calls):
-  // Isolation Gown always returns null — it has no size/color variants.
-  if (pId === '33000000-0000-0000-0000-000000000112') {
+  // HARDCODED IDENTITY GUARDS (catches both string and object calls):
+  // Isolation Gown and Cover Sheets always return null — each color/model is a standalone product.
+  if (
+    pId === '33000000-0000-0000-0000-000000000112' ||
+    pId === '33000000-0000-0000-0000-000000000103' ||
+    pId === '33000000-0000-0000-0000-000000000104'
+  ) {
     return null;
   }
 
@@ -575,6 +530,9 @@ export function getProductSizedConfig(productOrId) {
   if (typeof productOrId === 'object') {
     const text = `${productOrId.name_en || ''} ${productOrId.name_ar || ''}`.toLowerCase();
     if (text.includes('gown') || text.includes('جاون')) {
+      return null;
+    }
+    if (text.includes('cover sheet') || text.includes('كافر شيت') || text.includes('مفرش')) {
       return null;
     }
   }
