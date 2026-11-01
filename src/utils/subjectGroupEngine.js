@@ -379,13 +379,13 @@ export function getSubjectProductGroups(subjectSlug, products = []) {
   // 9. PREVENTIVE DENTISTRY (Year 3)
   // ─────────────────────────────────────────────────────────────
   if (slug === 'preventive-dentistry') {
-    // 1. Clinical Supplies & Gauze
+    // 1. Clinical Isolation & Wrapping Supplies
     const clin = products.filter(p => isClinicalSurgicalProduct(p));
-    addGroup('clinical_surgical', 'Clinical Supplies & Gauze', 'مستلزمات العيادة والشاش الطبي', 'ShieldCheck', clin);
+    addGroup('clinical_surgical', 'Clinical Isolation & Barrier Supplies', 'مستلزمات العزل الوقائي والعيادي', 'ShieldCheck', clin);
 
-    // 2. Consumables & Accessories
-    const cons = sortConsumables(products.filter(p => !placedIds.has(p.id)));
-    addGroup('consumables', 'Consumables & Accessories', 'المستهلكات والإكسسوارات', 'Package', cons);
+    // 2. Remaining Subject Tools (if any)
+    const rem = products.filter(p => !placedIds.has(p.id));
+    addGroup('consumables', 'Supplies & Tools', 'المستلزمات والأدوات', 'Package', rem);
 
     return groups;
   }

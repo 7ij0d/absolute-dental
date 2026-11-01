@@ -275,7 +275,7 @@ export const Navbar = () => {
 
             <Link to="/other-supplies" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
               <Layers size={17} strokeWidth={2} style={{ color: 'var(--brand-gold)', flexShrink: 0 }} />
-              <span>{lang === 'ar' ? 'مستلزمات أخرى' : 'Other Supplies'}</span>
+              <span>{lang === 'ar' ? 'المستهلكات والإكسسوارات' : 'Consumables & Accessories'}</span>
             </Link>
 
             <Link to="/cart" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>

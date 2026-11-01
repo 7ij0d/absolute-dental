@@ -28,17 +28,17 @@
     "availability": "available",
     "year_id": "20000000-0000-0000-0000-000000000002",
     "subject_id": "22000000-0000-0000-0000-000000000021",
-    "discount_label_en": "other_supplies",
+    "discount_label_en": null,
     "extra_subject_ids": [
-      "22000000-0000-0000-0000-000000000023",
-      "33000000-0000-0000-0000-000000000031",
-      "33000000-0000-0000-0000-000000000033"
+      "22000000-0000-0000-0000-000000000023"
     ],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/bur-holder-mix-3colors.png",
     "is_featured": false,
     "is_active": true,
     "is_archived": false,
-    "sort_order": 1
+    "sort_order": 1,
+    "all_subjects": false,
+    "all_years": false
   },
   {
     "id": "8806943f-d3bf-443b-b623-7002b354a355",
@@ -94,7 +94,7 @@
     "stock_quantity": 25,
     "year_id": "10000000-0000-0000-0000-000000000001",
     "subject_id": "11000000-0000-0000-0000-000000000012",
-    "discount_label_en": "other_supplies",
+    "discount_label_en": null,
     "extra_subject_ids": [
       "22000000-0000-0000-0000-000000000022",
       "33000000-0000-0000-0000-000000000034"
@@ -103,7 +103,8 @@
     "is_featured": false,
     "is_active": true,
     "is_archived": false,
-    "sort_order": 2
+    "sort_order": 2,
+    "all_subjects": false
   },
   {
     "id": "28647b17-8bc9-4834-a9d9-abbb45c88fca",
@@ -120,7 +121,7 @@
     "stock_quantity": 25,
     "year_id": "10000000-0000-0000-0000-000000000001",
     "subject_id": "11000000-0000-0000-0000-000000000012",
-    "discount_label_en": "other_supplies",
+    "discount_label_en": null,
     "extra_subject_ids": [
       "22000000-0000-0000-0000-000000000022",
       "33000000-0000-0000-0000-000000000034"
@@ -129,7 +130,8 @@
     "is_featured": false,
     "is_active": true,
     "is_archived": false,
-    "sort_order": 3
+    "sort_order": 3,
+    "all_subjects": false
   },
   {
     "id": "0c18deeb-a571-419b-adf2-8060db42d8cf",
@@ -549,8 +551,8 @@
     "compare_at_price": null,
     "availability": "available",
     "stock_quantity": 150,
-    "subject_id": "11000000-0000-0000-0000-000000000011",
-    "all_subjects": true,
+    "subject_id": null,
+    "all_subjects": false,
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-medprotect-blue.png",
     "description_ar": "كمامات طبية جراحية ثلاثية الطبقات عالية الكفاءة مع حلقات أذن مطاطية مريحة، خالية تماماً من اللاتكس والنيكل والكادميوم لحماية قصوى في المعامل والعيادات. متوفرة باللونين الأزرق والأسود.",
     "description_en": "Latex-free, nickel-free and cadmium-free. High-filtration 3-ply surgical face mask with comfortable elastic ear loops. Available in Blue and Black.",
@@ -559,16 +561,11 @@
     "sort_order": 1,
     "is_universal": true,
     "discount_label_en": "other_supplies",
-    "extra_subject_ids": [
-      "11000000-0000-0000-0000-000000000012",
-      "22000000-0000-0000-0000-000000000021",
-      "22000000-0000-0000-0000-000000000022",
-      "22000000-0000-0000-0000-000000000023",
-      "33000000-0000-0000-0000-000000000031",
-      "33000000-0000-0000-0000-000000000032",
-      "33000000-0000-0000-0000-000000000033",
-      "33000000-0000-0000-0000-000000000034"
-    ]
+    "extra_subject_ids": [],
+    "year_id": null,
+    "all_years": false,
+    "is_active": true,
+    "is_archived": false
   },
   {
     "id": "33000000-0000-0000-0000-000000000102",
@@ -598,16 +595,9 @@
     "compare_at_price": null,
     "availability": "available",
     "stock_quantity": 500,
-    "subject_id": "33000000-0000-0000-0000-000000000031",
-    "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000032",
-      "33000000-0000-0000-0000-000000000033",
-      "33000000-0000-0000-0000-000000000034",
-      "22000000-0000-0000-0000-000000000021",
-      "22000000-0000-0000-0000-000000000022",
-      "22000000-0000-0000-0000-000000000023"
-    ],
+    "subject_id": null,
+    "year_id": null,
+    "extra_subject_ids": [],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-pink.png",
     "description_ar": "مفرش طبي واقي للاستخدام لمرة واحدة (Waterproof Dental Bib) مصنوع من طبقات ورقية ماصة عالية الجودة مدعمة بطبقة بولي إيثيلين عازلة ومقاومة للماء تماماً لحماية ملابس المرضى وأسطح العمل في العيادات. متوفر باللونين الوردي والأزرق.",
     "description_en": "Disposable waterproof dental bib / cover sheet. 2-ply absorbent paper backing laminated with 1-ply waterproof PE film to protect patients and clinic trays from liquids. Available in Pink and Blue.",
@@ -615,7 +605,11 @@
     "details_en": "Available Colors:\n• Pink\n• Blue\nType: Disposable Waterproof Dental Bib / Cover Sheet\nAcademic Year: 3rd Year (All Subjects)",
     "sort_order": 3,
     "is_universal": true,
-    "discount_label_en": "other_supplies"
+    "discount_label_en": "other_supplies",
+    "all_subjects": false,
+    "all_years": false,
+    "is_active": true,
+    "is_archived": false
   },
   {
     "id": "33000000-0000-0000-0000-000000000105",
@@ -661,15 +655,15 @@
     "stock_quantity": 1,
     "subject_id": "33000000-0000-0000-0000-000000000034",
     "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000033"
-    ],
+    "extra_subject_ids": [],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/lascod-iq-alginate-impression-material-450g.png",
     "description_ar": "مادة أخذ طبعات الجينات الإيطالية الشهيرة Lascod iQ Alginate (عبوة كاملة 450 جرام). تتميز بتغير لوني إرشادي لمراحل التصلب (Chromatic indicator)، ونكهة النعناع المنعشة، وسرعة فائقة في التصلب ومرونة استثنائية لأخذ طبعات غاية في الدقة في معامل وعيادات صناعة الأسنان.",
     "description_en": "World-renowned Italian Chromatic Alginate impression material by Lascod (Full 450g bag). Features visual chromatic phase indicator, mint flavor, fast setting, and high elastic recovery for precision impressions in Prosthodontics.",
     "details_ar": "الماركة: Lascod (إيطاليا)\nالوزن: 450 جرام (Full Bag 450g)\nالنوع: مادة طبعة الجينات متغيرة الألوان (Chromatic Alginate)\nالمادة الدراسية: صناعة الأسنان (Prosthodontics)",
     "details_en": "Brand: Lascod (Italy)\nWeight: 450g Full Bag\nType: Chromatic Alginate Impression Material (Mint Flavor)\nSubject: Prosthodontics",
-    "sort_order": 7
+    "sort_order": 7,
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "33000000-0000-0000-0000-000000000108",
@@ -677,16 +671,20 @@
     "name_en": "Life Support Sterile Gauze Swab (10cm x 10cm)",
     "price": 0.5,
     "compare_at_price": null,
-    "availability": "available",
+    "availability": "unavailable",
     "stock_quantity": 200,
-    "subject_id": "33000000-0000-0000-0000-000000000032",
-    "year_id": "30000000-0000-0000-0000-000000000003",
+    "subject_id": null,
+    "year_id": null,
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/life-support-sterile-gauze-swab.png",
     "description_ar": "شاش طبي قطني نقي معقم بأكسيد الإيثيلين (Sterile EO) عالي الامتصاص من Life Support. متعدد الطبقات بمقاس 10cm × 10cm، مثالي للتحكم في اللعاب والعزل ومسح وتجفيف الأسنان وتطبيق محاليل الفلورايد في عيادات طب الأسنان الوقائي وطب أسنان الأطفال.",
     "description_en": "Life Support ethylene oxide sterilized (Sterile EO) 100% cotton gauze swab (10cm x 10cm, 4-ply / 12-ply). Highly absorbent and lint-free, essential for isolation, moisture control, cleaning, and topical fluoride applications in Preventive & Pediatric Dentistry.",
     "details_ar": "الماركة: Life Support (IPC)\nالمقاس: 10cm × 10cm (40S, 4PLY, 12PLY)\nالنوع: شاش قطني طبي معقم (Sterile Gauze Swab)\nالمادة الدراسية: طب أسنان الأطفال والوقائي 1 (البريفنشن)",
     "details_en": "Brand: Life Support (IPC)\nSize: 10cm x 10cm (40S, 4PLY, 12PLY)\nType: Sterile Cotton Gauze Swab (EO Sterilized)\nSubject: Pediatric & Preventive Dentistry 1",
-    "sort_order": 8
+    "sort_order": 8,
+    "is_active": false,
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "33000000-0000-0000-0000-000000000109",
@@ -696,16 +694,9 @@
     "compare_at_price": null,
     "availability": "available",
     "stock_quantity": 100,
-    "subject_id": "33000000-0000-0000-0000-000000000031",
-    "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000032",
-      "33000000-0000-0000-0000-000000000033",
-      "33000000-0000-0000-0000-000000000034",
-      "22000000-0000-0000-0000-000000000021",
-      "22000000-0000-0000-0000-000000000022",
-      "22000000-0000-0000-0000-000000000023"
-    ],
+    "subject_id": null,
+    "year_id": null,
+    "extra_subject_ids": [],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/overseasglove-nitrile-gloves-black-s.png",
     "description_ar": "قفازات فحص طبية نايتريل خالية من البودرة واللاتكس من OverseasGlove للاستخدام لمرة واحدة (حماية فائقة وملمس مريح). متوفرة بمقاسات وألوان متعددة (أسود مقاس S، أزرق مقاس M). أساسية لجميع عيادات ومعامل السنة الثالثة.",
     "description_en": "Premium OverseasGlove disposable non-sterile nitrile examination gloves (Powder-free & Latex-free). Available in multiple colors and sizes (Black Size S, Blue Size M). Essential protection across all 3rd-year dental clinics and laboratories.",
@@ -713,7 +704,11 @@
     "details_en": "Brand: OverseasGlove\nType: Disposable Non-Sterile Nitrile Gloves\nAvailable Colors & Sizes:\n• Black - Size Small (S)\n• Blue - Size Medium (M)\nAcademic Year: 3rd Year (All 4 Subjects)",
     "sort_order": 9,
     "is_universal": true,
-    "discount_label_en": "other_supplies"
+    "discount_label_en": "other_supplies",
+    "all_subjects": false,
+    "all_years": false,
+    "is_active": true,
+    "is_archived": false
   },
   {
     "id": "33000000-0000-0000-0000-000000000110",
@@ -721,16 +716,20 @@
     "name_en": "GM Medical Gauze Roll (500g)",
     "price": 26,
     "compare_at_price": null,
-    "availability": "available",
+    "availability": "unavailable",
     "stock_quantity": 2,
-    "subject_id": "33000000-0000-0000-0000-000000000032",
-    "year_id": "30000000-0000-0000-0000-000000000003",
+    "subject_id": null,
+    "year_id": null,
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/gauze-roll-500g.png",
     "description_ar": "رول شاش طبي قطني نقي 100% عالي الجودة والامتصاص من GM (عبوة كبيرة 500 جرام، قياس 36 بوصة × 100 ياردة، 4 طبقات). مخصص لإعداد ومسح وتجهيز مسحات الشاش المعملية والعيادية والتحكم في الرطوبة في عيادات طب الأسنان الوقائي.",
     "description_en": "GM Medical 100% pure cotton absorbent gauze roll (500g roll, 36 inch x 100Y, 4-ply, 40s/12x8 mesh, 8 threads, Latex-free). High absorbency for custom swabs, isolation, and clinical procedures in Preventive Dentistry.",
     "details_ar": "الماركة: GM (Al Gohay International Medical Equipment)\nالوزن: 500 جرام (500G Roll)\nالمواصفات: 100% قطن نقي، 36 بوصة × 100 ياردة، 4PLY، خالٍ من اللاتكس (Latex Free)\nالمادة الدراسية: طب أسنان الأطفال والوقائي 1 (البريفنشن)",
     "details_en": "Brand: GM\nWeight: 500g Roll\nSpecifications: 100% Cotton, 36 inch x 100Y, 4-ply, Latex Free, CE certified\nSubject: Pediatric & Preventive Dentistry 1",
-    "sort_order": 10
+    "sort_order": 10,
+    "is_active": false,
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "discount_label_en": null
   },
   {
     "id": "33000000-0000-0000-0000-000000000111",
@@ -740,14 +739,18 @@
     "compare_at_price": null,
     "availability": "available",
     "stock_quantity": 5,
-    "subject_id": "33000000-0000-0000-0000-000000000034",
+    "subject_id": "33000000-0000-0000-0000-000000000032",
     "year_id": "30000000-0000-0000-0000-000000000003",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-barrier-wrapping-roll-blue.png",
     "description_ar": "رول تغليف وعزل عيادي واقي عالي الجودة باللون الأزرق (Dental Barrier Film Roll)، مخصص لتغطية وعزل مقابض الأجهزة، رؤوس الإضاءة، لوحات التحكم، وخراطيم الوحدات العيادية لمنع انتقال العدوى وضمان أعلى معايير التعقيم أثناء العمل السريري والمعملي في صناعة الأسنان المتحركة.",
     "description_en": "Premium medical dental barrier film wrapping roll in blue. Designed for surface infection control, protecting equipment handles, light handles, control panels, and clinic tubing during clinical and lab procedures in Removable Prosthodontics.",
     "details_ar": "المادة: رول عزل وتغليف عيادي (Barrier Film Wrapping Roll)\nاللون: أزرق (Blue)\nالاستخدام: عزل أسطح الأجهزة ومقابض الإنارة والعيادات لمنع التلوث المتبادل\nالمادة الدراسية: صناعة الأسنان المتحركة (Removable Prosthodontics)",
     "details_en": "Product: Dental Barrier Film Wrapping Roll\nColor: Blue\nApplication: Clinical surface isolation, cross-contamination prevention, equipment protection\nSubject: Removable Prosthodontics",
-    "sort_order": 10
+    "sort_order": 10,
+    "extra_subject_ids": [],
+    "all_subjects": false,
+    "all_years": false,
+    "discount_label_en": null
   },
   {
     "id": "33000000-0000-0000-0000-000000000112",
@@ -757,17 +760,20 @@
     "compare_at_price": null,
     "availability": "available",
     "stock_quantity": 20,
-    "subject_id": "33000000-0000-0000-0000-000000000032",
-    "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000031"
-    ],
+    "subject_id": null,
+    "year_id": null,
+    "extra_subject_ids": [],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/disposable-dental-isolation-gown-blue.png",
     "description_ar": "جاون وقائي عيادي للاستخدام مرة واحدة بلون أزرق عالي الجودة مع أساور بيضاء محبوكة، مريح وعازل للسوائل والرذاذ، مصمم خصيصاً لجلسات مادة طب الأسنان الوقائي (Prevention).",
     "description_en": "High-quality blue disposable dental isolation gown with white elastic knitted cuffs, liquid-resistant and comfortable for Preventive Dentistry clinical sessions.",
     "details_ar": "المنتج: جاون وقائي طبي عيادي للاستخدام مرة واحدة (Disposable Medical Isolation Gown)\nاللون: أزرق مع أساور بيضاء محبوكة\nالمادة الدراسية: طب الأسنان الوقائي (Prevention)\nسعر البيع: 3 د.ل",
     "details_en": "Product: Disposable Dental Isolation Gown\nColor: Blue with white knitted cuffs\nSubject: Preventive Dentistry\nSelling Price: 3 LYD",
-    "sort_order": 112
+    "sort_order": 112,
+    "all_subjects": false,
+    "all_years": false,
+    "discount_label_en": "other_supplies",
+    "is_active": true,
+    "is_archived": false
   },
   {
     "id": "33000000-0000-0000-0000-000000000118",
@@ -798,18 +804,18 @@
     "compare_at_price": null,
     "availability": "available",
     "stock_quantity": 10,
-    "subject_id": "33000000-0000-0000-0000-000000000032",
+    "subject_id": "33000000-0000-0000-0000-000000000031",
     "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000031",
-      "33000000-0000-0000-0000-000000000033"
-    ],
+    "extra_subject_ids": [],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-floss-dispenser.png",
     "description_ar": "خيط أسنان طبي عيادي عالي المتانة داخل علبة موزع شفافة مع قاطع معدني مدمج. مخصص لتنظيف المسافات بين الأسنان (Interdental cleaning)، إزالة البلاك، وفحص نقاط التماس (Contact points) أثناء الإجراءات السريرية والتدريب في طب الأسنان الوقائي والتحفظي.",
     "description_en": "Professional clinical dental floss in a compact dispenser box with integrated stainless steel cutter. Ideal for interdental cleaning, plaque removal, checking restorative contact points, and clinical procedures in Preventive and Conservative Dentistry.",
     "details_ar": "المنتج: خيط أسنان طبي عيادي مع علبة موزع (Dental Floss Dispenser)\nالمواصفات: خيط مشمع عالي القوة ومقاوم للقطع، علبة شفافة مع شفرة قطع معدنية\nالمادة الدراسية: طب الأسنان الوقائي 1 (البريفنشن)",
     "details_en": "Product: Clinical Dental Floss Dispenser\nFeatures: High-tensile strength waxed floss, transparent protective case with cutting blade\nSubject: Preventive Dentistry",
-    "sort_order": 11
+    "sort_order": 11,
+    "all_subjects": false,
+    "all_years": false,
+    "discount_label_en": null
   },
   {
     "id": "33000000-0000-0000-0000-000000000114",
@@ -819,18 +825,20 @@
     "compare_at_price": null,
     "availability": "available",
     "stock_quantity": 10,
-    "subject_id": "33000000-0000-0000-0000-000000000031",
-    "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000033",
-      "33000000-0000-0000-0000-000000000034"
-    ],
+    "subject_id": null,
+    "year_id": null,
+    "extra_subject_ids": [],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/disposable-dental-examination-kit.png",
     "description_ar": "طقم فحص أسنان عيادي معقم ومغلف للاستخدام الفردي لمرة واحدة (Single-use Sterile Kit). يحتوي على صينية بلاستيكية مدمجة، مرآة فحص أسنان، مسبار فحص/بروب، ملقط طبي معدني، كرات قطنية، ومفرش طبي واقٍ (Bib). أساسي لجلسات الفحص والتشخيص السريري في عيادات العلاج التحفظي (الكونس) وصناعة الأسنان الثابتة (البرستو) والمتحركة (الريموفبل).",
     "description_en": "Professional disposable sterile dental examination kit for single-patient clinical procedures. Includes a rigid examination tray, dental mouth mirror, double-ended dental probe/explorer, stainless steel clinical tweezers, cotton rolls, and protective dental bib. Essential for clinical diagnosis and practice in Conservative Dentistry, Fixed Prosthodontics, and Removable Prosthodontics.",
     "details_ar": "المنتج: طقم فحص أسنان عيادي معقم للاستخدام مرة واحدة (Disposable Examination Kit)\nالمحتويات: مرآة فحص، مسبار (Probe/Explorer)، ملقط أسنان، كرات قطن طبي، مفرش واقٍ، وصينية فحص\nالمواد الدراسية: علاج الأسنان التحفظي (الكونس)، صناعة الأسنان الثابتة (البرستو)، وصناعة الأسنان المتحركة (الريموفبل)",
     "details_en": "Product: Disposable Sterile Dental Examination Kit\nContents: Mouth mirror, dental probe/explorer, clinical tweezers, sterile cotton rolls, dental bib, organized compartment tray\nSubjects: Conservative Dentistry, Fixed Prosthodontics, Removable Prosthodontics",
-    "sort_order": 12
+    "sort_order": 12,
+    "all_subjects": false,
+    "all_years": false,
+    "discount_label_en": "other_supplies",
+    "is_active": true,
+    "is_archived": false
   },
   {
     "id": "33000000-0000-0000-0000-000000000115",
@@ -891,16 +899,9 @@
     "compare_at_price": null,
     "availability": "available",
     "stock_quantity": 125,
-    "subject_id": "33000000-0000-0000-0000-000000000031",
-    "year_id": "30000000-0000-0000-0000-000000000003",
-    "extra_subject_ids": [
-      "33000000-0000-0000-0000-000000000032",
-      "33000000-0000-0000-0000-000000000033",
-      "33000000-0000-0000-0000-000000000034",
-      "22000000-0000-0000-0000-000000000021",
-      "22000000-0000-0000-0000-000000000022",
-      "22000000-0000-0000-0000-000000000023"
-    ],
+    "subject_id": null,
+    "year_id": null,
+    "extra_subject_ids": [],
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/dental-bib-cover-sheet-blue.png",
     "description_ar": "مفرش طبي واقي للاستخدام لمرة واحدة (Waterproof Dental Bib) بلون أزرق عيادي أنيق، مصنوع من طبقات ورقية ماصة عالية الجودة مدعمة بطبقة عازلة ومقاومة للماء تماماً لحماية ملابس المرضى وأسطح العمل في العيادات.",
     "description_en": "Disposable waterproof dental bib / cover sheet in clinic blue. 2-ply absorbent paper backing laminated with 1-ply waterproof PE film to protect patients and clinic trays from liquids.",
@@ -908,36 +909,11 @@
     "details_en": "Color: Blue\nQuantity in Stock: 125 pieces\nType: Disposable Waterproof Dental Bib / Cover Sheet\nSelling Price: 0.5 LYD\nCost Price: 0.11 LYD\nAcademic Year: 3rd Year (All Subjects)",
     "sort_order": 4,
     "is_universal": true,
-    "discount_label_en": "other_supplies"
-  },
-  {
-    "id": "99000000-0000-0000-0000-000000000003",
-    "name_ar": "طقم كمامة وقفازات (Mask & Gloves Set)",
-    "name_en": "Mask and Gloves Set",
-    "price": 1.5,
-    "compare_at_price": null,
-    "availability": "available",
-    "stock_quantity": 100,
-    "subject_id": "11000000-0000-0000-0000-000000000011",
-    "all_subjects": true,
-    "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-medprotect-blue.png",
-    "description_ar": "طقم وقائي متكامل للاستخدام العيادي والمعملي يجمع بين كمامات طبية جراحية ثلاثية الطبقات وقفازات نايتريل عالية الجودة لحماية تامة للطلبة أثناء جلسات التدريب والعيادات.",
-    "description_en": "Complete protective set for dental clinics and laboratories combining 3-ply surgical face mask and premium nitrile examination gloves.",
-    "details_ar": "المحتويات:\n• كمامة طبية جراحية ثلاثية الطبقات خالية من اللاتكس\n• زوج قفازات نايتريل فاحصة عالية الحماية\nالقسم: مستلزمات أخرى لجميع السنوات",
-    "details_en": "Contents:\n• 1x 3-Ply Surgical Face Mask (Latex-Free)\n• 1x Pair Nitrile Examination Gloves\nDepartment: Other Supplies for All Years",
-    "sort_order": 0,
-    "is_universal": true,
     "discount_label_en": "other_supplies",
-    "extra_subject_ids": [
-      "11000000-0000-0000-0000-000000000012",
-      "22000000-0000-0000-0000-000000000021",
-      "22000000-0000-0000-0000-000000000022",
-      "22000000-0000-0000-0000-000000000023",
-      "33000000-0000-0000-0000-000000000031",
-      "33000000-0000-0000-0000-000000000032",
-      "33000000-0000-0000-0000-000000000033",
-      "33000000-0000-0000-0000-000000000034"
-    ]
+    "all_subjects": false,
+    "all_years": false,
+    "is_active": true,
+    "is_archived": false
   },
   {
     "id": "22000000-0000-0000-0000-000000000211",
@@ -993,8 +969,8 @@
   },
   {
     "id": "99000000-0000-0000-0000-000000000005",
-    "subject_id": "11000000-0000-0000-0000-000000000011",
-    "year_id": "10000000-0000-0000-0000-000000000001",
+    "subject_id": null,
+    "year_id": null,
     "name_ar": "Medical Alcohol 75% (125ml)",
     "name_en": "Medical Alcohol 75% (125ml)",
     "description_ar": "بخاخ كحول طبي إيثيلي 75% نقي بحجم 125 مل للتعقيم الفوري للأيدي والأسطح والأدوات.",
@@ -1004,7 +980,7 @@
     "price": 5,
     "compare_at_price": null,
     "discount_label_ar": "universal",
-    "discount_label_en": "universal",
+    "discount_label_en": "other_supplies",
     "discount_ends_at": null,
     "stock_quantity": 50,
     "availability": "available",
@@ -1018,19 +994,11 @@
     "audio_url": null,
     "unit_multiplier": 1,
     "shared_inventory_product_id": null,
-    "all_subjects": true,
-    "extra_subject_ids": [
-      "11000000-0000-0000-0000-000000000012",
-      "22000000-0000-0000-0000-000000000021",
-      "22000000-0000-0000-0000-000000000022",
-      "22000000-0000-0000-0000-000000000023",
-      "33000000-0000-0000-0000-000000000031",
-      "33000000-0000-0000-0000-000000000032",
-      "33000000-0000-0000-0000-000000000033",
-      "33000000-0000-0000-0000-000000000034"
-    ],
+    "all_subjects": false,
+    "extra_subject_ids": [],
     "created_at": "2026-10-27T15:46:39.040Z",
-    "updated_at": "2026-10-27T15:46:39.041Z"
+    "updated_at": "2026-10-27T15:46:39.041Z",
+    "all_years": false
   },
   {
     "id": "7e990001-0000-4000-8000-000000000001",
@@ -1094,8 +1062,8 @@
   },
   {
     "id": "99000000-0000-0000-0000-000000000002",
-    "subject_id": "22000000-0000-0000-0000-000000000021",
-    "year_id": "20000000-0000-0000-0000-000000000002",
+    "subject_id": null,
+    "year_id": null,
     "name_ar": "Mask - Black",
     "name_en": "Disposable Surgical Face Masks (Black)",
     "description_ar": "كمامات طبية وقائية ثلاثية الطبقات بلون أسود أنيق، أحادية الاستخدام مع حلقات أذن مريحة ودعامة أنف مرنة للاستخدام اليومي في كليات ومعامل الأسنان.",
@@ -1105,7 +1073,7 @@
     "price": 0.5,
     "compare_at_price": null,
     "discount_label_ar": null,
-    "discount_label_en": "universal",
+    "discount_label_en": "other_supplies",
     "discount_ends_at": null,
     "stock_quantity": 100,
     "availability": "available",
@@ -1113,14 +1081,17 @@
     "usage_instruction_image_url": null,
     "is_featured": true,
     "is_archived": false,
-    "is_active": false,
+    "is_active": true,
     "sort_order": 2,
     "created_at": "2026-10-09T21:08:14.221993+00:00",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/mask-disposable-black.png",
     "audio_url": null,
     "updated_at": "2026-10-09T21:08:14.221993+00:00",
     "unit_multiplier": 1,
-    "shared_inventory_product_id": null
+    "shared_inventory_product_id": null,
+    "all_subjects": false,
+    "all_years": false,
+    "extra_subject_ids": []
   },
   {
     "id": "8f344bd9-91ec-4787-8371-f489cccf635e",

@@ -148,7 +148,7 @@ export const SubjectPage = () => {
   );
 
   const lookupSlug = slug === 'operative-dentistry' ? 'restorative-dentistry' : slug;
-  const CACHE_KEY = `subject_v39:${slug}`;
+  const CACHE_KEY = `subject_v40:${slug}`;
 
   // Instant synchronous initialization: check cache, then compute from local defaults (0ms load)
   const initialPayload = useMemo(() => {
@@ -260,10 +260,14 @@ export const SubjectPage = () => {
         // Merge any seeded defaults not yet in DB
         const existingIds = new Set(allProds.map(p => p.id));
         const defaultsForSub = defaultProductsList.filter(p =>
-          p.subject_id === subject.id ||
-          p.all_subjects === true ||
-          p.discount_label_en === 'universal' ||
-          (Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.includes(subject.id))
+          p.is_active !== false &&
+          !p.is_archived &&
+          (
+            p.subject_id === subject.id ||
+            p.all_subjects === true ||
+            p.discount_label_en === 'universal' ||
+            (Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.includes(subject.id))
+          )
         );
         for (const dp of defaultsForSub) {
           if (!existingIds.has(dp.id)) {

@@ -74,19 +74,24 @@ export const SearchPage = ({ categoryMode = null }) => {
               return true;
             });
           } else if (categoryMode === 'other-supplies') {
-            // Strictly include products enabled for "Other Supplies" ('other_supplies' or 'universal' or canonical clinic supplies)
+            // Strictly include products enabled for "Consumables & Accessories"
+            const CONSUMABLES_CANONICAL_IDS = new Set([
+              '33000000-0000-0000-0000-000000000114', // Disposable Dental Examination Kit (Sterile)
+              '33000000-0000-0000-0000-000000000112', // Disposable Dental Isolation Gown (Blue)
+              '99000000-0000-0000-0000-000000000001', // Disposable Face Masks (Blue & Black)
+              '99000000-0000-0000-0000-000000000002', // Disposable Surgical Face Masks (Black)
+              '33000000-0000-0000-0000-000000000109', // Overseas Glove Nitrile Examination Gloves
+              '33000000-0000-0000-0000-000000000103', // Cover Sheet (Pink)
+              '33000000-0000-0000-0000-000000000104', // Cover Sheet (Blue)
+              '99000000-0000-0000-0000-000000000005'  // Medical Alcohol 75%
+            ]);
             const suppliesList = data.filter((p) => {
-              const nameLower = ((p.name_en || '') + ' ' + (p.name_ar || '')).toLowerCase();
-              return (
-                p.discount_label_en === 'other_supplies' ||
-                p.discount_label_en === 'universal' ||
-                nameLower.includes('cover sheet') ||
-                nameLower.includes('mask') ||
-                nameLower.includes('glove') ||
-                nameLower.includes('كمام') ||
-                nameLower.includes('قفاز') ||
-                nameLower.includes('مفرش عيادة')
-              );
+              if (p.id === '33000000-0000-0000-0000-000000000113') return false; // Dental floss belongs strictly to Conservative 2
+              if (p.id === '99000000-0000-0000-0000-000000000003') return false; // Deleted bundle
+              if (p.id === '33000000-0000-0000-0000-000000000110' || p.id === '33000000-0000-0000-0000-000000000108') return false; // Standby
+              if (p.id === '50c5fac9-de64-452d-85ac-c6cce3496793') return false; // Bur Holder belongs strictly to Year 2 subjects
+              if (CONSUMABLES_CANONICAL_IDS.has(p.id)) return true;
+              return p.discount_label_en === 'other_supplies' && !p.subject_id;
             });
             const seen = new Set();
             matched = suppliesList.filter((p) => {
@@ -278,12 +283,12 @@ export const SearchPage = ({ categoryMode = null }) => {
     }
     if (categoryMode === 'other-supplies') {
       return {
-        titleAr: 'مستلزمات أخرى',
-        titleEn: 'Other Supplies',
+        titleAr: 'المستهلكات والإكسسوارات',
+        titleEn: 'Consumables & Accessories',
         subtitle: lang === 'ar'
-          ? 'مستلزمات يحتاجها طلبة طب الأسنان في مختلف السنوات.'
-          : 'Supplies needed by dental students across different years.',
-        searchPlaceholder: lang === 'ar' ? 'ابحث في مستلزمات أخرى... (مثال: Mask, Gloves, Cover Sheet)' : 'Search in Other Supplies...'
+          ? 'المستلزمات الاستهلاكية العامة التي يحتاجها طلبة طب الأسنان.'
+          : 'General consumables and accessories needed by dental students.',
+        searchPlaceholder: lang === 'ar' ? 'ابحث في المستهلكات والإكسسوارات...' : 'Search in Consumables & Accessories...'
       };
     }
     return {
