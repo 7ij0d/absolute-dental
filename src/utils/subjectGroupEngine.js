@@ -22,7 +22,21 @@ const isBurProduct = (p) => {
   const s = ((p.name_en || '') + ' ' + (p.name_ar || '')).toLowerCase();
   // Bur Holder is a consumable, not a rotary bur!
   if (s.includes('holder') || s.includes('علبة')) return false;
-  return Boolean(p.isBurGroup) || s.includes('bur') || s.includes('بير') || (typeof p.id === 'string' && p.id.startsWith('bur-group'));
+  return (
+    Boolean(p.isBurGroup) ||
+    s.includes('bur') ||
+    s.includes('بير') ||
+    s.includes('needle') ||
+    s.startsWith('tc ') ||
+    s.startsWith('br ') ||
+    s.startsWith('fo ') ||
+    s.startsWith('tf ') ||
+    s.startsWith('wr ') ||
+    s.startsWith('sf ') ||
+    s.startsWith('si ') ||
+    s.startsWith('cd ') ||
+    (typeof p.id === 'string' && p.id.startsWith('bur-group'))
+  );
 };
 
 const isHandpieceOrCast = (p) => {
@@ -32,8 +46,9 @@ const isHandpieceOrCast = (p) => {
 
 const isExamProduct = (p) => {
   const s = ((p.name_en || '') + ' ' + (p.name_ar || '')).toLowerCase();
+  if (p.id === '33000000-0000-0000-0000-000000000114' || s.includes('examination kit') || s.includes('طقم فحص')) return false;
   if (s.includes('glove') || s.includes('قفاز')) return false;
-  return s.includes('probe') || s.includes('mirror') || s.includes('مرآة') || s.includes('بروب') || s.includes('فحص');
+  return s.includes('probe') || s.includes('mirror') || s.includes('مرآة') || s.includes('بروب');
 };
 
 const isTeethProduct = (p) => {
@@ -44,13 +59,18 @@ const isTeethProduct = (p) => {
 const isConsumableProduct = (p) => {
   const s = ((p.name_en || '') + ' ' + (p.name_ar || '')).toLowerCase();
   return (
+    p.id === '33000000-0000-0000-0000-000000000114' ||
+    s.includes('examination kit') ||
+    s.includes('طقم فحص') ||
     s.includes('holder') ||
     s.includes('glove') ||
     s.includes('mask') ||
     s.includes('cover sheet') ||
+    s.includes('alcohol') ||
     s.includes('قفاز') ||
     s.includes('كمام') ||
     s.includes('مفرش') ||
+    s.includes('كحول') ||
     s.includes('علبة')
   );
 };
@@ -155,15 +175,16 @@ function sortExamination(items) {
 }
 
 function sortConsumables(items) {
-  // 1. Bur Holder, 2. Gloves, 3. Masks, 4. Mask & Gloves Set, 5. Cover Sheets, 6. Medical Alcohol
+  // Ordered per user directive:
+  // 1. Cover Sheets, 2. Masks, 3. Gloves, 4. Disposable Examination Kit, 5. Medical Alcohol, 6. Bur Holder
   const orderWeight = (p) => {
     const s = ((p.name_en || '') + ' ' + (p.name_ar || '')).toLowerCase();
-    if (s.includes('holder') || s.includes('علبة')) return 1;
-    if (s.includes('glove') && !s.includes('set') && !s.includes('طقم')) return 2;
-    if (s.includes('mask') && !s.includes('set') && !s.includes('طقم')) return 3;
-    if (s.includes('set') || s.includes('طقم')) return 4;
-    if (s.includes('cover sheet') || s.includes('مفرش')) return 5;
-    if (s.includes('alcohol') || s.includes('كحول')) return 6;
+    if (s.includes('cover sheet') || s.includes('مفرش')) return 1;
+    if (s.includes('mask') || s.includes('كمام')) return 2;
+    if (s.includes('glove') || s.includes('قفاز')) return 3;
+    if (p.id === '33000000-0000-0000-0000-000000000114' || s.includes('examination kit') || s.includes('طقم فحص')) return 4;
+    if (s.includes('alcohol') || s.includes('كحول')) return 5;
+    if (s.includes('holder') || s.includes('علبة')) return 6;
     return 7;
   };
 
@@ -265,11 +286,15 @@ export function getSubjectProductGroups(subjectSlug, products = []) {
     const wax = products.filter(p => isWaxOrLabProduct(p));
     addGroup('wax_lab', 'Waxing & Lab Instruments', 'أدوات التشميع والمعمل', 'Flame', wax);
 
-    // 2. Water Measurement & Impression Tools
+    // 2. Handpieces & Cast Models
+    const hp = products.filter(p => !placedIds.has(p.id) && isHandpieceOrCast(p));
+    addGroup('handpieces_casting', 'Handpieces & Cast Models', 'القبضات والمجسمات والكاست', 'Wrench', hp);
+
+    // 3. Water Measurement & Impression Tools
     const water = products.filter(p => !placedIds.has(p.id) && isImpressionOrWaterProduct(p));
     addGroup('water_impression', 'Water Measurement & Impression', 'أدوات القياس وأخذ الطبعات', 'Droplets', water);
 
-    // 3. Consumables & Accessories
+    // 4. Consumables & Accessories
     const cons = sortConsumables(products.filter(p => !placedIds.has(p.id)));
     addGroup('consumables', 'Consumables & Accessories', 'المستهلكات والإكسسوارات', 'Package', cons);
 
@@ -383,9 +408,9 @@ export function getSubjectProductGroups(subjectSlug, products = []) {
     const clin = products.filter(p => isClinicalSurgicalProduct(p));
     addGroup('clinical_surgical', 'Clinical Isolation & Barrier Supplies', 'مستلزمات العزل الوقائي والعيادي', 'ShieldCheck', clin);
 
-    // 2. Remaining Subject Tools (if any)
-    const rem = products.filter(p => !placedIds.has(p.id));
-    addGroup('consumables', 'Supplies & Tools', 'المستلزمات والأدوات', 'Package', rem);
+    // 2. Consumables & Accessories
+    const cons = sortConsumables(products.filter(p => !placedIds.has(p.id)));
+    addGroup('consumables', 'Consumables & Accessories', 'المستهلكات والإكسسوارات', 'Package', cons);
 
     return groups;
   }

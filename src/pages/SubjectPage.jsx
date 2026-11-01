@@ -148,7 +148,7 @@ export const SubjectPage = () => {
   );
 
   const lookupSlug = slug === 'operative-dentistry' ? 'restorative-dentistry' : slug;
-  const CACHE_KEY = `subject_v40:${slug}`;
+  const CACHE_KEY = `subject_v41:${slug}`;
 
   // Instant synchronous initialization: check cache, then compute from local defaults (0ms load)
   const initialPayload = useMemo(() => {
