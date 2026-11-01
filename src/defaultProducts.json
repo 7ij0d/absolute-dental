@@ -154,9 +154,10 @@
     "availability": "available",
     "stock_quantity": 52,
     "year_id": "20000000-0000-0000-0000-000000000002",
-    "subject_id": "22000000-0000-0000-0000-000000000023",
+    "subject_id": "22000000-0000-0000-0000-000000000021",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/5528000b-cde4-4b27-8745-7956dc0e4b78.jpg",
-    "sort_order": 0
+    "sort_order": 0,
+    "extra_subject_ids": []
   },
   {
     "id": "8a2c351d-359c-4f5e-8c37-3d4ecb1eba19",
