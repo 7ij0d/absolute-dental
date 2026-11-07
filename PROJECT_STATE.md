@@ -31,10 +31,12 @@
    - **Fluoride Varnish (`15.00 LYD`):** مضاف حصرياً إلى `Pediatric Dentistry` مع صورة `V-Varnish Premium` (`fluoride-varnish.jpg`).
    - **Dental Needle (`0.50 LYD`):** منقول حصرياً إلى `Oral Surgery` وإزالته من `Preventive Dentistry`.
 
-3. **المزامنة والتنظيم:**
+3. **المزامنة والتنظيم وتفعيل التعديل الكامل من لوحة التحكم:**
    - تحديث `YearPage.jsx` و `SubjectPage.jsx` (`subject_v46`) و `supabaseClient.js` و `subjectGroupEngine.js` و `defaultProducts.json`.
+   - ترقية `src/pages/admin/Subjects.jsx` لدعم رفع أو تعديل صورة الهيرو (`image_url`) وترتيب الظهور (`sort_order`) لكل مادة دراسية مباشرة من لوحة الإدارة، مع انعكاس فوري في صفحات السنوات والمواد.
 
 ### 📁 الملفات التي تم تعديلها:
+- `src/pages/admin/Subjects.jsx`
 - `src/pages/YearPage.jsx`
 - `src/pages/SubjectPage.jsx`
 - `src/supabaseClient.js`

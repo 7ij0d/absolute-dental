@@ -146,6 +146,7 @@ export const YearPage = () => {
     ? DEFAULT_YEARS[3]
     : (isYear3 ? DEFAULT_YEARS[2] : (isYear2 ? DEFAULT_YEARS[1] : DEFAULT_YEARS[0]));
   const [yearData, setYearData] = useState(() => DEFAULT_YEARS.find(y => y.slug === slug || y.slug === targetSlug) || defaultYear);
+  const [dbSubjects, setDbSubjects] = useState(null);
 
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
 
@@ -153,18 +154,26 @@ export const YearPage = () => {
     // If year 4, immediately maintain coming soon state without fallback
     if (isYear4) {
       setYearData(DEFAULT_YEARS[3]);
+      setDbSubjects(null);
       return;
     }
 
-    const CACHE_KEY = `year_v4:${targetSlug}`;
+    const CACHE_KEY = `year_v5:${targetSlug}`;
 
     const fetchYear = async () => {
       try {
-        const { data: yearRes } = await supabase
-          .from('years').select('*').eq('slug', targetSlug).single();
+        const [{ data: yearRes }, { data: subsRes }] = await Promise.all([
+          supabase.from('years').select('*').eq('slug', targetSlug).maybeSingle(),
+          supabase.from('subjects').select('*').eq('year_id', defaultYear.id).order('sort_order', { ascending: true })
+        ]);
         if (yearRes) {
           setYearData(yearRes);
           cacheSet(CACHE_KEY, yearRes, 5 * 60);
+        }
+        if (Array.isArray(subsRes) && subsRes.length > 0) {
+          setDbSubjects(subsRes);
+        } else {
+          setDbSubjects(null);
         }
       } catch (err) {
         console.warn('YearPage fetch warning, using defaults:', err);
@@ -178,7 +187,7 @@ export const YearPage = () => {
     } else {
       fetchYear();
     }
-  }, [slug, targetSlug, isYear4]);
+  }, [slug, targetSlug, isYear4, defaultYear.id]);
 
   // ── COMING SOON VIEW (Year 4 only) ──
   if (isYear4 || yearData?.is_coming_soon) {
@@ -216,7 +225,25 @@ export const YearPage = () => {
     );
   }
 
-  const currentSubjects = isYear3 ? YEAR_3_SUBJECTS : (isYear2 ? YEAR_2_SUBJECTS : YEAR_1_SUBJECTS);
+  const staticSubjects = isYear3 ? YEAR_3_SUBJECTS : (isYear2 ? YEAR_2_SUBJECTS : YEAR_1_SUBJECTS);
+  const ALL_STATIC = [...YEAR_1_SUBJECTS, ...YEAR_2_SUBJECTS, ...YEAR_3_SUBJECTS];
+
+  const currentSubjects = Array.isArray(dbSubjects) && dbSubjects.length > 0
+    ? dbSubjects.map(sub => {
+        const match = ALL_STATIC.find(
+          s => s.slug === sub.slug || (sub.slug === 'restorative-dentistry' && s.slug === 'operative-dentistry')
+        );
+        return {
+          slug: sub.slug,
+          titleAr: sub.name_ar || match?.titleAr || sub.slug,
+          titleEn: sub.name_en || match?.titleEn || sub.slug,
+          href: `/subject/${sub.slug}`,
+          customImg: sub.image_url || null,
+          webp: match?.webp || preventiveDentWebp,
+          png: match?.png || preventiveDentPng,
+        };
+      })
+    : staticSubjects;
 
   const yearDisplayName = lang === 'ar'
     ? (yearData?.name_ar || (isYear3 ? 'السنة الثالثة' : (isYear2 ? 'السنة الثانية' : 'السنة الأولى')))
@@ -275,14 +302,22 @@ export const YearPage = () => {
 
               {/* Right Side: High-Resolution Photographic Artwork with Smooth Alpha Fade */}
               <div className="year-card-art">
-                <picture>
-                  <source srcSet={sub.webp} type="image/webp" />
+                {sub.customImg ? (
                   <img
-                    src={sub.png}
+                    src={sub.customImg}
                     alt={sub.titleEn}
                     loading="eager"
                   />
-                </picture>
+                ) : (
+                  <picture>
+                    <source srcSet={sub.webp} type="image/webp" />
+                    <img
+                      src={sub.png}
+                      alt={sub.titleEn}
+                      loading="eager"
+                    />
+                  </picture>
+                )}
               </div>
             </Link>
           ))}

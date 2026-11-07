@@ -657,7 +657,7 @@ export const SubjectPage = () => {
             }}
           >
             <img
-              src={getSubjectArtwork(slug || lookupSlug)}
+              src={subjectData?.image_url || getSubjectArtwork(slug || lookupSlug)}
               alt=""
               style={{
                 height: '100%',

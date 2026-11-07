@@ -55,6 +55,9 @@ export const Subjects = () => {
   const [descEn, setDescEn] = useState('');
   const [slug, setSlug] = useState('');
   const [yearId, setYearId] = useState('');
+  const [subjectImageUrl, setSubjectImageUrl] = useState('');
+  const [uploadingSubjectImg, setUploadingSubjectImg] = useState(false);
+  const [sortOrder, setSortOrder] = useState(0);
 
   // Image upload helpers for Year backgrounds
   const compressImage = (file) => {
@@ -142,6 +145,15 @@ export const Subjects = () => {
     setUploadingYearImg(false);
   };
 
+  const handleSubjectImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingSubjectImg(true);
+    const url = await uploadFile(file);
+    setSubjectImageUrl(url);
+    setUploadingSubjectImg(false);
+  };
+
   const openEditYearModal = (y) => {
     setEditingYear(y);
     setYearNameAr(y.name_ar || '');
@@ -215,6 +227,8 @@ export const Subjects = () => {
     setDescAr('');
     setDescEn('');
     setSlug('');
+    setSubjectImageUrl('');
+    setSortOrder(subjects.length + 1);
     setYearId(years.length > 0 ? years[0].id : '');
     setShowModal(true);
   };
@@ -226,6 +240,8 @@ export const Subjects = () => {
     setDescAr(sub.description_ar || '');
     setDescEn(sub.description_en || '');
     setSlug(sub.slug || '');
+    setSubjectImageUrl(sub.image_url || '');
+    setSortOrder(sub.sort_order || 0);
     setYearId(sub.year_id || '');
     setShowModal(true);
   };
@@ -240,7 +256,9 @@ export const Subjects = () => {
       description_ar: descAr.trim(),
       description_en: descEn.trim(),
       slug: slug.trim().toLowerCase().replace(/\s+/g, '-'),
-      year_id: yearId
+      year_id: yearId,
+      image_url: subjectImageUrl.trim() || null,
+      sort_order: Number(sortOrder) || 0
     };
 
     try {
@@ -251,6 +269,14 @@ export const Subjects = () => {
         // Insert
         await supabase.from('subjects').insert(payload);
       }
+      // Clear local frontend caches so changes appear immediately
+      try {
+        Object.keys(localStorage).forEach(k => {
+          if (k.includes('subject_') || k.includes('year_')) {
+            localStorage.removeItem(k);
+          }
+        });
+      } catch (_) {}
       setShowModal(false);
       fetchData();
     } catch (err) {
@@ -323,18 +349,28 @@ export const Subjects = () => {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'start' }}>
                 <thead>
                   <tr style={{ backgroundColor: 'var(--accent)', borderBottom: '2px solid var(--border-color)', color: 'var(--text-main)', fontWeight: 700 }}>
+                    <th style={{ padding: '1rem' }}>صورة الهيرو</th>
                     <th style={{ padding: '1rem' }}>اسم المادة بالعربية</th>
                     <th style={{ padding: '1rem' }}>اسم المادة بالإنجليزية</th>
                     <th style={{ padding: '1rem' }}>السنة الدراسية</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>الترتيب</th>
                     <th style={{ padding: '1rem', textAlign: 'center' }}>الخيارات</th>
                   </tr>
                 </thead>
                 <tbody>
                   {subjects.map((sub) => (
                     <tr key={sub.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td style={{ padding: '0.6rem 1rem' }}>
+                        {sub.image_url ? (
+                          <img src={sub.image_url} alt={sub.name_en} style={{ width: '56px', height: '38px', objectFit: 'cover', borderRadius: '6px' }} />
+                        ) : (
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>افتراضية</span>
+                        )}
+                      </td>
                       <td style={{ padding: '1rem', fontWeight: 700 }}>{sub.name_ar}</td>
                       <td style={{ padding: '1rem' }}>{sub.name_en}</td>
                       <td style={{ padding: '1rem', fontWeight: 600 }}>{sub.years?.name_ar || sub.years?.name_en}</td>
+                      <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 600 }}>{sub.sort_order ?? 0}</td>
                       <td style={{ padding: '1rem', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
                           <button onClick={() => openEditModal(sub)} className="action-btn" title="Edit"><Edit size={14} /></button>
@@ -486,6 +522,36 @@ export const Subjects = () => {
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">شرح بسيط بالإنجليزية</label>
                 <textarea className="form-input" rows="2" value={descEn} onChange={(e) => setDescEn(e.target.value)} style={{ resize: 'none' }} />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">صورة الهيرو للقسم / المادة (Hero Image)</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={subjectImageUrl}
+                    onChange={(e) => setSubjectImageUrl(e.target.value)}
+                    placeholder="رابط الصورة أو اختر ملفاً (اتركه فارغاً للصورة الافتراضية)..."
+                  />
+                  <label className="btn btn-outline" style={{ padding: '0.65rem 1rem', fontSize: '0.85rem', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: 0, display: 'inline-flex', alignItems: 'center' }}>
+                    {uploadingSubjectImg ? 'جاري الرفع...' : 'رفع صورة'}
+                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleSubjectImageChange} disabled={uploadingSubjectImg} />
+                  </label>
+                </div>
+                {subjectImageUrl && (
+                  <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <img src={subjectImageUrl} alt="Preview" style={{ width: '90px', height: '54px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-color)' }} />
+                    <button type="button" onClick={() => setSubjectImageUrl('')} style={{ fontSize: '0.75rem', color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>
+                      إزالة الصورة والعودة للافتراضية
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">ترتيب الظهور (Sort Order)</label>
+                <input type="number" className="form-input" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} />
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '0.5rem' }}>
