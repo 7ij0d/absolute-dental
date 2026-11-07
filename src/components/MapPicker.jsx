@@ -2,6 +2,44 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Navigation, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
+let leafletLoadPromise = null;
+function ensureLeafletLoaded() {
+  if (typeof window !== 'undefined' && window.L) {
+    return Promise.resolve(window.L);
+  }
+  if (leafletLoadPromise) return leafletLoadPromise;
+
+  leafletLoadPromise = new Promise((resolve, reject) => {
+    if (!document.querySelector('link[href*="leaflet.css"]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      link.crossOrigin = '';
+      document.head.appendChild(link);
+    }
+
+    const existingScript = document.querySelector('script[src*="leaflet.js"]');
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve(window.L));
+      existingScript.addEventListener('error', reject);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.crossOrigin = '';
+    script.async = true;
+    script.onload = () => resolve(window.L);
+    script.onerror = (err) => {
+      leafletLoadPromise = null;
+      reject(err);
+    };
+    document.head.appendChild(script);
+  });
+
+  return leafletLoadPromise;
+}
+
 export const MapPicker = ({ 
   latitude, 
   longitude, 
@@ -19,73 +57,82 @@ export const MapPicker = ({
   const defaultLng = longitude ? parseFloat(longitude) : 13.1913;
 
   useEffect(() => {
-    if (!window.L) {
-      console.error('Leaflet script not loaded on window.');
-      return;
-    }
+    let isCancelled = false;
+    let mapInstance = null;
 
-    // Set custom default icon to bypass Vite bundle path issues
-    const DefaultIcon = window.L.icon({
-      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
-    window.L.Marker.prototype.options.icon = DefaultIcon;
+    ensureLeafletLoaded()
+      .then((L) => {
+        if (isCancelled || !L) return;
+        const container = document.getElementById(mapId);
+        if (!container) return;
 
-    // Initialize Map
-    const map = window.L.map(mapId, {
-      center: [defaultLat, defaultLng],
-      zoom: 13,
-      scrollWheelZoom: !readOnly,
-      dragging: !readOnly,
-      touchZoom: !readOnly
-    });
+        // Set custom default icon to bypass Vite bundle path issues
+        const DefaultIcon = L.icon({
+          iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+          iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+          shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        });
+        L.Marker.prototype.options.icon = DefaultIcon;
 
-    mapRef.current = map;
+        // Initialize Map
+        const map = L.map(mapId, {
+          center: [defaultLat, defaultLng],
+          zoom: 13,
+          scrollWheelZoom: !readOnly,
+          dragging: !readOnly,
+          touchZoom: !readOnly
+        });
 
-    // Add OpenStreetMap tile layer
-    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+        mapInstance = map;
+        mapRef.current = map;
 
-    // Place Marker
-    const marker = window.L.marker([defaultLat, defaultLng], {
-      draggable: !readOnly
-    }).addTo(map);
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
-    markerRef.current = marker;
+        // Place Marker
+        const marker = L.marker([defaultLat, defaultLng], {
+          draggable: !readOnly
+        }).addTo(map);
 
-    // Map Event listeners (Only active if writable)
-    if (!readOnly) {
-      // Map click handler to place marker
-      map.on('click', async (e) => {
-        const { lat, lng } = e.latlng;
-        marker.setLatLng([lat, lng]);
-        await triggerLocationChange(lat, lng);
+        markerRef.current = marker;
+
+        // Map Event listeners (Only active if writable)
+        if (!readOnly) {
+          map.on('click', async (e) => {
+            const { lat, lng } = e.latlng;
+            marker.setLatLng([lat, lng]);
+            await triggerLocationChange(lat, lng);
+          });
+
+          marker.on('dragend', async (e) => {
+            const { lat, lng } = e.target.getLatLng();
+            await triggerLocationChange(lat, lng);
+          });
+
+          map.on('locationfound', async (e) => {
+            const { lat, lng } = e.latlng;
+            marker.setLatLng([lat, lng]);
+            map.setView([lat, lng], 15);
+            await triggerLocationChange(lat, lng);
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn('Leaflet dynamic load failed:', err);
       });
-
-      // Marker drag-end handler
-      marker.on('dragend', async (e) => {
-        const { lat, lng } = e.target.getLatLng();
-        await triggerLocationChange(lat, lng);
-      });
-
-      // Handle GPS locate trigger
-      map.on('locationfound', async (e) => {
-        const { lat, lng } = e.latlng;
-        marker.setLatLng([lat, lng]);
-        map.setView([lat, lng], 15);
-        await triggerLocationChange(lat, lng);
-      });
-    }
 
     return () => {
-      map.remove();
+      isCancelled = true;
+      if (mapInstance) {
+        mapInstance.remove();
+      }
     };
   }, [mapId]);
 

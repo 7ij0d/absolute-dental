@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { Printer, MapPin, Phone, Building, Package, Download, Loader2 } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 import brandLogoTrimmed from '../assets/images/brand-logo-trimmed.png';
 import { normalizeOrderItems, paginateInvoiceItems } from '../utils/invoicePaginationEngine';
 import { getBundleUnitLabel } from '../utils/productInventoryEngine';
@@ -42,6 +40,11 @@ export const InvoiceView = ({ order }) => {
     document.title = `Absolute_Dental_Invoice_${rawOrderNum}`;
 
     try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf')
+      ]);
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',

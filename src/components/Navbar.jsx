@@ -11,6 +11,8 @@ import {
   Sparkles, Layers, Shirt
 } from 'lucide-react';
 import supabase from '../supabaseClient';
+import { cacheGet } from '../cache';
+import { fetchSharedYears, fetchSharedSubjects } from '../prefetch';
 import brandLogoTrimmed from '../assets/images/brand-logo-trimmed.png';
 
 const DEFAULT_NAV_YEARS = [
@@ -45,8 +47,8 @@ export const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
-  const [years, setYears] = useState(DEFAULT_NAV_YEARS);
-  const [subjects, setSubjects] = useState(DEFAULT_NAV_SUBJECTS);
+  const [years, setYears] = useState(() => cacheGet('years') || DEFAULT_NAV_YEARS);
+  const [subjects, setSubjects] = useState(() => cacheGet('subjects:all') || DEFAULT_NAV_SUBJECTS);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,8 +56,11 @@ export const Navbar = () => {
   const megaRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => {
+      const next = window.scrollY > 20;
+      setScrolled((prev) => (prev === next ? prev : next));
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -66,17 +71,25 @@ export const Navbar = () => {
   }, [location.pathname, location.search]);
 
   useEffect(() => {
+    let mounted = true;
     const loadNavData = async () => {
       try {
-        const { data: yrs } = await supabase.from('years').select('*').order('sort_order', { ascending: true });
+        const [yrs, subs] = await Promise.all([
+          fetchSharedYears(),
+          fetchSharedSubjects()
+        ]);
+        if (!mounted) return;
         if (yrs && yrs.length > 0) setYears(yrs);
-        const { data: subs } = await supabase.from('subjects').select('id, name_ar, name_en, year_id, slug');
         if (subs && subs.length > 0) setSubjects(subs);
       } catch (err) {
         console.warn('Using fallback navbar data:', err);
       }
     };
-    loadNavData();
+    const timer = setTimeout(loadNavData, 800);
+    return () => {
+      mounted = false;
+      clearTimeout(timer);
+    };
   }, []);
 
   // Close dropdowns on outside click & Escape key

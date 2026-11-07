@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { isBundleProduct, getBundleDefinition } from '../utils/productInventoryEngine';
 import { isBoxProduct } from '../utils/boxInventoryEngine';
-import defaultProductsList from '../defaultProducts.json';
+import { cacheGet } from '../cache';
 
 const CartContext = createContext();
 
@@ -192,6 +192,7 @@ export const CartProvider = ({ children }) => {
 
       // 2. Add each remaining component as an individual cart item
       const newItems = [...listWithoutBundle];
+      const cachedProds = cacheGet('products:all') || [];
 
       remainingComponents.forEach(comp => {
         const compQty = comp.quantity * bundleItem.quantity;
@@ -204,8 +205,8 @@ export const CartProvider = ({ children }) => {
             quantity: newItems[existingCompIndex].quantity + compQty
           };
         } else {
-          // Find canonical product details from default catalog
-          const catalogProd = defaultProductsList.find(p => p.id === comp.productId) || {};
+          // Find canonical product details from cached catalog or component metadata
+          const catalogProd = cachedProds.find(p => p.id === comp.productId) || {};
           newItems.push({
             id: comp.productId,
             cart_line_id: comp.productId,

@@ -800,8 +800,29 @@ export const Products = () => {
       // Invalidate subject caches so storefront updates immediately
       clearSubjectCaches();
 
+      // Optimistically update local state & admin cache without re-fetching the entire database
+      const updatedProdObj = {
+        ...(editingProduct || {}),
+        ...productPayload,
+        id: productId,
+        is_archived: editingProduct ? Boolean(editingProduct.is_archived) : false,
+        product_subjects: effectiveSubjectIds.map((sid) => ({ product_id: productId, subject_id: sid })),
+        product_images: extraImageUrls
+          .filter(Boolean)
+          .map((url, idx) => ({ product_id: productId, image_url: url, sort_order: idx }))
+      };
+
+      setProducts((prev) => {
+        const nextList = editingProduct
+          ? prev.map((item) => (item.id === productId ? { ...item, ...updatedProdObj } : item))
+          : [updatedProdObj, ...prev];
+        try {
+          localStorage.setItem('abs_admin_cached_products', JSON.stringify(nextList));
+        } catch (_) {}
+        return nextList;
+      });
+
       setShowFormModal(false);
-      fetchData();
     } catch (err) {
       console.error(err);
       alert('حدث خطأ أثناء حفظ التغييرات / Error saving product:\n' + (err.message || err.details || JSON.stringify(err)));
@@ -819,9 +840,14 @@ export const Products = () => {
         .eq('id', prod.id);
       
       if (!error) {
-        setProducts((prev) =>
-          prev.map((item) => (item.id === prod.id ? { ...item, is_archived: nextArchiveState } : item))
-        );
+        clearSubjectCaches();
+        setProducts((prev) => {
+          const next = prev.map((item) => (item.id === prod.id ? { ...item, is_archived: nextArchiveState } : item));
+          try {
+            localStorage.setItem('abs_admin_cached_products', JSON.stringify(next));
+          } catch (_) {}
+          return next;
+        });
       }
     } catch (err) {
       console.error(err);
@@ -833,7 +859,14 @@ export const Products = () => {
     try {
       const { error } = await supabase.from('products').delete().eq('id', prodId);
       if (!error) {
-        setProducts((prev) => prev.filter((item) => item.id !== prodId));
+        clearSubjectCaches();
+        setProducts((prev) => {
+          const next = prev.filter((item) => item.id !== prodId);
+          try {
+            localStorage.setItem('abs_admin_cached_products', JSON.stringify(next));
+          } catch (_) {}
+          return next;
+        });
       } else {
         alert('لا يمكن حذف المنتج لأنه مرتبط بطلبات سابقة، يمكنك أرشفتة بدلاً من ذلك. / Cannot delete, product linked to orders. Try archiving.');
       }
@@ -916,7 +949,7 @@ export const Products = () => {
               {filteredList.map((prod) => (
                 <tr key={prod.id} style={{ borderBottom: '1px solid var(--border-color)', opacity: prod.is_archived ? 0.6 : 1 }}>
                   <td style={{ padding: '0.6rem 0.75rem' }}>
-                    <img src={prod.image_url} alt="thumbnail" style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
+                    <img src={prod.image_url} alt="thumbnail" loading="lazy" decoding="async" width="45" height="45" style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem' }}>
                     <p style={{ fontWeight: 700, margin: 0 }}>{prod.name_ar}</p>

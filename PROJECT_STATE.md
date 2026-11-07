@@ -8,66 +8,53 @@
 ## 1. نظرة عامة على المشروع والتقنيات (Project Overview & Tech Stack)
 - **المنصة:** متجر ومستودع الأدوات والمستلزمات الطبية الدراسية لطلبة طب وجراحة الفم والأسنان (**Absolute Dental Equipment**).
 - **الدومين الرسمي المخصص:** `https://absolutedental.ly` (مؤمّن بشهادة SSL رسمية سارية المفعول حتى 2027 ومفعّل HTTPS الإجباري بنجاح).
-- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 (HashRouter) + Lucide React Icons + High-Res Asset Pipeline + Dynamic Navigation Trail & Browse Context Engine + Bur Grouping & Popup Engine + Sized Products Engine + Boxes & Accessories Gateway Architecture + Dental Boxes Unified Inventory Engine + Quick Box & Color Studio + Standalone Box Portal + Static SPA Route Pre-generation Engine + Relative Asset Resolution Engine (`base: './'`).
+- **التقنيات المعتمدة:** React 19 + Vite 8 + React Router v7 (HashRouter) + Route-Level Code Splitting (`React.lazy` + `Suspense`) + Shared In-Flight Query Deduplication & Idle Prefetch Engine + Sharp Image Optimization Pipeline + Dynamic Navigation Trail & Browse Context Engine + Dental Boxes Unified Inventory Engine.
 
 ---
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 إضافة وتوزيع مواد ومنتجات السنة الثالثة (`Absolute_Dental_Third_Year_Materials`):
+### 🔹 إعادة هيكلة وتحسين الأداء الجذري للموقع ولوحة الإدارة (الهاتف والكمبيوتر):
 
-1. **إضافة 3 مواد دراسية جديدة للسنة الثالثة (`3rd Year`):**
-   - **Oral Surgery (جراحة الفم والأسنان):** `33000000-0000-0000-0000-000000000035` (`slug: oral-surgery`).
-   - **Periodontology (طب وجراحة اللثة):** `33000000-0000-0000-0000-000000000036` (`slug: periodontology`).
-   - **Pediatric Dentistry (طب أسنان الأطفال):** `33000000-0000-0000-0000-000000000037` (`slug: pediatric-dentistry`).
+1. **تقسيم الحزم البرمجية (Code Splitting & Lazy Loading):**
+   - تحويل جميع صفحات المتجر الفرعية وجميع صفحات لوحة الإدارة (`/admin/*`) إلى التحميل الديناميكي عند الطلب (`React.lazy` + `Suspense`) في `src/App.jsx` مع Skeleton خفيف بدون إزاحة بصرية (`CLS = 0`).
+   - فصل مكتبات التصدير الثقيلة (`jspdf` و `html2canvas` بحجم ~600 KB) في `src/components/InvoiceView.jsx` ليتم تحميلها فقط عند النقر على زر «حفظ كـ PDF».
+   - إزالة ملفات الخرائط (`Leaflet CSS/JS`) الحاجبة للعرض من `index.html` وتحميلها ديناميكياً عند الحاجة فقط داخل `src/components/MapPicker.jsx`.
+   - فصل كتالوج `defaultProducts.json` (98 KB) عن الحزمة الأولية في `src/context/CartContext.jsx`.
+   - **النتيجة:** انخفاض حجم حزمة JavaScript الرئيسية من **2,132.84 KB** (544.90 KB مضغوطة) إلى **401.03 KB** (120.76 KB مضغوطة) — **تخفيض بنسبة 81.2% في حجم الكود المحمّل عند فتح الموقع!**
 
-2. **تحديث وتوزيع المنتجات الثمانية والصور المعتمدة:**
-   - **Cotton Rolls (`2.00 LYD`):** مرتبط بمواد `Oral Surgery` و `Periodontology` و `Pediatric Dentistry` مع إزالته من `Preventive Dentistry`.
-   - **Dental Syringe (`50.00 LYD`):** مرتبط بمواد `Oral Surgery` و `Periodontology` و `Pediatric Dentistry` مع إزالته من `Preventive Dentistry`.
-   - **Periodontal Probe (`15.00 LYD`):** مضاف إلى `Periodontology` مع بقائه في مواد السنة الثانية (`Conservative` و `Fixed`) وتحديث صورته عالية الدقة (`periodontal-probe.png`).
-   - **Mouth Mirror (`15.00 LYD`):** مضاف إلى `Oral Surgery` و `Periodontology` و `Pediatric Dentistry` مع بقائه في مواد السنة الثانية.
-   - **Self-Sealing Sterilization Pouch (`0.50 LYD`):** منتج موحد بمخزون مشترك مضاف إلى `Oral Surgery` و `Periodontology` و `Pediatric Dentistry` مع صورته الاستوديو (`self-sealing-sterilization-pouch.jpg`).
-   - **Disposable Diagnostic Kit (`2.50 LYD`):** مضاف إلى `Pediatric Dentistry` وكافة المواد الجديدة مع الاحتفاظ بجميع ارتباطاته السابقة.
-   - **Fluoride Varnish (`15.00 LYD`):** مضاف حصرياً إلى `Pediatric Dentistry` مع صورة `V-Varnish Premium` (`fluoride-varnish.jpg`).
-   - **Dental Needle (`0.50 LYD`):** منقول حصرياً إلى `Oral Surgery` وإزالته من `Preventive Dentistry`.
+2. **ضغط وتحسين الصور (توفير أكثر من 30.4 MB):**
+   - ضغط 118 صورة عالية الحجم في `public/products/` و `public/accessories/` و `public/images/` و `src/assets/images/` باستخدام `sharp` دون أي فقدان ملحوظ في الدقة (توفير **20.42 MB** من أحجام الصور).
+   - إزالة مجلد النسخ الاحتياطية المكررة `public/accessories/backup_original/` (توفير **10 MB** إضافية من البناء النهائي).
+   - تفعيل `loading="lazy"` و `decoding="async"` للصور خارج الشاشة، وتخصيص `fetchPriority="high"` لصورة الهيرو الأساسية فقط لمنع استهلاك ذاكرة ومعالج الهاتف.
 
-3. **المزامنة والتنظيم وتفعيل التعديل الكامل من لوحة التحكم:**
-   - تحديث `YearPage.jsx` و `SubjectPage.jsx` (`subject_v46`) و `supabaseClient.js` و `subjectGroupEngine.js` و `defaultProducts.json`.
-   - ترقية `src/pages/admin/Subjects.jsx` لدعم رفع أو تعديل صورة الهيرو (`image_url`) وترتيب الظهور (`sort_order`) لكل مادة دراسية ولكل سنة دراسية مباشرة من لوحة الإدارة، مع انعكاس فوري في صفحات السنوات والمواد (`StudyToolsPage.jsx`, `YearPage.jsx`, `SubjectPage.jsx`).
-   - ترقية `src/pages/admin/Banners.jsx` وإنشاء `src/utils/siteSectionsEngine.js` للتحكم الكامل في هيرو الصفحة الرئيسية والبطاقات الثلاث الرئيسية (`أدوات الدراسة`، `الإكسسوارات`، `البوكسات`) وهيرو صفحات الأقسام (`مستلزمات أخرى`، `الإكسسوارات`، `البوكسات`) من لوحة الإدارة.
-   - ترقية `src/pages/admin/Products.jsx` لإضافة حقول الاسم الإنجليزي، كود `SKU`، وترتيب الظهور (`sort_order`) بجانب التحكم الكامل في أماكن ظهور كل منتج عبر المواد والسنوات.
+3. **تحسين استعلامات قاعدة البيانات والتخزين المؤقت (Cache & Network Deduplication):**
+   - إعادة بناء `src/prefetch.js` لمشاركة الوعود الجارية (`fetchSharedYears`, `fetchSharedSubjects`, `fetchSharedActiveProducts`) ومنع تكرار الطلبات بين `Navbar.jsx` و `StudyToolsPage.jsx` و `YearPage.jsx`، وتأجيل التحميل المسبق للكتالوج عبر `requestIdleCallback` حتى لا ينافس عرض الصفحة الأولى على الهاتف.
+   - توحيد ذاكرة إعدادات الأقسام في `src/utils/siteSectionsEngine.js` لمنع تكرار طلبات `settings`.
+   - إضافة `{ passive: true }` ومنع إعادة التصيير المتكرر أثناء التمرير (`scroll`) في `src/components/Navbar.jsx`.
+
+4. **تسريع لوحة الإدارة (`/admin/products` و `/admin/banners`):**
+   - تحديث حالة المنتج المعدّل أو المضاف أو المؤرشف في `src/pages/admin/Products.jsx` محلياً وبشكل فوري (`Optimistic State & Cache Update`) دون إعادة تحميل جميع منتجات الموقع بعد كل تعديل.
+   - تفعيل `loading="lazy" decoding="async"` لصور جدول المنتجات في لوحة الإدارة.
 
 ### 📁 الملفات التي تم تعديلها:
-- `src/pages/admin/Products.jsx`
-- `src/pages/admin/Subjects.jsx`
-- `src/pages/admin/Banners.jsx`
-- `src/pages/admin/AdminLayout.jsx`
+- `index.html`
+- `src/App.jsx`
+- `src/prefetch.js`
+- `src/context/CartContext.jsx`
+- `src/components/Navbar.jsx`
+- `src/components/InvoiceView.jsx`
+- `src/components/MapPicker.jsx`
 - `src/utils/siteSectionsEngine.js`
 - `src/pages/Home.jsx`
 - `src/pages/StudyToolsPage.jsx`
 - `src/pages/YearPage.jsx`
-- `src/pages/SubjectPage.jsx`
-- `src/pages/AccessoriesPage.jsx`
-- `src/pages/BoxesPage.jsx`
-- `src/pages/SearchPage.jsx`
-- `src/supabaseClient.js`
-- `src/utils/subjectGroupEngine.js`
-- `src/defaultProducts.json`
-- `public/products/self-sealing-sterilization-pouch.jpg`
-- `public/products/fluoride-varnish.jpg`
-- `public/products/periodontal-probe.png`
-- `public/products/mouth-mirror.jpg`
+- `src/pages/admin/Products.jsx`
+- `src/pages/admin/Banners.jsx`
+- `public/products/*`, `public/accessories/*`, `public/images/*`, `src/assets/images/*`
 - `PROJECT_STATE.md`
 
 ---
 
-## 3. الروابط المباشرة المؤكدة:
-- **السنة الثالثة:** `https://absolutedental.ly/#/year/3rd-year`
-- **جراحة الفم والأسنان:** `https://absolutedental.ly/#/subject/oral-surgery`
-- **طب وجراحة اللثة:** `https://absolutedental.ly/#/subject/periodontology`
-- **طب أسنان الأطفال:** `https://absolutedental.ly/#/subject/pediatric-dentistry`
-
----
-
-## 4. الخطوة التالية المباشرة (Immediate Next Step)
+## 3. الخطوة التالية المباشرة (Immediate Next Step)
 - متابعة أي طلبات أو تعديلات إضافية من الإدارة.

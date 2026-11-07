@@ -139,26 +139,27 @@ export const YearPage = () => {
   const isYear4 = slug === '4th-year' || slug === '4th' || slug?.startsWith('4');
   const isYear3 = !isYear4 && (slug === '3rd-year' || slug === '3rd' || slug?.startsWith('3'));
   const isYear2 = !isYear4 && !isYear3 && (slug === '2nd-year' || slug === '2nd' || slug?.startsWith('2'));
-  const isYear1 = !isYear4 && !isYear3 && !isYear2;
 
   const targetSlug = isYear4 ? '4th-year' : (isYear3 ? '3rd-year' : (isYear2 ? '2nd-year' : '1st-year'));
   const defaultYear = isYear4
     ? DEFAULT_YEARS[3]
     : (isYear3 ? DEFAULT_YEARS[2] : (isYear2 ? DEFAULT_YEARS[1] : DEFAULT_YEARS[0]));
   const [yearData, setYearData] = useState(() => DEFAULT_YEARS.find(y => y.slug === slug || y.slug === targetSlug) || defaultYear);
-  const [dbSubjects, setDbSubjects] = useState(null);
+  const [dbSubjects, setDbSubjects] = useState(() => cacheGet('subjects:year:' + defaultYear.id) || null);
 
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
 
   useEffect(() => {
-    // If year 4, immediately maintain coming soon state without fallback
     if (isYear4) {
       setYearData(DEFAULT_YEARS[3]);
       setDbSubjects(null);
       return;
     }
 
+    let mounted = true;
     const CACHE_KEY = `year_v5:${targetSlug}`;
+    const cachedSubs = cacheGet('subjects:year:' + defaultYear.id);
+    if (cachedSubs) setDbSubjects(cachedSubs);
 
     const fetchYear = async () => {
       try {
@@ -166,13 +167,15 @@ export const YearPage = () => {
           supabase.from('years').select('*').eq('slug', targetSlug).maybeSingle(),
           supabase.from('subjects').select('*').eq('year_id', defaultYear.id).order('sort_order', { ascending: true })
         ]);
+        if (!mounted) return;
         if (yearRes) {
           setYearData(yearRes);
           cacheSet(CACHE_KEY, yearRes, 5 * 60);
         }
         if (Array.isArray(subsRes) && subsRes.length > 0) {
           setDbSubjects(subsRes);
-        } else {
+          cacheSet('subjects:year:' + defaultYear.id, subsRes, 300);
+        } else if (!cachedSubs) {
           setDbSubjects(null);
         }
       } catch (err) {
@@ -183,10 +186,12 @@ export const YearPage = () => {
     const cached = cacheGet(CACHE_KEY);
     if (cached) {
       setYearData(cached);
-      fetchYear();
-    } else {
-      fetchYear();
     }
+    fetchYear();
+
+    return () => {
+      mounted = false;
+    };
   }, [slug, targetSlug, isYear4, defaultYear.id]);
 
   // ── COMING SOON VIEW (Year 4 only) ──
@@ -195,7 +200,6 @@ export const YearPage = () => {
     return (
       <div className="choose-subject-page">
         <div className="container choose-subject-container">
-          {/* Breadcrumb */}
           <nav aria-label="breadcrumb" className="subject-breadcrumb" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
             <Link to="/" className="breadcrumb-link">{lang === 'ar' ? 'الرئيسية' : 'Home'}</Link>
             <ChevronSep size={13} className="breadcrumb-separator" />
@@ -282,45 +286,50 @@ export const YearPage = () => {
 
         {/* ── 3. EXACT SUBJECT CARDS (LARGE FULL-WIDTH MOBILE-FIRST CANVASES) ── */}
         <section className="year-subject-list" aria-label="Subjects List">
-          {currentSubjects.map((sub) => (
-            <Link
-              key={sub.slug}
-              to={sub.href}
-              className="year-subject-card"
-              aria-label={`${sub.titleAr} - ${sub.titleEn}`}
-            >
-              {/* Left Side: Arabic Title + English Title + Solid Brown Circle Button */}
-              <div className="year-card-left">
-                <div className="year-card-titles">
-                  <h3 className="year-card-title-ar">{sub.titleAr}</h3>
-                  <h2 className="year-card-title-en">{sub.titleEn}</h2>
+          {currentSubjects.map((sub, idx) => {
+            const isAboveFold = idx < 2;
+            return (
+              <Link
+                key={sub.slug}
+                to={sub.href}
+                className="year-subject-card"
+                aria-label={`${sub.titleAr} - ${sub.titleEn}`}
+              >
+                {/* Left Side: Arabic Title + English Title + Solid Brown Circle Button */}
+                <div className="year-card-left">
+                  <div className="year-card-titles">
+                    <h3 className="year-card-title-ar">{sub.titleAr}</h3>
+                    <h2 className="year-card-title-en">{sub.titleEn}</h2>
+                  </div>
+                  <div className="year-circle-btn" aria-hidden="true">
+                    <ArrowRight size={20} strokeWidth={2.5} />
+                  </div>
                 </div>
-                <div className="year-circle-btn" aria-hidden="true">
-                  <ArrowRight size={20} strokeWidth={2.5} />
-                </div>
-              </div>
 
-              {/* Right Side: High-Resolution Photographic Artwork with Smooth Alpha Fade */}
-              <div className="year-card-art">
-                {sub.customImg ? (
-                  <img
-                    src={sub.customImg}
-                    alt={sub.titleEn}
-                    loading="eager"
-                  />
-                ) : (
-                  <picture>
-                    <source srcSet={sub.webp} type="image/webp" />
+                {/* Right Side: High-Resolution Photographic Artwork with Smooth Alpha Fade */}
+                <div className="year-card-art">
+                  {sub.customImg ? (
                     <img
-                      src={sub.png}
+                      src={sub.customImg}
                       alt={sub.titleEn}
-                      loading="eager"
+                      loading={isAboveFold ? 'eager' : 'lazy'}
+                      decoding="async"
                     />
-                  </picture>
-                )}
-              </div>
-            </Link>
-          ))}
+                  ) : (
+                    <picture>
+                      <source srcSet={sub.webp} type="image/webp" />
+                      <img
+                        src={sub.png}
+                        alt={sub.titleEn}
+                        loading={isAboveFold ? 'eager' : 'lazy'}
+                        decoding="async"
+                      />
+                    </picture>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
         </section>
 
       </div>

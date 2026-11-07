@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import supabase from '../supabaseClient';
+import { cacheGet } from '../cache';
+import { fetchSharedYears } from '../prefetch';
 import { useSiteSectionsConfig } from '../utils/siteSectionsEngine';
 import { ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, Lock, Sparkles } from 'lucide-react';
 
@@ -93,15 +94,12 @@ export const StudyToolsPage = () => {
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
   const ActionArrow = isRtl ? ArrowLeft : ArrowRight;
   const siteSections = useSiteSectionsConfig();
-  const [dbYears, setDbYears] = useState(null);
+  const [dbYears, setDbYears] = useState(() => cacheGet('years') || null);
 
   useEffect(() => {
     let mounted = true;
-    supabase
-      .from('years')
-      .select('*')
-      .order('sort_order', { ascending: true })
-      .then(({ data }) => {
+    fetchSharedYears()
+      .then((data) => {
         if (mounted && Array.isArray(data) && data.length > 0) {
           setDbYears(data);
         }
@@ -158,7 +156,8 @@ export const StudyToolsPage = () => {
           className="study-years-grid"
           aria-label={lang === 'ar' ? 'السنوات الدراسية' : 'Academic Years'}
         >
-          {displayYears.map((year) => {
+          {displayYears.map((year, idx) => {
+            const isAboveFold = idx < 2;
             const innerCard = (
               <>
                 {/* Dedicated Text Column — Strictly separated from image container */}
@@ -209,7 +208,8 @@ export const StudyToolsPage = () => {
                     <img
                       src={year.customImg}
                       alt={lang === 'ar' ? year.titleAr : year.titleEn}
-                      loading="eager"
+                      loading={isAboveFold ? 'eager' : 'lazy'}
+                      decoding="async"
                       className="study-year-card__img"
                     />
                   ) : (
@@ -218,7 +218,8 @@ export const StudyToolsPage = () => {
                       <img
                         src={year.png}
                         alt={lang === 'ar' ? year.titleAr : year.titleEn}
-                        loading="eager"
+                        loading={isAboveFold ? 'eager' : 'lazy'}
+                        decoding="async"
                         className="study-year-card__img"
                       />
                     </picture>
@@ -316,7 +317,8 @@ export const StudyToolsPage = () => {
                 <img
                   src={siteSections.study_other_banner.image_url}
                   alt={lang === 'ar' ? 'مستلزمات أخرى' : 'Other Supplies'}
-                  loading="eager"
+                  loading="lazy"
+                  decoding="async"
                   className="study-other-banner__img"
                 />
               ) : (
@@ -325,7 +327,8 @@ export const StudyToolsPage = () => {
                   <img
                     src={otherSuppliesPng}
                     alt={lang === 'ar' ? 'مستلزمات أخرى - قفازات وماسك و Cover Sheet' : 'Other Supplies - Gloves, Masks, and Cover Sheets'}
-                    loading="eager"
+                    loading="lazy"
+                    decoding="async"
                     className="study-other-banner__img"
                   />
                 </picture>

@@ -59,8 +59,21 @@ export const Home = () => {
   const isLoggedInStudent = Boolean(user && user.email !== 'admin@smylodent.com');
 
   // ── Student Experiences State ──
-  const [experiences, setExperiences] = useState([]);
-  const [loadingExperiences, setLoadingExperiences] = useState(true);
+  const [experiences, setExperiences] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem('ad_cached_experiences');
+      return cached ? JSON.parse(cached) : [];
+    } catch (_) {
+      return [];
+    }
+  });
+  const [loadingExperiences, setLoadingExperiences] = useState(() => {
+    try {
+      return !sessionStorage.getItem('ad_cached_experiences');
+    } catch (_) {
+      return true;
+    }
+  });
   const [expandedComments, setExpandedComments] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
   const [commentSubmittingId, setCommentSubmittingId] = useState(null);
@@ -96,12 +109,14 @@ export const Home = () => {
   const [reqSuccessData, setReqSuccessData] = useState(null);
   const reqFileInputRef = useRef(null);
 
-  // Load published experiences from DB
+  // Load published experiences from DB (deferred slightly on initial mount so hero paints first)
   const loadExperiences = async () => {
-    setLoadingExperiences(true);
     try {
       const list = await fetchPublishedExperiences();
       setExperiences(list);
+      try {
+        sessionStorage.setItem('ad_cached_experiences', JSON.stringify(list));
+      } catch (_) {}
     } catch (err) {
       console.error('Failed to load student experiences:', err);
     } finally {
@@ -110,7 +125,10 @@ export const Home = () => {
   };
 
   useEffect(() => {
-    loadExperiences();
+    const timer = setTimeout(() => {
+      loadExperiences();
+    }, 350);
+    return () => clearTimeout(timer);
   }, []);
 
   // Restore saved product request draft from sessionStorage
@@ -389,11 +407,11 @@ export const Home = () => {
       <div className="home-hero-backdrop-wrap">
         <div className="home-hero-bg-layer" aria-hidden="true">
           {siteSections.home_hero?.image_url ? (
-            <img src={siteSections.home_hero.image_url} alt="" className="home-hero-bg-img" />
+            <img src={siteSections.home_hero.image_url} alt="" className="home-hero-bg-img" fetchPriority="high" decoding="async" />
           ) : (
             <picture>
               <source srcSet={homeHeroBgWebp} type="image/webp" />
-              <img src={homeHeroBgPng} alt="" className="home-hero-bg-img" />
+              <img src={homeHeroBgPng} alt="" className="home-hero-bg-img" fetchPriority="high" decoding="async" />
             </picture>
           )}
           <div className="home-hero-bg-fade" />
@@ -499,7 +517,8 @@ export const Home = () => {
                   <img
                     src={siteSections.home_card_accessories.image_url}
                     alt={lang === 'ar' ? 'الإكسسوارات' : 'Accessories'}
-                    loading="eager"
+                    loading="lazy"
+                    decoding="async"
                     className="gateway-art-img"
                   />
                 ) : (
@@ -508,7 +527,8 @@ export const Home = () => {
                     <img
                       src={accessoriesPng}
                       alt={lang === 'ar' ? 'الإكسسوارات' : 'Accessories'}
-                      loading="eager"
+                      loading="lazy"
+                      decoding="async"
                       className="gateway-art-img"
                     />
                   </picture>
@@ -549,7 +569,8 @@ export const Home = () => {
                   <img
                     src={siteSections.home_card_boxes.image_url}
                     alt={lang === 'ar' ? 'البوكسات' : 'Boxes'}
-                    loading="eager"
+                    loading="lazy"
+                    decoding="async"
                     className="gateway-art-img"
                   />
                 ) : (
@@ -558,7 +579,8 @@ export const Home = () => {
                     <img
                       src={dentalBoxesPng}
                       alt={lang === 'ar' ? 'البوكسات' : 'Boxes'}
-                      loading="eager"
+                      loading="lazy"
+                      decoding="async"
                       className="gateway-art-img"
                     />
                   </picture>

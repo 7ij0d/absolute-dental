@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
+import { invalidateSiteSectionsConfigCache } from '../../utils/siteSectionsEngine';
 import { Edit, X, Upload, Check, RotateCcw, Image as ImageIcon, Layout, Layers } from 'lucide-react';
 
 // Default built-in artworks for live preview when no custom image is set
@@ -290,9 +291,7 @@ export const Banners = () => {
       }
 
       setSectionsConfig(updatedConfig);
-      try {
-        localStorage.setItem('ad_site_sections_config', JSON.stringify(dbValue));
-      } catch (_) {}
+      invalidateSiteSectionsConfigCache(dbValue);
 
       setEditingKey(null);
       setSavedNotice('تم حفظ تعديلات الهيرو والقسم بنجاح وتطبيقها في الموقع!');
