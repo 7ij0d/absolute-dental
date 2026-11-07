@@ -106,6 +106,30 @@ const YEAR_3_SUBJECTS = [
     webp: removableProsthoWebp,
     png: removableProsthoPng,
   },
+  {
+    slug: 'oral-surgery',
+    titleAr: 'جراحة الفم والأسنان',
+    titleEn: 'Oral Surgery',
+    href: '/subject/oral-surgery',
+    webp: preventiveDentWebp,
+    png: preventiveDentPng,
+  },
+  {
+    slug: 'periodontology',
+    titleAr: 'طب وجراحة اللثة',
+    titleEn: 'Periodontology',
+    href: '/subject/periodontology',
+    webp: operativeDentWebp,
+    png: operativeDentPng,
+  },
+  {
+    slug: 'pediatric-dentistry',
+    titleAr: 'طب أسنان الأطفال',
+    titleEn: 'Pediatric Dentistry',
+    href: '/subject/pediatric-dentistry',
+    webp: preventiveDentWebp,
+    png: preventiveDentPng,
+  },
 ];
 
 export const YearPage = () => {

@@ -1,6 +1,6 @@
 # حالة المشروع — Absolute Dental Equipment
 
-**تاريخ آخر تحديث:** 2026-11-01 (بتوقيت طرابلس)  
+**تاريخ آخر تحديث:** 2026-11-07 (بتوقيت طرابلس)  
 **الفرع الرئيسي:** `main`
 
 ---
@@ -14,39 +14,45 @@
 
 ## 2. التعديل الأخير والملفات المتأثرة (Done & Verified)
 
-### 🔹 فصل قوالب الطبعة (Dental Impression Trays) إلى منتجين مستقلين: قالب علوي (Upper Tray) وقالب سفلي (Lower Tray):
+### 🔹 إضافة وتوزيع مواد ومنتجات السنة الثالثة (`Absolute_Dental_Third_Year_Materials`):
 
-1. **قالب طبعة الأسنان - علوي (Upper Impression Tray):**
-   - المعرف: `33000000-0000-0000-0000-000000000101` بسعر 2 د.ل.
-   - الصورة: صورة قالب الفك العلوي المرفقة من المستخدم والمرفوعة على السحابة (`dental-impression-tray-upper-blue.png`).
-   - خيارات المقاسات: مقاس 1، 2 (غير متوفر)، 3، 4.
+1. **إضافة 3 مواد دراسية جديدة للسنة الثالثة (`3rd Year`):**
+   - **Oral Surgery (جراحة الفم والأسنان):** `33000000-0000-0000-0000-000000000035` (`slug: oral-surgery`).
+   - **Periodontology (طب وجراحة اللثة):** `33000000-0000-0000-0000-000000000036` (`slug: periodontology`).
+   - **Pediatric Dentistry (طب أسنان الأطفال):** `33000000-0000-0000-0000-000000000037` (`slug: pediatric-dentistry`).
 
-2. **قالب طبعة الأسنان - سفلي (Lower Impression Tray):**
-   - المعرف: `33000000-0000-0000-0000-000000000119` بسعر 2 د.ل.
-   - الصورة: صورة قالب الفك السفلي من الموقع (`dental-impression-tray-blue-angle.png`).
-   - خيارات المقاسات: مقاس 1، 2 (غير متوفر)، 3، 4 (نفس مقاسات القالب العلوي تماماً).
+2. **تحديث وتوزيع المنتجات الثمانية والصور المعتمدة:**
+   - **Cotton Rolls (`2.00 LYD`):** مرتبط بمواد `Oral Surgery` و `Periodontology` و `Pediatric Dentistry` مع إزالته من `Preventive Dentistry`.
+   - **Dental Syringe (`50.00 LYD`):** مرتبط بمواد `Oral Surgery` و `Periodontology` و `Pediatric Dentistry` مع إزالته من `Preventive Dentistry`.
+   - **Periodontal Probe (`15.00 LYD`):** مضاف إلى `Periodontology` مع بقائه في مواد السنة الثانية (`Conservative` و `Fixed`) وتحديث صورته عالية الدقة (`periodontal-probe.png`).
+   - **Mouth Mirror (`15.00 LYD`):** مضاف إلى `Oral Surgery` و `Periodontology` و `Pediatric Dentistry` مع بقائه في مواد السنة الثانية.
+   - **Self-Sealing Sterilization Pouch (`0.50 LYD`):** منتج موحد بمخزون مشترك مضاف إلى `Oral Surgery` و `Periodontology` و `Pediatric Dentistry` مع صورته الاستوديو (`self-sealing-sterilization-pouch.jpg`).
+   - **Disposable Diagnostic Kit (`2.50 LYD`):** مضاف إلى `Pediatric Dentistry` وكافة المواد الجديدة مع الاحتفاظ بجميع ارتباطاته السابقة.
+   - **Fluoride Varnish (`15.00 LYD`):** مضاف حصرياً إلى `Pediatric Dentistry` مع صورة `V-Varnish Premium` (`fluoride-varnish.jpg`).
+   - **Dental Needle (`0.50 LYD`):** منقول حصرياً إلى `Oral Surgery` وإزالته من `Preventive Dentistry`.
 
 3. **المزامنة والتنظيم:**
-   - تحديث `productInventoryEngine.js` بتهيئة المقاسات المستقلة لكلا القالبين.
-   - تحديث وترتيب `sortImpression` في `subjectGroupEngine.js` لظهور القالب العلوي أولاً ويليه القالب السفلي جنباً إلى جنب في صدارة قسم مواد وقوالب الطبعات.
-   - تحديث وحفظ البيانات في جدول `products` وجدول الارتباطات `product_subjects` في Supabase ومزامنة `defaultProducts.json`.
-   - ترقية مفتاح كاش الواجهة في `SubjectPage.jsx` إلى `subject_v45` لضمان التحديث الفوري للطلبة.
-   - اجتياز اختبار البناء الكامل (`npm run build`) بنجاح تام.
+   - تحديث `YearPage.jsx` و `SubjectPage.jsx` (`subject_v46`) و `supabaseClient.js` و `subjectGroupEngine.js` و `defaultProducts.json`.
 
 ### 📁 الملفات التي تم تعديلها:
-- `src/utils/productInventoryEngine.js`
+- `src/pages/YearPage.jsx`
+- `src/pages/SubjectPage.jsx`
+- `src/supabaseClient.js`
 - `src/utils/subjectGroupEngine.js`
 - `src/defaultProducts.json`
-- `src/pages/SubjectPage.jsx`
-- `public/dental-impression-tray-upper-blue.png`
+- `public/products/self-sealing-sterilization-pouch.jpg`
+- `public/products/fluoride-varnish.jpg`
+- `public/products/periodontal-probe.png`
+- `public/products/mouth-mirror.jpg`
 - `PROJECT_STATE.md`
-- قاعدة بيانات Supabase (جدول `products` وجدول `product_subjects`)
 
 ---
 
 ## 3. الروابط المباشرة المؤكدة:
-- **صناعة الأسنان الثابتة 2 (سنة ثالثة):** `https://absolutedental.ly/#/subject/fixed-prosthodontics-2`
-- **صناعة الأسنان المتحركة 2 (سنة ثالثة):** `https://absolutedental.ly/#/subject/removable-prosthodontics-2`
+- **السنة الثالثة:** `https://absolutedental.ly/#/year/3rd-year`
+- **جراحة الفم والأسنان:** `https://absolutedental.ly/#/subject/oral-surgery`
+- **طب وجراحة اللثة:** `https://absolutedental.ly/#/subject/periodontology`
+- **طب أسنان الأطفال:** `https://absolutedental.ly/#/subject/pediatric-dentistry`
 
 ---
 

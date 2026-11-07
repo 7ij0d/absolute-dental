@@ -20,13 +20,14 @@ export const GROUP_ICONS = {
 // Item classification helpers
 const isBurProduct = (p) => {
   const s = ((p.name_en || '') + ' ' + (p.name_ar || '')).toLowerCase();
-  // Bur Holder is a consumable, not a rotary bur!
+  // Bur Holder and Dental Needle are not rotary burs!
   if (s.includes('holder') || s.includes('علبة')) return false;
+  if (s.includes('dental needle') || s.includes('anaesthetic') || s.includes('anesthesia') || s.includes('تخدير')) return false;
   return (
     Boolean(p.isBurGroup) ||
     s.includes('bur') ||
     s.includes('بير') ||
-    s.includes('needle') ||
+    s.includes('tc needle') ||
     s.startsWith('tc ') ||
     s.startsWith('br ') ||
     s.startsWith('fo ') ||
@@ -46,9 +47,9 @@ const isHandpieceOrCast = (p) => {
 
 const isExamProduct = (p) => {
   const s = ((p.name_en || '') + ' ' + (p.name_ar || '')).toLowerCase();
-  if (p.id === '33000000-0000-0000-0000-000000000114' || s.includes('examination kit') || s.includes('طقم فحص')) return false;
+  if (p.id === '33000000-0000-0000-0000-000000000114' || s.includes('examination kit') || s.includes('diagnostic kit') || s.includes('طقم فحص')) return false;
   if (s.includes('glove') || s.includes('قفاز')) return false;
-  return s.includes('probe') || s.includes('mirror') || s.includes('مرآة') || s.includes('بروب');
+  return s.includes('probe') || s.includes('mirror') || s.includes('مرآة') || s.includes('بروب') || s.includes('diagnostic instruments');
 };
 
 const isTeethProduct = (p) => {
@@ -61,6 +62,7 @@ const isConsumableProduct = (p) => {
   return (
     p.id === '33000000-0000-0000-0000-000000000114' ||
     s.includes('examination kit') ||
+    s.includes('diagnostic kit') ||
     s.includes('طقم فحص') ||
     s.includes('holder') ||
     s.includes('glove') ||
@@ -120,7 +122,19 @@ const isClinicalSurgicalProduct = (p) => {
     s.includes('rubber dam') ||
     s.includes('blade') ||
     s.includes('شفر') ||
-    s.includes('floss')
+    s.includes('floss') ||
+    s.includes('cotton') ||
+    s.includes('قطن') ||
+    s.includes('syringe') ||
+    s.includes('سرنج') ||
+    s.includes('needle') ||
+    s.includes('إبرة') ||
+    s.includes('sterilization') ||
+    s.includes('pouch') ||
+    s.includes('تعقيم') ||
+    s.includes('varnish') ||
+    s.includes('fluoride') ||
+    s.includes('فلوريد')
   );
 };
 
@@ -431,6 +445,25 @@ export function getSubjectProductGroups(subjectSlug, products = []) {
     addGroup('clinical_surgical', 'Clinical Isolation & Barrier Supplies', 'مستلزمات العزل الوقائي والعيادي', 'ShieldCheck', clin);
 
     // 2. Consumables & Accessories
+    const cons = sortConsumables(products.filter(p => !placedIds.has(p.id)));
+    addGroup('consumables', 'Consumables & Accessories', 'المستهلكات والإكسسوارات', 'Package', cons);
+
+    return groups;
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // 10. ORAL SURGERY, PERIODONTOLOGY & PEDIATRIC DENTISTRY (Year 3)
+  // ─────────────────────────────────────────────────────────────
+  if (slug === 'oral-surgery' || slug === 'periodontology' || slug === 'pediatric-dentistry') {
+    // 1. Examination & Diagnostic Instruments
+    const exam = sortExamination(products.filter(p => isExamProduct(p)));
+    addGroup('examination', 'Diagnostic & Examination Instruments', 'أدوات الفحص والتشخيص', 'Search', exam);
+
+    // 2. Anesthesia, Sterilization & Clinical Supplies
+    const clin = products.filter(p => !placedIds.has(p.id) && isClinicalSurgicalProduct(p));
+    addGroup('clinical_surgical', 'Clinical, Anesthesia & Sterilization Supplies', 'أدوات التخدير والتعقيم والمستلزمات العيادية', 'ShieldCheck', clin);
+
+    // 3. Consumables & Accessories
     const cons = sortConsumables(products.filter(p => !placedIds.has(p.id)));
     addGroup('consumables', 'Consumables & Accessories', 'المستهلكات والإكسسوارات', 'Package', cons);
 

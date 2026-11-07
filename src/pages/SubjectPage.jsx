@@ -131,6 +131,33 @@ const DEFAULT_SUBJECTS = [
     description_en: 'Required tools and gear for Removable Prosthodontics 2',
     slug: 'removable-prosthodontics-2',
   },
+  {
+    id: '33000000-0000-0000-0000-000000000035',
+    year_id: '30000000-0000-0000-0000-000000000003',
+    name_ar: 'جراحة الفم والأسنان',
+    name_en: 'Oral Surgery',
+    description_ar: 'الأدوات والمستلزمات المطلوبة لمادة جراحة الفم والأسنان',
+    description_en: 'Required instruments and clinical supplies for Oral Surgery',
+    slug: 'oral-surgery',
+  },
+  {
+    id: '33000000-0000-0000-0000-000000000036',
+    year_id: '30000000-0000-0000-0000-000000000003',
+    name_ar: 'طب وجراحة اللثة',
+    name_en: 'Periodontology',
+    description_ar: 'الأدوات والمستلزمات المطلوبة لمادة طب وجراحة اللثة (البريو)',
+    description_en: 'Required instruments and clinical supplies for Periodontology',
+    slug: 'periodontology',
+  },
+  {
+    id: '33000000-0000-0000-0000-000000000037',
+    year_id: '30000000-0000-0000-0000-000000000003',
+    name_ar: 'طب أسنان الأطفال',
+    name_en: 'Pediatric Dentistry',
+    description_ar: 'الأدوات والمستلزمات المطلوبة لمادة طب أسنان الأطفال (البيدو)',
+    description_en: 'Required instruments and preventive supplies for Pediatric Dentistry',
+    slug: 'pediatric-dentistry',
+  },
 ];
 
 export const SubjectPage = () => {
@@ -148,7 +175,7 @@ export const SubjectPage = () => {
   );
 
   const lookupSlug = slug === 'operative-dentistry' ? 'restorative-dentistry' : slug;
-  const CACHE_KEY = `subject_v45:${slug}`;
+  const CACHE_KEY = `subject_v46:${slug}`;
 
   // Instant synchronous initialization: check cache, then compute from local defaults (0ms load)
   const initialPayload = useMemo(() => {
