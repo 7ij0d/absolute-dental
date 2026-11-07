@@ -10,6 +10,7 @@ import {
   Check
 } from 'lucide-react';
 import dentalBoxesArtwork from '../assets/images/dental-boxes-artwork.png';
+import { useSiteSectionsConfig } from '../utils/siteSectionsEngine';
 import {
   cleanColorLabel,
   FALLBACK_BOXES,
@@ -330,6 +331,7 @@ const CANONICAL_ORDERED_BOXES = [
 /* ─── MAIN DENTAL BOXES PAGE ─── */
 export const BoxesPage = () => {
   const { lang, isRtl } = useLanguage();
+  const siteSections = useSiteSectionsConfig();
 
   // Initialize with canonical ordered blueprints
   const [displayBoxes, setDisplayBoxes] = useState(CANONICAL_ORDERED_BOXES);
@@ -502,7 +504,9 @@ export const BoxesPage = () => {
                   lineHeight: 1.15
                 }}
               >
-                {lang === 'ar' ? 'البوكسات' : 'Dental Boxes'}
+                {lang === 'ar'
+                  ? (siteSections.boxes_hero?.title_ar || 'البوكسات')
+                  : (siteSections.boxes_hero?.title_en || 'Dental Boxes')}
               </h1>
               <p
                 style={{
@@ -516,8 +520,8 @@ export const BoxesPage = () => {
                 }}
               >
                 {lang === 'ar'
-                  ? 'بوكسات تنظيم وحفظ لجميع أدواتك الطبية بأحجام وألوان متعددة'
-                  : 'Organizer & storage boxes for all your dental tools and gear in multiple sizes & colors'}
+                  ? (siteSections.boxes_hero?.subtitle_ar || 'بوكسات تنظيم وحفظ لجميع أدواتك الطبية بأحجام وألوان متعددة')
+                  : (siteSections.boxes_hero?.subtitle_en || 'Organizer & storage boxes for all your dental tools and gear in multiple sizes & colors')}
               </p>
             </div>
           </div>
@@ -538,7 +542,7 @@ export const BoxesPage = () => {
             }}
           >
             <img
-              src={dentalBoxesArtwork}
+              src={siteSections.boxes_hero?.image_url || dentalBoxesArtwork}
               alt="Dental Boxes Collection"
               style={{
                 height: '100%',

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import accessoriesBannerArt from '../assets/images/accessories-banner-art.png';
+import { useSiteSectionsConfig } from '../utils/siteSectionsEngine';
 
 const BASE = import.meta.env.BASE_URL || '/';
 
@@ -21,6 +22,7 @@ export const AccessoriesPage = () => {
   const { lang, isRtl } = useLanguage();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const siteSections = useSiteSectionsConfig();
 
   const [favoriteIds, setFavoriteIds] = useState(() => {
     try {
@@ -184,7 +186,9 @@ export const AccessoriesPage = () => {
                   lineHeight: 1.2
                 }}
               >
-                {lang === 'ar' ? 'الإكسسوارات' : 'Accessories'}
+                {lang === 'ar'
+                  ? (siteSections.accessories_hero?.title_ar || 'الإكسسوارات')
+                  : (siteSections.accessories_hero?.title_en || 'Accessories')}
               </h1>
               <p
                 style={{
@@ -197,8 +201,8 @@ export const AccessoriesPage = () => {
                 }}
               >
                 {lang === 'ar'
-                  ? 'لايكوت، يونيفورم، ديكور وإكسسوارات طبية مخصصة لطلبة طب الأسنان'
-                  : 'Lab coats, uniforms, clinic decor, and medical accessories for dental students'}
+                  ? (siteSections.accessories_hero?.subtitle_ar || 'لايكوت، يونيفورم، ديكور وإكسسوارات طبية مخصصة لطلبة طب الأسنان')
+                  : (siteSections.accessories_hero?.subtitle_en || 'Lab coats, uniforms, clinic decor, and medical accessories for dental students')}
               </p>
             </div>
           </div>
@@ -220,7 +224,7 @@ export const AccessoriesPage = () => {
             }}
           >
             <img
-              src={accessoriesBannerArt}
+              src={siteSections.accessories_hero?.image_url || accessoriesBannerArt}
               alt=""
               style={{
                 height: '100%',

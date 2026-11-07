@@ -345,12 +345,19 @@ export const SubjectPage = () => {
       }
     }
 
-    // Sorting (prioritizing direct subject tools before universal consumables when in default view)
+    // Sorting (prioritizing custom sort_order, then direct subject tools before universal consumables)
     if (sortBy === 'recent') {
       list.sort((a, b) => {
         const aUniv = a.discount_label_en === 'universal' ? 1 : 0;
         const bUniv = b.discount_label_en === 'universal' ? 1 : 0;
         if (aUniv !== bUniv) return aUniv - bUniv;
+        const orderA = Number(a.sort_order) || 0;
+        const orderB = Number(b.sort_order) || 0;
+        if (orderA !== orderB) {
+          if (orderA > 0 && orderB > 0) return orderA - orderB;
+          if (orderA > 0) return -1;
+          if (orderB > 0) return 1;
+        }
         return new Date(b.created_at || 0) - new Date(a.created_at || 0);
       });
     } else if (sortBy === 'popular') {

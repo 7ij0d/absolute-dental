@@ -5,17 +5,19 @@ import supabase from '../supabaseClient';
 import { cacheGet, cacheSet } from '../cache';
 import ProductCard from '../components/ProductCard';
 import { groupProductsList } from '../utils/burGroupingEngine';
+import { useSiteSectionsConfig } from '../utils/siteSectionsEngine';
 import {
   Search, Sparkles, Layers, Package, ChevronLeft, ChevronRight,
   X, SlidersHorizontal, RotateCcw
 } from 'lucide-react';
 
-const SEARCH_COLUMNS = 'id, name_ar, name_en, description_ar, description_en, details_ar, details_en, price, compare_at_price, image_url, availability, stock_quantity, subject_id, year_id, is_bundle, discount_label_ar, discount_label_en, shared_inventory_product_id, unit_multiplier, created_at';
+const SEARCH_COLUMNS = 'id, name_ar, name_en, description_ar, description_en, details_ar, details_en, price, compare_at_price, image_url, availability, stock_quantity, subject_id, year_id, is_bundle, discount_label_ar, discount_label_en, shared_inventory_product_id, unit_multiplier, sort_order, created_at';
 
 export const SearchPage = ({ categoryMode = null }) => {
   const { lang, isRtl } = useLanguage();
   const location = useLocation();
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
+  const siteSections = useSiteSectionsConfig();
 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -156,7 +158,16 @@ export const SearchPage = ({ categoryMode = null }) => {
     }
 
     if (sortBy === 'recent') {
-      list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+      list.sort((a, b) => {
+        const orderA = Number(a.sort_order) || 0;
+        const orderB = Number(b.sort_order) || 0;
+        if (orderA !== orderB) {
+          if (orderA > 0 && orderB > 0) return orderA - orderB;
+          if (orderA > 0) return -1;
+          if (orderB > 0) return 1;
+        }
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      });
     } else if (sortBy === 'popular') {
       list.sort((a, b) => (b.sort_order || 0) - (a.sort_order || 0));
     } else if (sortBy === 'price_asc') {
@@ -283,11 +294,11 @@ export const SearchPage = ({ categoryMode = null }) => {
     }
     if (categoryMode === 'other-supplies') {
       return {
-        titleAr: 'المستهلكات والإكسسوارات',
-        titleEn: 'Consumables & Accessories',
+        titleAr: siteSections.study_other_banner?.title_ar || 'المستهلكات والإكسسوارات',
+        titleEn: siteSections.study_other_banner?.title_en || 'Consumables & Accessories',
         subtitle: lang === 'ar'
-          ? 'المستلزمات الاستهلاكية العامة التي يحتاجها طلبة طب الأسنان.'
-          : 'General consumables and accessories needed by dental students.',
+          ? (siteSections.study_other_banner?.subtitle_ar || 'المستلزمات الاستهلاكية العامة التي يحتاجها طلبة طب الأسنان.')
+          : (siteSections.study_other_banner?.subtitle_en || 'General consumables and accessories needed by dental students.'),
         searchPlaceholder: lang === 'ar' ? 'ابحث في المستهلكات والإكسسوارات...' : 'Search in Consumables & Accessories...'
       };
     }

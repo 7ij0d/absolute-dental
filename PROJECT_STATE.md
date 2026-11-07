@@ -33,12 +33,23 @@
 
 3. **المزامنة والتنظيم وتفعيل التعديل الكامل من لوحة التحكم:**
    - تحديث `YearPage.jsx` و `SubjectPage.jsx` (`subject_v46`) و `supabaseClient.js` و `subjectGroupEngine.js` و `defaultProducts.json`.
-   - ترقية `src/pages/admin/Subjects.jsx` لدعم رفع أو تعديل صورة الهيرو (`image_url`) وترتيب الظهور (`sort_order`) لكل مادة دراسية مباشرة من لوحة الإدارة، مع انعكاس فوري في صفحات السنوات والمواد.
+   - ترقية `src/pages/admin/Subjects.jsx` لدعم رفع أو تعديل صورة الهيرو (`image_url`) وترتيب الظهور (`sort_order`) لكل مادة دراسية ولكل سنة دراسية مباشرة من لوحة الإدارة، مع انعكاس فوري في صفحات السنوات والمواد (`StudyToolsPage.jsx`, `YearPage.jsx`, `SubjectPage.jsx`).
+   - ترقية `src/pages/admin/Banners.jsx` وإنشاء `src/utils/siteSectionsEngine.js` للتحكم الكامل في هيرو الصفحة الرئيسية والبطاقات الثلاث الرئيسية (`أدوات الدراسة`، `الإكسسوارات`، `البوكسات`) وهيرو صفحات الأقسام (`مستلزمات أخرى`، `الإكسسوارات`، `البوكسات`) من لوحة الإدارة.
+   - ترقية `src/pages/admin/Products.jsx` لإضافة حقول الاسم الإنجليزي، كود `SKU`، وترتيب الظهور (`sort_order`) بجانب التحكم الكامل في أماكن ظهور كل منتج عبر المواد والسنوات.
 
 ### 📁 الملفات التي تم تعديلها:
+- `src/pages/admin/Products.jsx`
 - `src/pages/admin/Subjects.jsx`
+- `src/pages/admin/Banners.jsx`
+- `src/pages/admin/AdminLayout.jsx`
+- `src/utils/siteSectionsEngine.js`
+- `src/pages/Home.jsx`
+- `src/pages/StudyToolsPage.jsx`
 - `src/pages/YearPage.jsx`
 - `src/pages/SubjectPage.jsx`
+- `src/pages/AccessoriesPage.jsx`
+- `src/pages/BoxesPage.jsx`
+- `src/pages/SearchPage.jsx`
 - `src/supabaseClient.js`
 - `src/utils/subjectGroupEngine.js`
 - `src/defaultProducts.json`

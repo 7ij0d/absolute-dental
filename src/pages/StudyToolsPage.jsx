@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import supabase from '../supabaseClient';
+import { useSiteSectionsConfig } from '../utils/siteSectionsEngine';
 import { ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, Lock, Sparkles } from 'lucide-react';
 
 // Direct Vite Asset Imports (independent project assets in src/assets/images/)
@@ -90,6 +92,39 @@ export const StudyToolsPage = () => {
   const { lang, isRtl } = useLanguage();
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
   const ActionArrow = isRtl ? ArrowLeft : ArrowRight;
+  const siteSections = useSiteSectionsConfig();
+  const [dbYears, setDbYears] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase
+      .from('years')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => {
+        if (mounted && Array.isArray(data) && data.length > 0) {
+          setDbYears(data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const displayYears = STUDY_YEARS.map((y) => {
+    const dbMatch = Array.isArray(dbYears)
+      ? dbYears.find((d) => d.slug === y.slug || d.name_en === y.titleEn)
+      : null;
+    if (!dbMatch) return y;
+    return {
+      ...y,
+      titleAr: dbMatch.name_ar || y.titleAr,
+      titleEn: dbMatch.name_en || y.titleEn,
+      isComingSoon: dbMatch.is_coming_soon !== undefined ? dbMatch.is_coming_soon : y.isComingSoon,
+      customImg: dbMatch.image_url || null,
+    };
+  });
 
   return (
     <div className="study-tools-page" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -123,7 +158,7 @@ export const StudyToolsPage = () => {
           className="study-years-grid"
           aria-label={lang === 'ar' ? 'السنوات الدراسية' : 'Academic Years'}
         >
-          {STUDY_YEARS.map((year) => {
+          {displayYears.map((year) => {
             const innerCard = (
               <>
                 {/* Dedicated Text Column — Strictly separated from image container */}
@@ -170,15 +205,24 @@ export const StudyToolsPage = () => {
 
                 {/* Dedicated Framed Image Column — Fixed aspect ratio, never overlaps text */}
                 <div className="study-year-card__media">
-                  <picture className="study-year-card__picture">
-                    <source srcSet={year.webp} type="image/webp" />
+                  {year.customImg ? (
                     <img
-                      src={year.png}
+                      src={year.customImg}
                       alt={lang === 'ar' ? year.titleAr : year.titleEn}
                       loading="eager"
                       className="study-year-card__img"
                     />
-                  </picture>
+                  ) : (
+                    <picture className="study-year-card__picture">
+                      <source srcSet={year.webp} type="image/webp" />
+                      <img
+                        src={year.png}
+                        alt={lang === 'ar' ? year.titleAr : year.titleEn}
+                        loading="eager"
+                        className="study-year-card__img"
+                      />
+                    </picture>
+                  )}
                 </div>
               </>
             );
@@ -246,13 +290,15 @@ export const StudyToolsPage = () => {
                 </div>
 
                 <h2 className="study-other-banner__title">
-                  {lang === 'ar' ? 'مستلزمات أخرى' : 'Other Supplies'}
+                  {lang === 'ar'
+                    ? (siteSections.study_other_banner?.title_ar || 'مستلزمات أخرى')
+                    : (siteSections.study_other_banner?.title_en || 'Other Supplies')}
                 </h2>
 
                 <p className="study-other-banner__desc">
                   {lang === 'ar'
-                    ? 'مستلزمات يحتاجها طلبة طب الأسنان في مختلف السنوات'
-                    : 'Supplies needed by dental students across different academic years'}
+                    ? (siteSections.study_other_banner?.subtitle_ar || 'مستلزمات يحتاجها طلبة طب الأسنان في مختلف السنوات')
+                    : (siteSections.study_other_banner?.subtitle_en || 'Supplies needed by dental students across different academic years')}
                 </p>
               </div>
 
@@ -266,15 +312,24 @@ export const StudyToolsPage = () => {
 
             {/* Dedicated Framed Studio Image Column */}
             <div className="study-other-banner__media">
-              <picture className="study-other-banner__picture">
-                <source srcSet={otherSuppliesWebp} type="image/webp" />
+              {siteSections.study_other_banner?.image_url ? (
                 <img
-                  src={otherSuppliesPng}
-                  alt={lang === 'ar' ? 'مستلزمات أخرى - قفازات وماسك و Cover Sheet' : 'Other Supplies - Gloves, Masks, and Cover Sheets'}
+                  src={siteSections.study_other_banner.image_url}
+                  alt={lang === 'ar' ? 'مستلزمات أخرى' : 'Other Supplies'}
                   loading="eager"
                   className="study-other-banner__img"
                 />
-              </picture>
+              ) : (
+                <picture className="study-other-banner__picture">
+                  <source srcSet={otherSuppliesWebp} type="image/webp" />
+                  <img
+                    src={otherSuppliesPng}
+                    alt={lang === 'ar' ? 'مستلزمات أخرى - قفازات وماسك و Cover Sheet' : 'Other Supplies - Gloves, Masks, and Cover Sheets'}
+                    loading="eager"
+                    className="study-other-banner__img"
+                  />
+                </picture>
+              )}
             </div>
           </Link>
         </section>

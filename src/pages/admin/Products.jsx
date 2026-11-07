@@ -155,6 +155,8 @@ export const Products = () => {
   // Form Field States
   const [nameAr, setNameAr] = useState('');
   const [nameEn, setNameEn] = useState('');
+  const [sku, setSku] = useState('');
+  const [sortOrder, setSortOrder] = useState(0);
   const [descriptionAr, setDescriptionAr] = useState('');
   const [descriptionEn, setDescriptionEn] = useState('');
   const [detailsAr, setDetailsAr] = useState('');
@@ -551,6 +553,8 @@ export const Products = () => {
     setEditingProduct(null);
     setNameAr('');
     setNameEn('');
+    setSku('');
+    setSortOrder(0);
     setDescriptionAr('');
     setDescriptionEn('');
     setDetailsAr('');
@@ -584,6 +588,8 @@ export const Products = () => {
     setEditingProduct(prod);
     setNameAr(prod.name_ar || '');
     setNameEn(prod.name_en || '');
+    setSku(prod.sku || (prod.details_ar && prod.details_ar.match(/SKU:\s*([^\n\r]+)/i)?.[1]?.trim()) || '');
+    setSortOrder(prod.sort_order ?? 0);
     setDescriptionAr(prod.description_ar || '');
     setDescriptionEn(prod.description_en || '');
     setDetailsAr(prod.details_ar || '');
@@ -700,12 +706,23 @@ export const Products = () => {
       }
     }
 
+    const skuClean = sku.trim();
+    let finalDetailsAr = detailsAr.trim();
+    if (skuClean) {
+      if (/SKU:\s*[^\n\r]+/i.test(finalDetailsAr)) {
+        finalDetailsAr = finalDetailsAr.replace(/SKU:\s*[^\n\r]+/i, `SKU: ${skuClean}`);
+      } else {
+        finalDetailsAr = `SKU: ${skuClean}${finalDetailsAr ? '\n' + finalDetailsAr : ''}`;
+      }
+    }
+
     const productPayload = {
       name_ar: nameArTrimmed,
       name_en: nameEn.trim() || nameArTrimmed,
+      sort_order: parseInt(sortOrder) || 0,
       description_ar: descriptionAr.trim() || null,
       description_en: descriptionEn.trim() || null,
-      details_ar: detailsAr.trim() || null,
+      details_ar: finalDetailsAr || null,
       details_en: detailsEn.trim() || null,
       price: parseFloat(price) || 0,
       compare_at_price: comparePrice ? parseFloat(comparePrice) : null,
@@ -1031,9 +1048,26 @@ export const Products = () => {
 
             <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               
-              <div className="form-group">
-                <label className="form-label">اسم المنتج</label>
-                <input type="text" className="form-input" value={nameAr} onChange={(e) => setNameAr(e.target.value)} placeholder="اكتب اسم المنتج..." />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }} className="modal-form-row">
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">اسم المنتج بالعربية *</label>
+                  <input type="text" className="form-input" value={nameAr} onChange={(e) => setNameAr(e.target.value)} placeholder="اكتب اسم المنتج بالعربية..." />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">اسم المنتج بالإنجليزية (Product Name EN)</label>
+                  <input type="text" className="form-input" value={nameEn} onChange={(e) => setNameEn(e.target.value)} placeholder="Product Name in English..." style={{ direction: 'ltr' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }} className="modal-form-row">
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">كود المنتج (SKU - اختياري)</label>
+                  <input type="text" className="form-input" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="مثال: AD-3Y-001" style={{ direction: 'ltr' }} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">ترتيب ظهور المنتج (Sort Order)</label>
+                  <input type="number" className="form-input" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} placeholder="0" />
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }} className="modal-form-row">

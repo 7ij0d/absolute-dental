@@ -45,6 +45,7 @@ import {
   submitProductAvailabilityRequest,
   validateImageFile
 } from '../utils/communityAndRequestsEngine';
+import { useSiteSectionsConfig } from '../utils/siteSectionsEngine';
 
 const DRAFT_STORAGE_KEY = 'ad_product_request_draft';
 const POST_AUTH_ACTION_KEY = 'ad_post_auth_action';
@@ -53,6 +54,7 @@ export const Home = () => {
   const { lang, isRtl } = useLanguage();
   const { user, profile, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const siteSections = useSiteSectionsConfig();
 
   const isLoggedInStudent = Boolean(user && user.email !== 'admin@smylodent.com');
 
@@ -386,10 +388,14 @@ export const Home = () => {
       {/* ── 1. HERO BACKGROUND & MAIN TWO GATEWAY CARDS ── */}
       <div className="home-hero-backdrop-wrap">
         <div className="home-hero-bg-layer" aria-hidden="true">
-          <picture>
-            <source srcSet={homeHeroBgWebp} type="image/webp" />
-            <img src={homeHeroBgPng} alt="" className="home-hero-bg-img" />
-          </picture>
+          {siteSections.home_hero?.image_url ? (
+            <img src={siteSections.home_hero.image_url} alt="" className="home-hero-bg-img" />
+          ) : (
+            <picture>
+              <source srcSet={homeHeroBgWebp} type="image/webp" />
+              <img src={homeHeroBgPng} alt="" className="home-hero-bg-img" />
+            </picture>
+          )}
           <div className="home-hero-bg-fade" />
         </div>
 
@@ -397,10 +403,14 @@ export const Home = () => {
           {/* Hero Heading */}
           <section className="home-hero" aria-labelledby="hero-question">
             <h1 id="hero-question" className="home-hero-title">
-              {lang === 'ar' ? 'شن تبي تجهّز؟' : 'What are you preparing for?'}
+              {lang === 'ar'
+                ? (siteSections.home_hero?.title_ar || 'شن تبي تجهّز؟')
+                : (siteSections.home_hero?.title_en || 'What are you preparing for?')}
             </h1>
             <p className="home-hero-subtitle">
-              {lang === 'ar' ? 'اختر القسم المناسب لاحتياجاتك.' : 'Choose the section that suits your needs.'}
+              {lang === 'ar'
+                ? (siteSections.home_hero?.subtitle_ar || 'اختر القسم المناسب لاحتياجاتك.')
+                : (siteSections.home_hero?.subtitle_en || 'Choose the section that suits your needs.')}
             </p>
           </section>
 
@@ -415,12 +425,14 @@ export const Home = () => {
               <div className="gateway-card-content">
                 <div className="gateway-card-text">
                   <h2 className="gateway-card-title">
-                    {lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}
+                    {lang === 'ar'
+                      ? (siteSections.home_card_study?.title_ar || 'أدوات الدراسة')
+                      : (siteSections.home_card_study?.title_en || 'Study Tools')}
                   </h2>
                   <p className="gateway-card-desc">
                     {lang === 'ar'
-                      ? 'كل مستلزمات الدراسة في مكان واحد.'
-                      : 'All your dental study instruments and supplies in one place.'}
+                      ? (siteSections.home_card_study?.subtitle_ar || 'كل مستلزمات الدراسة في مكان واحد.')
+                      : (siteSections.home_card_study?.subtitle_en || 'All your dental study instruments and supplies in one place.')}
                   </p>
                 </div>
 
@@ -433,15 +445,24 @@ export const Home = () => {
               </div>
 
               <div className="gateway-card-artwork">
-                <picture>
-                  <source srcSet={studyToolsWebp} type="image/webp" />
+                {siteSections.home_card_study?.image_url ? (
                   <img
-                    src={studyToolsPng}
+                    src={siteSections.home_card_study.image_url}
                     alt={lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}
                     loading="eager"
                     className="gateway-art-img"
                   />
-                </picture>
+                ) : (
+                  <picture>
+                    <source srcSet={studyToolsWebp} type="image/webp" />
+                    <img
+                      src={studyToolsPng}
+                      alt={lang === 'ar' ? 'أدوات الدراسة' : 'Study Tools'}
+                      loading="eager"
+                      className="gateway-art-img"
+                    />
+                  </picture>
+                )}
               </div>
             </Link>
 
@@ -454,12 +475,14 @@ export const Home = () => {
               <div className="gateway-card-content">
                 <div className="gateway-card-text">
                   <h2 className="gateway-card-title">
-                    {lang === 'ar' ? 'الإكسسوارات' : 'Accessories'}
+                    {lang === 'ar'
+                      ? (siteSections.home_card_accessories?.title_ar || 'الإكسسوارات')
+                      : (siteSections.home_card_accessories?.title_en || 'Accessories')}
                   </h2>
                   <p className="gateway-card-desc">
                     {lang === 'ar'
-                      ? 'لابكوت، يونيفورم، إكسسوارات طبية وشخصية.'
-                      : 'Lab coats, uniforms, personal & medical accessories.'}
+                      ? (siteSections.home_card_accessories?.subtitle_ar || 'لابكوت، يونيفورم، إكسسوارات طبية وشخصية.')
+                      : (siteSections.home_card_accessories?.subtitle_en || 'Lab coats, uniforms, personal & medical accessories.')}
                   </p>
                 </div>
 
@@ -472,15 +495,24 @@ export const Home = () => {
               </div>
 
               <div className="gateway-card-artwork">
-                <picture>
-                  <source srcSet={accessoriesWebp} type="image/webp" />
+                {siteSections.home_card_accessories?.image_url ? (
                   <img
-                    src={accessoriesPng}
+                    src={siteSections.home_card_accessories.image_url}
                     alt={lang === 'ar' ? 'الإكسسوارات' : 'Accessories'}
                     loading="eager"
                     className="gateway-art-img"
                   />
-                </picture>
+                ) : (
+                  <picture>
+                    <source srcSet={accessoriesWebp} type="image/webp" />
+                    <img
+                      src={accessoriesPng}
+                      alt={lang === 'ar' ? 'الإكسسوارات' : 'Accessories'}
+                      loading="eager"
+                      className="gateway-art-img"
+                    />
+                  </picture>
+                )}
               </div>
             </Link>
 
@@ -493,12 +525,14 @@ export const Home = () => {
               <div className="gateway-card-content">
                 <div className="gateway-card-text">
                   <h2 className="gateway-card-title">
-                    {lang === 'ar' ? 'البوكسات' : 'Boxes'}
+                    {lang === 'ar'
+                      ? (siteSections.home_card_boxes?.title_ar || 'البوكسات')
+                      : (siteSections.home_card_boxes?.title_en || 'Boxes')}
                   </h2>
                   <p className="gateway-card-desc">
                     {lang === 'ar'
-                      ? 'بوكسات تنظيم وحفظ لجميع أدواتك.'
-                      : 'Organizer & storage boxes for all your tools.'}
+                      ? (siteSections.home_card_boxes?.subtitle_ar || 'بوكسات تنظيم وحفظ لجميع أدواتك.')
+                      : (siteSections.home_card_boxes?.subtitle_en || 'Organizer & storage boxes for all your tools.')}
                   </p>
                 </div>
 
@@ -511,15 +545,24 @@ export const Home = () => {
               </div>
 
               <div className="gateway-card-artwork">
-                <picture>
-                  <source srcSet={dentalBoxesWebp} type="image/webp" />
+                {siteSections.home_card_boxes?.image_url ? (
                   <img
-                    src={dentalBoxesPng}
+                    src={siteSections.home_card_boxes.image_url}
                     alt={lang === 'ar' ? 'البوكسات' : 'Boxes'}
                     loading="eager"
                     className="gateway-art-img"
                   />
-                </picture>
+                ) : (
+                  <picture>
+                    <source srcSet={dentalBoxesWebp} type="image/webp" />
+                    <img
+                      src={dentalBoxesPng}
+                      alt={lang === 'ar' ? 'البوكسات' : 'Boxes'}
+                      loading="eager"
+                      className="gateway-art-img"
+                    />
+                  </picture>
+                )}
               </div>
             </Link>
           </section>
