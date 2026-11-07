@@ -8,7 +8,8 @@ import {
   isBundleProduct,
   calculateBundleAvailability,
   CANONICAL_MULTI_UNITS,
-  getPhysicalStockBreakdown
+  getPhysicalStockBreakdown,
+  syncLiveProductStates
 } from '../../utils/productInventoryEngine';
 import {
   isBurHolderProduct,
@@ -529,6 +530,7 @@ export const Products = () => {
       }
 
       if (Array.isArray(loadedProds) && loadedProds.length > 0) {
+        syncLiveProductStates(loadedProds);
         setProducts(loadedProds);
         try { localStorage.setItem('abs_admin_cached_products', JSON.stringify(loadedProds)); } catch (_) {}
       }
@@ -624,7 +626,7 @@ export const Products = () => {
     setMainImageUrl(prod.image_url || '');
     setUsageVideoUrl(prod.usage_video_url || '');
     setIsFeatured(prod.is_featured || false);
-    setIsActive(prod.is_active !== false);
+    setIsActive(prod.is_active !== false && !prod.is_archived);
     setUnitMultiplier(prod.unit_multiplier || 1);
     setSharedInventoryProductId(prod.shared_inventory_product_id || '');
     setAudioUrl(prod.audio_url || '');
@@ -736,6 +738,7 @@ export const Products = () => {
       audio_url: audioUrl.trim() || null,
       is_featured: isFeatured,
       is_active: isActive,
+      ...(isActive ? { is_archived: false } : {}),
       unit_multiplier: parseInt(unitMultiplier) || 1,
       shared_inventory_product_id: sharedInventoryProductId || null,
     };
@@ -805,12 +808,14 @@ export const Products = () => {
         ...(editingProduct || {}),
         ...productPayload,
         id: productId,
-        is_archived: editingProduct ? Boolean(editingProduct.is_archived) : false,
+        is_archived: isActive ? false : (editingProduct ? Boolean(editingProduct.is_archived) : false),
         product_subjects: effectiveSubjectIds.map((sid) => ({ product_id: productId, subject_id: sid })),
         product_images: extraImageUrls
           .filter(Boolean)
           .map((url, idx) => ({ product_id: productId, image_url: url, sort_order: idx }))
       };
+
+      syncLiveProductStates([updatedProdObj]);
 
       setProducts((prev) => {
         const nextList = editingProduct
@@ -840,14 +845,75 @@ export const Products = () => {
         .eq('id', prod.id);
       
       if (!error) {
+        const updatedItem = { ...prod, is_archived: nextArchiveState };
+        syncLiveProductStates([updatedItem]);
         clearSubjectCaches();
         setProducts((prev) => {
-          const next = prev.map((item) => (item.id === prod.id ? { ...item, is_archived: nextArchiveState } : item));
+          const next = prev.map((item) => (item.id === prod.id ? updatedItem : item));
           try {
             localStorage.setItem('abs_admin_cached_products', JSON.stringify(next));
           } catch (_) {}
           return next;
         });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // 1-Click Quick Toggle: Available (متوفر) <-> Out of Stock (غير متوفر)
+  const handleQuickToggleAvailability = async (prod) => {
+    const isCurrentlyOut = prod.availability === 'unavailable' || prod.availability === 'out_of_stock';
+    const nextAvailability = isCurrentlyOut ? 'available' : 'unavailable';
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ availability: nextAvailability })
+        .eq('id', prod.id);
+
+      if (!error) {
+        const updatedItem = { ...prod, availability: nextAvailability };
+        syncLiveProductStates([updatedItem]);
+        clearSubjectCaches();
+        setProducts((prev) => {
+          const next = prev.map((item) => (item.id === prod.id ? updatedItem : item));
+          try {
+            localStorage.setItem('abs_admin_cached_products', JSON.stringify(next));
+          } catch (_) {}
+          return next;
+        });
+      } else {
+        alert('حدث خطأ أثناء تحديث التوفر / Error updating availability: ' + error.message);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // 1-Click Quick Toggle: Show in Store (معروض بالمتجر) <-> Hide from Store (عدم العرض في المتجر)
+  const handleQuickToggleVisibility = async (prod) => {
+    const isCurrentlyHidden = prod.is_active === false || prod.is_archived === true;
+    const nextIsActive = isCurrentlyHidden ? true : false;
+    const nextIsArchived = nextIsActive ? false : Boolean(prod.is_archived);
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ is_active: nextIsActive, is_archived: nextIsArchived })
+        .eq('id', prod.id);
+
+      if (!error) {
+        const updatedItem = { ...prod, is_active: nextIsActive, is_archived: nextIsArchived };
+        syncLiveProductStates([updatedItem]);
+        clearSubjectCaches();
+        setProducts((prev) => {
+          const next = prev.map((item) => (item.id === prod.id ? updatedItem : item));
+          try {
+            localStorage.setItem('abs_admin_cached_products', JSON.stringify(next));
+          } catch (_) {}
+          return next;
+        });
+      } else {
+        alert('حدث خطأ أثناء تحديث حالة العرض بالمتجر / Error updating store visibility: ' + error.message);
       }
     } catch (err) {
       console.error(err);
@@ -1018,11 +1084,77 @@ export const Products = () => {
                     )}
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem' }}>
-                    {prod.is_archived ? (
-                      <span style={{ fontSize: '0.7rem', fontWeight: 'bold', padding: '1px 6px', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)' }}>أرشيف</span>
-                    ) : (
-                      <span style={{ fontSize: '0.7rem', fontWeight: 'bold', padding: '1px 6px', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: 'var(--success)', borderRadius: 'var(--radius-sm)' }}>نشط</span>
-                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-start' }}>
+                      {/* 1. Availability Pill (Available vs Out of Stock) */}
+                      <button
+                        type="button"
+                        onClick={() => handleQuickToggleAvailability(prod)}
+                        title="اضغط للتبديل الفوري بين متوفر وغير متوفر (Out of Stock)"
+                        style={{
+                          cursor: 'pointer',
+                          border: (prod.availability === 'unavailable' || prod.availability === 'out_of_stock')
+                            ? '1px solid rgba(220, 38, 38, 0.35)'
+                            : prod.availability === 'coming_soon'
+                              ? '1px solid rgba(245, 158, 11, 0.35)'
+                              : '1px solid rgba(16, 185, 129, 0.35)',
+                          backgroundColor: (prod.availability === 'unavailable' || prod.availability === 'out_of_stock')
+                            ? 'rgba(220, 38, 38, 0.12)'
+                            : prod.availability === 'coming_soon'
+                              ? 'rgba(245, 158, 11, 0.12)'
+                              : 'rgba(16, 185, 129, 0.12)',
+                          color: (prod.availability === 'unavailable' || prod.availability === 'out_of_stock')
+                            ? '#DC2626'
+                            : prod.availability === 'coming_soon'
+                              ? '#D97706'
+                              : '#059669',
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          padding: '2px 8px',
+                          borderRadius: '999px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {(prod.availability === 'unavailable' || prod.availability === 'out_of_stock')
+                          ? '● غير متوفر (Out of Stock)'
+                          : prod.availability === 'coming_soon'
+                            ? '⏳ قريباً (Coming Soon)'
+                            : '✓ متوفر (Available)'}
+                      </button>
+
+                      {/* 2. Store Visibility Pill (Shown in Store vs Hidden from Store) */}
+                      <button
+                        type="button"
+                        onClick={() => handleQuickToggleVisibility(prod)}
+                        title="اضغط للتبديل الفوري بين العرض في المتجر وعدم العرض (Hide from Store)"
+                        style={{
+                          cursor: 'pointer',
+                          border: (prod.is_active === false || prod.is_archived === true)
+                            ? '1px solid rgba(100, 116, 139, 0.4)'
+                            : '1px solid rgba(14, 116, 144, 0.3)',
+                          backgroundColor: (prod.is_active === false || prod.is_archived === true)
+                            ? 'rgba(100, 116, 139, 0.15)'
+                            : 'rgba(14, 116, 144, 0.1)',
+                          color: (prod.is_active === false || prod.is_archived === true)
+                            ? '#475569'
+                            : '#0E7490',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          padding: '2px 8px',
+                          borderRadius: '999px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {(prod.is_active === false || prod.is_archived === true)
+                          ? '🚫 مخفي من المتجر (عدم العرض)'
+                          : '👁️ معروض بالمتجر'}
+                      </button>
+                    </div>
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
                     <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
@@ -1121,10 +1253,19 @@ export const Products = () => {
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">{t('subject.filter_availability')} *</label>
-                  <select className="form-input" value={availability} onChange={(e) => setAvailability(e.target.value)}>
-                    <option value="available">متوفر / Available</option>
-                    <option value="coming_soon">قريباً / Coming Soon</option>
-                    <option value="unavailable">غير متوفر / Out of Stock</option>
+                  <select
+                    className="form-input"
+                    value={availability}
+                    onChange={(e) => setAvailability(e.target.value)}
+                    style={{
+                      fontWeight: 700,
+                      borderColor: availability === 'unavailable' ? '#DC2626' : availability === 'coming_soon' ? '#D97706' : '#059669',
+                      color: availability === 'unavailable' ? '#DC2626' : availability === 'coming_soon' ? '#B45309' : '#047857'
+                    }}
+                  >
+                    <option value="available">✓ متوفر للطلب (Available)</option>
+                    <option value="unavailable">✕ غير متوفر — يظهر بعلامة حمراء ولا يمكن طلبه (Out of Stock)</option>
+                    <option value="coming_soon">⏳ قريباً (Coming Soon)</option>
                   </select>
                 </div>
               </div>
@@ -2334,16 +2475,40 @@ export const Products = () => {
                 </div>
               </div>
 
-              {/* Toggles */}
-              <div style={{ display: 'flex', gap: '2rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} style={{ accentColor: 'var(--secondary)' }} />
-                  <strong>منتج مميز (أكثر طلباً)</strong>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} style={{ accentColor: 'var(--secondary)' }} />
-                  <strong>متاح للعرض بالمتجر</strong>
-                </label>
+              {/* Storefront Visibility & Status Control Box */}
+              <div style={{
+                border: isActive ? '1.5px solid rgba(16, 185, 129, 0.35)' : '1.5px solid rgba(220, 38, 38, 0.4)',
+                backgroundColor: isActive ? 'rgba(16, 185, 129, 0.05)' : 'rgba(220, 38, 38, 0.06)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', margin: 0 }}>
+                    <input
+                      type="checkbox"
+                      checked={isActive}
+                      onChange={(e) => setIsActive(e.target.checked)}
+                      style={{ width: '18px', height: '18px', accentColor: isActive ? '#059669' : '#DC2626' }}
+                    />
+                    <strong style={{ fontSize: '0.92rem', color: isActive ? '#047857' : '#B91C1C' }}>
+                      {isActive
+                        ? '👁️ متاح للعرض بالمتجر (يظهر للزبائن في الموقع)'
+                        : '🚫 عدم العرض في المتجر (مخفي تماماً عن الزبائن - Hide from Store)'}
+                    </strong>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', margin: 0 }}>
+                    <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--secondary)' }} />
+                    <strong style={{ fontSize: '0.85rem' }}>⭐ منتج مميز (أكثر طلباً)</strong>
+                  </label>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+                  • <strong>غير متوفر (Out of Stock):</strong> يبقى المنتج ظاهراً للزبون في المتجر بعلامة حمراء «غير متوفر» مع تعطيل زر الإضافة للسلة.<br />
+                  • <strong>إلغاء تفعيل «متاح للعرض بالمتجر» (Hide from Store):</strong> يختفي المنتج تماماً من جميع صفحات المتجر والبحث والمواد الدراسية، ويبقى محفوظاً داخل لوحة الإدارة فقط.
+                </p>
               </div>
 
               {/* Form buttons */}

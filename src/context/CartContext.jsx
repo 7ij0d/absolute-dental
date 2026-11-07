@@ -1,7 +1,15 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { isBundleProduct, getBundleDefinition } from '../utils/productInventoryEngine';
+import React, { createContext, useState, useEffect, useContext, useCallback, useMemo } from 'react';
+import {
+  isBundleProduct,
+  getBundleDefinition,
+  isProductHiddenFromStore,
+  isProductOutOfStock,
+  syncLiveProductStates,
+  applyLiveProductState
+} from '../utils/productInventoryEngine';
 import { isBoxProduct } from '../utils/boxInventoryEngine';
 import { cacheGet } from '../cache';
+import supabase from '../supabaseClient';
 
 const CartContext = createContext();
 
@@ -118,6 +126,13 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, qty = 1) => {
     setCartItems((prev) => {
+      // 0. Strict product status check: Never allow adding hidden or out-of-stock products to cart
+      const liveProd = applyLiveProductState(product);
+      if (isProductHiddenFromStore(liveProd) || isProductOutOfStock(liveProd)) {
+        console.warn('Blocked adding unavailable or hidden product to cart:', liveProd);
+        return prev;
+      }
+
       // 1. Strict box product stock check: Zero stock box variants can NEVER be added to cart
       const isBox = Boolean(product.is_box || isBoxProduct(product) || isBoxProduct(product.base_product_id));
       if (isBox) {
@@ -238,6 +253,13 @@ export const CartProvider = ({ children }) => {
       prev.map((item) => {
         const match = item.cart_line_id ? item.cart_line_id === idOrCartLineId : item.id === idOrCartLineId;
         if (!match) return item;
+        // Block increasing quantity if the product is unavailable or hidden
+        if (qty > item.quantity) {
+          const liveItem = applyLiveProductState(item);
+          if (isProductHiddenFromStore(liveItem) || isProductOutOfStock(liveItem)) {
+            return item;
+          }
+        }
         return { ...item, quantity: Math.max(1, qty) };
       })
     );
@@ -246,6 +268,86 @@ export const CartProvider = ({ children }) => {
   const clearCart = () => {
     setCartItems([]);
   };
+
+  /**
+   * Queries Supabase for live availability/visibility of all items currently in the cart.
+   * Updates live state cache and overlays live status onto cart items.
+   */
+  const refreshCartStatuses = useCallback(async () => {
+    if (!cartItems || cartItems.length === 0) return [];
+    try {
+      const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const idsSet = new Set();
+      cartItems.forEach(item => {
+        const baseId = item.base_product_id || (typeof item.id === 'string' && item.id.length > 36 && item.id.includes('-') ? item.id.substring(0, 36) : item.id);
+        if (baseId && UUID_REGEX.test(String(baseId))) idsSet.add(String(baseId));
+        const bId = item.bundle_id || item.id;
+        if (isBundleProduct(bId)) {
+          const bDef = getBundleDefinition(bId);
+          if (bDef && Array.isArray(bDef.components)) {
+            bDef.components.forEach(c => {
+              if (c.productId && UUID_REGEX.test(String(c.productId))) idsSet.add(String(c.productId));
+            });
+          }
+        }
+      });
+
+      const ids = Array.from(idsSet);
+      if (ids.length === 0) return [];
+
+      const { data: dbProds } = await supabase
+        .from('products')
+        .select('id, name_ar, name_en, price, compare_at_price, stock_quantity, availability, is_active, is_archived')
+        .in('id', ids);
+
+      if (Array.isArray(dbProds) && dbProds.length > 0) {
+        syncLiveProductStates(dbProds);
+        const dbMap = new Map(dbProds.map(p => [String(p.id), p]));
+        setCartItems(prev => {
+          let changed = false;
+          const next = prev.map(item => {
+            const baseId = item.base_product_id || (typeof item.id === 'string' && item.id.length > 36 && item.id.includes('-') ? item.id.substring(0, 36) : item.id);
+            const dbP = baseId ? dbMap.get(String(baseId)) : null;
+            if (!dbP) return item;
+            const nextAvail = dbP.availability || 'available';
+            const nextActive = dbP.is_active !== false;
+            const nextArch = Boolean(dbP.is_archived);
+            if (item.availability !== nextAvail || item.is_active !== nextActive || item.is_archived !== nextArch) {
+              changed = true;
+              return {
+                ...item,
+                availability: nextAvail,
+                is_active: nextActive,
+                is_archived: nextArch
+              };
+            }
+            return item;
+          });
+          return changed ? next : prev;
+        });
+        return dbProds;
+      }
+    } catch (err) {
+      console.warn('Cart live status check notice:', err);
+    }
+    return [];
+  }, [cartItems]);
+
+  // Automatically verify cart statuses when cart has items
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      refreshCartStatuses();
+    }
+  }, [cartItems.length]);
+
+  // Identify any items in the cart that are currently out of stock or hidden from the store
+  const unavailableCartItems = useMemo(() => {
+    return cartItems.filter(item => {
+      if (item.is_box || item.is_accessory) return false;
+      const liveItem = applyLiveProductState(item);
+      return isProductHiddenFromStore(liveItem) || isProductOutOfStock(liveItem);
+    });
+  }, [cartItems]);
 
   // Computations
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -265,6 +367,8 @@ export const CartProvider = ({ children }) => {
         updateQuantity,
         removeBundleComponent,
         clearCart,
+        refreshCartStatuses,
+        unavailableCartItems,
         subtotal,
         totalComparePrice,
         totalDiscount,

@@ -16,7 +16,12 @@ import {
   CANONICAL_MULTI_UNITS,
   getPhysicalStockBreakdown,
   getProductSizedConfig,
-  getStudentGuideInfo
+  getStudentGuideInfo,
+  syncLiveProductStates,
+  applyLiveProductState,
+  isProductHiddenFromStore,
+  isProductOutOfStock,
+  isProductComingSoon
 } from '../utils/productInventoryEngine';
 import BoxColorVariantSelector from '../components/BoxColorVariantSelector';
 import {
@@ -170,8 +175,12 @@ export const ProductDetails = () => {
 
   // Instant synchronous product lookup from catalog/boxes (0ms display)
   const initialProd = useMemo(() => {
-    const found = defaultProductsList.find(p => String(p.id) === String(cleanId) || p.slug === cleanId);
-    if (found) return found;
+    const foundRaw = defaultProductsList.find(p => String(p.id) === String(cleanId) || p.slug === cleanId);
+    if (foundRaw) {
+      const found = applyLiveProductState(foundRaw);
+      if (isProductHiddenFromStore(found)) return null;
+      return found;
+    }
     if (isBurGroupProduct(cleanId)) {
       const bg = getBurGroup(cleanId);
       if (bg) {
@@ -274,6 +283,14 @@ export const ProductDetails = () => {
           }
 
           if (prod) {
+            syncLiveProductStates([prod]);
+            if (isProductHiddenFromStore(prod)) {
+              if (isMounted) {
+                setProduct(null);
+                setLoading(false);
+              }
+              return;
+            }
             fetchedProd = prod;
             if (prod.subjects) {
               fetchedSubject = prod.subjects;
@@ -374,8 +391,9 @@ export const ProductDetails = () => {
 
         // 2. Fallback to local defaultProductsList if not found in DB
         if (!fetchedProd) {
-          const localProd = defaultProductsList.find(p => String(p.id) === String(cleanId) || p.slug === cleanId);
-          if (localProd) {
+          const localProdRaw = defaultProductsList.find(p => String(p.id) === String(cleanId) || p.slug === cleanId);
+          const localProd = localProdRaw ? applyLiveProductState(localProdRaw) : null;
+          if (localProd && !isProductHiddenFromStore(localProd)) {
             fetchedProd = localProd;
             fetchedImages = [localProd.image_url, ...(localProd.images || [])].filter(Boolean);
             if (isBundleProduct(localProd.id)) {
@@ -493,7 +511,8 @@ export const ProductDetails = () => {
 
           if (related.length === 0) {
             related = defaultProductsList
-              .filter(p => p.subject_id === fetchedProd.subject_id && String(p.id) !== String(fetchedProd.id))
+              .map(p => applyLiveProductState(p))
+              .filter(p => !isProductHiddenFromStore(p) && p.subject_id === fetchedProd.subject_id && String(p.id) !== String(fetchedProd.id))
               .slice(0, 4);
           }
         }
@@ -579,10 +598,9 @@ export const ProductDetails = () => {
   const guideInfo = getStudentGuideInfo(product?.id);
   const isGuide = Boolean(guideInfo);
   const isByOrder = product?.availability === 'by_order';
-  // Per store directive: Keep catalog items available even if stock is zero, except student guides
-  const isUnavailable = false;
-  const isComingSoon = false;
-  const isOrderable = !isGuide;
+  const isUnavailable = product ? isProductOutOfStock(product) : false;
+  const isComingSoon = product ? isProductComingSoon(product) : false;
+  const isOrderable = Boolean(product && !isGuide && !isUnavailable && !isComingSoon && !isProductHiddenFromStore(product));
 
   const selectedSizeDef = (sizedConfig && selectedSize) ? sizedConfig.sizes.find(s => s.size === selectedSize) : null;
   const isSelectedSizeUnavailable = Boolean(selectedSizeDef && (selectedSizeDef.available === false || selectedSizeDef.isUnavailable === true || selectedSizeDef.stock === 0));
@@ -1257,20 +1275,42 @@ export const ProductDetails = () => {
                 </div>
               </div>
             ) : isUnavailable ? (
-              <div
-                style={{
-                  padding: '1rem 1.25rem',
-                  borderRadius: '12px',
-                  backgroundColor: '#FEF2F2',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
-                  color: '#DC2626',
-                  fontWeight: 800,
-                  fontSize: '0.92rem',
-                  textAlign: 'center',
-                  marginTop: '0.5rem',
-                }}
-              >
-                {lang === 'ar' ? 'عذراً، هذا المنتج غير متوفر حالياً' : 'Sorry, this product is currently out of stock'}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  disabled={true}
+                  className="product-detail-add-cart-btn"
+                  style={{
+                    width: '100%',
+                    background: '#FEF2F2',
+                    color: '#DC2626',
+                    border: '1.5px solid rgba(220, 38, 38, 0.45)',
+                    cursor: 'not-allowed',
+                    boxShadow: 'none',
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <XCircle size={18} strokeWidth={2.5} />
+                  <span>{lang === 'ar' ? 'غير متوفر حالياً (لا يمكن إضافته للسلة)' : 'Out of Stock (Cannot Add to Cart)'}</span>
+                </button>
+                <div
+                  style={{
+                    padding: '0.9rem 1.25rem',
+                    borderRadius: '12px',
+                    backgroundColor: '#FEF2F2',
+                    border: '1px solid rgba(239, 68, 68, 0.25)',
+                    color: '#DC2626',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    textAlign: 'center',
+                  }}
+                >
+                  {lang === 'ar' ? 'عذراً، هذا المنتج غير متوفر حالياً بالمخزن' : 'Sorry, this product is currently out of stock'}
+                </div>
               </div>
             ) : (
               <>

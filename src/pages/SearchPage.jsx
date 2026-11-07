@@ -7,11 +7,17 @@ import ProductCard from '../components/ProductCard';
 import { groupProductsList } from '../utils/burGroupingEngine';
 import { useSiteSectionsConfig } from '../utils/siteSectionsEngine';
 import {
+  syncLiveProductStates,
+  applyLiveProductState,
+  isProductHiddenFromStore,
+  isProductOutOfStock
+} from '../utils/productInventoryEngine';
+import {
   Search, Sparkles, Layers, Package, ChevronLeft, ChevronRight,
   X, SlidersHorizontal, RotateCcw
 } from 'lucide-react';
 
-const SEARCH_COLUMNS = 'id, name_ar, name_en, description_ar, description_en, details_ar, details_en, price, compare_at_price, image_url, availability, stock_quantity, subject_id, year_id, is_bundle, discount_label_ar, discount_label_en, shared_inventory_product_id, unit_multiplier, sort_order, created_at';
+const SEARCH_COLUMNS = 'id, name_ar, name_en, description_ar, description_en, details_ar, details_en, price, compare_at_price, image_url, availability, stock_quantity, is_active, is_archived, subject_id, year_id, is_bundle, discount_label_ar, discount_label_en, shared_inventory_product_id, unit_multiplier, sort_order, created_at';
 
 export const SearchPage = ({ categoryMode = null }) => {
   const { lang, isRtl } = useLanguage();
@@ -48,18 +54,21 @@ export const SearchPage = ({ categoryMode = null }) => {
 
       setLoading(true);
       try {
-        let data = cacheGet('products:search_catalog_v2');
-        if (!data) {
-          const res = await supabase
-            .from('products')
-            .select(SEARCH_COLUMNS)
-            .eq('is_active', true)
-            .eq('is_archived', false);
-          data = res.data;
-          if (data && data.length > 0) {
-            cacheSet('products:search_catalog_v2', data, 120);
-          }
+        const res = await supabase
+          .from('products')
+          .select(SEARCH_COLUMNS);
+
+        let allRaw = res.data;
+        if (Array.isArray(allRaw) && allRaw.length > 0) {
+          syncLiveProductStates(allRaw);
+          cacheSet('products:search_catalog_v3', allRaw, 120);
+        } else {
+          allRaw = cacheGet('products:search_catalog_v3') || [];
         }
+
+        const data = (allRaw || [])
+          .map(p => applyLiveProductState(p))
+          .filter(p => !isProductHiddenFromStore(p));
 
         if (data) {
           let matched = [];
@@ -131,7 +140,9 @@ export const SearchPage = ({ categoryMode = null }) => {
   }, [location.search, categoryMode]);
 
   const filteredList = useMemo(() => {
-    let list = [...results];
+    let list = results
+      .map(p => applyLiveProductState(p))
+      .filter(p => !isProductHiddenFromStore(p));
 
     if (inPageSearch.trim()) {
       const kw = inPageSearch.trim().toLowerCase();
@@ -151,7 +162,9 @@ export const SearchPage = ({ categoryMode = null }) => {
       if (selectedStock === 'discount') {
         list = list.filter(p => p.compare_at_price && p.compare_at_price > p.price);
       } else if (selectedStock === 'available') {
-        list = list.filter(p => p.availability === 'available' || p.availability === 'by_order' || !p.availability || p.availability === 'unavailable');
+        list = list.filter(p => !isProductOutOfStock(p) && p.availability !== 'coming_soon');
+      } else if (selectedStock === 'unavailable') {
+        list = list.filter(p => isProductOutOfStock(p));
       } else {
         list = list.filter(p => p.availability === selectedStock);
       }

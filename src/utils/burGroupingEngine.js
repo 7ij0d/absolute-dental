@@ -4,6 +4,11 @@
  */
 
 import defaultProductsList from '../defaultProducts.json';
+import {
+  isProductHiddenFromStore,
+  isProductOutOfStock,
+  applyLiveProductState
+} from './productInventoryEngine';
 
 export const BUR_GROUPS = [
   {
@@ -246,9 +251,16 @@ export function groupProductsList(products = []) {
 
   // First pass: index products by ID for quick lookup
   const allProdsMap = new Map();
-  products.forEach(p => allProdsMap.set(p.id, p));
+  products.forEach(p => {
+    if (p && p.id) allProdsMap.set(p.id, applyLiveProductState(p));
+  });
 
-  for (const prod of products) {
+  for (const rawProd of products) {
+    const prod = applyLiveProductState(rawProd);
+    if (!prod || isProductHiddenFromStore(prod)) {
+      continue;
+    }
+
     const groupDef = PRODUCT_TO_GROUP_MAP.get(prod.id);
 
     if (!groupDef) {
@@ -270,17 +282,32 @@ export function groupProductsList(products = []) {
     // First time seeing this bur group: create the unified display card
     handledGroupIds.add(groupDef.groupId);
 
-    // Build the resolved options list with actual DB records
-    const resolvedOptions = groupDef.options.map(opt => {
-      const dbProd = allProdsMap.get(opt.productId) || resolveBurProduct(opt.productId, products);
-      return {
-        ...opt,
-        product: dbProd,
-        price: dbProd?.price ?? groupDef.base_price,
-        // Availability: strictly available unless specifically marked otherwise or out of stock
-        isAvailable: dbProd ? (dbProd.availability === 'available' || dbProd.availability === 'by_order' || (dbProd.stock_quantity != null && dbProd.stock_quantity > 0)) : true
-      };
-    });
+    // Build the resolved options list with actual DB records, excluding hidden options
+    const resolvedOptions = groupDef.options
+      .map(opt => {
+        const rawOptProd = allProdsMap.get(opt.productId) || resolveBurProduct(opt.productId, products);
+        const dbProd = rawOptProd ? applyLiveProductState(rawOptProd) : null;
+        if (dbProd && isProductHiddenFromStore(dbProd)) {
+          return null;
+        }
+        if (isProductHiddenFromStore(opt.productId)) {
+          return null;
+        }
+        const isAvail = dbProd ? (!isProductOutOfStock(dbProd) && !isProductHiddenFromStore(dbProd)) : true;
+        return {
+          ...opt,
+          product: dbProd,
+          price: dbProd?.price ?? groupDef.base_price,
+          isAvailable: isAvail
+        };
+      })
+      .filter(Boolean);
+
+    if (resolvedOptions.length === 0) {
+      continue;
+    }
+
+    const allOptionsUnavailable = resolvedOptions.every(o => !o.isAvailable);
 
     const groupCard = {
       id: groupDef.groupId,
@@ -295,9 +322,11 @@ export function groupProductsList(products = []) {
       matchedProductIds: [prod.id],
       matchedProducts: [prod],
       resolvedOptions,
+      allOptionsUnavailable,
+      availability: allOptionsUnavailable ? 'unavailable' : 'available',
       sort_order: prod.sort_order ?? 0,
       // Search keywords helper so user queries match the group
-      searchKeywords: `${groupDef.name_en} ${groupDef.name_ar} ${groupDef.options.map(o => `${o.code} ${o.color || ''} ${o.label_en}`).join(' ')}`
+      searchKeywords: `${groupDef.name_en} ${groupDef.name_ar} ${resolvedOptions.map(o => `${o.code} ${o.color || ''} ${o.label_en}`).join(' ')}`
     };
 
     groupItemsMap.set(groupDef.groupId, groupCard);

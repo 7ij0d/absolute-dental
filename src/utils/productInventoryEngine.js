@@ -722,9 +722,162 @@ export function getBundleSingleItemLabel(bundleOrIdOrName = '', lang = 'ar') {
   return isBur ? 'bur' : 'item';
 }
 
+const LIVE_STATES_STORAGE_KEY = 'ad_live_product_states_v1';
+let liveProductStatesCache = null;
+
+function getLiveStatesMap() {
+  if (liveProductStatesCache) return liveProductStatesCache;
+  liveProductStatesCache = new Map();
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(LIVE_STATES_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          Object.entries(parsed).forEach(([id, state]) => {
+            liveProductStatesCache.set(String(id), state);
+          });
+        }
+      }
+    } catch (_) {}
+  }
+  return liveProductStatesCache;
+}
+
 /**
- * Dynamically calculates bundle availability based on component physical stock.
- * Formula: min( Math.floor( component_stock / required_qty ) )
+ * Synchronizes authoritative product status fields from Supabase DB rows into memory + localStorage
+ * so fallback lists (defaultProducts.json, bur groups, cached pages) never resurrect hidden or out-of-stock items.
+ */
+export function syncLiveProductStates(dbProducts = []) {
+  if (!Array.isArray(dbProducts) || dbProducts.length === 0) return;
+  const map = getLiveStatesMap();
+  for (const p of dbProducts) {
+    if (!p || !p.id) continue;
+    map.set(String(p.id), {
+      is_active: p.is_active !== false,
+      is_archived: Boolean(p.is_archived),
+      availability: p.availability || 'available',
+      stock_quantity: p.stock_quantity,
+      price: p.price,
+      compare_at_price: p.compare_at_price
+    });
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      const obj = {};
+      map.forEach((val, key) => {
+        obj[key] = val;
+      });
+      localStorage.setItem(LIVE_STATES_STORAGE_KEY, JSON.stringify(obj));
+    } catch (_) {}
+  }
+}
+
+/**
+ * Overlays the latest known DB status onto a product object (e.g. from defaultProducts.json or cache).
+ */
+export function applyLiveProductState(product) {
+  if (!product || !product.id) return product;
+  const live = getLiveStatesMap().get(String(product.id));
+  if (!live) return product;
+  return {
+    ...product,
+    is_active: live.is_active,
+    is_archived: live.is_archived,
+    availability: live.availability || product.availability,
+    stock_quantity: live.stock_quantity !== undefined ? live.stock_quantity : product.stock_quantity,
+    price: live.price !== undefined ? live.price : product.price
+  };
+}
+
+/**
+ * Canonical check: Is this product hidden from the customer storefront ("عدم العرض في المتجر")?
+ * True when is_active === false, is_archived === true, or availability === 'hidden'.
+ */
+export function isProductHiddenFromStore(productOrId) {
+  if (!productOrId) return true;
+  const id = typeof productOrId === 'object' ? productOrId.id : productOrId;
+  const baseId = (typeof productOrId === 'object' && productOrId.base_product_id)
+    ? productOrId.base_product_id
+    : (typeof id === 'string' && id.length > 36 && id.includes('-') ? id.substring(0, 36) : id);
+
+  const live = baseId ? getLiveStatesMap().get(String(baseId)) : null;
+  if (live) {
+    if (live.is_active === false || live.is_archived === true || live.availability === 'hidden') {
+      return true;
+    }
+  }
+  if (typeof productOrId === 'object') {
+    if (productOrId.is_active === false) return true;
+    if (productOrId.is_archived === true) return true;
+    if (productOrId.availability === 'hidden') return true;
+  }
+  return false;
+}
+
+/**
+ * Canonical check: Is this product marked "Out of Stock / غير متوفر"?
+ * True when availability === 'unavailable' or 'out_of_stock', or when all size variants are unavailable.
+ */
+export function isProductOutOfStock(product, allProducts = null) {
+  if (!product) return true;
+  const baseId = product.base_product_id || (typeof product.id === 'string' && product.id.length > 36 && product.id.includes('-') ? product.id.substring(0, 36) : product.id);
+  const live = baseId ? getLiveStatesMap().get(String(baseId)) : null;
+  const effectiveAvailability = live?.availability || product.availability;
+
+  if (effectiveAvailability === 'unavailable' || effectiveAvailability === 'out_of_stock') {
+    return true;
+  }
+  // Check if it's a sized product where every size is unavailable
+  const sizedCfg = getProductSizedConfig(product);
+  if (sizedCfg && Array.isArray(sizedCfg.sizes) && sizedCfg.sizes.length > 0) {
+    const allSizesOut = sizedCfg.sizes.every(
+      s => s.available === false || s.isUnavailable === true || Number(s.stock) <= 0
+    );
+    if (allSizesOut) return true;
+  }
+  // Check if it's a bundle where the bundle itself or any component is unavailable
+  if (isBundleProduct(product.id)) {
+    const bundleDef = CANONICAL_BUNDLES[product.id];
+    const map = allProducts ? (allProducts instanceof Map ? allProducts : toProductMap(allProducts)) : null;
+    if (bundleDef && Array.isArray(bundleDef.components)) {
+      for (const comp of bundleDef.components) {
+        if (isProductHiddenFromStore(comp.productId)) return true;
+        const compLive = getLiveStatesMap().get(String(comp.productId));
+        if (compLive && (compLive.availability === 'unavailable' || compLive.availability === 'out_of_stock')) {
+          return true;
+        }
+        const compProd = map ? map.get(comp.productId) : null;
+        if (compProd && (compProd.availability === 'unavailable' || compProd.availability === 'out_of_stock' || compProd.is_active === false || compProd.is_archived === true)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Canonical check: Is this product marked "Coming Soon / قريباً"?
+ */
+export function isProductComingSoon(product) {
+  return Boolean(product && product.availability === 'coming_soon');
+}
+
+/**
+ * Canonical check: Can a customer order this product right now?
+ */
+export function isProductOrderable(product, allProducts = null) {
+  if (!product) return false;
+  if (isProductHiddenFromStore(product)) return false;
+  if (isProductOutOfStock(product, allProducts)) return false;
+  if (isProductComingSoon(product)) return false;
+  if (isStudentGuideProduct(product.id)) return false;
+  return true;
+}
+
+/**
+ * Dynamically calculates bundle availability based on component status and physical stock.
  */
 export function calculateBundleAvailability(bundleId, allProducts) {
   const bundle = CANONICAL_BUNDLES[bundleId];
@@ -733,11 +886,17 @@ export function calculateBundleAvailability(bundleId, allProducts) {
   const map = allProducts instanceof Map ? allProducts : toProductMap(allProducts);
 
   let normalTotalPrice = 0;
+  let anyComponentUnavailable = false;
   const componentsStatus = [];
 
   for (const comp of bundle.components) {
     const compProd = map.get(comp.productId);
-    const currentStock = compProd ? (Number(compProd.stock_quantity ?? compProd.stock) || 9999) : 9999;
+    const compOut = compProd
+      ? (compProd.availability === 'unavailable' || compProd.availability === 'out_of_stock' || compProd.is_active === false || compProd.is_archived === true)
+      : false;
+    if (compOut) anyComponentUnavailable = true;
+
+    const currentStock = compOut ? 0 : (compProd ? (Number(compProd.stock_quantity ?? compProd.stock) || 9999) : 9999);
 
     normalTotalPrice += (comp.normalPrice || (compProd ? (compProd.price || compProd.sellingPrice || 0) : 0)) * comp.quantity;
 
@@ -746,14 +905,14 @@ export function calculateBundleAvailability(bundleId, allProducts) {
       nameAr: comp.nameAr,
       nameEn: comp.nameEn,
       required: comp.quantity,
-      currentStock: Math.max(9999, currentStock),
-      possibleBundles: 9999,
-      isAvailable: true
+      currentStock: compOut ? 0 : Math.max(9999, currentStock),
+      possibleBundles: compOut ? 0 : 9999,
+      isAvailable: !compOut
     });
   }
 
-  const availableCount = 9999;
-  const isAvailable = true;
+  const isAvailable = !anyComponentUnavailable;
+  const availableCount = isAvailable ? 9999 : 0;
   const savings = Math.max(0, normalTotalPrice - bundle.bundlePrice);
 
   return {
@@ -772,11 +931,12 @@ export function calculateBundleAvailability(bundleId, allProducts) {
 
 /**
  * Computes the authoritative effective stock available for sale.
- * All catalog products (except the 3 student guide items) are always available in unlimited quantity.
  */
 export function computeEffectiveStock(product, allProducts) {
   if (!product) return 0;
   if (isStudentGuideProduct(product.id)) return 0;
+  if (isProductHiddenFromStore(product)) return 0;
+  if (isProductOutOfStock(product, allProducts)) return 0;
   return 9999;
 }
 

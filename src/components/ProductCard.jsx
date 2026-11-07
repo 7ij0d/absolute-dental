@@ -4,8 +4,17 @@ import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useStorageImage } from '../utils/storageImage';
-import { isBundleProduct, getBundleDefinition, getProductSizedConfig, getStudentGuideInfo } from '../utils/productInventoryEngine';
-import { ShoppingCart, Check, Heart, Sparkles, BookOpen, AlertCircle, Layers } from 'lucide-react';
+import {
+  isBundleProduct,
+  getBundleDefinition,
+  getProductSizedConfig,
+  getStudentGuideInfo,
+  isProductHiddenFromStore,
+  isProductOutOfStock,
+  isProductComingSoon,
+  applyLiveProductState
+} from '../utils/productInventoryEngine';
+import { ShoppingCart, Check, Heart, Sparkles, BookOpen, AlertCircle, Layers, XCircle } from 'lucide-react';
 import { BurGroupModal } from './BurGroupModal';
 import { buildProductUrl, recordProductOrigin } from '../utils/navigationTrail';
 
@@ -117,22 +126,26 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
     }
   };
 
-  const guideInfo = getStudentGuideInfo(product.id);
+  const liveProduct = useMemo(() => applyLiveProductState(product), [product]);
+  const isBurGroup = Boolean(product?.isBurGroup);
+
+  const guideInfo = getStudentGuideInfo(liveProduct?.id);
   const isGuide = Boolean(guideInfo);
-  const isOffer = isBundleProduct(product.id);
-  const isByOrder = product.availability === 'by_order';
-  // Per store directive: Keep catalog items available even if stock is zero, except special student guides
-  const isUnavailable = false;
-  const isComingSoon = false;
+  const isOffer = isBundleProduct(liveProduct?.id);
+  const isByOrder = liveProduct?.availability === 'by_order';
+  const isUnavailable = isBurGroup
+    ? Boolean(product?.allOptionsUnavailable)
+    : isProductOutOfStock(liveProduct);
+  const isComingSoon = isProductComingSoon(liveProduct);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (isGuide) {
-      navigate(`/product/${product.id}`);
+      navigate(`/product/${liveProduct.id}`);
       return;
     }
-    if (isUnavailable || isComingSoon) return;
+    if (isUnavailable || isComingSoon || isProductHiddenFromStore(liveProduct)) return;
 
     if (sizedConfig && !selectedSize) {
       setSizePrompt(true);
@@ -147,38 +160,40 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
         setTimeout(() => setSizePrompt(false), 2200);
         return;
       }
-      const variantNameEn = sizeDef?.labelEn ? `${product.name_en} (${sizeDef.labelEn})` : `${product.name_en} (Size ${selectedSize})`;
-      const variantNameAr = sizeDef?.labelAr ? `${product.name_ar} (${sizeDef.labelAr})` : `${product.name_ar} (مقاس ${selectedSize})`;
+      const variantNameEn = sizeDef?.labelEn ? `${liveProduct.name_en} (${sizeDef.labelEn})` : `${liveProduct.name_en} (Size ${selectedSize})`;
+      const variantNameAr = sizeDef?.labelAr ? `${liveProduct.name_ar} (${sizeDef.labelAr})` : `${liveProduct.name_ar} (مقاس ${selectedSize})`;
       addToCart({
-        ...product,
-        id: `${product.id}-${selectedSize}`,
-        base_product_id: product.id,
+        ...liveProduct,
+        id: `${liveProduct.id}-${selectedSize}`,
+        base_product_id: liveProduct.id,
         name_en: variantNameEn,
         name_ar: variantNameAr,
         selected_size: sizeDef?.code || selectedSize,
-        selected_color: sizeDef?.color || product.color,
-        image_url: sizeDef?.image || product.image_url,
-        quantity: 1,
-        stock_quantity: 9999,
-        effectiveStock: 9999
+        selected_color: sizeDef?.color || liveProduct.color,
+        image_url: sizeDef?.image || liveProduct.image_url,
+        quantity: 1
       });
       setJustAdded(true);
       setTimeout(() => setJustAdded(false), 1800);
       return;
     }
 
-    addToCart({ ...product, quantity: 1, isOffer, stock_quantity: 9999, effectiveStock: 9999 });
+    addToCart({ ...liveProduct, quantity: 1, isOffer });
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1800);
   };
 
-  const discountPercent = product.compare_at_price && product.compare_at_price > product.price
-    ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
+  const discountPercent = liveProduct?.compare_at_price && liveProduct?.compare_at_price > liveProduct?.price
+    ? Math.round(((liveProduct.compare_at_price - liveProduct.price) / liveProduct.compare_at_price) * 100)
     : 0;
 
-  const displayName = product.name_en || product.name_ar || 'Dental Tool';
+  const displayName = liveProduct?.name_en || liveProduct?.name_ar || 'Dental Tool';
   const [showBurModal, setShowBurModal] = useState(false);
-  const isBurGroup = Boolean(product?.isBurGroup);
+
+  // Never render products marked "Hide from Store" (عدم العرض في المتجر)
+  if (!isBurGroup && isProductHiddenFromStore(liveProduct)) {
+    return null;
+  }
 
   if (isBurGroup) {
     return (
@@ -202,18 +217,32 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
 
             {/* Group Options Count Badge */}
             <div className="product-card-badge">
-              <span
-                className="badge"
-                style={{
-                  background: 'linear-gradient(135deg, #684835, #4A3325)',
-                  color: '#fff',
-                  boxShadow: '0 2px 6px rgba(104,72,53,0.3)',
-                  gap: '0.25rem'
-                }}
-              >
-                <Layers size={11} />
-                <span>{lang === 'ar' ? `${product.resolvedOptions?.length || 2} خيارات` : `${product.resolvedOptions?.length || 2} Options`}</span>
-              </span>
+              {isUnavailable ? (
+                <span
+                  className="badge badge-unavailable"
+                  style={{
+                    background: '#DC2626',
+                    color: '#FFFFFF',
+                    boxShadow: '0 2px 8px rgba(220, 38, 38, 0.35)',
+                    fontWeight: 800
+                  }}
+                >
+                  {lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}
+                </span>
+              ) : (
+                <span
+                  className="badge"
+                  style={{
+                    background: 'linear-gradient(135deg, #684835, #4A3325)',
+                    color: '#fff',
+                    boxShadow: '0 2px 6px rgba(104,72,53,0.3)',
+                    gap: '0.25rem'
+                  }}
+                >
+                  <Layers size={11} />
+                  <span>{lang === 'ar' ? `${product.resolvedOptions?.length || 2} خيارات` : `${product.resolvedOptions?.length || 2} Options`}</span>
+                </span>
+              )}
             </div>
           </div>
 
@@ -275,8 +304,8 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
       onClick={handleCardClick}
       className="product-card"
       style={{
-        opacity: isUnavailable ? 0.72 : 1,
         cursor: 'pointer',
+        borderColor: isUnavailable ? 'rgba(220, 38, 38, 0.35)' : undefined
       }}
     >
       {/* ── IMAGE AREA ── */}
@@ -299,10 +328,26 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
               <span>{lang === 'ar' ? 'إرشاد للطلبة' : 'Student Guide'}</span>
             </span>
           )}
-          {isByOrder && <span className="badge badge-by-order" style={{ background: 'linear-gradient(135deg, #4f46e5, #3730a3)', color: '#fff', boxShadow: '0 2px 6px rgba(79,70,229,0.35)' }}>{lang === 'ar' ? 'بالطلب' : 'By Order'}</span>}
+          {isUnavailable && (
+            <span
+              className="badge badge-unavailable"
+              style={{
+                background: '#DC2626',
+                color: '#FFFFFF',
+                fontWeight: 800,
+                boxShadow: '0 2px 8px rgba(220, 38, 38, 0.38)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.25rem'
+              }}
+            >
+              <XCircle size={11} strokeWidth={2.5} />
+              <span>{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>
+            </span>
+          )}
+          {!isUnavailable && isByOrder && <span className="badge badge-by-order" style={{ background: 'linear-gradient(135deg, #4f46e5, #3730a3)', color: '#fff', boxShadow: '0 2px 6px rgba(79,70,229,0.35)' }}>{lang === 'ar' ? 'بالطلب' : 'By Order'}</span>}
           {isOffer && !isUnavailable && <span className="badge badge-discount" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff' }}>{lang === 'ar' ? 'عرض خاص' : 'Special Offer'}</span>}
-          {discountPercent > 0 && <span className="badge badge-discount tabular-nums">-{discountPercent}%</span>}
-          {isUnavailable && <span className="badge badge-unavailable">{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>}
+          {discountPercent > 0 && !isUnavailable && <span className="badge badge-discount tabular-nums">-{discountPercent}%</span>}
           {isComingSoon && <span className="badge badge-unavailable">{lang === 'ar' ? 'قريباً' : 'Soon'}</span>}
         </div>
 
@@ -327,23 +372,6 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
             <span style={{ fontSize: '0.66rem', opacity: 0.92 }}>{lang === 'ar' ? 'بالسلة' : 'in cart'}</span>
           </div>
         )}
-
-        {isUnavailable && (
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'rgba(255,255,255,0.65)',
-            backdropFilter: 'blur(2px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2,
-          }}>
-            <span className="badge badge-unavailable" style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem', fontWeight: 800 }}>
-              {lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* ── BODY AREA: English Name + Price + Add to Cart ── */}
@@ -359,23 +387,41 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
           {displayName}
         </h3>
 
-        {/* Price Row */}
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45rem', marginTop: 'auto', marginBottom: '0.75rem' }}>
-          <span className="product-card-price tabular-nums">
-            {product.price}{' '}
-            <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-              {t('cart.currency') || 'د.ل'}
+        {/* Price Row + Red Out of Stock Indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem', marginTop: 'auto', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45rem' }}>
+            <span className="product-card-price tabular-nums">
+              {liveProduct.price}{' '}
+              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                {t('cart.currency') || 'د.ل'}
+              </span>
             </span>
-          </span>
-          {product.compare_at_price && (
-            <span className="product-card-compare tabular-nums">
-              {product.compare_at_price}
+            {liveProduct.compare_at_price && (
+              <span className="product-card-compare tabular-nums">
+                {liveProduct.compare_at_price}
+              </span>
+            )}
+          </div>
+          {isUnavailable && (
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              color: '#DC2626',
+              background: '#FEF2F2',
+              border: '1px solid rgba(220, 38, 38, 0.3)',
+              padding: '2px 7px',
+              borderRadius: '999px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '3px'
+            }}>
+              ● {lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}
             </span>
           )}
         </div>
 
         {/* Size Selection Row for Sized Products (Mandatory Selection) */}
-        {sizedConfig && (
+        {sizedConfig && !isUnavailable && (
           <div
             onClick={(e) => e.stopPropagation()}
             className={`product-size-selector-bar ${sizePrompt ? 'has-error' : ''}`}
@@ -436,7 +482,7 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              navigate(`/product/${product.id}`);
+              navigate(`/product/${liveProduct.id}`);
             }}
             className="product-card-cta-btn guide-state"
           >
@@ -445,9 +491,18 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
           </button>
         ) : (
           <button
+            type="button"
             onClick={handleAddToCart}
             disabled={isUnavailable || isComingSoon}
             className={`product-card-cta-btn ${justAdded ? 'just-added' : ''} ${sizePrompt ? 'error-state' : ''}`}
+            style={isUnavailable ? {
+              background: '#FEF2F2',
+              color: '#DC2626',
+              border: '1.5px solid rgba(220, 38, 38, 0.4)',
+              cursor: 'not-allowed',
+              boxShadow: 'none',
+              fontWeight: 800
+            } : undefined}
           >
             {justAdded ? (
               <>
@@ -455,7 +510,10 @@ export const ProductCard = ({ product, subjectContext, onFavChanged }) => {
                 <span>{lang === 'ar' ? (selectedSize ? `تمت إضافة (${selectedSize})` : 'تمت الإضافة') : (selectedSize ? `Added (${selectedSize})` : 'Added')}</span>
               </>
             ) : isUnavailable ? (
-              <span>{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>
+              <>
+                <XCircle size={15} strokeWidth={2.4} />
+                <span>{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>
+              </>
             ) : isComingSoon ? (
               <span>{lang === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
             ) : sizePrompt ? (

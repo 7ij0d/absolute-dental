@@ -354,7 +354,7 @@
     "usage_instruction_image_url": null,
     "is_featured": false,
     "is_archived": false,
-    "is_active": true,
+    "is_active": false,
     "sort_order": 0,
     "created_at": "2026-11-01T13:36:31.410444+00:00",
     "image_url": "https://api.kurofangs.id.ly/storage/v1/object/public/smylodent-assets/products/1793540524912-v78hjhj.jpg",

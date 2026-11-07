@@ -30,7 +30,9 @@ export const Favorites = () => {
 
       if (data) {
         // Map elements out
-        const items = data.map((fav) => fav.products).filter(Boolean);
+        const items = data
+          .map((fav) => fav.products)
+          .filter((p) => p && p.is_active !== false && !p.is_archived);
         setProducts(items);
       }
     } catch (err) {

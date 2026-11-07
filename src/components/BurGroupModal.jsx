@@ -31,6 +31,7 @@ export const BurGroupModal = ({ isOpen, onClose, groupItem }) => {
   const handleAddToCart = (e, opt) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!opt || !opt.isAvailable) return;
 
     const productRecord = opt.product || {
       id: opt.productId,
@@ -38,15 +39,14 @@ export const BurGroupModal = ({ isOpen, onClose, groupItem }) => {
       name_ar: opt.label_ar || `${groupDef.name_ar} (${opt.code})`,
       price: opt.price || groupDef.base_price,
       image_url: opt.image || groupDef.base_image,
-      stock_quantity: 9999
+      availability: 'available'
     };
 
     const addQty = getQty(opt.productId);
 
     addToCart({
       ...productRecord,
-      quantity: addQty,
-      effectiveStock: 9999
+      quantity: addQty
     });
 
     setJustAddedIds(prev => new Set([...prev, opt.productId]));
@@ -297,6 +297,22 @@ export const BurGroupModal = ({ isOpen, onClose, groupItem }) => {
                             ● {opt.color}
                           </span>
                         )}
+
+                        {!isAvailable && (
+                          <span
+                            style={{
+                              fontSize: '0.7rem',
+                              fontWeight: 800,
+                              padding: '0.15rem 0.5rem',
+                              borderRadius: '999px',
+                              background: '#FEF2F2',
+                              color: '#DC2626',
+                              border: '1px solid rgba(220, 38, 38, 0.35)'
+                            }}
+                          >
+                            ● {lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}
+                          </span>
+                        )}
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginTop: '0.25rem' }}>
@@ -399,9 +415,26 @@ export const BurGroupModal = ({ isOpen, onClose, groupItem }) => {
                         </button>
                       </>
                     ) : (
-                      <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#DC2626', background: 'rgba(239, 68, 68, 0.08)', padding: '0.35rem 0.75rem', borderRadius: '6px' }}>
-                        {lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}
-                      </span>
+                      <button
+                        type="button"
+                        disabled={true}
+                        style={{
+                          fontSize: '0.78rem',
+                          fontWeight: 800,
+                          color: '#DC2626',
+                          background: '#FEF2F2',
+                          border: '1.5px solid rgba(220, 38, 38, 0.35)',
+                          padding: '0.42rem 0.85rem',
+                          borderRadius: '8px',
+                          cursor: 'not-allowed',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem'
+                        }}
+                      >
+                        <AlertCircle size={13} />
+                        <span>{lang === 'ar' ? 'غير متوفر' : 'Out of Stock'}</span>
+                      </button>
                     )}
                   </div>
                 </div>

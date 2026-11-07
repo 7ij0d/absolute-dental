@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
-import { Trash2, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
-import { isBundleProduct, getBundleDefinition, getBundleUnitLabel, getBundleSingleItemLabel } from '../utils/productInventoryEngine';
+import { Trash2, ShoppingBag, ArrowLeft, ArrowRight, AlertCircle, XCircle } from 'lucide-react';
+import {
+  isBundleProduct,
+  getBundleDefinition,
+  getBundleUnitLabel,
+  getBundleSingleItemLabel,
+  isProductHiddenFromStore,
+  isProductOutOfStock,
+  applyLiveProductState
+} from '../utils/productInventoryEngine';
 import { buildProductUrl, recordProductOrigin } from '../utils/navigationTrail';
 
 export const CartPage = () => {
@@ -13,6 +21,8 @@ export const CartPage = () => {
     updateQuantity,
     removeFromCart,
     removeBundleComponent,
+    refreshCartStatuses,
+    unavailableCartItems = [],
     subtotal,
     totalComparePrice,
     totalDiscount,
@@ -21,6 +31,12 @@ export const CartPage = () => {
     cancelEditingOrder
   } = useCart();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (typeof refreshCartStatuses === 'function') {
+      refreshCartStatuses();
+    }
+  }, []);
 
   if (cartItems.length === 0) {
     return (
@@ -102,6 +118,8 @@ export const CartPage = () => {
         {/* Items List Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {cartItems.map((item) => {
+            const liveItem = applyLiveProductState(item);
+            const isItemUnavailable = !item.is_box && !item.is_accessory && (isProductHiddenFromStore(liveItem) || isProductOutOfStock(liveItem));
             const originalPrice = item.compare_at_price || item.price;
             const itemKey = item.cart_line_id || item.id;
             const isOffer = item.is_bundle || isBundleProduct(item.bundle_id || item.id);
@@ -118,8 +136,10 @@ export const CartPage = () => {
                   gridTemplateColumns: '80px 1fr auto',
                   alignItems: 'start',
                   gap: '1rem',
-                  backgroundColor: 'var(--surface-color)',
-                  border: isOffer ? '1.5px solid rgba(128, 0, 32, 0.35)' : undefined
+                  backgroundColor: isItemUnavailable ? '#FEF2F2' : 'var(--surface-color)',
+                  border: isItemUnavailable
+                    ? '1.5px solid #DC2626'
+                    : (isOffer ? '1.5px solid rgba(128, 0, 32, 0.35)' : undefined)
                 }}
               >
                 
@@ -140,7 +160,7 @@ export const CartPage = () => {
                       to={buildProductUrl(item.base_product_id || (typeof item.id === 'string' && item.id.includes('-') && item.id.length > 36 ? item.id.substring(0, 36) : item.id), { from: 'cart' })}
                       state={{ from: '/cart', returnPath: '/cart' }}
                       onClick={() => recordProductOrigin(item.base_product_id || item.id, { from: 'cart', returnPath: '/cart' })}
-                      style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}
+                      style={{ fontWeight: 800, fontSize: '1rem', color: isItemUnavailable ? '#991B1B' : 'var(--text-main)' }}
                       className="product-title-link"
                     >
                       {isRtl ? item.name_ar : item.name_en}
@@ -150,7 +170,21 @@ export const CartPage = () => {
                         🎁 {isRtl ? 'بكج متكامل' : 'Complete Bundle'}
                       </span>
                     )}
+                    {isItemUnavailable && (
+                      <span style={{ fontSize: '0.72rem', backgroundColor: '#DC2626', color: '#FFFFFF', padding: '2px 8px', borderRadius: '999px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                        <XCircle size={12} />
+                        <span>{isRtl ? 'غير متوفر حالياً' : 'Out of Stock'}</span>
+                      </span>
+                    )}
                   </div>
+
+                  {isItemUnavailable && (
+                    <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 700, color: '#DC2626' }}>
+                      {isRtl
+                        ? '⚠️ هذا المنتج غير متوفر حالياً بالمخزن — يرجى إزالته من السلة لإتمام الطلب.'
+                        : '⚠️ This product is currently out of stock — please remove it to complete checkout.'}
+                    </p>
+                  )}
 
                   <p style={{ fontSize: '0.9rem', color: 'var(--secondary)', fontWeight: 800, margin: 0 }}>
                     {item.price} {t('cart.currency')}
@@ -160,17 +194,29 @@ export const CartPage = () => {
                       </span>
                     )}
                   </p>
-                  {item.availability === 'by_order' && (
+                  {item.availability === 'by_order' && !isItemUnavailable && (
                     <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(79, 70, 229, 0.1)', color: '#4F46E5', border: '1px solid rgba(79, 70, 229, 0.25)', padding: '2px 8px', borderRadius: '6px', fontWeight: 700, width: 'fit-content' }}>
                       {isRtl ? '📦 متوفر بالطلب' : '📦 By Order'}
                     </span>
                   )}
 
                   {/* Quantity adjuster */}
-                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', width: 'fit-content', marginTop: '0.2rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', width: 'fit-content', marginTop: '0.2rem', background: '#FFFFFF' }}>
                     <button onClick={() => updateQuantity(itemKey, item.quantity - 1)} style={{ padding: '0.25rem 0.65rem', fontSize: '0.85rem', fontWeight: 'bold' }}>-</button>
                     <span style={{ width: '34px', textAlign: 'center', fontSize: '0.88rem', fontWeight: 800 }}>{item.quantity}</span>
-                    <button onClick={() => updateQuantity(itemKey, item.quantity + 1)} style={{ padding: '0.25rem 0.65rem', fontSize: '0.85rem', fontWeight: 'bold' }}>+</button>
+                    <button
+                      onClick={() => updateQuantity(itemKey, item.quantity + 1)}
+                      disabled={isItemUnavailable}
+                      style={{
+                        padding: '0.25rem 0.65rem',
+                        fontSize: '0.85rem',
+                        fontWeight: 'bold',
+                        opacity: isItemUnavailable ? 0.35 : 1,
+                        cursor: isItemUnavailable ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      +
+                    </button>
                   </div>
 
                   {/* Bundle Components List with Individual Removal */}
@@ -298,13 +344,75 @@ export const CartPage = () => {
 
             </div>
 
+            {unavailableCartItems.length > 0 && (
+              <div style={{
+                padding: '0.85rem 1rem',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: '#FEF2F2',
+                border: '1.5px solid #DC2626',
+                color: '#991B1B',
+                fontSize: '0.83rem',
+                fontWeight: 700,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#DC2626', fontWeight: 800 }}>
+                  <AlertCircle size={16} />
+                  <span>
+                    {isRtl
+                      ? `يوجد (${unavailableCartItems.length}) منتج غير متوفر حالياً في سلتك`
+                      : `There are (${unavailableCartItems.length}) unavailable items in your cart`}
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontWeight: 600, lineHeight: 1.45 }}>
+                  {isRtl
+                    ? 'لا يمكن إتمام الطلب وسلتك تحتوي على منتج غير متوفر. يرجى حذفه للمتابعة:'
+                    : 'Cannot proceed to checkout while unavailable items are in your cart:'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    unavailableCartItems.forEach(it => removeFromCart(it.cart_line_id || it.id));
+                  }}
+                  style={{
+                    background: '#DC2626',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '0.45rem 0.75rem',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isRtl ? '🗑️ إزالة المنتجات غير المتوفرة تلقائياً' : '🗑️ Remove Unavailable Items'}
+                </button>
+              </div>
+            )}
+
             {/* Proceed to checkout */}
             <button
-              onClick={() => navigate('/checkout')}
+              onClick={() => {
+                if (unavailableCartItems.length > 0) return;
+                navigate('/checkout');
+              }}
+              disabled={unavailableCartItems.length > 0}
               className="btn btn-secondary"
-              style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem', fontWeight: 800 }}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                marginTop: '0.5rem',
+                fontWeight: 800,
+                background: unavailableCartItems.length > 0 ? '#FEE2E2' : undefined,
+                color: unavailableCartItems.length > 0 ? '#991B1B' : undefined,
+                border: unavailableCartItems.length > 0 ? '1.5px solid #DC2626' : undefined,
+                cursor: unavailableCartItems.length > 0 ? 'not-allowed' : 'pointer'
+              }}
             >
-              {isEditingOrder
+              {unavailableCartItems.length > 0
+                ? (isRtl ? '⚠️ أزل المنتجات غير المتوفرة للمتابعة' : '⚠️ Remove Unavailable Items First')
+                : isEditingOrder
                 ? (isRtl ? 'مراجعة وإرسال التعديل ➔' : 'Review & Submit Modified Order ➔')
                 : t('cart.checkout')}
             </button>

@@ -8,7 +8,15 @@ import InvoiceView from '../components/InvoiceView';
 import { CheckCircle2, FileText, MapPin, Truck, HelpCircle, Phone, Clock, Calendar } from 'lucide-react';
 import MapPicker from '../components/MapPicker';
 import { createEditHistoryEntry, buildUpdatedStatusNote } from '../utils/orderEditHelper';
-import { isBundleProduct, getBundleDefinition, calculateBundleAvailability, calculateOrderDeductions } from '../utils/productInventoryEngine';
+import {
+  isBundleProduct,
+  getBundleDefinition,
+  calculateBundleAvailability,
+  calculateOrderDeductions,
+  syncLiveProductStates,
+  isProductHiddenFromStore,
+  isProductOutOfStock
+} from '../utils/productInventoryEngine';
 import { isBoxProduct, fetchCanonicalBoxInventory } from '../utils/boxInventoryEngine';
 import {
   DELIVERY_TIME_SLOTS,
@@ -80,7 +88,7 @@ const TRIPOLI_STREETS = [
 
 export const CheckoutPage = () => {
   const { t, isRtl, lang } = useLanguage();
-  const { cartItems, subtotal, totalDiscount, clearCart, isEditingOrder, editingOrder, cancelEditingOrder } = useCart();
+  const { cartItems, subtotal, totalDiscount, clearCart, isEditingOrder, editingOrder, cancelEditingOrder, unavailableCartItems = [], refreshCartStatuses } = useCart();
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
@@ -220,10 +228,20 @@ export const CheckoutPage = () => {
       }
 
       const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const extractBaseUuid = (rawId) => {
+        const s = String(rawId || '');
+        if (UUID_REGEX.test(s)) return s;
+        if (s.length >= 36 && UUID_REGEX.test(s.substring(0, 36))) return s.substring(0, 36);
+        return '';
+      };
+
       const productIdsSet = new Set();
       cartItems
-        .filter(item => !item.is_accessory && UUID_REGEX.test(String(item.id || '')))
-        .forEach(item => productIdsSet.add(item.id));
+        .filter(item => !item.is_accessory)
+        .forEach(item => {
+          const baseId = extractBaseUuid(item.base_product_id || item.id);
+          if (baseId) productIdsSet.add(baseId);
+        });
 
       // Also gather all bundle component IDs so component stocks are fetched
       cartItems.forEach(item => {
@@ -241,17 +259,55 @@ export const CheckoutPage = () => {
       const dbProductsMap = new Map();
       const masterMap = new Map();
 
-      // 0. Batch Pre-flight: validate stock is sufficient in 1 single batch query
+      // 0. Batch Pre-flight: validate product availability, visibility, and stock in 1 single batch query
       if (productIds.length > 0) {
         const { data: dbProducts, error: prodFetchErr } = await supabase
           .from('products')
-          .select('id, name_ar, availability, stock_quantity, shared_inventory_product_id, unit_multiplier')
+          .select('id, name_ar, name_en, availability, stock_quantity, is_active, is_archived, shared_inventory_product_id, unit_multiplier')
           .in('id', productIds);
 
         if (prodFetchErr) throw prodFetchErr;
 
         if (dbProducts) {
+          syncLiveProductStates(dbProducts);
           dbProducts.forEach(p => dbProductsMap.set(p.id, p));
+        }
+
+        // Strict pre-flight check: reject order if any item in the cart is Out of Stock or Hidden from Store
+        const offendingItems = [];
+        for (const item of cartItems) {
+          if (item.is_accessory) continue;
+          const baseId = extractBaseUuid(item.base_product_id || item.id);
+          const dbProd = baseId ? dbProductsMap.get(baseId) : null;
+
+          if (dbProd && (isProductHiddenFromStore(dbProd) || isProductOutOfStock(dbProd))) {
+            offendingItems.push(lang === 'ar' ? (dbProd.name_ar || item.name_ar || item.name_en) : (dbProd.name_en || item.name_en || item.name_ar));
+            continue;
+          }
+
+          const bId = item.bundle_id || item.id;
+          if (isBundleProduct(bId)) {
+            const bDef = getBundleDefinition(bId);
+            if (bDef && Array.isArray(bDef.components)) {
+              const hasUnavailableComp = bDef.components.some(c => {
+                const compProd = dbProductsMap.get(c.productId);
+                return compProd && (isProductHiddenFromStore(compProd) || isProductOutOfStock(compProd));
+              });
+              if (hasUnavailableComp) {
+                offendingItems.push(lang === 'ar' ? (item.name_ar || item.name_en) : (item.name_en || item.name_ar));
+              }
+            }
+          }
+        }
+
+        if (offendingItems.length > 0) {
+          if (typeof refreshCartStatuses === 'function') refreshCartStatuses();
+          const namesStr = offendingItems.join(' ، ');
+          throw new Error(
+            lang === 'ar'
+              ? `عذراً، المنتج (${namesStr}) أصبح غير متوفر حالياً ولا يمكن إتمام الطلب وهو داخل السلة. يرجى العودة إلى السلة وإزالته أولاً.`
+              : `Sorry, (${namesStr}) is currently out of stock and cannot be ordered. Please return to your cart and remove it first.`
+          );
         }
 
         // Fetch master linked products if any
@@ -468,16 +524,14 @@ export const CheckoutPage = () => {
                 const deduct = d.deductUnits * mult;
                 const newMasterQty = Math.max(0, (master.stock_quantity || 0) - deduct);
                 master.stock_quantity = newMasterQty;
-                const availability = 'available';
                 syncTasks.push(
-                  supabase.from('products').update({ stock_quantity: newMasterQty, availability }).eq('id', master.id)
+                  supabase.from('products').update({ stock_quantity: newMasterQty }).eq('id', master.id)
                 );
               }
             } else {
               const newQty = Math.max(0, (prodData.stock_quantity || 0) - d.deductUnits);
-              const availability = 'available';
               syncTasks.push(
-                supabase.from('products').update({ stock_quantity: newQty, availability }).eq('id', d.productId)
+                supabase.from('products').update({ stock_quantity: newQty }).eq('id', d.productId)
               );
             }
           }
@@ -1151,12 +1205,44 @@ export const CheckoutPage = () => {
             />
           </div>
 
+          {unavailableCartItems.length > 0 && (
+            <div style={{
+              backgroundColor: 'rgba(220, 38, 38, 0.08)',
+              border: '1.5px solid rgba(220, 38, 38, 0.35)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.9rem 1rem',
+              color: '#B91C1C',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              marginTop: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem'
+            }}>
+              <span>
+                {lang === 'ar'
+                  ? `⚠️ تنبيه: تحتوي سلتك على منتج غير متوفر حالياً (${unavailableCartItems.map(i => i.name_ar || i.name_en).join(' ، ')}). لا يمكن إتمام الطلب حتى يتم إزالته من السلة.`
+                  : `⚠️ Notice: Your cart contains an out-of-stock item (${unavailableCartItems.map(i => i.name_en || i.name_ar).join(', ')}). Please remove it from your cart to place your order.`}
+              </span>
+              <Link to="/cart" className="btn btn-outline" style={{ alignSelf: 'flex-start', borderColor: '#DC2626', color: '#DC2626', padding: '0.35rem 0.85rem', fontSize: '0.8rem', fontWeight: 800 }}>
+                {lang === 'ar' ? 'العودة إلى السلة لإزالته' : 'Return to Cart to Remove'}
+              </Link>
+            </div>
+          )}
+
           {/* Checkout Submit trigger */}
           <button
             type="submit"
-            disabled={submitting || cartItems.length === 0}
+            disabled={submitting || cartItems.length === 0 || unavailableCartItems.length > 0}
             className="btn btn-secondary"
-            style={{ padding: '0.8rem', fontSize: '1rem', width: '100%', marginTop: '1rem', fontWeight: 800 }}
+            style={{
+              padding: '0.8rem',
+              fontSize: '1rem',
+              width: '100%',
+              marginTop: '1rem',
+              fontWeight: 800,
+              ...(unavailableCartItems.length > 0 ? { backgroundColor: '#9CA3AF', borderColor: '#9CA3AF', cursor: 'not-allowed', opacity: 0.7 } : {})
+            }}
           >
             {submitting
               ? (isRtl ? 'جاري إرسال التعديل...' : 'Submitting Changes...')

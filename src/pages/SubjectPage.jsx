@@ -29,6 +29,12 @@ import { groupProductsList } from '../utils/burGroupingEngine';
 import { getSubjectProductGroups } from '../utils/subjectGroupEngine';
 import { sanitizeCourseBannerUrl, getCanonicalCourse } from '../utils/courseBannersEngine';
 import {
+  syncLiveProductStates,
+  applyLiveProductState,
+  isProductHiddenFromStore,
+  isProductOutOfStock
+} from '../utils/productInventoryEngine';
+import {
   SlidersHorizontal, ChevronLeft, ChevronRight,
   Package, Search, X, RotateCcw, Layers, Sparkles,
   Disc, Wrench, Flame, Droplets, ShieldCheck, Box
@@ -176,22 +182,30 @@ export const SubjectPage = () => {
   );
 
   const lookupSlug = slug === 'operative-dentistry' ? 'restorative-dentistry' : slug;
-  const CACHE_KEY = `subject_v46:${slug}`;
+  const CACHE_KEY = `subject_v48:${slug}`;
 
   // Instant synchronous initialization: check cache, then compute from local defaults (0ms load)
   const initialPayload = useMemo(() => {
     const cached = cacheGet(CACHE_KEY);
     if (cached && Array.isArray(cached.prods) && cached.prods.length > 0) {
-      return cached;
+      const liveCachedProds = cached.prods
+        .map(p => applyLiveProductState(p))
+        .filter(p => !isProductHiddenFromStore(p));
+      return { ...cached, prods: liveCachedProds };
     }
     const sub = DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) || DEFAULT_SUBJECTS[0];
     const yr = DEFAULT_YEARS.find(y => String(y.id) === String(sub.year_id)) || DEFAULT_YEARS[0];
-    const seeded = defaultProductsList.filter(p =>
-      p.subject_id === sub.id ||
-      p.all_subjects === true ||
-      p.discount_label_en === 'universal' ||
-      (Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.includes(sub.id))
-    );
+    const seeded = defaultProductsList
+      .map(p => applyLiveProductState(p))
+      .filter(p =>
+        !isProductHiddenFromStore(p) &&
+        (
+          p.subject_id === sub.id ||
+          p.all_subjects === true ||
+          p.discount_label_en === 'universal' ||
+          (Array.isArray(p.extra_subject_ids) && p.extra_subject_ids.includes(sub.id))
+        )
+      );
     for (const p of seeded) {
       const subsSet = new Set();
       if (p.subject_id) subsSet.add(p.subject_id);
@@ -238,12 +252,20 @@ export const SubjectPage = () => {
 
     const fetchAndCache = async () => {
       try {
-        // Fast parallel fetch: subject + active products + product_subjects junction in 1 network trip
-        const [{ data: subjectRes }, { data: allDbProds }, { data: allJunctions }] = await Promise.all([
+        // Fast parallel fetch: subject + ALL DB products (to track hidden/archived IDs) + product_subjects junction
+        const [{ data: subjectRes }, { data: allDbProdsRaw }, { data: allJunctions }] = await Promise.all([
           supabase.from('subjects').select('*, years(*)').or(`slug.eq.${slug},slug.eq.${lookupSlug}`).maybeSingle(),
-          supabase.from('products').select('*').eq('is_active', true).eq('is_archived', false),
+          supabase.from('products').select('*'),
           supabase.from('product_subjects').select('product_id, subject_id')
         ]);
+
+        // Synchronize live states for all DB products so hidden/out-of-stock statuses are globally authoritative
+        if (Array.isArray(allDbProdsRaw) && allDbProdsRaw.length > 0) {
+          syncLiveProductStates(allDbProdsRaw);
+        }
+
+        const allKnownDbIds = new Set((allDbProdsRaw || []).map(p => p.id));
+        const allDbProds = (allDbProdsRaw || []).filter(p => p.is_active !== false && !p.is_archived);
 
         const subject = subjectRes ||
           DEFAULT_SUBJECTS.find(s => s.slug === slug || s.slug === lookupSlug) ||
@@ -285,11 +307,11 @@ export const SubjectPage = () => {
           }
         }
 
-        // Merge any seeded defaults not yet in DB
+        // Merge any seeded defaults ONLY if they do not exist in the DB at all (never resurrect hidden DB products!)
         const existingIds = new Set(allProds.map(p => p.id));
         const defaultsForSub = defaultProductsList.filter(p =>
-          p.is_active !== false &&
-          !p.is_archived &&
+          !allKnownDbIds.has(p.id) &&
+          !isProductHiddenFromStore(p) &&
           (
             p.subject_id === subject.id ||
             p.all_subjects === true ||
@@ -303,13 +325,13 @@ export const SubjectPage = () => {
             if (dp.subject_id) subsSet.add(dp.subject_id);
             if (Array.isArray(dp.extra_subject_ids)) dp.extra_subject_ids.forEach(id => subsSet.add(id));
             dp.assigned_subject_ids = Array.from(subsSet);
-            allProds.push(dp);
+            allProds.push(applyLiveProductState(dp));
             existingIds.add(dp.id);
           }
         }
 
         const bundle = { subject, year: year || null, prods: allProds };
-        cacheSet(CACHE_KEY, bundle, 86400); // 24 hours persistent cache
+        cacheSet(CACHE_KEY, bundle, 300); // 5 minutes cache + instant revalidation on every mount
         applyData(bundle);
       } catch (err) {
         console.warn('SubjectPage background refresh notice:', err);
@@ -321,7 +343,9 @@ export const SubjectPage = () => {
 
   // Real-time filtering and sorting calculation (direct unified product list)
   const filteredList = useMemo(() => {
-    let list = [...products];
+    let list = products
+      .map(p => applyLiveProductState(p))
+      .filter(p => !isProductHiddenFromStore(p));
 
     // Live search filter
     if (inPageSearch.trim()) {
@@ -340,7 +364,9 @@ export const SubjectPage = () => {
       if (selectedStock === 'discount') {
         list = list.filter(p => p.compare_at_price && p.compare_at_price > p.price);
       } else if (selectedStock === 'available') {
-        list = list.filter(p => p.availability === 'available' || p.availability === 'by_order' || !p.availability || p.availability === 'unavailable');
+        list = list.filter(p => !isProductOutOfStock(p) && p.availability !== 'coming_soon');
+      } else if (selectedStock === 'unavailable') {
+        list = list.filter(p => isProductOutOfStock(p));
       } else {
         list = list.filter(p => p.availability === selectedStock);
       }

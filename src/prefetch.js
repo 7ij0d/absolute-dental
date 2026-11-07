@@ -4,6 +4,7 @@
  */
 import { supabase } from './supabaseClient';
 import { cacheGet, cacheSet } from './cache';
+import { syncLiveProductStates, isProductHiddenFromStore } from './utils/productInventoryEngine';
 
 const TTL = 86400; // 24 hours
 
@@ -71,22 +72,24 @@ export function fetchSharedSubjects() {
 
 export function fetchSharedActiveProducts() {
   const cached = cacheGet('products:all');
-  if (cached) return Promise.resolve(cached);
+  if (cached) {
+    return Promise.resolve(cached.filter((p) => !isProductHiddenFromStore(p)));
+  }
   if (productsPromise) return productsPromise;
 
   productsPromise = supabase
     .from('products')
     .select('*')
-    .eq('is_active', true)
-    .eq('is_archived', false)
     .order('sort_order', { ascending: true })
     .then(({ data, error }) => {
       productsPromise = null;
       if (!error && data?.length) {
-        cacheSet('products:all', data, TTL);
-        const featured = data.filter((p) => p.is_featured);
-        cacheSet('products:featured', featured, TTL);
-        return data;
+        syncLiveProductStates(data);
+        const activeList = data.filter((p) => p.is_active !== false && !p.is_archived);
+        cacheSet('products:all', activeList, 300);
+        const featured = activeList.filter((p) => p.is_featured);
+        cacheSet('products:featured', featured, 300);
+        return activeList;
       }
       return [];
     })
