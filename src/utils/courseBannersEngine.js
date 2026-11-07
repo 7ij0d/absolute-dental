@@ -1,5 +1,5 @@
 import supabase from '../supabaseClient';
-import { cacheSet, cacheInvalidate } from '../cache';
+import { cacheSet, clearSubjectCaches } from '../cache';
 
 // Default Studio Artworks (Faded WebP & PNG)
 import dentalAnatomyWebp from '../assets/images/dental-anatomy-faded.webp';
@@ -460,9 +460,7 @@ export async function uploadCourseBannerImage(file, courseSlug = 'course') {
  */
 export function invalidateCourseBannersCache(updatedSubjects = null) {
   try {
-    cacheInvalidate('subjects:');
-    cacheInvalidate('year_v5:');
-    cacheInvalidate('subject_v');
+    clearSubjectCaches();
   } catch (_) {}
 
   try {
