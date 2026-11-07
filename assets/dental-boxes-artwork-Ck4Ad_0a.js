@@ -1,0 +1,1 @@
+var e=``+new URL(`dental-boxes-artwork-sPCTV3Yd.png`,import.meta.url).href;export{e as t};

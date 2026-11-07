@@ -1,0 +1,1 @@
+var e=``+new URL(`other-supplies-artwork-D04Ph4-H.png`,import.meta.url).href;export{e as t};
