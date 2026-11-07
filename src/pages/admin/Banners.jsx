@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
 import { invalidateSiteSectionsConfigCache } from '../../utils/siteSectionsEngine';
@@ -310,13 +311,23 @@ export const Banners = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }} className="animate-fade-in">
-      <div>
-        <h1 style={{ fontSize: '1.55rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '0.35rem' }}>
-          إدارة الهيرو وبانرات الأقسام الرئيسية / Site Heroes & Banners
-        </h1>
-        <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', margin: 0 }}>
-          تحكم كامل في صور الهيرو، البطاقات الرئيسية، والعناوين التوضيحية لجميع أقسام المتجر (بالإضافة لصور المواد والسنوات من قسم «المواد»).
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.55rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '0.35rem' }}>
+            إدارة الهيرو وبانرات الأقسام الرئيسية / Site Heroes & Banners
+          </h1>
+          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', margin: 0 }}>
+            تحكم كامل في صور الهيرو، البطاقات الرئيسية، والعناوين التوضيحية لجميع أقسام المتجر.
+          </p>
+        </div>
+        <Link
+          to="/admin/course-banners"
+          className="btn btn-secondary"
+          style={{ padding: '0.6rem 1.15rem', fontSize: '0.84rem', fontWeight: 800, gap: '0.45rem' }}
+        >
+          <ImageIcon size={16} />
+          <span>Manage Course Banners / بانرات المواد الدراسية</span>
+        </Link>
       </div>
 
       {savedNotice && (

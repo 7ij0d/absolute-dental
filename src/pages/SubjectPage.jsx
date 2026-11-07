@@ -27,6 +27,7 @@ import { cacheGet, cacheSet } from '../cache';
 import defaultProductsList from '../defaultProducts.json';
 import { groupProductsList } from '../utils/burGroupingEngine';
 import { getSubjectProductGroups } from '../utils/subjectGroupEngine';
+import { sanitizeCourseBannerUrl, getCanonicalCourse } from '../utils/courseBannersEngine';
 import {
   SlidersHorizontal, ChevronLeft, ChevronRight,
   Package, Search, X, RotateCcw, Layers, Sparkles,
@@ -664,7 +665,11 @@ export const SubjectPage = () => {
             }}
           >
             <img
-              src={subjectData?.image_url || getSubjectArtwork(slug || lookupSlug)}
+              src={
+                sanitizeCourseBannerUrl(subjectData?.image_url) ||
+                getCanonicalCourse(subjectData?.id || slug || lookupSlug)?.default_png ||
+                getSubjectArtwork(slug || lookupSlug)
+              }
               alt=""
               style={{
                 height: '100%',

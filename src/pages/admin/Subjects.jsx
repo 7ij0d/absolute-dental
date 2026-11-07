@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
 import { Plus, Edit, Trash2, X, PlusCircle, ToggleLeft, ToggleRight } from 'lucide-react';
@@ -332,14 +333,19 @@ export const Subjects = () => {
 
       {activeTab === 'subjects' ? (
         <>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
             <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>
               إدارة المواد الدراسية / Manage Subjects
             </h1>
-            <button onClick={openAddModal} className="btn btn-secondary" style={{ gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
-              <PlusCircle size={16} />
-              إضافة مادة جديدة
-            </button>
+            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <Link to="/admin/course-banners" className="btn btn-outline" style={{ gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 800 }}>
+                🖼️ Manage Course Banners / تعديل بانرات المواد
+              </Link>
+              <button onClick={openAddModal} className="btn btn-secondary" style={{ gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+                <PlusCircle size={16} />
+                إضافة مادة جديدة
+              </button>
+            </div>
           </div>
 
           {loading ? (

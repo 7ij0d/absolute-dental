@@ -45,6 +45,7 @@ const Dashboard = lazyPage(() => import('./pages/admin/Dashboard'));
 const Orders = lazyPage(() => import('./pages/admin/Orders'));
 const Products = lazyPage(() => import('./pages/admin/Products'));
 const Subjects = lazyPage(() => import('./pages/admin/Subjects'));
+const CourseBanners = lazyPage(() => import('./pages/admin/CourseBanners'));
 const Banners = lazyPage(() => import('./pages/admin/Banners'));
 const Settings = lazyPage(() => import('./pages/admin/Settings'));
 const Messages = lazyPage(() => import('./pages/admin/Messages'));
@@ -187,6 +188,7 @@ export const App = () => {
             <Route path="experiences" element={<StudentExperiences />} />
             <Route path="products" element={<Products />} />
             <Route path="subjects" element={<Subjects />} />
+            <Route path="course-banners" element={<CourseBanners />} />
             <Route path="banners" element={<Banners />} />
             <Route path="settings" element={<Settings />} />
             <Route path="messages" element={<Messages />} />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import {
@@ -10,7 +10,6 @@ import {
   Image,
   Inbox,
   Settings,
-  ShieldAlert,
   ArrowLeft,
   ArrowRight,
   UserCheck,
@@ -19,11 +18,12 @@ import {
   Gift,
   Sparkles,
   MessageSquare,
-  Box
+  Box,
+  Layers
 } from 'lucide-react';
 
 export const AdminLayout = () => {
-  const { user, profile, signIn, signOut, loading } = useAuth();
+  const { user, signIn, signOut, loading } = useAuth();
   const { isRtl } = useLanguage();
   const location = useLocation();
 
@@ -55,7 +55,6 @@ export const AdminLayout = () => {
       localStorage.setItem('admin_pin', '9922');
       localStorage.setItem('admin_passcode', '9922');
       setPasscode('9922');
-      // Sign into Supabase so admin DB queries work (RLS requires auth)
       try { await signIn('admin@smylodent.com', 'admin123'); } catch (_) {}
       setLoginLoading(false);
     } else {
@@ -139,12 +138,13 @@ export const AdminLayout = () => {
   const menuItems = [
     { path: '/admin', label: isRtl ? 'الرئيسية' : 'Dashboard', icon: LayoutDashboard },
     { path: '/admin/orders', label: isRtl ? 'الطلبات' : 'Orders', icon: ShoppingCart },
-    { path: '/admin/product-requests', label: isRtl ? 'طلبات توفير المنتجات' : 'Product Requests', icon: Sparkles },
-    { path: '/admin/experiences', label: isRtl ? 'تجارب الطلبة' : 'Student Experiences', icon: MessageSquare },
+    { path: '/admin/course-banners', label: isRtl ? 'بانرات المواد (Manage Course Banners)' : 'Manage Course Banners', icon: Image },
     { path: '/admin/products', label: isRtl ? 'المنتجات وأماكنها' : 'Products & Placements', icon: Package },
     { path: '/admin/subjects', label: isRtl ? 'المواد والسنوات' : 'Subjects & Years', icon: BookOpen },
+    { path: '/admin/banners', label: isRtl ? 'الهيرو وبانرات الأقسام' : 'Site Heroes & Banners', icon: Layers },
+    { path: '/admin/product-requests', label: isRtl ? 'طلبات توفير المنتجات' : 'Product Requests', icon: Sparkles },
+    { path: '/admin/experiences', label: isRtl ? 'تجارب الطلبة' : 'Student Experiences', icon: MessageSquare },
     { path: '/admin/users', label: isRtl ? 'إدارة المستخدمين' : 'User Management', icon: Users },
-    { path: '/admin/banners', label: isRtl ? 'الهيرو وبانرات الأقسام' : 'Heroes & Banners', icon: Image },
     { path: '/admin/messages', label: isRtl ? 'الرسائل' : 'Messages', icon: Inbox },
     { path: '/admin/donations', label: isRtl ? 'التبرعات' : 'Donations', icon: Gift },
     { path: '/admin/requests', label: isRtl ? 'نواقص الطلاب' : 'Student Needs', icon: Lock },
