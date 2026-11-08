@@ -3,34 +3,61 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import supabase from '../../supabaseClient';
 import { normalizeOrderStatus } from '../../utils/orderEditHelper';
-import { DollarSign, ShoppingBag, Box, Inbox, Star, Flame, Eye } from 'lucide-react';
+import { DollarSign, ShoppingBag, Box, Inbox, Flame } from 'lucide-react';
 
 export const Dashboard = () => {
   const { t, lang } = useLanguage();
-  
-  // Dashboard Metrics
-  const [stats, setStats] = useState({
-    sales: 0,
-    ordersCount: 0,
-    productsCount: 0,
-    messagesCount: 0
+
+  // Initialize from cache for instant 0ms opening on mobile
+  const [stats, setStats] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_dashboard_stats_v2');
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    return { sales: 0, ordersCount: 0, productsCount: 0, messagesCount: 0 };
   });
-  const [recentOrders, setRecentOrders] = useState([]);
-  const [popularProducts, setPopularProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [recentOrders, setRecentOrders] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_dashboard_recent_v2');
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    return [];
+  });
+  const [popularProducts, setPopularProducts] = useState(() => {
+    try {
+      const cached = localStorage.getItem('abs_admin_dashboard_popular_v2');
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    return [];
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !localStorage.getItem('abs_admin_dashboard_stats_v2');
+    } catch (_) {
+      return true;
+    }
+  });
 
   useEffect(() => {
+    let mounted = true;
     const loadDashboardStats = async () => {
-      setLoading(true);
       try {
-        // 1. Fetch orders
-        const { data: orders } = await supabase.from('orders').select('*');
+        // Parallel lightweight queries (only required fields, never full JSON payloads)
+        const [ordersRes, productsCountRes, messagesCountRes, recentRes, popularRes] = await Promise.all([
+          supabase.from('orders').select('status, total_price'),
+          supabase.from('products').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('is_archived', false),
+          supabase.from('messages').select('id', { count: 'exact', head: true }),
+          supabase.from('orders').select('id, order_number, customer_name, total_price, status, created_at').order('created_at', { ascending: false }).limit(5),
+          supabase.from('products').select('id, name_ar, name_en, price, image_url').eq('is_active', true).order('sort_order', { ascending: false }).limit(4)
+        ]);
+
+        if (!mounted) return;
+
         let totalSales = 0;
         let validOrdersCount = 0;
-        
-        if (orders) {
-          validOrdersCount = orders.length;
-          orders.forEach((ord) => {
+        if (Array.isArray(ordersRes.data)) {
+          validOrdersCount = ordersRes.data.length;
+          ordersRes.data.forEach((ord) => {
             const k = normalizeOrderStatus(ord.status);
             if (k !== 'cancelled' && k !== 'rejected') {
               totalSales += parseFloat(ord.total_price || 0);
@@ -38,50 +65,34 @@ export const Dashboard = () => {
           });
         }
 
-        // 2. Fetch products count
-        const { data: products } = await supabase
-          .from('products')
-          .select('id')
-          .eq('is_active', true)
-          .eq('is_archived', false);
-        const pCount = products ? products.length : 0;
-
-        // 3. Fetch messages count
-        const { data: messages } = await supabase.from('messages').select('id');
-        const mCount = messages ? messages.length : 0;
-
-        setStats({
+        const nextStats = {
           sales: totalSales,
           ordersCount: validOrdersCount,
-          productsCount: pCount,
-          messagesCount: mCount
-        });
+          productsCount: productsCountRes.count ?? 0,
+          messagesCount: messagesCountRes.count ?? 0
+        };
 
-        // 4. Fetch recent 5 orders
-        const { data: recent } = await supabase
-          .from('orders')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(5);
-        if (recent) setRecentOrders(recent);
+        setStats(nextStats);
+        try { localStorage.setItem('abs_admin_dashboard_stats_v2', JSON.stringify(nextStats)); } catch (_) {}
 
-        // 5. Fetch popular products (aggregated orders or mocked based on sort_order)
-        const { data: popular } = await supabase
-          .from('products')
-          .select('*')
-          .eq('is_active', true)
-          .order('sort_order', { ascending: false })
-          .limit(4);
-        if (popular) setPopularProducts(popular);
+        if (Array.isArray(recentRes.data)) {
+          setRecentOrders(recentRes.data);
+          try { localStorage.setItem('abs_admin_dashboard_recent_v2', JSON.stringify(recentRes.data)); } catch (_) {}
+        }
 
+        if (Array.isArray(popularRes.data)) {
+          setPopularProducts(popularRes.data);
+          try { localStorage.setItem('abs_admin_dashboard_popular_v2', JSON.stringify(popularRes.data)); } catch (_) {}
+        }
       } catch (err) {
         console.error('Error loading dashboard numbers', err);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
     loadDashboardStats();
+    return () => { mounted = false; };
   }, []);
 
   if (loading) {
@@ -233,7 +244,7 @@ export const Dashboard = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
               {popularProducts.map((prod) => (
                 <div key={prod.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.6rem' }}>
-                  <img src={prod.image_url} alt={prod.name_ar} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
+                  <img src={prod.image_url} alt={prod.name_ar} loading="lazy" decoding="async" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
                   <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
                     <Link to={`/product/${prod.id}`} className="product-title-link" style={{ fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {lang === 'ar' ? prod.name_ar : prod.name_en}

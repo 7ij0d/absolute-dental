@@ -7,7 +7,9 @@ import supabase from '../supabaseClient';
 import {
   Box,
   ShoppingCart,
-  Check
+  Check,
+  ArrowLeft,
+  ArrowRight
 } from 'lucide-react';
 import dentalBoxesArtwork from '../assets/images/dental-boxes-artwork.png';
 import { useSiteSectionsConfig } from '../utils/siteSectionsEngine';
@@ -331,6 +333,7 @@ const CANONICAL_ORDERED_BOXES = [
 /* ─── MAIN DENTAL BOXES PAGE ─── */
 export const BoxesPage = () => {
   const { lang, isRtl } = useLanguage();
+  const { cartCount, subtotal } = useCart();
   const siteSections = useSiteSectionsConfig();
 
   // Initialize with canonical ordered blueprints
@@ -560,6 +563,105 @@ export const BoxesPage = () => {
             />
           </div>
         </section>
+
+        {/* ── 2.5 BELOW-BANNER BAR: BOX COUNT + DIRECT CART ICON BUTTON ── */}
+        <div
+          className="below-banner-cart-bar"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.75rem',
+            flexWrap: 'wrap',
+            marginTop: '1.25rem',
+            padding: '0.65rem 1rem',
+            borderRadius: '14px',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #EAE0D5',
+            boxShadow: '0 2px 10px rgba(44, 26, 17, 0.04)',
+            direction: isRtl ? 'rtl' : 'ltr'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Box size={17} style={{ color: '#684835' }} />
+            <span
+              style={{
+                fontFamily: "'Cairo', sans-serif",
+                fontSize: '0.95rem',
+                fontWeight: 800,
+                color: '#3E271D'
+              }}
+            >
+              {displayBoxes.length} {lang === 'ar' ? 'بوكسات تنظيم وحفظ متاحة' : 'storage boxes available'}
+            </span>
+          </div>
+
+          <Link
+            to="/cart"
+            className="below-banner-cart-btn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.6rem',
+              padding: '0.5rem 1rem',
+              borderRadius: '999px',
+              backgroundColor: '#2C1A11',
+              color: '#FFFFFF',
+              textDecoration: 'none',
+              fontFamily: "'Cairo', sans-serif",
+              fontSize: '0.86rem',
+              fontWeight: 800,
+              boxShadow: '0 3px 10px rgba(44, 26, 17, 0.18)',
+              transition: 'transform 0.15s ease, background-color 0.2s ease'
+            }}
+          >
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ShoppingCart size={18} strokeWidth={2.2} style={{ color: '#E6D5B8' }} />
+              <span
+                className="tabular-nums"
+                style={{
+                  position: 'absolute',
+                  top: '-7px',
+                  insetInlineEnd: '-9px',
+                  backgroundColor: cartCount > 0 ? '#E53935' : '#684835',
+                  color: '#FFFFFF',
+                  fontSize: '0.68rem',
+                  fontWeight: 900,
+                  minWidth: '18px',
+                  height: '18px',
+                  borderRadius: '999px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0 4px',
+                  border: '1.5px solid #2C1A11',
+                  lineHeight: 1
+                }}
+              >
+                {cartCount}
+              </span>
+            </div>
+            <span style={{ marginInlineStart: '0.2rem' }}>
+              {lang === 'ar' ? 'سلة المشتريات' : 'Shopping Cart'}
+            </span>
+            {cartCount > 0 && (
+              <span
+                className="tabular-nums"
+                style={{
+                  backgroundColor: 'rgba(230, 213, 184, 0.18)',
+                  color: '#E6D5B8',
+                  padding: '0.1rem 0.5rem',
+                  borderRadius: '999px',
+                  fontSize: '0.76rem',
+                  fontWeight: 800
+                }}
+              >
+                {subtotal} {lang === 'ar' ? 'د.ل' : 'LYD'}
+              </span>
+            )}
+            {isRtl ? <ArrowLeft size={15} style={{ color: '#E6D5B8' }} /> : <ArrowRight size={15} style={{ color: '#E6D5B8' }} />}
+          </Link>
+        </div>
       </div>
 
       {/* ── 3. PRODUCT CARDS GRID (EXACT 2x2 BALANCED LAYOUT) ── */}

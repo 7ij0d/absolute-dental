@@ -234,17 +234,26 @@ export const AdminLayout = () => {
             grid-template-columns: 1fr !important;
           }
           .admin-sidebar-pane {
-            flex-direction: row !important;
-            flex-wrap: wrap !important;
-            gap: 1rem !important;
+            flex-direction: column !important;
+            gap: 0.75rem !important;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
             margin-bottom: 1rem;
           }
           .admin-sidebar-pane nav {
             flex-direction: row !important;
-            flex-wrap: wrap !important;
-            gap: 0.5rem !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            gap: 0.4rem !important;
+            padding-bottom: 0.4rem;
+            scrollbar-width: thin;
+          }
+          .admin-sidebar-pane nav a {
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+            padding: 0.5rem 0.85rem !important;
+            font-size: 0.82rem !important;
           }
         }
       `}</style>

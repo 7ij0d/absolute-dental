@@ -152,6 +152,7 @@ export const Products = () => {
   const [editingProduct, setEditingProduct] = useState(null); // null if adding new
   const [showFormModal, setShowFormModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState(30);
 
   // Form Field States
   const [nameAr, setNameAr] = useState('');
@@ -498,17 +499,14 @@ export const Products = () => {
       setLoading(true);
     }
     try {
-      // Parallel fetch for maximum throughput
+      // Parallel fetch for maximum throughput (lightweight columns without heavy nested joins)
       const [prodsRes, yrsRes, subsRes] = await Promise.all([
         supabase
           .from('products')
           .select(`
             *,
-            years (*),
-            subjects!products_subject_id_fkey (*),
             product_subjects (
-              subject_id,
-              subjects!product_subjects_subject_id_fkey (id, name_ar, name_en, slug)
+              subject_id
             )
           `)
           .order('created_at', { ascending: false }),
@@ -944,22 +942,51 @@ export const Products = () => {
   // Filter products by year selection inside form
   const filteredSubjects = subjects.filter((sub) => sub.year_id === yearId);
 
-  // Filter main products list by search query
-  const getFilteredProducts = () => {
+  // Quick inline Price & Stock update directly from the Admin table without opening the full modal
+  const handleInlineFieldUpdate = async (prod, field, rawVal) => {
+    const numVal = field === 'price' ? Math.max(0, parseFloat(rawVal) || 0) : Math.max(0, parseInt(rawVal, 10) || 0);
+    if (Number(prod[field]) === numVal) return;
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ [field]: numVal })
+        .eq('id', prod.id);
+      if (!error) {
+        const updatedItem = { ...prod, [field]: numVal };
+        syncLiveProductStates([updatedItem]);
+        clearSubjectCaches();
+        setProducts((prev) => {
+          const next = prev.map((item) => (item.id === prod.id ? updatedItem : item));
+          try {
+            localStorage.setItem('abs_admin_cached_products', JSON.stringify(next));
+          } catch (_) {}
+          return next;
+        });
+      }
+    } catch (err) {
+      console.error('Inline field update error:', err);
+    }
+  };
+
+  // Filter main products list by search query (memoized for instant mobile typing)
+  const filteredList = useMemo(() => {
     if (!searchQuery.trim()) return products;
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.trim().toLowerCase();
     return products.filter(
       (p) =>
         (p.name_ar && p.name_ar.toLowerCase().includes(q)) ||
         (p.name_en && p.name_en.toLowerCase().includes(q)) ||
+        (p.sku && p.sku.toLowerCase().includes(q)) ||
         (p.description_ar && p.description_ar.toLowerCase().includes(q)) ||
-        (p.description_en && p.description_en.toLowerCase().includes(q)) ||
-        (p.details_ar && p.details_ar.toLowerCase().includes(q)) ||
-        (p.details_en && p.details_en.toLowerCase().includes(q))
+        (p.description_en && p.description_en.toLowerCase().includes(q))
     );
-  };
+  }, [products, searchQuery]);
 
-  const filteredList = getFilteredProducts();
+  // Progressive rendering on mobile so we don't mount 150+ heavy table rows at once
+  const displayedProducts = useMemo(() => {
+    if (searchQuery.trim()) return filteredList.slice(0, 60);
+    return filteredList.slice(0, visibleCount);
+  }, [filteredList, visibleCount, searchQuery]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }} className="animate-fade-in">
@@ -1012,7 +1039,7 @@ export const Products = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredList.map((prod) => (
+              {displayedProducts.map((prod) => (
                 <tr key={prod.id} style={{ borderBottom: '1px solid var(--border-color)', opacity: prod.is_archived ? 0.6 : 1 }}>
                   <td style={{ padding: '0.6rem 0.75rem' }}>
                     <img src={prod.image_url} alt="thumbnail" loading="lazy" decoding="async" width="45" height="45" style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
@@ -1051,7 +1078,30 @@ export const Products = () => {
                       )}
                     </div>
                   </td>
-                  <td style={{ padding: '0.6rem 0.75rem', fontWeight: 800 }}>{prod.price} د.ل</td>
+                  <td style={{ padding: '0.6rem 0.75rem', fontWeight: 800 }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <input
+                        type="number"
+                        step="0.5"
+                        defaultValue={prod.price}
+                        key={`price-${prod.id}-${prod.price}`}
+                        onBlur={(e) => handleInlineFieldUpdate(prod, 'price', e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                        title="اضغط لتعديل السعر مباشرة ثم اضغط Enter أو خارج الحقل للحفظ الفوري"
+                        style={{
+                          width: '68px',
+                          padding: '3px 6px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-color)',
+                          fontWeight: 800,
+                          fontSize: '0.84rem',
+                          textAlign: 'center',
+                          backgroundColor: '#FFFFFF'
+                        }}
+                      />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>د.ل</span>
+                    </div>
+                  </td>
                   <td style={{ padding: '0.6rem 0.75rem', fontWeight: 700 }}>
                     {isBundleProduct(prod.id) ? (() => {
                       const bundleRes = calculateBundleAvailability(prod.id, products);
@@ -1080,7 +1130,25 @@ export const Products = () => {
                         </span>
                       );
                     })() : (
-                      <span>{prod.stock_quantity}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        defaultValue={prod.stock_quantity}
+                        key={`stock-${prod.id}-${prod.stock_quantity}`}
+                        onBlur={(e) => handleInlineFieldUpdate(prod, 'stock_quantity', e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                        title="اضغط لتعديل المخزون مباشرة ثم اضغط Enter أو خارج الحقل للحفظ الفوري"
+                        style={{
+                          width: '64px',
+                          padding: '3px 6px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-color)',
+                          fontWeight: 800,
+                          fontSize: '0.84rem',
+                          textAlign: 'center',
+                          backgroundColor: '#FFFFFF'
+                        }}
+                      />
                     )}
                   </td>
                   <td style={{ padding: '0.6rem 0.75rem' }}>
@@ -1167,6 +1235,27 @@ export const Products = () => {
               ))}
             </tbody>
           </table>
+
+          {!searchQuery.trim() && filteredList.length > visibleCount && (
+            <div style={{ padding: '1rem', textAlign: 'center', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setVisibleCount((prev) => prev + 40)}
+                className="btn btn-outline"
+                style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem', fontWeight: 800 }}
+              >
+                عرض المزيد من المنتجات ({displayedProducts.length} من {filteredList.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setVisibleCount(filteredList.length)}
+                className="btn btn-secondary"
+                style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem', fontWeight: 800 }}
+              >
+                عرض الكل ({filteredList.length})
+              </button>
+            </div>
+          )}
         </div>
       )}
 

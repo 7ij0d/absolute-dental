@@ -242,13 +242,20 @@ export const AccessoriesPage = () => {
           </div>
         </section>
 
-        {/* ── 3. PRODUCT COUNT HEADER ── */}
+        {/* ── 3. BELOW-BANNER BAR: PRODUCT COUNT + DIRECT CART ICON BUTTON ── */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'flex-start',
-            marginBottom: '1rem'
+            justifyContent: 'space-between',
+            gap: '0.75rem',
+            flexWrap: 'wrap',
+            marginBottom: '1.25rem',
+            padding: '0.65rem 1rem',
+            borderRadius: '14px',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #EAE0D5',
+            boxShadow: '0 2px 10px rgba(44, 26, 17, 0.04)'
           }}
         >
           <span
@@ -261,6 +268,27 @@ export const AccessoriesPage = () => {
           >
             {lang === 'ar' ? `${ACCESSORY_PRODUCTS.length} منتجات` : `${ACCESSORY_PRODUCTS.length} products`}
           </span>
+
+          <Link
+            to="/cart"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.55rem',
+              padding: '0.45rem 0.95rem',
+              borderRadius: '999px',
+              backgroundColor: '#2C1A11',
+              color: '#FFFFFF',
+              textDecoration: 'none',
+              fontFamily: "'Cairo', sans-serif",
+              fontSize: '0.84rem',
+              fontWeight: 800,
+              boxShadow: '0 3px 10px rgba(44, 26, 17, 0.18)'
+            }}
+          >
+            <ShoppingCart size={17} strokeWidth={2.2} style={{ color: '#E6D5B8' }} />
+            <span>{lang === 'ar' ? 'سلة المشتريات' : 'Shopping Cart'}</span>
+          </Link>
         </div>
 
         {/* ── 4. PRODUCT SHOWCASE GRID (Starts naturally from the RIGHT in RTL) ── */}

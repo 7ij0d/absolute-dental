@@ -111,16 +111,6 @@ const PageSkeleton = () => (
 
 // Public Layout Wrapper
 const PublicLayout = () => {
-  const location = useLocation();
-  const isUnifiedStudyFlow =
-    location.pathname === '/' ||
-    location.pathname.startsWith('/study-tools') ||
-    location.pathname.startsWith('/years') ||
-    location.pathname.startsWith('/year') ||
-    location.pathname.startsWith('/subject') ||
-    location.pathname.startsWith('/other-supplies') ||
-    location.pathname.startsWith('/product');
-
   return (
     <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
       <Navbar />
@@ -131,7 +121,7 @@ const PublicLayout = () => {
       </main>
       <Footer />
       <FloatingCart />
-      {!isUnifiedStudyFlow && <BottomNav />}
+      <BottomNav />
     </div>
   );
 };

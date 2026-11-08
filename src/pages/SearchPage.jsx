@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useCart } from '../context/CartContext';
 import supabase from '../supabaseClient';
 import { cacheGet, cacheSet } from '../cache';
+import { fetchSharedCatalogProducts } from '../prefetch';
 import ProductCard from '../components/ProductCard';
 import { groupProductsList } from '../utils/burGroupingEngine';
 import { useSiteSectionsConfig } from '../utils/siteSectionsEngine';
@@ -14,13 +16,14 @@ import {
 } from '../utils/productInventoryEngine';
 import {
   Search, Sparkles, Layers, Package, ChevronLeft, ChevronRight,
-  X, SlidersHorizontal, RotateCcw
+  X, SlidersHorizontal, RotateCcw, ShoppingCart, ArrowLeft, ArrowRight
 } from 'lucide-react';
 
 const SEARCH_COLUMNS = 'id, name_ar, name_en, description_ar, description_en, details_ar, details_en, price, compare_at_price, image_url, availability, stock_quantity, is_active, is_archived, subject_id, year_id, is_bundle, discount_label_ar, discount_label_en, shared_inventory_product_id, unit_multiplier, sort_order, created_at';
 
 export const SearchPage = ({ categoryMode = null }) => {
   const { lang, isRtl } = useLanguage();
+  const { cartCount, subtotal } = useCart();
   const location = useLocation();
   const ChevronSep = isRtl ? ChevronLeft : ChevronRight;
   const siteSections = useSiteSectionsConfig();
@@ -52,18 +55,14 @@ export const SearchPage = ({ categoryMode = null }) => {
         return;
       }
 
-      setLoading(true);
+      const cachedRaw = cacheGet('products:raw_all_v2') || cacheGet('products:search_catalog_v3');
+      if (!cachedRaw) setLoading(true);
       try {
-        const res = await supabase
-          .from('products')
-          .select(SEARCH_COLUMNS);
-
-        let allRaw = res.data;
-        if (Array.isArray(allRaw) && allRaw.length > 0) {
-          syncLiveProductStates(allRaw);
-          cacheSet('products:search_catalog_v3', allRaw, 120);
-        } else {
-          allRaw = cacheGet('products:search_catalog_v3') || [];
+        let allRaw = await fetchSharedCatalogProducts();
+        if (!Array.isArray(allRaw) || allRaw.length === 0) {
+          const res = await supabase.from('products').select(SEARCH_COLUMNS);
+          allRaw = res.data || [];
+          if (allRaw.length > 0) syncLiveProductStates(allRaw);
         }
 
         const data = (allRaw || [])
@@ -370,7 +369,7 @@ export const SearchPage = ({ categoryMode = null }) => {
             <p className="subject-header-subtitle">{headerInfo.subtitle}</p>
           </div>
 
-          <div className="subject-header-meta">
+          <div className="subject-header-meta" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
             <div className="subject-count-pill">
               <Package size={15} />
               <span>
@@ -378,6 +377,59 @@ export const SearchPage = ({ categoryMode = null }) => {
                 {lang === 'ar' ? 'منتج' : (filteredList.length === 1 ? 'product' : 'products')}
               </span>
             </div>
+
+            <Link
+              to="/cart"
+              className="below-banner-cart-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.55rem',
+                padding: '0.45rem 0.95rem',
+                borderRadius: '999px',
+                backgroundColor: '#2C1A11',
+                color: '#FFFFFF',
+                textDecoration: 'none',
+                fontFamily: "'Cairo', sans-serif",
+                fontSize: '0.84rem',
+                fontWeight: 800,
+                boxShadow: '0 3px 10px rgba(44, 26, 17, 0.18)'
+              }}
+            >
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShoppingCart size={17} strokeWidth={2.2} style={{ color: '#E6D5B8' }} />
+                <span
+                  className="tabular-nums"
+                  style={{
+                    position: 'absolute',
+                    top: '-7px',
+                    insetInlineEnd: '-9px',
+                    backgroundColor: cartCount > 0 ? '#E53935' : '#684835',
+                    color: '#FFFFFF',
+                    fontSize: '0.66rem',
+                    fontWeight: 900,
+                    minWidth: '17px',
+                    height: '17px',
+                    borderRadius: '999px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0 4px',
+                    border: '1.5px solid #2C1A11',
+                    lineHeight: 1
+                  }}
+                >
+                  {cartCount}
+                </span>
+              </div>
+              <span style={{ marginInlineStart: '0.2rem' }}>{lang === 'ar' ? 'سلة المشتريات' : 'Cart'}</span>
+              {cartCount > 0 && (
+                <span className="tabular-nums" style={{ backgroundColor: 'rgba(230, 213, 184, 0.18)', color: '#E6D5B8', padding: '0.08rem 0.45rem', borderRadius: '999px', fontSize: '0.74rem', fontWeight: 800 }}>
+                  {subtotal} {lang === 'ar' ? 'د.ل' : 'LYD'}
+                </span>
+              )}
+              {isRtl ? <ArrowLeft size={14} style={{ color: '#E6D5B8' }} /> : <ArrowRight size={14} style={{ color: '#E6D5B8' }} />}
+            </Link>
           </div>
         </header>
 

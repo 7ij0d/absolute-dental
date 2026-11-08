@@ -1908,7 +1908,12 @@ select option { background-color: var(--surface-color); color: var(--text-main);
     display: block !important;
   }
   .floating-cart-wrapper {
-    display: none !important;
+    bottom: calc(env(safe-area-inset-bottom, 10px) + 74px) !important;
+    inset-inline-start: 0.9rem !important;
+  }
+  .floating-cart-pill {
+    padding: 0.52rem 0.95rem !important;
+    gap: 0.55rem !important;
   }
   body {
     padding-bottom: calc(env(safe-area-inset-bottom, 12px) + 68px) !important;

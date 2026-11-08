@@ -256,7 +256,6 @@ export const Orders = () => {
     const q = params.get('q');
     if (q) setSearchQuery(q);
     fetchOrders(orders.length > 0);
-    fetchAvailableProducts();
 
     // 1. Live Realtime Supabase Subscription: guarantees 2-way instant synchronization
     const ordersChannel = supabase
@@ -359,7 +358,8 @@ export const Orders = () => {
             )
           )
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(150);
       
       if (!error && Array.isArray(data)) {
         setOrders(data);

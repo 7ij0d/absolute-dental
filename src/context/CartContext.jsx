@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext, useCallback, useMemo } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback, useMemo, useRef } from 'react';
 import {
   isBundleProduct,
   getBundleDefinition,
@@ -51,19 +51,34 @@ export const CartProvider = ({ children }) => {
     }
   });
 
+  // Ref to always access latest cartItems without re-creating callbacks on every cart change
+  const cartItemsRef = useRef(cartItems);
+  cartItemsRef.current = cartItems;
+
+  // Anti-duplicate tap guard: prevents double-adding when a mobile user double-taps "Add to Cart" within 250ms
+  const lastAddTapRef = useRef({ key: '', time: 0 });
+
+  // Persist cart asynchronously after paint so UI updates at 0ms without synchronous JSON.stringify blocking
   useEffect(() => {
-    localStorage.setItem('smylodent_cart', JSON.stringify(cartItems));
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem('smylodent_cart', JSON.stringify(cartItems));
+      } catch (_) {}
+    }, 16);
+    return () => clearTimeout(timer);
   }, [cartItems]);
 
   useEffect(() => {
-    if (editingOrder) {
-      localStorage.setItem('smylodent_editing_order', JSON.stringify(editingOrder));
-    } else {
-      localStorage.removeItem('smylodent_editing_order');
-    }
+    try {
+      if (editingOrder) {
+        localStorage.setItem('smylodent_editing_order', JSON.stringify(editingOrder));
+      } else {
+        localStorage.removeItem('smylodent_editing_order');
+      }
+    } catch (_) {}
   }, [editingOrder]);
 
-  const startEditingOrder = (order) => {
+  const startEditingOrder = useCallback((order) => {
     if (!order) return;
 
     // Extract items safely from order.items or order_items
@@ -115,16 +130,28 @@ export const CartProvider = ({ children }) => {
 
     setEditingOrder(orderMeta);
     setCartItems(orderItems);
-  };
+  }, []);
 
-  const cancelEditingOrder = () => {
+  const cancelEditingOrder = useCallback(() => {
     setEditingOrder(null);
     setCartItems([]);
-  };
+  }, []);
 
   const isEditingOrder = Boolean(editingOrder);
 
-  const addToCart = (product, qty = 1) => {
+  const addToCart = useCallback((product, qty = 1) => {
+    if (!product) return;
+
+    const isOffer = isBundleProduct(product.id);
+    const cartLineId = product.cart_line_id || (isOffer ? `bundle_${product.id}` : product.id);
+
+    // Prevent accidental double-add when rapidly tapping the same Add button (< 250ms)
+    const now = Date.now();
+    if (lastAddTapRef.current.key === String(cartLineId) && now - lastAddTapRef.current.time < 250) {
+      return;
+    }
+    lastAddTapRef.current = { key: String(cartLineId), time: now };
+
     setCartItems((prev) => {
       // 0. Strict product status check: Never allow adding hidden or out-of-stock products to cart
       const liveProd = applyLiveProductState(product);
@@ -147,10 +174,7 @@ export const CartProvider = ({ children }) => {
         }
       }
 
-      const isOffer = isBundleProduct(product.id);
       const bundleDef = isOffer ? getBundleDefinition(product.id) : null;
-
-      const cartLineId = product.cart_line_id || (isOffer ? `bundle_${product.id}` : product.id);
       const existing = prev.find((item) => (item.cart_line_id ? item.cart_line_id === cartLineId : item.id === product.id));
 
       if (existing) {
@@ -182,14 +206,14 @@ export const CartProvider = ({ children }) => {
 
       return [...prev, newItem];
     });
-  };
+  }, []);
 
   /**
    * Smart synchronization: When an individual component bur belonging to a bundle is removed,
    * dissolve that bundle representation, remove the component, and keep the remaining components
    * as individual items in the cart at their individual prices.
    */
-  const removeBundleComponent = (cartLineId, componentProductId) => {
+  const removeBundleComponent = useCallback((cartLineId, componentProductId) => {
     setCartItems((prev) => {
       const bundleItem = prev.find(it => (it.cart_line_id === cartLineId || it.id === cartLineId) && (it.is_bundle || isBundleProduct(it.id)));
       if (!bundleItem) return prev;
@@ -238,15 +262,15 @@ export const CartProvider = ({ children }) => {
 
       return newItems;
     });
-  };
+  }, []);
 
-  const removeFromCart = (idOrCartLineId) => {
+  const removeFromCart = useCallback((idOrCartLineId) => {
     setCartItems((prev) => prev.filter((item) => (item.cart_line_id ? item.cart_line_id !== idOrCartLineId : item.id !== idOrCartLineId) && item.id !== idOrCartLineId));
-  };
+  }, []);
 
-  const updateQuantity = (idOrCartLineId, qty) => {
+  const updateQuantity = useCallback((idOrCartLineId, qty) => {
     if (qty <= 0) {
-      removeFromCart(idOrCartLineId);
+      setCartItems((prev) => prev.filter((item) => (item.cart_line_id ? item.cart_line_id !== idOrCartLineId : item.id !== idOrCartLineId) && item.id !== idOrCartLineId));
       return;
     }
     setCartItems((prev) =>
@@ -263,22 +287,24 @@ export const CartProvider = ({ children }) => {
         return { ...item, quantity: Math.max(1, qty) };
       })
     );
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCartItems([]);
-  };
+  }, []);
 
   /**
-   * Queries Supabase for live availability/visibility of all items currently in the cart.
-   * Updates live state cache and overlays live status onto cart items.
+   * Queries Supabase for live availability/visibility & price of all items currently in the cart.
+   * Called on CartPage and CheckoutPage (and once on initial load if cart is non-empty).
+   * Does NOT fire on every Add-to-Cart click so mobile adding stays 0ms!
    */
   const refreshCartStatuses = useCallback(async () => {
-    if (!cartItems || cartItems.length === 0) return [];
+    const currentCart = cartItemsRef.current;
+    if (!currentCart || currentCart.length === 0) return [];
     try {
       const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const idsSet = new Set();
-      cartItems.forEach(item => {
+      currentCart.forEach(item => {
         const baseId = item.base_product_id || (typeof item.id === 'string' && item.id.length > 36 && item.id.includes('-') ? item.id.substring(0, 36) : item.id);
         if (baseId && UUID_REGEX.test(String(baseId))) idsSet.add(String(baseId));
         const bId = item.bundle_id || item.id;
@@ -312,10 +338,14 @@ export const CartProvider = ({ children }) => {
             const nextAvail = dbP.availability || 'available';
             const nextActive = dbP.is_active !== false;
             const nextArch = Boolean(dbP.is_archived);
-            if (item.availability !== nextAvail || item.is_active !== nextActive || item.is_archived !== nextArch) {
+            const isOffer = Boolean(item.is_bundle || isBundleProduct(item.bundle_id || item.id));
+            const nextPrice = (!isOffer && typeof dbP.price === 'number' && dbP.price > 0) ? dbP.price : item.price;
+
+            if (item.availability !== nextAvail || item.is_active !== nextActive || item.is_archived !== nextArch || item.price !== nextPrice) {
               changed = true;
               return {
                 ...item,
+                price: nextPrice,
                 availability: nextAvail,
                 is_active: nextActive,
                 is_archived: nextArch
@@ -331,14 +361,17 @@ export const CartProvider = ({ children }) => {
       console.warn('Cart live status check notice:', err);
     }
     return [];
-  }, [cartItems]);
+  }, []);
 
-  // Automatically verify cart statuses when cart has items
+  // Verify cart once on initial app mount if cart already has items (deferred so it never blocks first paint)
   useEffect(() => {
-    if (cartItems.length > 0) {
-      refreshCartStatuses();
+    if (cartItemsRef.current.length > 0) {
+      const t = setTimeout(() => {
+        refreshCartStatuses();
+      }, 1500);
+      return () => clearTimeout(t);
     }
-  }, [cartItems.length]);
+  }, [refreshCartStatuses]);
 
   // Identify any items in the cart that are currently out of stock or hidden from the store
   const unavailableCartItems = useMemo(() => {
@@ -350,35 +383,52 @@ export const CartProvider = ({ children }) => {
   }, [cartItems]);
 
   // Computations
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalComparePrice = cartItems.reduce((sum, item) => {
+  const subtotal = useMemo(() => cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0), [cartItems]);
+  const totalComparePrice = useMemo(() => cartItems.reduce((sum, item) => {
     const original = item.compare_at_price || item.price;
     return sum + original * item.quantity;
-  }, 0);
+  }, 0), [cartItems]);
   const totalDiscount = totalComparePrice - subtotal;
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = useMemo(() => cartItems.reduce((sum, item) => sum + item.quantity, 0), [cartItems]);
+
+  const contextValue = useMemo(() => ({
+    cartItems,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    removeBundleComponent,
+    clearCart,
+    refreshCartStatuses,
+    unavailableCartItems,
+    subtotal,
+    totalComparePrice,
+    totalDiscount,
+    cartCount,
+    editingOrder,
+    isEditingOrder,
+    startEditingOrder,
+    cancelEditingOrder
+  }), [
+    cartItems,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    removeBundleComponent,
+    clearCart,
+    refreshCartStatuses,
+    unavailableCartItems,
+    subtotal,
+    totalComparePrice,
+    totalDiscount,
+    cartCount,
+    editingOrder,
+    isEditingOrder,
+    startEditingOrder,
+    cancelEditingOrder
+  ]);
 
   return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        removeBundleComponent,
-        clearCart,
-        refreshCartStatuses,
-        unavailableCartItems,
-        subtotal,
-        totalComparePrice,
-        totalDiscount,
-        cartCount,
-        editingOrder,
-        isEditingOrder,
-        startEditingOrder,
-        cancelEditingOrder
-      }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );

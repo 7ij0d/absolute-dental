@@ -8,9 +8,14 @@ import { syncLiveProductStates, isProductHiddenFromStore } from './utils/product
 
 const TTL = 86400; // 24 hours
 
+// Lightweight catalog columns for storefront listing & search (avoids downloading long details/audio/video on every page)
+export const STOREFRONT_PRODUCT_COLUMNS =
+  'id, name_ar, name_en, description_ar, description_en, price, compare_at_price, image_url, availability, stock_quantity, is_active, is_archived, is_featured, subject_id, year_id, is_bundle, is_universal, all_subjects, all_years, discount_label_ar, discount_label_en, shared_inventory_product_id, unit_multiplier, sort_order, created_at';
+
 let yearsPromise = null;
 let subjectsPromise = null;
 let productsPromise = null;
+let junctionsPromise = null;
 
 export function fetchSharedYears() {
   const cached = cacheGet('years');
@@ -44,7 +49,7 @@ export function fetchSharedSubjects() {
 
   subjectsPromise = supabase
     .from('subjects')
-    .select('id, year_id, name_ar, name_en, slug, sort_order, image_url')
+    .select('id, year_id, name_ar, name_en, description_ar, description_en, slug, sort_order, image_url')
     .order('sort_order', { ascending: true })
     .then(({ data, error }) => {
       subjectsPromise = null;
@@ -70,35 +75,81 @@ export function fetchSharedSubjects() {
   return subjectsPromise;
 }
 
+/**
+ * Shared deduplicated fetcher for all DB products (including hidden/archived flags for accurate sync).
+ * Cached for 3 minutes and invalidated immediately whenever Admin updates a product.
+ */
+export function fetchSharedCatalogProducts(forceRefresh = false) {
+  if (!forceRefresh) {
+    const cachedRaw = cacheGet('products:raw_all_v2');
+    if (Array.isArray(cachedRaw) && cachedRaw.length > 0) {
+      return Promise.resolve(cachedRaw);
+    }
+  }
+  if (productsPromise && !forceRefresh) return productsPromise;
+
+  productsPromise = supabase
+    .from('products')
+    .select(STOREFRONT_PRODUCT_COLUMNS)
+    .order('sort_order', { ascending: true })
+    .then(({ data, error }) => {
+      productsPromise = null;
+      if (!error && Array.isArray(data) && data.length > 0) {
+        syncLiveProductStates(data);
+        cacheSet('products:raw_all_v2', data, 180);
+        const activeList = data.filter((p) => p.is_active !== false && !p.is_archived);
+        cacheSet('products:all', activeList, 180);
+        const featured = activeList.filter((p) => p.is_featured);
+        cacheSet('products:featured', featured, 180);
+        return data;
+      }
+      return cacheGet('products:raw_all_v2') || [];
+    })
+    .catch(() => {
+      productsPromise = null;
+      return cacheGet('products:raw_all_v2') || [];
+    });
+
+  return productsPromise;
+}
+
+/**
+ * Shared deduplicated fetcher for `product_subjects` junction table.
+ */
+export function fetchSharedProductJunctions(forceRefresh = false) {
+  if (!forceRefresh) {
+    const cached = cacheGet('products:junctions_v2');
+    if (Array.isArray(cached)) return Promise.resolve(cached);
+  }
+  if (junctionsPromise && !forceRefresh) return junctionsPromise;
+
+  junctionsPromise = supabase
+    .from('product_subjects')
+    .select('product_id, subject_id')
+    .then(({ data, error }) => {
+      junctionsPromise = null;
+      if (!error && Array.isArray(data)) {
+        cacheSet('products:junctions_v2', data, 180);
+        return data;
+      }
+      return cacheGet('products:junctions_v2') || [];
+    })
+    .catch(() => {
+      junctionsPromise = null;
+      return cacheGet('products:junctions_v2') || [];
+    });
+
+  return junctionsPromise;
+}
+
 export function fetchSharedActiveProducts() {
   const cached = cacheGet('products:all');
   if (cached) {
     return Promise.resolve(cached.filter((p) => !isProductHiddenFromStore(p)));
   }
-  if (productsPromise) return productsPromise;
-
-  productsPromise = supabase
-    .from('products')
-    .select('*')
-    .order('sort_order', { ascending: true })
-    .then(({ data, error }) => {
-      productsPromise = null;
-      if (!error && data?.length) {
-        syncLiveProductStates(data);
-        const activeList = data.filter((p) => p.is_active !== false && !p.is_archived);
-        cacheSet('products:all', activeList, 300);
-        const featured = activeList.filter((p) => p.is_featured);
-        cacheSet('products:featured', featured, 300);
-        return activeList;
-      }
-      return [];
-    })
-    .catch(() => {
-      productsPromise = null;
-      return [];
-    });
-
-  return productsPromise;
+  return fetchSharedCatalogProducts().then((raw) =>
+    (raw || []).filter((p) => p.is_active !== false && !p.is_archived && !isProductHiddenFromStore(p))
+  );
 }
 
 export function runPrefetch() {
@@ -113,7 +164,8 @@ export function runPrefetch() {
     fetchSharedSubjects();
     // Defer full product catalog warm-up slightly further so initial navigation is unblocked
     setTimeout(() => {
-      fetchSharedActiveProducts();
-    }, 1000);
+      fetchSharedCatalogProducts();
+      fetchSharedProductJunctions();
+    }, 900);
   });
 }
